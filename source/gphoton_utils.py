@@ -39,7 +39,7 @@ def read_lc(ifile):
 
 
 ############################################################################################
-## This routine plots a lightcurve csv file to the interactive plot screen.  Input is a pandas DataFrame from read_lc.
+## This routine plots a lightcurve csv file to the interactive plot screen using matplotlib.  Input is a pandas DataFrame from read_lc.
 ############################################################################################
 def plot_lc(data_frame):
     pyplot.plot(data_frame.index.values, data_frame["flux"], "ko")
