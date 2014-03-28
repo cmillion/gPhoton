@@ -2,9 +2,8 @@ from MCUtils import *
 from FileUtils import *
 from gnomonic import *
 
-# Return the detector clock, center, scale, and slope constants
-# Eclipses is needed because the clk changed after the CSP event
 def clk_cen_scl_slp(band,eclipse):
+	"""Return the detector clock, center, scale and slope constants."""
         band = band.upper()
         if band == 'FUV':
                 xclk, yclk = 1997., 1993.
@@ -24,15 +23,14 @@ def clk_cen_scl_slp(band,eclipse):
 
         return xclk, yclk, xcen, ycen, xscl, yscl, xslp, yslp
 
-# Convert detector xi and eta values to image column and row
 def xieta2colrow(xi,eta,detsize,fill,npixx,npixy):
+	"""Convert detector xi and eta values ot image column and row."""
         col = ((( xi/36000.)/(detsize/2.)*fill+1.)/2.*npixx)
         row = (((eta/36000.)/(detsize/2.)*fill+1.)/2.*npixy)
         return col, row
 
-# Define the mean detector stim positions
-# The stims moved after the CSP event
 def avg_stimpos(band, eclipse):
+	"""Define the mean detector stim positions."""
         if band == 'FUV':
                 avgstim = {'x1':-2541.88,'x2':2632.06,'x3':-2541.53,'x4':2631.68,'y1':2455.28,'y2':2455.02,'y3':-2550.89,'y4':-2550.92}
         elif band =='NUV':
@@ -47,10 +45,11 @@ def avg_stimpos(band, eclipse):
 
         return avgstim
 
-# Given a list of detector x,y positions, returns four arrays which each
-#  contain the indices of likely stim events. For example
-#  x[index1], y[index1] contains all of the positions for stim1
 def find_stims_index(x,y,band,eclipse,margin=90.001):
+	"""Given a list of detector x,y positions of events, returns four
+	arrays which each contain the indices of likely stim events.
+	For example: x[index1], y[index1] contains all of the positions for stim1
+	"""
         # This can be programmed better
         pltscl = 68.754932 # arcsec/mm
         aspum = pltscl/1000.0 # arcsec/um
@@ -68,8 +67,8 @@ def find_stims_index(x,y,band,eclipse,margin=90.001):
 
         return index1,index2,index3,index4
 
-# Returns the t,x,y, and identity (1-4) of likely stims in the input arrays
 def find_stims(t,x,y,band,eclipse):
+	"""Returns t,x,y and identity (1-4) of likely stims in the input arrays."""
         # This can be programmed better
         pltscl = 68.754932 # arcsec/mm
         aspum = pltscl/1000.0 # arcsec/um
@@ -112,8 +111,8 @@ def find_stims(t,x,y,band,eclipse):
 
         return stimt[index],stimx_as[index],stimy_as[index],stimix[index]
 
-# Computes the stim scaling coefficients based upon an input ssdfile
 def get_stim_coefs(ssdfile):#,band):
+	"""Computes the stim scaling coefficients based on a ssdfile."""
         #if (band=='NUV'):
         #       stim_coef0=5105.48
         #else:
@@ -130,6 +129,7 @@ def get_stim_coefs(ssdfile):#,band):
         return stim_coef0, stim_coef1
 
 def find_FUV_offset(scstfile,calpath):
+	"""Computes NUV->FUV center offset based on a lookup table."""
         #cdef double stim_coef0, stim_coef1, fodx_coef_0, fody_coef_0, fodx_coef_1, fody_coef_1
         fodx_coef_0 = 0.
         fody_coef_0 = 0.
@@ -170,6 +170,7 @@ def find_FUV_offset(scstfile,calpath):
         return xoffset, yoffset
 
 def postCSP_caldata(calpath):
+	"""Loads the calibration data for after the CSP event."""
         print "Loading post-CSP wiggle file..."
         wig2file = calpath+'WIG2_Sep2010.fits'
         wig2fits = get_fits_data(wig2file,dim=1)
@@ -252,6 +253,7 @@ def rtaph_yac2(q,xb,yb,ya,y,calpath,aspum,wig2, wig2data, wlk2, wlk2data, clk2, 
         return yac_as/aspum
 
 def raw6_to_stims(raw6file,band,eclipse,margin=90.001):
+	"""Extracts stim events from a raw6 file."""
         print "Extracting stim data from ",raw6file," ..."
         print "         Using a search box with sides of ",margin," arcseconds."
         # This is unscoped for some reason... so I'm just coding it.
@@ -350,6 +352,7 @@ def raw6_to_stims(raw6file,band,eclipse,margin=90.001):
         return stim1,stim2,stim3,stim4
 
 def compute_stimstats(raw6file,band,eclipse):
+	"""Computes statistics for stim events."""
         print "Computing stim statistics and post-CSP corrections..."
         pltscl = 68.754932
         aspum = pltscl/1000.0
@@ -523,6 +526,7 @@ def compute_stimstats(raw6file,band,eclipse):
         return Mx,Bx,My,By,stimsep,yac
 
 def create_SSD(raw6file,band,eclipse,ssdfile=0):
+	"""Creates a Stim Separation Data (SSD) table file."""
         #ssdfile = str(outpath)+"SSD_"+str.lower(band)+str(eclipse)+".tbl"
 	if ssdfile:
         	print "Preparing SSD output file "+ssdfile
@@ -568,21 +572,4 @@ def create_SSD(raw6file,band,eclipse,ssdfile=0):
 
         #return np.array(avt), np.array(sep), np.array(num), np.array(fit)
 	return C, m
-
-#def create_stim_coefs(raw6file,band,eclipse):#,band):
-#	time,sep,num,fit = create_SSD(raw6file,band,eclipse)
-#	# tbl[:,0] == time
-#	# tbl[:,1] == sep
-#	# tbl[:,2] == num
-#	# tbl[:,3] == fit
-#        #tbl = get_tbl_data(ssdfile)
-#        c11 = sum(num)
-#        c12 = sum(time*num)
-#        c13 = sum(sep*num)
-#        c22 = sum(time*time*num)
-#        c23 = sum(sep*num*time)
-#        stim_coef1 = ((c13*c12)-(c23*c11))/((c12*c12)-(c22*c11))
-#        stim_coef0 = (c13-(c12*stim_coef1))/c11
-#
-#        return stim_coef0, stim_coef1
 

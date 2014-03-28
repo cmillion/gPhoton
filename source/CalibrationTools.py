@@ -12,6 +12,7 @@ from gnomonic import *
 gpssecs = 315532800+432000
 
 def load_txy(csvfile):
+	"""Loads just the t,x,y columns from a photon CSV file."""
 	reader = csv.reader(open(csvfile,'rb'),delimiter=',',quotechar='|')
 	t,x,y,xa,ya,q,xi,eta,ra,dec,flags=[],[],[],[],[],[],[],[],[],[],[]
 	columns = ['t','x','y','xa','ya','q','xi','eta','ra','dec','flags']
@@ -31,6 +32,11 @@ def load_txy(csvfile):
 	return np.array(t),np.array(x),np.array(y),np.array(flags,dtype='int16')
 
 def compute_deadtime(t,x,y,band,eclipse,trange=[[],[]]):
+	"""Uses multiple methods to estimate the detector deadtime correction.
+	The deadtime is an estimate of the fraction of time that the detector was
+	unable to register new events because it was in the middle of readout.
+	Deadtime should, therefore, not count as true exposure time.
+	"""
 	print "Computing deadtime correction..."
 	refrate = 79.0 # counts per second
 	minrate = refrate*.4
@@ -87,6 +93,11 @@ def compute_deadtime(t,x,y,band,eclipse,trange=[[],[]]):
 	return dead
 
 def compute_shutter(t,trange=[[],[]]):
+	"""Computes the detector shutter correction.
+	The shutter correction accounts for short periods of time when no events
+	were registered by the detector for any number of reasons. Any gap of
+	longer than 0.05 seconds does not count as true exposure time.
+	"""
 	if not trange[0]:
 		trange[0]=min(t)
 	if not trange[1]:
@@ -104,6 +115,7 @@ def compute_shutter(t,trange=[[],[]]):
 	return gaps*tstep
 
 def compute_exposure(t,x,y,flags,band,eclipse,trange=[[],[]]):
+	"""Computes the effective or true exposure for the given data."""
 	# Use only unflagged data.
 	# This should be done at the database level.
 	ix = ((flags!=7) & (flags!=12)).nonzero()[0]
@@ -126,8 +138,9 @@ def compute_exposure(t,x,y,flags,band,eclipse,trange=[[],[]]):
 
 	return exptime-deadtime-shutter
 
-# This doesn't get used anywhere.
+# FIXME: This doesn't get used anywhere.
 def compute_exposure2(csvfile,band,eclipse):
+	"""This function only still exists for reference."""
 	# This computation is done a big, terrible, slow loop because
 	#  NUV csv files are too big to hold in memory on most machines
 	#  so I can't just use the numpy functions.
@@ -220,32 +233,8 @@ def compute_exposure2(csvfile,band,eclipse):
 
 	return exptcorr
 
-#def compute_flat_scale(t,band,verbose=1):
-#	if verbose:
-#		print "Calculating flat scale for t=",t,", and band=",band
-#	if band=='NUV':
-#		flat_correct=-0.0154
-#		flat_t0=840418779.02
-#		flat_correct_0=1.9946352
-#		flat_correct_1=-1.9679445e-09
-#		flat_correct_2=9.3025231e-19
-#	elif band=='FUV':
-#		flat_correct=-0.0154
-#		flat_t0=840418779.02
-#		flat_correct_0=1.2420282
-#		flat_correct_1=-2.8843099e-10
-#		flat_correct_2=0.000
-#	else:
-#		print "Band not specified."
-#
-#	flat_scale = flat_correct_0 + (flat_correct_1 * t) + (flat_correct_2 * t) * t
-#
-#	if verbose:
-#		print "		flat scale = ",flat_scale
-#
-#	return flat_scale
-
 def create_rr(csvfile,band,calpath,eclipse,aspfile=0.,expstart=0.,expend=0.):
+	"""Creates a relative response map for an eclipse, given a photon list."""
 	detsize = 1.25
 	pltscl = 68.754932
 	aspum = pltscl/1000.0
@@ -317,7 +306,9 @@ def create_rr(csvfile,band,calpath,eclipse,aspfile=0.,expstart=0.,expend=0.):
 	return rr*flat_scale*(1-deadt),exp
 
 def write_rr(csvfile,band,calpath,eclipse,rrfile,outfile,aspfile=0,expstart=0.,expend=0.,exptime=0.,imsz=960.):
-
+	"""Creates a relative response map for an eclipse, given a photon list file,
+	and writes it to a FITS file.
+	"""
 	rr,exptime = create_rr(csvfile,band,calpath,eclipse,aspfile,expstart,expend)
 
 	#aspra, aspdec, asptwist, asptime, aspheader, aspflags = load_aspect([aspfile])
@@ -350,7 +341,7 @@ def write_rr(csvfile,band,calpath,eclipse,rrfile,outfile,aspfile=0,expstart=0.,e
 	return
 
 def write_rrhr(rrfile,rrhrfile,outfile):
-
+	"""Turns a relative response (rr) into a high resolution relative response (rrhr) file with interpolation."""
 	hdulist1 = pyfits.open(rrfile)
 	hdr1 = hdulist1[0].header
 	hdulist1.close
@@ -371,6 +362,7 @@ def write_rrhr(rrfile,rrhrfile,outfile):
 	return
 
 def write_int(cntfile,rrhrfile,oldint,outfile):
+	"""Writes out an intensity (int) map given a count (cnt) and a high resolution relative response (rrhr)."""
 	cnt  = get_fits_data(cntfile)
 	rrhr = get_fits_data(rrhrfile)
 

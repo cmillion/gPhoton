@@ -12,6 +12,8 @@ from MCUtils import *
 
 gpssecs = 315532800+432000 # conversion fact from galex time to unix time
 
+# FIXME: This looks like a vestigial test funtion. Does it still have a purpose?
+#	 It is NOT USED ANYWHERE.
 def scanraw6(raw6file):
 	raw6hdulist = pyfits.open(raw6file,memmap=1)
 	raw6htab = raw6hdulist[1].header
@@ -32,6 +34,7 @@ def scanraw6(raw6file):
 	return
 
 def read_xfile(xfile):
+	"""Reads an 'x-file' which is what the GALEX mission team called their photon list files."""
 	print "Reading xfile ",xfile
 	hdulist = pyfits.open(xfile,memmap=1)
 	scale = 2147483647.
@@ -49,6 +52,7 @@ def read_xfile(xfile):
 	return t, ra, dec
 
 def get_ra_dec(fitsfile):
+	"""Pulls the RA_CENT and DEC_CENT from a FITS header."""
 	print "Reading boresite center RA, Dec from ",fitsfile
 	hdulist = pyfits.open(fitsfile,memmap=1)
 	ra = hdulist[0].header['RA_CENT']
@@ -60,7 +64,9 @@ def get_ra_dec(fitsfile):
 
 	return ra,dec
 
+# FIXME: Is this redundant or unnecessary?
 def readfromcsv(csvfile):
+	"""Reads out t, ra, dec from a photon CSV file."""
 	reader = csv.reader(open(csvfile,'rb'),delimiter=',',quotechar='|')
 
 	t,ra,dec = [],[],[]
@@ -73,6 +79,7 @@ def readfromcsv(csvfile):
 	return [t,ra,dec]
 
 def makeimage(t,ra,dec,stepsz,dims,racent,deccent):
+	"""Generates a count (cnt) image based on t,ra,dec values."""
 	t,ra,dec = np.array(t),np.array(ra),np.array(dec)
 	mint,maxt = min(t),max(t)
 	trange = maxt-mint
@@ -123,6 +130,7 @@ def readrangesfromcsv(csvfile):
 	return min(t),max(t),min(ra),max(ra),min(dec),max(dec),len(t)
 
 def makeimage_memlight(csvfile,stepsz,dims,racent,deccent):
+	"""A memory light way of making count (cnt) from a photon CSV file."""
 	# This is a slower but more memory efficient use of makeimage above. Try this if you run out of
 	#  memory while using makeimage (which could well happen on NUV datasets).
 	#
@@ -162,11 +170,13 @@ def makeimage_memlight(csvfile,stepsz,dims,racent,deccent):
 
 	return np.fliplr(image)
 
+# FIXME: THIS IS NOT USED ANYWHERE
 def writephots2img(image,header,racent,deccent):
 	pyfits.writeto('exp.fits',image,header)
 	return 0
 
 def createheader(rarange,decrange,npix,racent,deccent,expstart=0.,expend=0.,exptime=0.,header=pyfits.Header()):
+	"""Populates a FITS header for a GALEX image."""
 	#header = pyfits.Header()
 	# The following values will be set automatically by pyfits
 	#header.update(key='simple', value='T', comment='conforms to FITS standard')
@@ -205,6 +215,7 @@ def createheader(rarange,decrange,npix,racent,deccent,expstart=0.,expend=0.,expt
 	return header
 
 def create_cnt(csvfile,imsz,cntfile,outfile,matchtimes=0,expstart=0,expend=0):
+	"""Writes a count (cnt) image to a FITS file from a photon CSV file."""
 	hdulist = pyfits.open(cntfile)
 	hdr = hdulist[0].header
 	hdulist.close()
@@ -298,6 +309,7 @@ def create_cnt(csvfile,imsz,cntfile,outfile,matchtimes=0,expstart=0,expend=0):
 	return
 
 def create_dose(csvfile,imsz,cntfile,outfile):
+	"""Writes a dose map (detector space image) from a photon CSV file."""
 	hdulist = pyfits.open(cntfile)
 	hdr = hdulist[0].header
 	hdulist.close()
@@ -352,6 +364,7 @@ def create_dose(csvfile,imsz,cntfile,outfile):
 	return 0
 
 def load_stims(csvfile,band,eclipse):
+	"""Returns only the stim events from a photon CSV file."""
 	reader = csv.reader(open(csvfile,'rb'),delimiter=',',quotechar='|')
 	x,y,t = [],[],[]
 	for row in reader:

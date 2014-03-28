@@ -5,7 +5,6 @@ from sys import stdout
 
 import pyximport
 pyximport.install()
-#from NinjaSpeed import *
 
 # A package for html queries
 import requests
@@ -13,6 +12,7 @@ from MCUtils import *
 import gQuery
 
 def load_raw6(raw6file):
+	"""Reads a raw6 file. Just wraps some pyfits commands."""
 	print "		",raw6file
 	hdulist = pyfits.open(raw6file,memmap=1)
 	htab = hdulist[1].header
@@ -20,8 +20,9 @@ def load_raw6(raw6file):
 	return htab, hdulist
 
 def find_band(raw6file):
-	# This assumes the standard raw6 naming convention. I made it this needlessly specific to avoid
-	#  false positives in the directory path.
+	"""Tries to guess the band based on a raw6 filename."""
+	# This assumes the standard raw6 naming convention. I made it
+	# this needlessly specific to avoid false positives in the directory path.
 	if raw6file.rfind('-fd-raw6.fits') > 0 and raw6file.rfind('-nd-raw6.fits') > 0:
 		print "Multiple bands implied in raw6 filename. Specify band on command line."
 		return 0
@@ -37,6 +38,7 @@ def find_band(raw6file):
 	return band
 
 def load_aspect(aspfile):
+	"""Loads an aspect file into a bunch of arrays."""
 	ra,dec,twist,time,aspflags=np.array([]),np.array([]),np.array([]),np.array([]),np.array([])
 	header = {'RA':[],'DEC':[],'ROLL':[]}
 	for i in xrange(len(aspfile)):
@@ -63,6 +65,7 @@ def load_aspect(aspfile):
 	return ra[ix], dec[ix], twist[ix], time[ix], header, aspflags[ix]
 
 def web_query_aspect(eclipse):
+	"""Grabs the aspect data from MAST databases based on eclipse."""
 	print "Attempting to query MAST database for aspect records."
 	entries = gQuery.getArray(gQuery.aspect_ecl(eclipse))
 	n = len(entries)
@@ -93,6 +96,7 @@ def web_query_aspect(eclipse):
 	return np.array(ra)[ix],np.array(dec)[ix],np.array(twist)[ix],np.array(time)[ix],header,np.array(flags)[ix]
 
 def wiggle_filenames(band,calpath):
+	"""Returns the 'wiggle' calibration file name."""
 	if band == 'NUV':
 		wiggle_files = {'x':calpath+'NUV_wiggle_x.fits','y':calpath+'NUV_wiggle_y.fits'}
 	elif band == 'FUV':
@@ -103,6 +107,7 @@ def wiggle_filenames(band,calpath):
 	return wiggle_files
 
 def avgwalk_filenames(band,calpath):
+	"""Returns the 'avgwalk' calibration filename."""
 	if band == 'NUV':
 		walk_files = {'x':calpath+'NUV_avgwalk_x.fits','y':calpath+'NUV_avgwalk_y.fits'}
 	elif band == 'FUV':
@@ -113,6 +118,7 @@ def avgwalk_filenames(band,calpath):
 	return walk_files
 
 def walk_filenames(band,calpath):
+	"""Returns the 'walk' calibration filename."""
 	if band == 'NUV':
 		walk_files = {'x':calpath+'NUV_walk_x.fits','y':calpath+'NUV_walk_y.fits'}
 	elif band == 'FUV':
@@ -123,6 +129,7 @@ def walk_filenames(band,calpath):
 	return walk_files
 
 def linearity_filenames(band,calpath):
+	"""Returns the 'linearity' calibration file name."""
 	if band == 'NUV':
 		linfiles = {'x':calpath+'NUV_NLC_x_det2sky.fits','y':calpath+'NUV_NLC_y_det2sky.fits'}
 	elif band == 'FUV':
@@ -133,6 +140,7 @@ def linearity_filenames(band,calpath):
 	return linfiles
 
 def flat_filename(band,calpath):
+	"""Returns the 'flat' calibration file name."""
 	if band=='NUV':
 		flatfile = calpath+'NUV_flat.fits'
 	elif band=='FUV':
@@ -143,6 +151,7 @@ def flat_filename(band,calpath):
 	return flatfile
 
 def distortion_filenames(band,calpath,eclipse,raw_stimsep):
+	"""Returns the 'distortion' calibration file names."""
 	if band == 'NUV':
 		if (eclipse > 37460):
 			if (raw_stimsep < 5136.3):
@@ -160,9 +169,8 @@ def distortion_filenames(band,calpath,eclipse,raw_stimsep):
 
 	return distfiles
 
-# These files define the alignment offset between the two detectors which
-#  drifted over the course of the mission
 def offset_filenames(calpath):
+	"""Returns the NUV->FUV offset calibration file names."""
 	# Offset is for FUV only
 	return {'x':calpath+'fuv_dx_fdttdc_coef_0.tbl','y':calpath+'fuv_dy_fdttdc_coef_0.tbl'}
 
@@ -177,5 +185,6 @@ def mask_filename(band,calpath):
 	return maskfile
 
 def create_SSD_filename(band,eclipse):
+	"""Returns the Stim Separation Data (SSD) calibration file name."""
 	return "SSD_"+band.lower()+"_"+str(eclipse)+".tbl"
 
