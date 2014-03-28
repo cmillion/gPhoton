@@ -259,6 +259,12 @@ def PhotonPipe(raw6file,scstfile,calpath,band,outbase,aspfile=0,ssdfile=0,nullfi
 		row[ix]   = ( yp_as[ix] - cube_y0) / cube_dy
 		depth[ix] = ( ss[ix]    - cube_d0) / cube_dd
 
+		# FIXME: This throws an error sometimes like the following...
+		# PhotonPipe.py:262: RuntimeWarning: invalid value encountered in less
+		# depth[((depth < 0)).nonzero()[0]] = 0.
+		# PhotonPipe.py:263: RuntimeWarning: invalid value encountered in greater_equal
+		#  depth[((depth >= cube_nd)).nonzero()[0]] = -1.
+		# ERROR: IndexError: index -9223372036854775808 is out of bounds for axis 0 with size 17 [PhotonPipe]
 		depth[((depth < 0)).nonzero()[0]] = 0.
 		depth[((depth >= cube_nd)).nonzero()[0]] = -1.
 
