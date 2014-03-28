@@ -136,21 +136,17 @@ def chunk(a,b,length=1,verbose=0):
 			arr[-1][1]=b
 		return arr.tolist()
 
-##
-# FIXME: Apparently recursion is not pythonic. So unrecurse this.
-##
-# Accepts and array of 2x1 and produces an array of 2x1
-#  delimiting ranges of the requested length
 def chunks(array,length=10,verbose=0):
-	if len(array)==1:
-		return chunk(array[0][0],array[0][1],length=length,verbose=verbose)
-	else:
-		return chunk(array[0][0],array[0][1],length=length)+chunks(array[1:],length=length)
+	out = []
+	for a in array:
+		out += chunk(a[0],a[1],length=length,verbose=verbose)
+	return out
 
 # Generalized function to read csv files into python dictionary structures
 #  with keys == column header names. Pass an array of column titles to
 #  'columns'. Any entries of None or False will not be read.
 # TODO: Add a way to specify numpy data types per column
+# It seems that pandas can do this way better, so this function will go away soon.
 def readcsv(csvfile,columns=None,verbose=0):
 	data = {}
 	# If the column names are not given, figure them out.
