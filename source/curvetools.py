@@ -111,28 +111,28 @@ def aperture_response(band,skypos,tranges,radius,verbose=0,tscale=1000.,
 
 	return response
 
-# Returns the [exptime, flux, and background] within a radius/annulus
+# Returns the flux data within a radius/annulus
 def compute_flux(band,skypos,tranges,radius,annulus=[None,None],userr=False,
 		 usehrbg=False,verbose=0,calpath='../cal/'):
 	# Find the exposure time first. If there's not any, don't bother
 	#  computing the flux at all.
-	data = {'expt':0.,'bg':0., 'bghr':0.,'counts':0.,'rr':1.}
-	# Do we really need this? It would be clean if it didn't loop.
+	data = {'expt':0.,'bg':0., 'bghr':0.,'counts':0.}
+	# Do we really need this? It would be cleaner if it didn't loop.
 	for trange in tranges:
 		expt = dbt.compute_exptime(band,trange,verbose=verbose,skypos=skypos)
 		if not expt:
 			continue
-		data['expt'] +=expt
-		if not usehrbg:
-			data['bg'] += compute_background(band,skypos,trange,radius,annulus,verbose=verbose)
-		else:
-			data['bg'] += compute_background_improved(band,skypos,trange,radius,annulus,verbose=verbose) 
+		data['expt'] += expt
+		data['bg'] += compute_background_improved(band,skypos,trange,radius,annulus,verbose=verbose) if usehrbg else compute_background(band,skypos,trange,radius,annulus,verbose=verbose)
 		data['counts'] += gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],radius),verbose=verbose)
+
 	if verbose>1:
 		print 'Integrated '+str(data['expt'])+' seconds of exposure.'
-	if userr:
-		data['rr'] = aperture_response(band,skypos,tranges,radius,verbose=verbose,calpath=calpath)/data['expt']
 
+	data['rr'] = aperture_response(band,skypos,tranges,radius,verbose=verbose,calpath=calpath)/data['expt'] if userr and expt>0 else 1
+
+	# TODO: This list of assertions should maybe be folded into a
+	#  list comprehension of some kind.
 	data['band'] = band
 	data['skypos'] = skypos
 	data['tranges'] = tranges
@@ -142,16 +142,15 @@ def compute_flux(band,skypos,tranges,radius,annulus=[None,None],userr=False,
 	data['annulus'] = annulus
 	data['apcor1'] = gxt.apcorrect1(radius,band)
 	data['apcor2'] = gxt.apcorrect2(radius,band)
-	if not data['expt']:
-		data['cps'],data['error'],data['flux'],data['fluxerror'],data['mag'] = None,None,None,None,None
-		data['magerr'] = [None,None]
+	data['cps'] = ((data['counts']-data['bg'])/data['expt'])/data['rr'] if expt else None
+	data['error'] = (np.sqrt(data['counts']-data['bg'])/data['expt'])/data['rr'] if data['cps']>=0 else None
+	data['flux'] = gxt.counts2flux(data['cps'],band) if data['cps']>=0 else None
+	data['fluxerror'] = gxt.counts2flux(data['error'],band) if data['cps']>=0 else None
+	data['mag'] = gxt.counts2mag(data['cps'],band) if data['cps']>0 else None
+	if data['cps']>0:
+		data['magerr'] = [gxt.counts2mag(data['cps']-data['error'],band) if data['cps']>data['error'] else None, gxt.counts2mag(data['cps']+data['error'],band)]
 	else:
-		data['cps'] = ((data['counts']-data['bg'])/data['expt'])/data['rr']
-		data['error'] = (np.sqrt(data['counts']-data['bg'])/data['expt'])/data['rr']
-		data['flux'] = gxt.counts2flux(data['cps'],band)
-		data['fluxerror'] = gxt.counts2flux(data['error'],band)
-		data['mag'] = gxt.counts2mag(data['cps'],band)
-		data['magerr'] = [gxt.counts2mag(data['cps']-data['error'],band),gxt.counts2mag(data['cps']+data['error'],band)]
+		data['magerr']=[None,None]
 
 	return data
 
@@ -159,6 +158,9 @@ def coadd_mag(band,skypos,radius,annulus=[None,None],userr=False,usehrbg=False,
 	      verbose=0,detsize=1.25,maxgap=1,minexp=1,calpath='../cal/'):
 	tranges = dbt.fGetTimeRanges(band,skypos,verbose=verbose,maxgap=maxgap,minexp=minexp)
 	return compute_flux(band,skypos,tranges,radius,annulus=annulus,userr=userr,usehrbg=usehrbg,verbose=verbose,calpath=calpath)
+
+def colnames():
+	return ['tmin','tmax','radius','exptime','cps','error','flux','fluxerror','mag','magerr','inner annulus','outer annulus','background','response','counts','apcor1','apcor2']
 
 def flux_row_constructor(data):
 	return [data['tmin'],data['tmax'],data['radius'],data['expt'],
@@ -221,6 +223,7 @@ def read_curve(csvfile):
 		'counts':np.array([]),'aperture correction 1':np.array([]),
 		'aperture correction 2':np.array([])}
 
+	# TODO: Replace with the more generic readcsv function from MCUtils
 	reader = csv.reader(open(csvfile,'rb'),delimiter=',',quotechar='|')
 	for row in reader:
 		if row[4] == '':
