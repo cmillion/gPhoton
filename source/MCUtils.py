@@ -75,10 +75,10 @@ def manage_grequests(queries,maxcnt=20,wait=1):
 # Returns an array of indexes for which the input conditions are true.
 # - conditions must be a numpy array.
 # Example:
-# >>> a = np.array([1,2,3,4,5,6,7,8,9])
-# >>> wheretrue(a>5)
+# > a = np.array([1,2,3,4,5,6,7,8,9])
+# > wheretrue(a>5)
 # array([5, 6, 7, 8])
-# >>> a[wheretrue(a>5)]
+# > a[wheretrue(a>5)]
 # array([6, 7, 8, 9])
 def wheretrue(conditions):
 	return np.where(conditions==True)[0]
@@ -142,25 +142,3 @@ def chunks(array,length=10,verbose=0):
 		out += chunk(a[0],a[1],length=length,verbose=verbose)
 	return out
 
-# Generalized function to read csv files into python dictionary structures
-#  with keys == column header names. Pass an array of column titles to
-#  'columns'. Any entries of None or False will not be read.
-# TODO: Add a way to specify numpy data types per column
-# It seems that pandas can do this way better, so this function will go away soon.
-def readcsv(csvfile,columns=None,verbose=0):
-	data = {}
-	# If the column names are not given, figure them out.
-	# TODO: Actually pull out column names from the first line
-	if not columns:
-		# Name all the columns after their number
-		columns = map(lambda x: str(x),
-			range(len(csv.reader(open(csvfile,'rb')).next())))
-	for i,col in enumerate(columns):
-		if verbose>2:
-			print i, col
-		if col: 
-			# TODO: Deal with commented lines
-			data[col]=map(lambda row: row[i],
-				      csv.reader(open(csvfile,'rb')))
-
-	return data
