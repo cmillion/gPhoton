@@ -1,15 +1,4 @@
-############################################################################################
-## gphoton_utils
-##
-## This package provides read and plot functionality for gPhoton .csv lightcurve files as created by gAperture.
-##
-############################################################################################
-
-
-
-############################################################################################
-## Place import commands and logging options.
-############################################################################################
+# read and plot functionality for gPhoton .csv lightcurve files as created by gAperture.
 import os
 import csv
 import numpy as np
