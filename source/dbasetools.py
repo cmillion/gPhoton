@@ -4,8 +4,12 @@ import numpy as np
 import gQuery
 from MCUtils import print_inline,area
 
-# Find the contiguous time ranges within a time range at a specific location.
 def fGetTimeRanges(band,skypos,trange=[1,1000000000000],tscale=1000.,detsize=1.25,verbose=0,maxgap=1.,minexp=1.):
+	"""Find the contiguous time ranges within a time range at a specific location.
+	minexp - Don't include exposure time less than this.
+	maxgap - Gaps in exposure longer than this initiate a new time range.
+	detsize- Fiddle with this if you want to exlude the edges of the detector.
+	"""
 	try:
 		times = np.array(gQuery.getArray(gQuery.exposure_ranges(band,skypos[0],skypos[1],t0=trange[0],t1=trange[1],detsize=detsize,tscale=tscale),verbose=verbose),dtype='float64')[:,0]/tscale
 	except:
@@ -42,6 +46,7 @@ def fGetTimeRanges(band,skypos,trange=[1,1000000000000],tscale=1000.,detsize=1.2
 	return np.array(chunks,dtype='float64')
 
 def compute_exptime(band,trange,verbose=0,skypos=[False,False],detsize=1.25):
+	"""Compute the effective exposure time."""
 	if skypos[0] and skypos[1]:
 		tranges = fGetTimeRanges(band,skypos,verbose=verbose,trange=trange)
 	else:
@@ -58,6 +63,7 @@ def compute_exptime(band,trange,verbose=0,skypos=[False,False],detsize=1.25):
 
 # Get the MCAT estimated sky background at a location
 def mcat_skybg(band,skypos,radius,verbose=0):
+	"""Grab the background from the MCAT."""
 	# Setting maglimit to 30 so that it gets _everything_.
 	sources = gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=30))
 

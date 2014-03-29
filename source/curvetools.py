@@ -7,15 +7,15 @@ from imagetools import backgroundmap
 import dbasetools as dbt
 import galextools as gxt
 
-# Estimated number of counts within the aperture based on rate within
-#  the annulus
 def compute_background(band,skypos,trange,radius,annulus,verbose=0):
-	# (area of aperture) * (counts in annulus) / (area of annulus)
+	"""Estimated counts within an aperture based upon rate within an annulus.
+	counts in aperture = (area of aperture) * (counts in annulus) / (area of annulus)
+	"""
 	return (area(radius)/(area(annulus[1])-area(annulus[0]))) * (gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[1]),verbose=verbose)-gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[0]),verbose=verbose)) if (annulus[0] and annulus[1]) else 0.
 
-# Create an image with annulus masked in
 def mask_background_image(band,skypos,trange,radius,annulus,verbose=0,
 			  maglimit=28.,pixsz=0.000416666666666667,NoData=-999):
+	"""Creates an image of the sky within an annulus."""
 	skyrange = [2*annulus[1],2*annulus[1]]
 	imsz = [gxt.deg2pix(skyrange[0]),gxt.deg2pix(skyrange[1])]
 	# Create a background map with stars blacked out
@@ -33,11 +33,12 @@ def mask_background_image(band,skypos,trange,radius,annulus,verbose=0,
 
 	return bg
 
-# Estimated number of counts within the aperture based on rate within the
-# annulus after removing light from stars brighter than the specified magnitude
 def compute_background_improved(band,skypos,trange,radius,annulus,verbose=0,
 				maglimit=28.,pixsz=0.000416666666666667,
 				NoData=-999):
+	"""Estimated counts within the aperture based on counts within the annulus
+	with sources within the annulus masked out (to the specified maglimit).
+	"""
 	bg = mask_background_image(band,skypos,trange,radius,annulus,
 				   verbose=verbose,maglimit=maglimit,
 				   pixsz=pixsz,NoData=NoData)
@@ -49,6 +50,10 @@ def compute_background_improved(band,skypos,trange,radius,annulus,verbose=0,
 #  precise but much faster than building a relative response map.
 def aperture_response(band,skypos,tranges,radius,verbose=0,tscale=1000.,
 		      calpath='../cal/'):
+	"""Estimates the mean response within the aperture by averaging over
+	the portion of the flat upon which the detector falls.
+	This might be less accurate than building a response image, but it is fast(er).
+	"""
 	if verbose>1:
 		print 'Computing relative response over a '+str(radius)+' degree aperture.'
 	flat = np.flipud(np.rot90(get_fits_data(flat_filename(band,calpath),
@@ -114,6 +119,9 @@ def aperture_response(band,skypos,tranges,radius,verbose=0,tscale=1000.,
 # Returns the flux data within a radius/annulus
 def compute_flux(band,skypos,tranges,radius,annulus=[None,None],userr=False,
 		 usehrbg=False,verbose=0,calpath='../cal/'):
+	"""Returns a data structure with a bunch of information about the target.
+	This includes flux, exposure time, background, response, etc.
+	"""
 	# Find the exposure time first. If there's not any, don't bother
 	#  computing the flux at all.
 	data = {'expt':0.,'bg':0., 'bghr':0.,'counts':0.}
@@ -160,9 +168,11 @@ def coadd_mag(band,skypos,radius,annulus=[None,None],userr=False,usehrbg=False,
 	return compute_flux(band,skypos,tranges,radius,annulus=annulus,userr=userr,usehrbg=usehrbg,verbose=verbose,calpath=calpath)
 
 def colnames():
+	"""Defines the column names for the light curve CSV file."""
 	return ['tmin','tmax','radius','exptime','cps','error','flux','fluxerror','mag','magerr','inner annulus','outer annulus','background','response','counts','apcor1','apcor2']
 
 def flux_row_constructor(data):
+	"""Constructs rows for the light curve CSV file."""
 	return [data['tmin'],data['tmax'],data['radius'],data['expt'],
 		data['cps'],data['error'],data['flux'],data['fluxerror'],
 		data['mag'],data['magerr'][1],data['annulus'][0],
@@ -172,6 +182,7 @@ def flux_row_constructor(data):
 def compute_curve(band,skypos,tranges,radius,annulus=[None,None],stepsz=None,
 		  coadd=False,userr=False,usehrbg=False,verbose=0,
 		  calpath='../cal/',detsize=1.25,maxgap=1,minexp=1):
+	"""Computes a light curve over the requested parameters."""
 	data = []
 	# If coadd is specified, integrate across all time ranges.
 	if coadd:
@@ -199,6 +210,7 @@ def compute_curve(band,skypos,tranges,radius,annulus=[None,None],stepsz=None,
 def write_curve(band,skypos,tranges,radius,outfile=False,annulus=[None,None],
 		stepsz=None,coadd=False,userr=False,usehrbg=False,verbose=0,
 		iocode='wb',calpath='../cal/'):
+	"""Generates a light curve and writes it to the a CSV file."""
 	data = compute_curve(band,skypos,tranges,radius,annulus=annulus,
 			     stepsz=stepsz,userr=userr,usehrbg=usehrbg,
 			     verbose=verbose,coadd=coadd,calpath=calpath)
@@ -212,8 +224,9 @@ def write_curve(band,skypos,tranges,radius,outfile=False,annulus=[None,None],
 			print frame
 	return
 
-# Read a CSV light curve file into a convenient Python data structure
+# FIXME: This is probably redundant or should be replaced with pandas.
 def read_curve(csvfile):
+	"""Reads a light curve into a dict."""
 	data = {'tstart':np.array([]),'tstop':np.array([]),
 		'radius':np.array([]),'exptime':np.array([]),
 		'cps':np.array([]),'error':np.array([]),
@@ -223,7 +236,6 @@ def read_curve(csvfile):
 		'counts':np.array([]),'aperture correction 1':np.array([]),
 		'aperture correction 2':np.array([])}
 
-	# TODO: Replace with the more generic readcsv function from MCUtils
 	reader = csv.reader(open(csvfile,'rb'),delimiter=',',quotechar='|')
 	for row in reader:
 		if row[4] == '':

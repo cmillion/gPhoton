@@ -3,6 +3,7 @@ import numpy as np
 R2D = 180./3.141592658979
 
 def gnomrev_simple(xi, eta, ra0, dec0, crota, cdelt, cenpix):
+	"""A reverse gnomonic projection."""
 	x =  (xi  - cenpix)*cdelt/R2D
 	y =  (eta - cenpix)*cdelt/R2D
 	crotar = crota/R2D
@@ -40,6 +41,7 @@ def gnomrev_simple(xi, eta, ra0, dec0, crota, cdelt, cenpix):
 	return ra, dec
 
 def gnomfwd_simple (ra, dec, ra0, dec0, crota, cdelt, cenpix):
+	"""A forward gnomonic projection."""
 	cosdec0 = np.cos(dec0/R2D)
 	sindec0 = np.sin(dec0/R2D)
 	drar = (ra0-ra)/R2D

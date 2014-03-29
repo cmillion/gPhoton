@@ -11,6 +11,7 @@ import dbasetools as dbt
 import galextools as gxt
 
 def imgdims(skyrange,width=False,height=False):
+	"""Compute the required image dimension in pixels based on sky range in degrees."""
 	imsz = [gxt.deg2pix(skyrange[0]),gxt.deg2pix(skyrange[1])]
 	if width:
 		imsz[0] = float(np.ceil(width))
@@ -19,6 +20,7 @@ def imgdims(skyrange,width=False,height=False):
 	return imsz
 
 def define_wcs(skypos,skyrange,width=False,height=False,verbose=0):
+	"""Define the world coordinate system (WCS)."""
 	if verbose:
 		print_inline('Defining World Coordinate System (WCS).')
 	wcs = pywcs.WCS(naxis=2) # NAXIS = 2
@@ -31,6 +33,7 @@ def define_wcs(skypos,skyrange,width=False,height=False,verbose=0):
 	return wcs
 
 def movie_tbl(band,tranges,verbose=0,framesz=0):
+	"""Initialize a FITS table to contain movie frame information."""
 	if verbose:
 		print_inline('Populating exposure time table.')
 	tstarts,tstops,exptimes=[],[],[]
@@ -51,6 +54,7 @@ def movie_tbl(band,tranges,verbose=0,framesz=0):
 	return tbl
 
 def fits_header(band,skypos,tranges,skyrange,width=False,height=False,verbose=0,tscale=1000.,hdu=False):
+	"""Populate a FITS header."""
 	if verbose:
 		print_inline('Populating FITS header.')
 	hdu = hdu if hdu else pyfits.PrimaryHDU()
@@ -82,6 +86,7 @@ def fits_header(band,skypos,tranges,skyrange,width=False,height=False,verbose=0,
 	return hdu
 
 def countmap(band,skypos,tranges,skyrange,width=False,height=False,verbose=0,tscale=1000.,memlight=False,hdu=False):
+	"""Create a count (cnt) map."""
 	# Use the default plate scale unless width or height is commanded
 	imsz = imgdims(skyrange,width=width,height=height)
 
@@ -125,10 +130,12 @@ def countmap(band,skypos,tranges,skyrange,width=False,height=False,verbose=0,tsc
 	return count
 
 def write_jpeg(filename,band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,clobber=False,verbose=0,tscale=1000.):
+	"""Write a 'preview' jpeg image from a count map."""
 	scipy.misc.imsave(filename,countmap(band,skypos,tranges,skyrange,width=width,height=height,verbose=verbose,tscale=tscale))
 	return
 
 def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,verbose=0,calpath='../cal/',tscale=1000.,response=True,hdu=False):
+	"""Generate a high resolution relative response (rrhr) map."""
 	imsz = [gxt.deg2pix(skyrange[0]),gxt.deg2pix(skyrange[1])]
 	# TODO the if width / height
 
@@ -180,6 +187,7 @@ def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,verbose
 # TODO: tranges?
 # TODO: Consolidate duplicate "reference array" code from aperture_response
 def backgroundmap(band,skypos,trange,skyrange,width=False,height=False,tscale=1000,memlight=False,verbose=0,hdu=False,NoData=-999,detsize=1.25,pixsz=0.000416666666666667,maglimit=28.):
+	"""Generate a background (bg) map by masking out MCAT sources."""
         imsz = [gxt.deg2pix(skyrange[0]),gxt.deg2pix(skyrange[1])]
 
 	if verbose:
@@ -218,6 +226,7 @@ def backgroundmap(band,skypos,trange,skyrange,width=False,height=False,tscale=10
         return img
 
 def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,verbose=0,tscale=1000.,memlight=False,coadd=False,response=False,calpath='../cal/',hdu=False):
+	"""Generate a movie (mov)."""
 	# Not defining stepsz effectively creates a count map.
 	mv = []
 	rr = []
@@ -252,6 +261,7 @@ def create_images(band,skypos,tranges,skyrange,framesz=0,width=False,height=Fals
 	return np.array(count),np.array(rr),np.array(intensity)
 
 def write_images(band,skypos,tranges,skyrange,write_cnt=False,write_int=False,write_rr=False,framesz=0,width=False,height=False,verbose=0,tscale=1000.,memlight=False,coadd=False,response=False,calpath='../cal/',clobber=False):
+	"""Generate a write various maps to files."""
 	# No files were requested, so don't bother doing anything.
 	if not (write_cnt or write_int or write_rr):
 		return

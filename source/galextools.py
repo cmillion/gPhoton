@@ -7,9 +7,11 @@ import math
 gpssecs = 315532800+432000
 
 # TODO: handle arrays
-# Compute an aperture correction in mag based upon an aperture radius in
-#  degrees. Uses the table data in Figure 4 from Morissey, et al., 2007
 def apcorrect1(radius,band):
+	"""Compute an apeture correction. 1st way.
+	radius - in degrees
+	Uses the table data in Figure 4 from Morissey, et al., 2007
+	"""
 	aper = np.array([1.5,2.3,3.8,6.0,9.0,12.8,17.3,30.,60.,90.])/3600.
 	if radius>aper[-1]:
 		return 0.
@@ -33,6 +35,10 @@ def apcorrect1(radius,band):
 #  degrees. Uses the data in Table 1 from
 #  www.galex.caltech.edu/research/techdoch-ch5.html
 def apcorrect2(radius,band):
+	"""Compute an aperture correction. 2nd way.
+	radius - in degrees
+	Uses the data in Table 1 from www.galex.caltech.edu/research/techdoch-ch5.html
+	"""
 	aper = np.array([1.5,2.3,3.8,6.0,9.0,12.8,17.3])/3600.
 	if band=='FUV':
 		dmag = [1.65,0.77,0.2,0.1,0.07,0.05,0.04]
@@ -55,30 +61,28 @@ def apcorrect2(radius,band):
 #  http://galexgi.gsfc.nasa.gov/docs/galex/FAQ/counts_background.html
 #
 
-# Estimate the photometric repeatability vs. magnitude
 def photometric_repeatability(cps,expt,band):
+	"""Estimate the photometric repeatability vs. magnitude."""
 	scale = 0.050 if band=='FUV' else 0.027
 	return -2.5 * (np.log10(cps) - np.log10(cps + np.sqrt(cps * expt + (scale * cps * expt)**2.)/expt))
 
-# Computes the nominal detector background for a region
-#  'area' is in square decimal degrees
 def detbg(area, band):
-	# Nominal background in counts per second per 1.5" pixel
+	"""Nominal background in counts per second per 1.5" pixel"""
 	rate = 1e-4 if band=='FUV' else 1e-3
 	return area * rate / ((1.5/(60*60))**2.)
 
-# Converts GALEX counts per second to AB magnitudes
 def counts2mag(cps,band):
+	"""Converts GALEX counts per second to AB magnitudes"""
 	scale = 18.82 if band=='FUV' else 20.08
 	return -2.5 * np.log10(cps) + scale
 
-# Does the inverse of counts2mag
 def mag2counts(mag,band):
+	"""Converts AB magnitudes to GALEX counts per second."""
 	scale = 18.82 if band=='FUV' else 20.08
 	return 10.**(-(mag-scale)/2.5)
 
-# Converts GALEX counts per second to flux (erg sec^-1 cm^-2 A^-1)
 def counts2flux(cps,band):
+	"""Converts GALEX counts per second to flux (erg sec^-1 cm^-2 A^-1)"""
 	scale = 1.4e-15 if band == 'FUV' else 2.06e-16
 	return scale*cps
 
@@ -86,17 +90,19 @@ def counts2flux(cps,band):
 # END
 #
 
-# This converts degrees to GALEX pixels.
 def deg2pix(degrees,CDELT2=0.000416666666666667):
-        # Rounded up to the nearest pixel so that the number of
-        #  degrees specified will fully fit into the frame.
+	"""Converts degrees to GALEX pixels rounded up to the nearest pixel
+	so that the number of degrees specified will fully fit into the frame.
+	"""
         return math.ceil(degrees/CDELT2)
 
-# These are empirically determined linear scales to the flat field
-#  as a function of time due to diminished detector response. They
-#  were determined by Tom Barlow and are in the original GALEX pipeline
-#  but there is no published source of which I am aware.
 def compute_flat_scale(t,band,verbose=1):
+	"""Return the flat scale factor for a given time.
+	These are empirically determined linear scales to the flat field
+	as a function of time due to diminished detector response. They
+	were determined by Tom Barlow and are in the original GALEX pipeline
+	but there is no published source of which I am aware.
+	"""
 	if verbose:
 		print "Calculating flat scale for t=",t,", and band=",band
 	if band=='NUV':
