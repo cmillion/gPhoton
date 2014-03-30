@@ -19,3 +19,21 @@
 #
 #  We should test the possibility that the scale factor for the global dead time
 #  may have changed over the mission.
+
+refrate     = 79. # counts per second, nominal stim rate
+feeclkratio = 0.966 # not entirely sure what detector property this adjusts for
+tec2fdead   = 5.52e-6 # Conversion from TEC to deadtime correction (Method 2)
+
+# We need an SQL query that will pull the stim count out of the database
+stim_events = 0.
+
+# Method 0
+dead0 = tec2fdead*(len(t)/exptime)/feeclkratio
+
+# Method 1 - Use a histogram to ignore crazy values.
+
+
+# Method 2
+# gQuery.deadtime1() + gQuery.deadtime2() = total global counts
+# gQuery.deadtime() = deadtime correction using Method 2
+
