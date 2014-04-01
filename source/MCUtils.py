@@ -30,7 +30,7 @@ def rotvec(vector,theta):
 def rms(data):
         return np.sqrt(np.square(np.array(data)-np.array(data).mean()).mean())
 
-def print_inline(text,blanks=120):
+def print_inline(text,blanks=60):
 	"""For updating text in place without a carriage return."""
         stdout.write(" "*blanks+"\r")
         stdout.write(str(text+'\r'))
