@@ -1,5 +1,6 @@
 # This file defines common queries that are passed to the GALEX photon database at MAST.
 from MCUtils import manage_requests
+import CalUtils
 
 # Defines the basic path information to the database.
 # If the database ever "moves" or if someone builds a mirror, you should
@@ -59,11 +60,16 @@ def deadtime2(band,t0,t1,tscale=1000.):
 def deadtime(band,t0,t1,tscale=1000.):
 	return str(baseURL)+'select sum(dt) * 0.0000057142857142857145 / ('+repr(t1)+'-'+repr(t0)+') from(select count(*) as dt from '+str(band)+'PhotonsNULLV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+' union all select count(*) as dt from '+str(band)+'PhotonsV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+') x'+str(formatURL)
 
-
 # Find the number of events inside of a box defined by an x range and a y range
 #  in detector space coordinates
 def boxcount(band,t0,t1,xr,yr,tscale=1000.):
 	return str(baseURL)+'select count(*) from NUVPhotonsNULLV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and x between '+str(xr[0])+' and '+str(xr[1])+' and y between '+str(yr[0])+' and '+str(yr[1])+str(formatURL)
+
+# FIXME: convert t0 to eclipse
+def stimcount(band,t0,t1,margin=90.01,aspum=68.754932/1000.,tscale=1000,eclipse=31000):
+	avgstim = CalUtils.avg_stimpos(band,eclipse)
+	return str(baseURL)+'select count(*) from '+str(band)+'PhotonsNULLV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and ((x between '+str((avgstim['x1']-margin)/aspum)+' and '+str((avgstim['x1']+margin)/aspum)+' and y between '+str((avgstim['y1']-margin)/aspum)+' and '+str((avgstim['y1']+margin)/aspum)+') or (x between '+str((avgstim['x2']-margin)/aspum)+' and '+str((avgstim['x2']+margin)/aspum)+' and y between '+str((avgstim['y2']-margin)/aspum)+' and '+str((avgstim['y2']+margin)/aspum)+') or (x between '+str((avgstim['x3']-margin)/aspum)+' and '+str((avgstim['x3']+margin)/aspum)+' and y between '+str((avgstim['y3']-margin)/aspum)+' and '+str((avgstim['y3']+margin)/aspum)+') or (x between '+str((avgstim['x4']-margin)/aspum)+' and '+str((avgstim['x4']+margin)/aspum)+' and y between '+str((avgstim['y4']-margin)/aspum)+' and '+str((avgstim['y4']+margin)/aspum)+'))'+str(formatURL)
+
 
 # Find the mean position of events inside of a box in detector space
 def boxcentroid(band,t0,t1,xr,yr,tscale=1000.):
