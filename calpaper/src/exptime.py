@@ -20,20 +20,42 @@
 #  We should test the possibility that the scale factor for the global dead time
 #  may have changed over the mission.
 
-refrate     = 79. # counts per second, nominal stim rate
-feeclkratio = 0.966 # not entirely sure what detector property this adjusts for
-tec2fdead   = 5.52e-6 # Conversion from TEC to deadtime correction (Method 2)
+from CalUtils import avg_stimpos
+import numpy as np
+import gQuery
+from MCUtils import print_inline
 
-# We need an SQL query that will pull the stim count out of the database
-stim_events = 0.
+band = 'FUV'
+t0,t1 = 766525332.995,766526576.995
 
-# Method 0
-dead0 = tec2fdead*(len(t)/exptime)/feeclkratio
+def netdead(band,t0,t1,tstep=1.,refrate=79.):
+	refrate     = 79. # counts per second, nominal stim rate
+	feeclkratio = 0.966 # not sure what detector property this adjusts for
+	tec2fdead   = 5.52e-6 # TEC to deadtime correction (Method 2)
+	stimcount = gQuery.getValue(gQuery.stimcount(band,t0,t1))
+	totcount = (gQuery.getValue(gQuery.deadtime1(band,t0,t1)) +
+		    gQuery.getValue(gQuery.deadtime2(band,t0,t1)))
+	exptime = t1-t0
+	# Method 0
+	dead0 = tec2fdead*(totcount/exptime)/feeclkratio
+	minrate,maxrate = refrate*.4,refrate+2.
+	# Method 2
+	bins = np.linspace(0.,exptime-exptime%tstep,exptime//tstep+1)+t0
+	h = np.zeros(len(bins))
+	for i,t in enumerate(bins):
+		print_inline(t1-t)
+		h[i] = gQuery.getValue(gQuery.stimcount(band,t,t+tstep-0.0001))
+	
+	#h,xh = np.histogram(stimt-trange[0],bins=bins)
+	ix = ((h<=maxrate) & (h>=minrate)).nonzero()[0]
+	dead2 = (1.-((h[ix]/tstep)/feeclkratio)/refrate).mean()
 
-# Method 1 - Use a histogram to ignore crazy values.
+	# Method 1
+	h = np.zeros(len(bins))
+	for i,t in enumerate(bins):
+		print_inline(t1-t)
+		h[i] = gQuery.getValue(gQuery.deadtime1(band,t,t+tstep-0.0001)) + gQuery.getValue(gQuery.deadtime2(band,t,t+tstep-0.0001))
 
+	dead1 = (tec2fdead*(h/tstep)/feeclkratio).mean()
 
-# Method 2
-# gQuery.deadtime1() + gQuery.deadtime2() = total global counts
-# gQuery.deadtime() = deadtime correction using Method 2
-
+	return dead0, dead1, dead2
