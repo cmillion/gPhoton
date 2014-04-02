@@ -21,14 +21,17 @@
 #  may have changed over the mission.
 
 from CalUtils import avg_stimpos
+from dbasetools import fGetTimeRanges
 import numpy as np
 import gQuery
 from MCUtils import print_inline
 
 band = 'FUV'
 t0,t1 = 766525332.995,766526576.995
+skypos = [176.919525856024,0.255696872807351]
 
-def netdead(band,t0,t1,tstep=1.,refrate=79.):
+def netdead(band,t0,t1,tstep=1.,refrate=79.,verbose=0):
+	print 'Time range: ['+str(t0)+', '+str(t1)+']'
 	refrate     = 79. # counts per second, nominal stim rate
 	feeclkratio = 0.966 # not sure what detector property this adjusts for
 	tec2fdead   = 5.52e-6 # TEC to deadtime correction (Method 2)
@@ -58,4 +61,11 @@ def netdead(band,t0,t1,tstep=1.,refrate=79.):
 
 	dead1 = (tec2fdead*(h/tstep)/feeclkratio).mean()
 
+	print dead0,dead1,dead2
 	return dead0, dead1, dead2
+
+skypos = [323.06766667,0.25400000]
+tranges = fGetTimeRanges(band,skypos)
+deadtime = [netdead(band,trange[0],trange[1]) for trange in tranges]
+
+
