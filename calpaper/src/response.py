@@ -21,3 +21,27 @@
 #  aspect correction.
 #  This method is reproduced in aperture_response() in curvetools.py.
 
+import numpy as np
+from MCUtils import print_inline
+import imagetools as it
+import curvetools as ct
+
+band = 'FUV'
+t0,t1 = 766525332.995,766526576.995
+skypos = [176.919525856024,0.255696872807351]
+radius = 0.01
+skyrange = [radius*2.,radius*2.]
+trange = [t0,t1]
+tranges= [trange]
+verbose = 2
+
+rrhr = it.rrhr(band,skypos,tranges,skyrange,verbose=verbose)
+
+aprr = ct.aperture_response(band,skypos,tranges,radius,verbose=verbose)
+
+In [126]: rrhr.mean()
+Out[126]: 913.89075085365528
+
+In [127]: aprr
+Out[127]: 1118.6950892262755
+
