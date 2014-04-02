@@ -62,10 +62,17 @@ def netdead(band,t0,t1,tstep=1.,refrate=79.,verbose=0):
 	dead1 = (tec2fdead*(h/tstep)/feeclkratio).mean()
 
 	print dead0,dead1,dead2
-	return dead0, dead1, dead2
+	return [t0, t1, dead0, dead1, dead2, stimcount, totcount]
 
 skypos = [323.06766667,0.25400000]
 tranges = fGetTimeRanges(band,skypos)
 deadtime = [netdead(band,trange[0],trange[1]) for trange in tranges]
 
+%pylab
+# Two methods vs. global count rate
+plt.plot(np.array(deadtime)[:,-1]/(np.array(deadtime)[:,1]-np.array(deadtime)[:,0]),np.array(deadtime)[:,2],'.')
+plt.plot(np.array(deadtime)[:,-1]/(np.array(deadtime)[:,1]-np.array(deadtime)[:,0]),np.array(deadtime)[:,3],'.')
+
+# Two methods vs. each other
+plt.plot(np.array(deadtime)[:,2],np.array(deadtime)[:,3],'.')
 
