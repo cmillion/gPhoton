@@ -27,8 +27,9 @@ parser.add_option("--stamp", action="store", type="string", dest="stamp", help="
 parser.add_option("--calpath", action="store", type="string", dest="calpath", help="Path to the directory that contains the calibration files.", default='../cal/')
 parser.add_option("--addhdr", action="store_true", dest="addhdr", help="Write the command line and column headers to the top of the .csv file.")
 parser.add_option("--coadd", action="store_true", dest="coadd", help="Return the coadded flux over all requested time ranges.")
-parser.add_option("-g", "--gap", action="store", type="float", dest="gap", help="Maximum gap size in seconds for data to be considered contiguous.", default=1)
+parser.add_option("-g", "--gap", "--maxgap", action="store", type="float", dest="gap", help="Maximum gap size in seconds for data to be considered contiguous.", default=1)
 parser.add_option("--minexp", action="store", type="float", dest="minexp", help="Minimum contiguous exposure in seconds for data to be reported.", default=1)
+parser.add_option("--detsize", action="store", type="float", dest="detsize", help="Set the effective field diameter in degrees for the exposure search.", default=1.25)
 parser.add_option("--bestparams", "--best", action="store_true", dest="best", help="Set parameters to produce the highest quality lightcurve. Potentially slow.", default=False)
 
 (options, args) = parser.parse_args()
@@ -87,7 +88,7 @@ if options.tranges:
 else:
 	if options.verbose:
 		print 'Using all available exposure time between '+str(options.tmin)+' and '+str(options.tmax)
-	tranges = fGetTimeRanges(options.band,skypos,maxgap=options.gap,verbose=options.verbose,minexp=options.minexp,trange=[options.tmin,options.tmax])
+	tranges = fGetTimeRanges(options.band,skypos,maxgap=options.gap,verbose=options.verbose,minexp=options.minexp,trange=[options.tmin,options.tmax],detsize=options.detsize)
 	if not len(tranges):
 		print 'No exposure time in database.'
 		exit(0)
@@ -121,4 +122,4 @@ if options.stamp:
 	
 	write_jpeg(options.stamp,options.band,skypos,tranges,skyrange,width=False,height=False,stepsz=options.stepsz,clobber=True,verbose=options.verbose)
 
-write_curve(options.band,skypos,tranges,options.radius,outfile=outfile,annulus=annulus,stepsz=options.stepsz,userr=options.userr,usehrbg=options.usehrbg,verbose=options.verbose,calpath=options.calpath,iocode=iocode,coadd=options.coadd)
+write_curve(options.band,skypos,tranges,options.radius,outfile=outfile,annulus=annulus,stepsz=options.stepsz,userr=options.userr,usehrbg=options.usehrbg,verbose=options.verbose,calpath=options.calpath,iocode=iocode,coadd=options.coadd,detsize=options.detsize)

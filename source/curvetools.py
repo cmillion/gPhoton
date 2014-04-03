@@ -118,7 +118,7 @@ def aperture_response(band,skypos,tranges,radius,verbose=0,tscale=1000.,
 
 # Returns the flux data within a radius/annulus
 def compute_flux(band,skypos,tranges,radius,annulus=[None,None],userr=False,
-		 usehrbg=False,verbose=0,calpath='../cal/'):
+		 usehrbg=False,verbose=0,calpath='../cal/',detsize=1.25):
 	"""Returns a data structure with a bunch of information about the target.
 	This includes flux, exposure time, background, response, etc.
 	"""
@@ -127,7 +127,7 @@ def compute_flux(band,skypos,tranges,radius,annulus=[None,None],userr=False,
 	data = {'expt':0.,'bg':0., 'bghr':0.,'counts':0.}
 	# Do we really need this? It would be cleaner if it didn't loop.
 	for trange in tranges:
-		expt = dbt.compute_exptime(band,trange,verbose=verbose,skypos=skypos)
+		expt = dbt.compute_exptime(band,trange,verbose=verbose,skypos=skypos,detsize=detsize)
 		if not expt:
 			continue
 		data['expt'] += expt
@@ -165,7 +165,7 @@ def compute_flux(band,skypos,tranges,radius,annulus=[None,None],userr=False,
 def coadd_mag(band,skypos,radius,annulus=[None,None],userr=False,usehrbg=False,
 	      verbose=0,detsize=1.25,maxgap=1,minexp=1,calpath='../cal/'):
 	tranges = dbt.fGetTimeRanges(band,skypos,verbose=verbose,maxgap=maxgap,minexp=minexp)
-	return compute_flux(band,skypos,tranges,radius,annulus=annulus,userr=userr,usehrbg=usehrbg,verbose=verbose,calpath=calpath)
+	return compute_flux(band,skypos,tranges,radius,annulus=annulus,userr=userr,usehrbg=usehrbg,verbose=verbose,calpath=calpath,detsize=detsize)
 
 def colnames():
 	"""Defines the column names for the light curve CSV file."""
@@ -190,7 +190,7 @@ def compute_curve(band,skypos,tranges,radius,annulus=[None,None],stepsz=None,
 		result = compute_flux(band,skypos,tranges,radius,
 				      annulus=annulus,userr=userr,
 				      usehrbg=usehrbg,verbose=verbose,
-				      calpath=calpath)
+				      calpath=calpath,detsize=detsize)
 		data.append(flux_row_constructor(result))
 	else:
 		# TODO: map()
@@ -209,11 +209,11 @@ def compute_curve(band,skypos,tranges,radius,annulus=[None,None],stepsz=None,
 
 def write_curve(band,skypos,tranges,radius,outfile=False,annulus=[None,None],
 		stepsz=None,coadd=False,userr=False,usehrbg=False,verbose=0,
-		iocode='wb',calpath='../cal/'):
+		iocode='wb',calpath='../cal/',detsize=1.25):
 	"""Generates a light curve and writes it to the a CSV file."""
 	data = compute_curve(band,skypos,tranges,radius,annulus=annulus,
 			     stepsz=stepsz,userr=userr,usehrbg=usehrbg,
-			     verbose=verbose,coadd=coadd,calpath=calpath)
+			     verbose=verbose,coadd=coadd,calpath=calpath,detsize=detsize)
 	if outfile:
 		spreadsheet = csv.writer(open(outfile,iocode), delimiter=',',
 					 quotechar='|',
