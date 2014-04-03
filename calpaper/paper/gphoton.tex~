@@ -1,0 +1,342 @@
+% Uncomment below for AASTEX
+\documentclass[preprint]{aastex}
+% Uncomment below for EMULATEAPJ
+%\documentclass[iop]{emulateapj}
+\usepackage{url}
+\usepackage{color}
+\shorttitle{APOGEE Spectroscopy of the \emph{Kepler} Field}
+\shortauthors{Scott W. Fleming et al.}
+\begin{document}
+\title{Multi-Object Near-Infrared Spectrographs For Large-Scale Radial Velocity Surveys of \emph{Kepler} Active Planet Candidates:  A Pilot Study With The SDSS-III APOGEE Spectrograph}
+
+\author{Scott W. Fleming\altaffilmark{1,2,3,4},
+Suvrath Mahadevan\altaffilmark{3,4},
+Ryan C. Terrien\altaffilmark{3,4},
+Rohit Deshpande\altaffilmark{3,4},
+Carlos Allende Prieto\altaffilmark{5,6},
+Katia Cunha\altaffilmark{7,8},
+Verne V. Smith\altaffilmark{9},
+Eric Agol\altaffilmark{10},
+Fabienne A. Bastien\altaffilmark{11},
+Dmitry Bizyaev\altaffilmark{12},
+Justin R. Crepp\altaffilmark{13},
+Eric B. Ford\altaffilmark{14},
+Peter M. Frinchaboy\altaffilmark{15},
+Ana Elia Garc{\'{\i}}a P{\'e}rez\altaffilmark{16},
+B. Scott Gaudi\altaffilmark{17},
+Jian Ge\altaffilmark{14},
+Fred Hearty\altaffilmark{16},
+Steve R. Majewski\altaffilmark{16},
+Szabolcs M{\'e}sz{\'a}ros\altaffilmark{5,6},
+David L. Nidever\altaffilmark{18,16},
+Kaike Pan\altaffilmark{12},
+Joshua Pepper\altaffilmark{11},
+Marc H. Pinsonneault\altaffilmark{17},
+Ricardo P. Schiavon\altaffilmark{19},
+Donald P. Schneider\altaffilmark{3,4},
+Keivan G. Stassun\altaffilmark{11,20},
+John C. Wilson\altaffilmark{16}}
+
+\email{scfleming@psu.edu}
+\altaffiltext{1}{Computer Science Corporation, 3700 San Martin Dr, Baltimore, MD, 21218, USA}
+\altaffiltext{2}{Space Telescope Science Institute, 3700 San Martin Dr, Baltimore, MD, 21218, USA}
+\altaffiltext{3}{Department of Astronomy and Astrophysics, The Pennsylvania State University, 525 Davey Laboratory, University Park, PA 16802, USA}
+\altaffiltext{4}{Center for Exoplanets and Habitable Worlds, The Pennsylvania State University, University Park, PA 16802, USA}
+\altaffiltext{5}{Instituto de Astrof{\'{\i}}sica de Canarias (IAC), E-38200 La Laguna, Tenerife, Spain}
+\altaffiltext{6}{Departamento de Astrof{\'{\i}}sica, Universidad de La Laguna (ULL), E-38206 la Laguna, Tenerife, Spain}
+\altaffiltext{7}{Observatorio Nacional-MCTI, Rio de Janeiro, RJ 20921-400, Brazil}
+\altaffiltext{8}{Steward Observatory, University of Arizona, Tucson, AZ 85721, USA}
+\altaffiltext{9}{National Optical Astronomy Observatory, 950 N. Cherry Avenue, Tucson, AZ, 85719, USA}
+\altaffiltext{10}{Department of Astronomy, Box 351580, University of Washington, Seattle, WA 98195, USA}
+\altaffiltext{11}{Department of Physics \& Astronomy, Vanderbilt University, Nashville, TN 37235, USA}
+\altaffiltext{12}{Apache Point Observatory, P.O. Box 59, Sunspot, NM 88349-0059, USA}
+\altaffiltext{13}{University of Notre Dame, Department of Physics, 225 Nieuwland Science Hall, Notre Dame, IN 46556, USA}
+\altaffiltext{14}{Astronomy Department, University of Florida, 211 Bryant Space Sciences Center, Gainesville, FL 32111, USA}
+\altaffiltext{15}{Department of Physics and Astronomy, Texas Christian University, Fort Worth, TX 76129, USA}
+\altaffiltext{16}{Department of Astronomy, University of Virginia, Charlottesville, VA 22904-4325, USA}
+\altaffiltext{17}{Department of Astronomy, The Ohio State University, 140 West 18th Avenue, Columbus, OH 43210, USA}
+\altaffiltext{18}{Department of Astronomy, University of Michigan, 830 Dennison, 500 Church St., Ann Arbor, MI 48109-1042, USA}
+\altaffiltext{19}{Gemini Observatory, 670 N. A'Ohoku Place, Hilo, HI 96720, USA}
+\altaffiltext{20}{Department of Physics, Fisk University, Nashville, TN 37208, USA}
+
+\begin{abstract}
+It is expected that a large number ($>75\%$) of active planet candidates (APCs) from \emph{Kepler} will not have transit timing variations detectable from mission data alone, and will therefore require spectroscopic observations to confirm their planetary nature.  Eclipsing binaries (EBs), whose eclipse depths are diluted by contamination from another source, represent most of the false positive APCs.  In this paper, we show that a survey by a near-infrared (NIR), multi-object spectrograph, with a modest radial velocity precision of $100 \; \rm{m \; s^{-1}}$, can easily identify a majority of false positive APCs caused by stellar binaries, and in many cases, fully characterize their orbits.  As a pilot study, we measure RVs from {\color{red}XXXX} current and former KOIs that were observed with the SDSS-III APOGEE spectragraph.  We demonstrate that APOGEE is capable of achieving $\sim 100 \; \rm{m \; s^{-1}}$ RV precision, and that APOGEE's multiplexing capability and its optimization in the NIR make it more efficient than using higher precision, single-object, optical spectrographs (HARPS-North, Keck HIRES, SOPHIE, and HET) for this specific purpose.  Furthermore, the APOGEE RVs of the false-positive APCs will enable several ancillary science projects to undertake studies of fundamental stellar astrophysics, or studies of intrinsically rare companions at short orbital periods, such as brown dwarfs.  Critically, the co-added APOGEE spectra can also be used to derive stellar properties ($T_{\rm eff}$, $\log g$) and chemical abundances of over a dozen elements for the exoplanet host stars.
+\end{abstract}
+
+\section{INTRODUCTION}
+The \emph{Kepler} spacecraft's primary mission is to determine the frequency of Earth-sized exoplanets orbiting in the habitable zone of their parent stars \citep{bor2010,koc2010}, with a second objective of studying a wide variety of stellar astrophysics via astroseismology \citep[e.g., ][]{cha2011}.  In addition, the high precision photometry \citep[$\sim 80 \; \rm{ppm}$ over 6-hour timescales for the brightest ($K_p \lesssim 15$) dwarfs, ][]{cal2010,gil2011,chr2012} enables studies of giant exoplanets and a wide variety of variable stars.  Its photometric band $K_p$ covers 423 - 897 nm and is similar to, but broader than, a combined $V$ and $R$ band \citep{koc2010}.  To find exoplanets, \emph{Kepler} makes use of the transit method, which detects planet candidates by measuring the flux loss that occurs when a planet crosses the face of its parent star.  However, there are several sources of false positives that must be taken into account when analyzing these candidates, most notably:  grazing eclipsing binaries (EBs), EBs (including hierarchical triples) whose eclipse depths are diluted by another star through flux contamination, and brown dwarfs or low mass stars that have radii comparable to giant exoplanets.
+
+Because of these sources of false positives, the \emph{Kepler} team makes a very clear distinction between candidate exoplanets and those that have been dynamically confirmed through spectroscopic radial velocity (RV) measurements, or, in the specific case of systems with multiple transiting objects, through photodynamical modeling \citep[e.g., ][]{hol2010,car2011}.  Kepler Objects of Interest (KOIs) consist of candidate exoplanets, eclipsing binaries, and known false positives.  Those KOIs that are not known to be false positives or EBs are referred to as ``active planet candidates'' \citep{bor2011a,bor2011b,bat2012}.  For simplicity, we will refer to such candidates as APCs throughout the rest of this paper.  An intermediate level of classification consists of ``validated'' exoplanets, which have very low probabilities of being blended EBs as determined through a Monte Carlo statistical analysis of the \emph{Kepler} photometry \citep[e.g., ][]{tor2011}.
+
+As of February 2014, there are a total of 3614 APCs from 2868 \emph{Kepler} stars\footnote{\url{http://exoplanetarchive.ipac.caltech.edu/cgi-bin/ExoTables/nph-exotbls?dataset=cumulative}}, but only $\sim 20$\% (532) of the stars host multiple APCs.  It is estimated that as many as 15-26\% of transiting planets may have clearly detected transit timing variations \citep{ford2012}.  Even still, a majority of APCs will require RV observations to confirm their planetary nature.  Such time-series RV observations are resource intensive, so efficient identification of false positive candidates is necessary to confirm a large number of these APCs.  In addition to aiding in the confirmation of APCs, robustly determining the false positive rate amongst APCs is required when conducting statistical analyses of this population.  A number of studies have attempted to perform such analyses, including investigations of planet frequency as functions of orbital periods and stellar host properties \citep{bor2011b,you2011,how2012}, and studies of the eccentricity distribution \citep{moo2011}.
+
+Aside from the false positive rate of APCs, knowledge of the host star(s) intrinsic properties (e.g., mass, radius, effective temperature, surface gravity, metallicity) is required to determine the masses and radii of the exoplanets,  as well as to conduct studies of planetary properties as functions of these stellar parameters.  The Kepler Input Catalog \citep[KIC, ][]{bro2011} provides a photometrically derived $T_{\rm{eff}}$, $\log{g}$, $\rm{[Fe/H]}$ and $\rm{E_{\left(B-V\right)}}$ for every star within \emph{Kepler}'s field of view through a combination of calibrated fluxes using $\left\{g, r, i, z\right\}$ filters similar to the original SDSS filters \citep{fuk1996} and a narrow-band \emph{D}51 filter modeled after the Dunlap Observatory \emph{DD}51 filter.  The catalog was originally used to inform target selection of the mission, but in the absence of a comprehensive spectroscopic survey to derive stellar parameters for all $\sim 150,000$ \emph{Kepler} stars, the catalog's stellar parameters have been used in analyses of planet candidates.  There are ongoing efforts to provide improved stellar parameters of Kepler targets by aggregating photometry, spectroscopy, asteroseismology, and transit analyses \citep{hub2014}.
+
+In this paper, we use {\color{red}XXXX current and former KOIs} in a pilot study to show that the multi-object, near-infrared, $R \sim 22500$ Apache Point Observatory Galactic Evolution Experiment \citep[APOGEE,][]{maj2010} spectrograph \citep{wil2012} on the Sloan 2.5 m telescope \citep{gun2006}, currently part of SDSS-III \citep{eis2011}, provides an efficient means of determining the false positive rate of APCs.  At the same time, these spectra can be used in a variety of projects using the false positives themselves, including characterization of the orbits for many of the spectroscopic binaries (SBs), measurement of the mass ratios for a subset of the SBs, and orbital characterization of intrinsically rare, massive ($M \gtrsim 10 \; M_{\rm{Jup}}$), substellar companions such as brown dwarfs and massive gas giant planets \citep{mar2000,sah2011}.  In addition, it will be possible to estimate the $T_{\rm{eff}}$, $\log{g}$, and chemical abundances for many of the exoplanet host stars using the APOGEE spectra.
+
+{\color{red} Need to update the outline of the paper -- In Section \ref{fapsection} we review techniques for determining the false positive rate of \emph{Kepler} APCs.  In Section \ref{qfacsection} we compare the efficiency of a survey using a high resolution, NIR, multi-object spectrograph against other planet-hunting spectrographs: HARPS-North, which is a clone of HARPS-South \citep{may2003}, Keck HIRES \citep{vog1994}, SOPHIE \citep{per2008}, and HET HRS \citep{tul1998}.  We demonstrate that by using a multiplexing instrument in the NIR to conduct a survey at modest RV precision ($100 \; \rm{m \; s^{-1}}$), the false positives can be identified more efficiently compared to the single-object instruments, reserving telescope time on those other precious resources for confirmation of the remaining APCs at significantly higher precision.
+
+In Section \ref{apgsection} we describe in further detail the APOGEE instrument and main survey, the methods used to derive RVs from its spectra, and its current RV precision floor.  We show that the instrument is capable of achieving $100 \; \rm{m \; s^{-1}}$ precision using observations of a bright, previously known exoplanet outside the \emph{Kepler} field, as well as a \emph{Kepler} EB that produces planet-sized eclipses, demonstrating the ease of detecting such binaries with APOGEE.  We demonstrate that with $\sim 10$ APOGEE observations, many of the false positive APCs can be detected and have their orbits characterized.  In Section \ref{ancsection} we discuss additional science enabled with the APOGEE spectra by extracting stellar parameters and abundances for the stars that are not spectroscopic false positives, and therefore are likely to host actual exoplanets, along with a control sample of field dwarfs not known to host exoplanets.}
+
+\section{Review of Techniques for Identifying False Positives: The Promise of Multiplexing Spectrographs in the Near-Infrared}
+\label{fapsection}
+The majority of false positive APCs are expected to be caused by astrophysical sources rather than random or systematic errors, specifically, EBs whose eclipse depths are similar to that expected from a transiting planet \citep{bor2011b}.  Fig.\ \ref{falseposdiag} demonstrates six of the most common sources of transiting APC scenarios.  In each panel, the larger (yellow) star is the suspected APC host, and all objects within the panels are assumed to be within the aperture used to create the \emph{Kepler} lightcurve.  Each \emph{Kepler} ``optimal aperture'' is variable, but is typically many arcseconds in size \citep{twi2010}.  The dashed circles represent a spectrograph fiber's field-of-view (FoV, not to scale).  The titles in each panel also denote, qualitatively, how often the given scenarios can be characterized by time-series RVs at modest precision ($\sim 100 \; \rm{m \; s^{-1}}$ level).
+
+Cases 1, 2, 4 and 6 all involve a physical companion orbiting the APC host star.  In these cases, RV observations can easily detect the presence of grazing EBs (Case 1), EBs that are diluted by third light from another star within the \emph{Kepler} aperture, but resolved on-sky with the spectrograph (Case 2), or consist of a very low-mass star (VLMS) or brown dwarf companion (Case 4), a majority of the time.  In addition, the most massive, bona fide planets will induce a Doppler velocity shift detectable at the $\sim 100 \; \rm{m \; s^{-1}}$ level (Case 6); in those rare cases, their planetary nature will be confirmed through the APOGEE RVs by phasing them to the \emph{Kepler}-derived orbital period.
+
+Star systems that are either physical multiples or visual companions with small separations on-sky, and consist of an EB, are represented by Case 5.  In this scenario, the diluted EB is unresolved within the spectrograph's FoV as well, and is only detectable if the flux of at least one component of the EB is sufficiently high that its spectral features have an effect on the cross-correlation function, or if the EB pair induce a sufficient velocity shift on the primary to at least identify the system as having one or more stellar companions.  The detection of such companions is easier in the NIR than in the optical, since the flux contrast of a lower-mass companion compared to its primary is less in the $H$ band \citep[e.g., Kepler-16, ][]{ben2012}.
+
+Case 3 represents a \emph{Kepler}-unresolved EB, where the variable star is within the \emph{Kepler} aperture, but is exterior to the spectrograph's FoV relative to the APC host star.  This is the only scenario where RV observations will be not be able to detect any false positives, unless the RV survey targets every star within a given APC's \emph{Kepler} aperture.  Fortunately, Cases 2, 3 and 5 can sometimes be tested photometrically with time-series photometry from the ground at greater spatial resolutions \citep[e.g., ][]{col2012}.  In addition, this is also one of the cases that is more likely to be solved using \emph{Kepler} data alone by searching for flux centroid shifts.
+
+A variety of techniques exist to determine whether a given APC might be a false positive using only \emph{Kepler} photometric information.  Examination of the transits can be done to ensure that the odd/even transits have the same depth, that there are no ellipsoidal variations, and that the positions of the flux centroids do not vary with brightness changes, all of which are signs that the transit event may be due to a diluted EB \citep{ste2010,tor2011}.  Another method is to generate a large grid of synthetic EB blend scenarios and compare the models to the observed lightcurves via a $\chi^2$ analysis \citep[e.g., BLENDER, ][]{tor2011}, although the technique can be computationally expensive and difficult to apply to all APCs en masse.  In addition, imaging surveys \citep[e.g., ][]{how2011, ada2012} can be used to inform the photometric analyses described above, particularly to identify fainter stars that exist within the lightcurve aperture.
+
+Another technique makes use of stellar population synthesis and Galactic models to estimate the probability that a given transit signal is due to an EB.  \citet{mor2011} used such a technique to estimate the false positive probability (FPP) of APCs, and concluded that 90\% of the APCs had $\rm{FPPs < 10}$\%, a result that was used by other authors in subsequent statistical analyses of the APC planet candidates.  However, the technique presented in \citet{mor2011} relied on APCs to be vetted to the fullest extent possible using the \emph{Kepler} photometry, specifically, the removal of V-shaped transits and searches for faint secondary eclipses, whereas the table of APCs presented in their paper was not limited to these pre-vetted APCs.
+
+An updated version of the technique by \citet{mor2012} accounted for more false positive scenarios and clarified the importance of pre-vetting APCs before performing the statistical analysis.  The updated implementation can be run fairly quickly (of order 10 minutes per star), and has been verified by testing it on confirmed APCs and known false positive APCs; however, the technique works best with additional observations (imaging to detect close, visual companions and at least one high resolution spectrum to get coarse stellar parameters).  In addition, the Bayesian modeling is dependent on a variety of model assumptions regarding Galactic structure, stellar population synthesis, distribution of binary properties, and the frequency of exoplanets for various types of stars.  While the framework explicitly accounts for such assumptions through the adopted priors, and is fairly trivial to update when new knowledge is obtained about any of these distributions, direct spectroscopic or photometric observations of false positives are the least model-dependent approach to derive the false positive statistics of APCs.
+
+Studies have found that the false positive rates for various subsets of APCs are larger than the ones found from the \citet{mor2011} study, whose quoted statistics are only valid for fully pre-vetted APCs, and that this rate might differ depending on the orbital period and transit depth of the APCs.  \citet{col2012} made use of multi-color differential photometry to test for false positives due to diluted EBs whose components have sufficiently different colors.  They observed a total of four APCs that had short periods ($P < 6 \; \rm{days}$) and small radii ($R_{p} < 5 \; R_{\oplus}$), and found evidence that two of the four were likely due to diluted EBs, excluding an overall false positive rate of 10\% with 99\% confidence.  \citet{san2012} collected spectroscopic RVs of 33 giant planet APCs using the SOPHIE spectrograph and found a false positive probability of at least $35$\% within their sample, where a majority of false positives were due to EBs.  Their sample size of 33 APCs was partly limited by their telescope resource:  a single-object spectrograph observing in the optical using a 2m-class telescope, corresponding to an effective magnitude limit in the \emph{Kepler} bandpass of $K_p \lesssim 14.7$.  This magnitude limit removes almost half of the total APCs.  Utilizing a multi-object, NIR spectrograph, such as APOGEE, increases the rate of data collection while also increasing the total number of APCs able to be observed.
+
+\section{Results: Efficiency Comparisons Of A 100 m s$^{-1}$ RV Survey of \emph{Kepler} APCs Using APOGEE and Single-Object Optical Spectrographs}
+\label{qfacsection}
+Several high-precision RV instruments are available in the northern hemisphere to confirm \emph{Kepler} exoplanet candidates by achieving RV precisions of a few $\rm{m \; s^{-1}}$, including  HARPS-North, Keck HIRES, SOPHIE, and HET HRS.  These instruments are clearly capable of conducting a reconnaissance survey of \emph{Kepler} APCs for false positives, but their telescope time is most effectively spent observing robust exoplanet candidates for confirmation and characterization purposes.  To compare the efficiency by which these instruments can search for false positives, we calculate the integration time per target required to achieve a photon-limited RV precision of $100 ~ \rm{m \; s^{-1}}$.  A quality factor $Q$ is calculated following \citet{bou2001}, adapting instrument parameters summarized in Table \ref{instspecs}.  The quality factor represents the fundamental RV information content of a spectrum, which depends on the number, depths, and widths of spectral features.  The $Q$ values are calculated using BTSETTL stellar models \citep{ala2011} for a range of stellar effective temperatures ($T_{\rm{eff}}$), adopting a surface gravity $\log{g} = 5.0$, a solar metallicity, and no rotational broadening.  Including a rotational broadening will affect higher resolution instruments the most, resulting in lower $Q$ values.
+
+From these $Q$ values, it is then possible to calculate the required integration time per object (an ``effective integration time'') to achieve a given, photon-limited RV precision (here taken to be $100 ~ \rm{m \; s^{-1}}$), via:
+\begin{equation}
+t = \frac{\left( \frac{c}{{{\sigma}}_{\rm{rv}} \; Q \; \sqrt{\pi R^2 \epsilon F}} \right)^2 + t_{\rm{over}}}{n_{\rm{targets}}}
+\end{equation}
+where $t$ is the effective integration time, $c$ is the speed of light, ${\sigma}_{\rm{rv}}$ is the desired RV precision, $Q$ is the quality factor, $R$ is the telescope's effective aperture radius, $\epsilon$ is the total throughput (as a percentage) of the telescope and instrument, $F$ is the flux in photons per second per unit area, $t_{\rm{over}}$ is the overhead per integration, and $n_{\rm{targets}}$ is the number of targets observed per integration.  Since we are operating in the photon-limited case, we do not include readout noise for the instruments, nor consider sources of systematic uncertainties such as residual moonlight contamination (worse in the optical), or residual telluric lines and sky emission lines (worse in the NIR) -- our interest is in calculating the photon limited case for a direct comparison.
+
+The fluxes are calculated from the BTSETTL models after convolving with the appropriate filter transmission function:  Johnson $V$ for HARPS-North, Keck HIRES, SOPHIE, and HET HRS; 2MASS $H$ for APOGEE.  The model fluxes are scaled to the zero magnitude level using zero-level fluxes from \citet{bes1998} in $V$ and \citet{coh2003} in 2MASS, which are then further scaled to a desired apparent magnitude.  We calculate the effective integration time for each instrument by including an estimated overhead for detector readout, telescope slew, target acquisition and calibrations.  Since overhead times between integrations depend on a variety of factors, we adopt three minutes as an average overhead time for HARPS-North, Keck HIRES, SOPHIE and HET HRS.  For APOGEE, we use a minimum integration time of 66.7 minutes and an overhead time of 15 minutes, equivalent to the current survey's integration time per visit for each field and its average overhead time between fields.  We do not reduce the integration time for APOGEE below this minimum value because the total integration time is not based on any one target's brightness, but rather an overall integration time required for all targets in a field.
+
+We calculate the required integration times $t$ at a specific $H$ (and corresponding $V$) magnitude for both the single object and multi-object instruments, to allow for more direct comparisons.  We use the median APC host star flux level of $H \sim 13.5$, along with the appropriately scaled $V$ fluxes for the optical instruments.  The average number of APC host stars within each APOGEE field that have $ H < 13.5$ is 89, so we use this as the number of APC hosts that can be observed simultaneously with APOGEE's multiplexing capability for the purposes of comparing against the single-object instruments.  All of these input parameters are summarized in Table \ref{instspecs}.
+
+Fig.\ \ref{exptimesfig} displays the required integration times per target to achieve a photon-limited RV precision of $100 ~ \rm{m \; s^{-1}}$ for a variety of spectral types.  At this RV precision, APOGEE is approximately three times as efficient on a per target basis, primarily due to APOGEE's ability to observe multiple APC hosts simultaneously, and the fact that at this RV precision, the other instruments are dominated by overheads per target.  As the targeted precision level increases, the other instruments become increasingly more efficient compared to APOGEE, reflective of the fact that they are no longer dominated by overheads.  These basic calculations serve to demonstrate how the multiplexing capability of APOGEE enables an efficient survey at modest RV precision compared to the single-object instruments, and that the telescope time for those instruments is best spent on achieving high RV precision to confirm new exoplanets.
+
+Fig. \ref{hmagvsper} plots the orbital period versus $H$ magnitude for the current APC catalog.  Host stars with $H < 14$ and $P < 100 \; \rm{days}$ are particularly well-suited for APOGEE to characterize any binary star orbits, and represent $> 80$\% of the current APCs.  Note, however, that even APCs with longer orbital periods, extending to at least a few hundred days, can be identified as binaries even if the observing baseline does not cover the entire orbital period.  If a more conservative limit of $H < 13$ is applied, $\sim 47$\% of the APCs would be included.  Case 5 in Fig.\ \ref{falseposdiag} relies most heavily on achieving high signal-to-noise ratio observations, and thus has the brightest limiting magnitude within a survey; however, it is also the false positive scenario for which APOGEE is least sensitive.
+
+\section{Results: A Pilot Study of APC Hosts Using APOGEE}
+Having demonstrated that using APOGEE at $100 ~ \rm{m \; s^{-1}}$ RV precision is an optimal way to survey \emph{Kepler} APCs for false positives, we apply this technique to serveral current and former APCs observed with APOGEE.  Some of these targets were observed as part of an ancillary program studying Kepler EBs, in which case these targets were at one point Kepler planet candidates, but were later determined by the Kepler team to be likely EBs.  In that sense, they represent known false positives and serve as a test case in our pilot study.  The other set of APCs are current APCs observed as part of a special time allocation targeting every APC within a single Kepler module with a goal of obtaining 18 total visits.  While we currently have just 5 visits completed, we use our results so far to highlight some early false positive APCs.  We summarize our findings of these targets in this section, after first reviewing the APOGEE instrument.
+
+\subsection{Survey Overview}
+\label{apgsection}
+APOGEE is a multi-object, fiber-fed, NIR spectrograph linked to the 2.5-m telescope \citep{gun2006} at Apache Point Observatory, and is part of the Sloan Digital Sky Survey III \citep[SDSS-III, ][]{eis2011}.  The spectrograph is housed in a vacuum cryostat and can observe up to 300 objects simultaneously, producing $R \sim 22500$ spectra covering a wavelength range of $1.51 - 1.68 \; \rm{{\mu}m}$ using a volume phase holographic grating.  Details of the instrument design can be found in \citet{wil2012}.  Typically the instrument achieves a signal-to-noise ratio per pixel of 100 ($\Delta \lambda \sim 0.1 - 0.17 \AA$) on an $H = 11$ star in a single visit (one hour of total integration).  Most stars are observed on a minimum of three different nights, so that short-period binaries can be flagged.  Each field on the sky is normally observed in multiples of three, ranging from 3 to 24 times, with brighter targets swapped for new stars after three observations.  Aluminum plug plates hold optical fibers that carry the star light from the telescope into the instrument.
+
+The telescope's field-of-view (FoV) covers a circular area $1.49^{\circ}$ in radius, which matches well to the size of a given \emph{Kepler} module.  Fig.\ \ref{apgkepfov} shows the \emph{Kepler} modules' footprints, along with FoVs for nominal APOGEE fields centered within each module.  The total number of APC host stars within each APOGEE FoV are labeled within each SDSS footprint.  As can be seen, the SDSS footprint covers most of a \emph{Kepler} module's FoV within a single field.  Such overlap also means that most of the APCs are also within the SDSS footprint; indeed, more than $95$\% of the current APC host stars would fall within the hypothetical SDSS fields shown in Fig.\ \ref{apgkepfov}.
+
+The APOGEE data processing pipeline is described in \citet{nid2012}.  Basic steps include collapsing the detector exposures for each of the three NIR arrays from 3D data cubes to 2D images, flat fielding, aperture extraction, wavelength calibration, sky subtraction, telluric correction, and measurement of RVs.  The RVs calculated by the automated pipeline make use of a grid of synthetic spectra calculated from stellar atmospheres generated by ATLAS9 and MARCS stellar evolution codes \citep[][Garcia-Perez, in prep]{mes2012}.  The mean, internal RV precision of the pipeline-produced, relative RVs is $\sim 100 \; \rm{m \; s^{-1}}$, although it does depend on signal-to-noise, spectral type, level of residual systematics from the data processing, etc.  Critically, these pipeline-derived RVs only work for simple cross-correlation functions, and are expected to fail when there is contamination from multiple stellar spectra as in the case for most binary stars.  As such, we derive our own RVs using additional, interactive processing of the data.  These steps include manually correcting residual OH sky emission lines, selecting templates from a finer grid, and interactively fitting cross-correlation peaks, which may often be asymmetric or have multiple components in the case of binary stars.  RVs are then fit using a custom wrapper to the RVLIN software package \citep{wri2009}, that includes the ability to fit both components of a double-line spectroscopic binary through an iterative approach and taking advantage of the fact that some orbital parameters are identical for both components.
+
+\subsection{Summary of APC Results}
+
+\subsubsection{Kepler 1571511}
+As part of an ancillary program within the APOGEE survey, \citet{mah2014} (hereafter MAH2014) are observing $\sim 100$ \emph{Kepler} detached EBs identified in the catalogs of \citet{prs2011} and \citet{sla2011} to measure the mass ratios of these EBs to within 3\%.  One of these EBs is KIC 01571511 ($H \sim 12$), an EB comprised of an F-type dwarf and low-mass M dwarf \citep{ofi2012}.  The eclipses of such a low-mass star ($\sim 2$\% decrease in flux during primary eclipse) are comparable to those expected for a gas giant planet.  Indeed, this star was originally suspected to be an overlooked gas giant exoplanet \citep{cou2011,ofi2012}.  In the specific case of KIC 01571511, there is a small secondary eclipse ($\sim 0.05$\%) detected in the \emph{Kepler} lightcurve, which can be used to derive an estimate of the relative $T_{\rm{eff}}$ ratio between the primary and secondary, and can therefore be used to help determine whether the object is a likely stellar companion.  In general, however, there is no guarantee that such an EB system will show a secondary eclipse, nor that such an eclipse is detectable even with \emph{Kepler's} precision.  In fact, \citet{san2012} found that some of the false positive APCs were EBs in eccentric orbits for which only the shallower, secondary eclipse occurred.  
+
+Nevertheless, such EBs are fairly trivial to detect spectroscopically, as demonstrated in Fig.\ \ref{apgofir}.  In this figure, we plot the best-fit RV model from the analysis by \citet{ofi2012}, noting that there is a typo in the value of $\omega_1$ in their Table 3, where it is missing a minus sign.  We also plot the three APOGEE RVs obtained through the ancillary program.  Only a constant offset between the model and APOGEE data is included to account for instrumental zero-point differences.  Even with three data points, the RV variation observed in the APOGEE RVs is inconsistent with a giant planet, given the period and epoch of transit from the \emph{Kepler} lightcurve, because the change in RV over a short fraction of the orbit is much greater ($\sim 10 \; \rm{km \; s^{-1}}$) than expected for a planetary mass.  These data also demonstrate that APOGEE is capable of producing RVs at the $\sim 100-200 \; \rm{m \; s^{-1}}$ for $H \sim 12$ stars based on the RMS residual to the known \citet{ofi2012} orbital solution.
+
+\subsubsection{Kepler 3848972}
+
+\subsubsection{Kepler 3861595}
+KIC 3861595 (KOI 4) is listed in both the EB and KOI catalogs, and was observed as part of MAH2014.  As a KOI, the target was initially listed as a ``False Positive'' in the Q1-Q8 catalog, and is now listed as ``Not Dispositioned'' in the Q1-Q16 cumulative catalog\footnote{\url{http://exoplanetarchive.ipac.caltech.edu/cgi-bin/ExoTables/nph-exotbls?dataset=cumulative}}.  Some ground-based observations have been conducted and reported at the Kepler Community Follow-up Program (CFOP) website\footnote{\url{https://cfop.ipac.caltech.edu/home/}}.  These include several optical spectra from the TRES spectrograph \citep{sze2007} that indicated the star was a rapid rotator (40-50 $\rm{km \; s^{-1}}$), and potentially variability at a level of a few hundreds of $\rm{m \; s^{-1}}$.  Imaging from the 1-m Nickel telescope at Lick Observatory and Keck HIRES guider images show two nearby stars within ten arcseconds of the target.  Both nearby stars appear to be approximately 6 magnitudes fainter than the target.
+
+In addition to six APOGEE spectra, MAH2014 obtained five optical spectra for this target using the High Resolution Spectrograph (HRS) on the Hobby-Eberley Telescope.  The HRS was used in the 30,000 resolution mode, with the 316 $\rm{g/mm}$ grating at a central wavelength of $\lambda_0 = 5936 \; \AA$.  The HET spectra were reduced using our optimal extraction pipeline described in \citet{mah2014}.  We find a good template match (for both HET and APOGEE) using a mid-F spectral template rotationally broadened to 40 $\rm{km \; s^{-1}}$, in agreement with the CFOP notes from the TRES observations.  The estimated spectroscopic rotation rate of $\sim \; 40 \; \rm{km \; s^{-1}}$, combined with an estimated rotation rate of 5.65-5.8 days \citep{hir2012,rho2014}, results in an equatorial radius of $\sim \; 4.5 \; R_{\odot}$, somewhat larger than the spectroscopically determined radius of $2.727 \; \pm \; 0.504 \; R_{\odot}$ \citep{buc2012} and the Stellar Parameter Catalog's value of $2.992 ^{+0.469} _{-0.743} \; R_{\odot}$ \citep{hub2014}.
+
+We cross-correlate the HET and APOGEE spectra with mid-F spectral templates rotationally broadened at 40 $\rm{km \; s^{-1}}$.  We find a single-peaked, broad cross-correlation function, with RV variation at the $\sim \; 1 \; \rm{km \; s^{-1}}$ level (Fig. \ref{kic3861595}).  However, phase-folding and fitting the RVs at the orbital period and ephemerides found in the KOI and EB catalogs do not yield significant fits.  Our observations confidently exclude a physically-associated, massive companion as the source of the Kepler transit events.  Indeed, an analysis by \citet{rho2014} found that an Algol-type background binary, approximately 6.5 magnitudes fainter but within the Kepler photometric aperture, could produce a lightcurve similar to what's observed.  This scenario remains a possibility given the companions seen in the Lick and Keck images at roughly this flux ratio.
+
+\section{Stellar Parameters and Chemical Abundances of Planet Hosts}
+\label{ancsection}
+\subsection{Derivation Of Stellar Parameters: ASPCAP}
+Beyond identifying false positive APCs as binaries, a variety of additional science projects can be done with the APOGEE spectra.  One such example is the study of chemical abundance patterns in planet host stars compared to stars not known to host planets.  One of APOGEE's primary goals is to measure the chemical abundances of 15 elements to study stellar populations within the Milky Way.  These abundances are measured using the APOGEE Stellar Parameters and Chemical Abundances Pipeline (ASPCAP), which consists of a suite of software codes to analyze, in an automated fashion, the APOGEE spectra.  The main component of the code is FERRE, a Fortran optimization code that searches for the set of parameters that best match each APOGEE spectrum.  FERRE was originally developed in the context of low-resolution SDSS spectroscopy \citep{all2004, all2006}, and has subsequently evolved and been used in other contexts \citep{all2008, all2009, bro2012, kil2012}.
+
+ASPCAP runs in two steps:  The first one derives simultaneously the main atmospheric parameters and abundances ($T_{\rm eff}$, $\log g$, [Fe/H], [C/Fe], [N/Fe], [$\alpha$/Fe], and micro-turbulence. This is the most time consuming part of the analysis, and takes about 10-15 min per spectrum on a single CPU.  In the second step, abundances of other individual elements are derived, one at a time, holding constant the atmospheric parameters derived in the first stage.  The APOGEE band (1.5-1.7 $\mu$m) is rich in transitions from many elements in cool stars. Estimates of the APOGEE science team indicate that abundances for 15 elements can be derived from sufficiently high resolution ($R>20000$) and signal-to-noise per pixel (S/N$>100$) spectra in this spectral window:  C, N, O, Na, Mg, Al, Si, K, Ca, Ti, V, Mn, Fe, Ni, Cr.  A S/N level approaching 100 per pixel is expected to be achieved out to $H \sim 14$ by co-adding the 10 visit spectra.
+
+\subsection{Abundance Patterns of Exoplanet Hosts}
+Because the derived stellar parameters and detailed chemical abundance distributions will be determined for all observed targets in a given APOGEE field, both the stars with false-positive transits and those that are true planet-hosting stars will be important in comparative studies of stellar mass and chemistry with planetary-system architecture.  There are dedicated programs to characterize the planet hosts spectroscopically, but detailed information on the underlying population is substantially more limited, and largely confined to coarse photometric estimates and galactic population models.  For example, early on it was recognized that stars discovered to host planets from RV surveys tended to have rather large metallicities \citep[e.g., ][]{gon1997,san2000,san2001,san2004,gon2001,fis2005}.  With the ever increasing sample size of RV-selected exoplanetary systems, it has been shown by a number of studies that the shift in metallicity (usually characterized by [Fe/H]) between planet-hosting FGK dwarf and subgiant stars, when compared to FGK dwarfs and subgiants known not to host closely orbiting giant planets, is a statistically significant difference.  Most studies agree \citep[e.g., ][]{san2004,fis2005} that in the majority of cases, the metal-rich nature of planet-hosting stars is intrinsic to the star itself, and this suggests that planets, at least giant planets of the type that are found most easily in RV surveys, are preferentially formed in a metal-rich environment.  It’s important to characterize the metallicity trends for the smaller and less massive planets currently being discovered, and this requires a deep survey of the population.  One application is reconciling the statistical properties inferred from different surveys and methods.  The frequency of hot Neptunes inferred from the CoRoT mission is very different from that in the Kepler sample \citep{bon2012}, and the frequency of hot Jupiters in the Kepler fields is different from that inferred locally in radial velocity surveys \citep{how2012}.  This either reflects substantial differences in detection efficiency or differences in the underlying populations being sampled; metallicity information is required to distinguish between the two.
+
+There is also substantial interest in the detailed abundance pattern in planet hosts.  There are tantalizing hints for different heavy element patterns in planet hosts relative to the field that could be induced by preferential removal of heavy elements in the disk.  In a homogeneous abundance analysis of 117 FGK planet-hosting main-sequence stars and 145 similar-type stars which are RV stable ($\sigma_{\rm{RV}} < 30 \; \rm{m \; s^{-1}}$), \citet{ghe2010} found that stars which hosted Jovian-mass planets tended to be more metal-rich than those stars which have only Neptunian-mass planets. This result suggests that metallicity may also influence the distribution of planetary masses within extrasolar systems.  The overall shift in values of [Fe/H] between stars with Jovian- versus Neptunian-mass planets is 0.20 dex, which is significant and indicates that the metallicity populations for stars with Jovian-mass planets are not the same as those which host the smaller Neptunian-mass planets.  In addition to stellar metallicity, there are also suggestions that stellar mass plays a role, such that the dominant planetary mass decreases as the parent star's mass decreases \citep{ghe2010,may2011}.  It is likely that some combination of stellar mass and metallicity influences the type of planetary system that will form \citep{joh2010}.  APOGEE can provide a statistically significant control sample for such studies.
+
+In addition to overall metallicity and stellar mass playing a role, the detailed chemistry of the parent cloud in which the system forms may also hold clues to further understanding planet formation.  Recent findings suggest that specific abundance patterns, such as Mg/Fe, may influence the likelihood that a star hosts an underlying planetary system \citep{adi2012a}, and that enhancement in alpha elements may favor the formation of rocky planets, even for stars with low iron abundances \citep{adi2012b}.  The C/O ratio in the parent cloud is also found in some studies to be enriched in planet hosting systems, with C/O ratios $> 0.8$ \citep{del2010,pet2011}, however, these results have been questioned by \citet{for2012}. \citet{bru2011} find that the silicon abundance (and not the oxygen abundance) is a key element, as they find that their planet detection rate depends strongly on the silicon abundance of the host star.  \citet{mel2009}, \citet{gon2010}, and \citet{sch2011} present intriguing results suggesting that low-amplitude chemical signatures point to selective accretion or depletion of refractory and volatile elements in stellar exoplanetary hosts.  In particular, trends of abundances with condensation temperature ($T_{\rm{cond}}$) are used as diagnostics, and these can be defined from the abundances of the 15 chemical elements covered by APOGEE, which include C, N, O (volatiles) and Si, Ti and Al (refractories).  The investigation of such trends in samples of \emph{Kepler} stars with confirmed planets of different masses, and including the smallest planets to date, will provide an unprecedented database in order to probe the importance of $T_{\rm{cond}}$ trends in this context.
+
+Beyond the formation of exoplanets, the abundances of individual planet hosts can affect the size of the habitability zone around those stars \citep{you2012}.  Finally, it is likely that we will have significant information on stellar ages in the Kepler field.  Rotation periods can be inferred from periodic photometric modulation induced by star spots.  The exquisite Kepler light curves will provide a substantial sample of data for dwarfs \citep{bas2011}.  It has long been known that low mass stars spin down as they age, and that this implies that rotation is a valuable chronometer \citep{sku1972,mam2008,mei2011a,mei2011b,eps2012}.  An important unknown in such studies is the metallicity dependence, as the relationships typically invoked are based on open cluster samples with near-solar abundance.  Metallicity data in the background field will be essential for proper calibration and characterization of ages inferred from rotation measurements.
+
+\section{Summary}
+In this paper, we highlight the importance of an RV survey of APCs to better determine the false positive rate, and demonstrate that APOGEE can efficiently conduct a 10-visit survey of \emph{Kepler} APCs to identify, and in many cases characterize the orbits of, false positive APCs.  We have shown that the APOGEE instrument is capable of achieving an RV precision level of $\sim 100 ~ \rm{m \; s^{-1}}$ using observations of the known exoplanet HD 114762 and the \emph{Kepler} EB KIC 01571511, which produces planet-sized eclipses and has an $H$ magnitude similar to many \emph{Kepler} APCs.  Not only can the data from such a survey be used to determine the false positive rate of APCs and vet the sample to identify the best candidates for high-precision RV observations, but it will enable ancillary science projects in fundamental stellar astrophysics though observations of EBs, studies of intrinsically rare short-period companions (such as brown dwarfs), and detailed chemical abundances of exoplanet host stars.  At the precision level of $100 ~ \rm{m \; s^{-1}}$, APOGEE is a more efficient instrument compared to HARPS-North, Keck HIRES, and SOPHIE, due to its multiplex capability and because the single-object spectrographs are dominated by overheads.  Such a survey at modest RV precision to detect false positives refines the target selection for the higher precision RV instruments, enabling them to focus on the best exoplanet candidates.  It will allow for improved statistical studies of the \emph{Kepler} exoplanet population by determining the false positive rate of all APCs, as well as any trends in the false positive rate with orbital period or stellar properties.
+
+\acknowledgements
+We acknowledge support from NSF award AST1006676.  This work was partially supported by funding from the Center for Exoplanets and Habitable Worlds. The Center for Exoplanets and Habitable Worlds is supported by the Pennsylvania State University, the Eberly College of Science, and the Pennsylvania Space Grant Consortium.  This research has made use of the SIMBAD database, operated at CDS, Strasbourg, France.  This publication makes use of data products from the Two Micron All Sky Survey, which is a joint project of the University of Massachusetts and the Infrared Processing and Analysis Center/California Institute of Technology, funded by the National Aeronautics and Space Administration and the National Science Foundation.
+
+This work was based on observations with the SDSS 2.5-meter telescope.  Funding for SDSS-III has been provided by the Alfred P. Sloan Foundation, the Participating Institutions, the National Science Foundation, and the U.S. Department of Energy Office of Science. The SDSS-III web site is \url{http://www.sdss3.org/}.  SDSS-III is managed by the Astrophysical Research Consortium for the Participating Institutions of the SDSS-III Collaboration including the University of Arizona, the Brazilian Participation Group, Brookhaven National Laboratory, University of Cambridge, Carnegie Mellon University, University of Florida, the French Participation Group, the German Participation Group, Harvard University, the Instituto de Astrofisica de Canarias, the Michigan State/Notre Dame/JINA Participation Group, Johns Hopkins University, Lawrence Berkeley National Laboratory, Max Planck Institute for Astrophysics, Max Planck Institute for Extraterrestrial Physics, New Mexico State University, New York University, Ohio State University, Pennsylvania State University, University of Portsmouth, Princeton University, the Spanish Participation Group, University of Tokyo, University of Utah, Vanderbilt University, University of Virginia, University of Washington, and Yale University.
+
+\begin{thebibliography}{}
+\bibitem[Adams et al. (2012)]{ada2012} Adams, E.~R., Ciardi, D.~R., Dupree, A.~K., et al.\ 2012, \aj, 144, 42
+\bibitem[Adibekyan et al. (2012a)]{adi2012a} Adibekyan, V.~Z., Santos, N.~C., Sousa, S.~G., et al.\ 2012, \aap, 543, A89
+\bibitem[Adibekyan et al. (2012b)]{adi2012b} Adibekyan, V.~Z., Delgado Mena, E., Sousa, S.~G., et al.\ 2012, arXiv:1209.6272
+\bibitem[Allard et al. (2011)]{ala2011} Allard, F., Homeier, D., \& Freytag, B.\ 2011, 16th Cambridge Workshop on Cool Stars, Stellar Systems, and the Sun, 448, 91
+\bibitem[Allende Prieto (2004)]{all2004} Allende Prieto, C.\ 2004, Astronomische Nachrichten, 325, 604
+\bibitem[Allende Prieto et al. (2006)]{all2006} Allende Prieto, C., Beers, T.~C., Wilhelm, R., et al.\ 2006, \apj, 636, 804
+\bibitem[Allende Prieto et al. (2008)]{all2008} Allende Prieto, C., Sivarani, T., Beers, T.~C., et al.\ 2008, \aj, 136, 2070
+\bibitem[Allende Prieto et al. (2009)]{all2009} Allende Prieto, C., Hubeny, I., \& Smith, J.~A.\ 2009, \mnras, 396, 759
+\bibitem[Basri et al. (2011)]{bas2011} Basri, G., Walkowicz, L.~M., Batalha, N., et al.\ 2011, \aj, 141, 20
+\bibitem[Batalha et al. (2012)]{bat2012} Batalha, N.~M., Rowe, J.~F., Bryson, S.~T., et al.\ 2012, arXiv:1202.5852
+\bibitem[Bender et al. (2012)]{ben2012} Bender, C.~F., Mahadevan, S., Deshpande, R., et al.\ 2012, \apjl, 751, L31
+\bibitem[Bessell et al. (1998)]{bes1998} Bessell, M.~S., Castelli, F., \& Plez, B.\ 1998, \aap, 333, 231
+\bibitem[Bonomo et al. (2012)]{bon2012} Bonomo, A.~S., Chabaud, P.-Y., Deleuil, M., et al.\ 2012, arXiv:1209.4815
+\bibitem[Borucki et al. (2010)]{bor2010} Borucki, W.~J., Koch, D., Basri, G., et al.\ 2010, Science, 327, 977
+\bibitem[Borucki et al. (2011a)]{bor2011a} Borucki, W.~J., Koch, D.~G., Basri, G., et al.\ 2011, \apj, 728, 117 
+\bibitem[Borucki et al. (2011b)]{bor2011b} Borucki, W.~J., Koch, D.~G., Basri, G., et al.\ 2011, \apj, 736, 19
+\bibitem[Bouchy et al. (2001)]{bou2001} Bouchy, F., Pepe, F., \& Queloz, D.\ 2001, \aap, 374, 733
+\bibitem[Brown et al. (2011)]{bro2011} Brown, T.~M., Latham, D.~W., Everett, M.~E., \& Esquerdo, G.~A.\ 2011, \aj, 142, 112
+\bibitem[Brown et al. (2012)]{bro2012} Brown, W.~R., Kilic, M., Allende Prieto, C., \& Kenyon, S.~J.\ 2012, \apj, 744, 142
+\bibitem[Brugamyer et al. (2011)]{bru2011} Brugamyer, E., Dodson-Robinson, S.~E., Cochran, W.~D., \& Sneden, C.\ 2011, \apj, 738, 97
+\bibitem[Buchhave et al. (2012)]{buc2012} Buchhave, L.~A., Latham, D.~W., Johansen, A., et al.\ 2012, \nat, 486, 375
+\bibitem[Butler et al. (1996)]{but1996} Butler, R.~P., Marcy, G.~W., Williams, E., et al.\ 1996, \pasp, 108, 500
+\bibitem[Caldwell et al. (2010)]{cal2010} Caldwell, D.~A., Kolodziejczak, J.~J., Van Cleve, J.~E., et al.\ 2010, \apjl, 713, L92
+\bibitem[Carter et al. (2011)]{car2011} Carter, J.~A., Fabrycky, D.~C., Ragozzine, D., et al.\ 2011, Science, 331, 562
+\bibitem[Chaplin et al. (2011)]{cha2011} Chaplin, W.~J., Kjeldsen, H., Christensen-Dalsgaard, J., et al.\ 2011, Science, 332, 213
+\bibitem[Christiansen et al. (2012)]{chr2012} Christiansen, J.~L., Jenkins, J.~M., Barclay, T.~S., et al.\ 2012, arXiv:1208.0595
+\bibitem[Cohen et al. (2003)]{coh2003} Cohen, M., Wheaton, W.~A., \& Megeath, S.~T.\ 2003, \aj, 126, 1090
+\bibitem[Col{\'o}n et al. (2012)]{col2012} Col{\'o}n, K.~D., Ford, E.~B., \& Morehead, R.~C.\ 2012, arXiv:1207.2481
+\bibitem[Coughlin et al. (2011)]{cou2011} Coughlin, J.~L., L{\'o}pez-Morales, M., Harrison, T.~E., Ule, N., \& Hoffman, D.~I.\ 2011, \aj, 141, 78
+\bibitem[Delgado Mena et al. (2010)]{del2010} Delgado Mena, E., Israelian, G., Gonz{\'a}lez Hern{\'a}ndez, J.~I., et al.\ 2010, \apj, 725, 2349
+\bibitem[Eisenstein et al. (2011)]{eis2011} Eisenstein, D.~J., Weinberg, D.~H., Agol, E., et al.\ 2011, \aj, 142, 72
+\bibitem[Epstein \& Pinsonneault (2012)]{eps2012} Epstein, C.~R., \& Pinsonneault, M.~H.\ 2012, arXiv:1203.1618
+\bibitem[Fischer \& Valenti (2005)]{fis2005} Fischer, D.~A., \& Valenti, J.\ 2005, \apj, 622, 1102
+\bibitem[Ford et al. (2012)]{ford2012} Ford, E.~B., Ragozzine, D., Rowe, J.~F., et al.\ 2012, \apj, 756, 185 
+\bibitem[Fortney (2012)]{for2012} Fortney, J.~J.\ 2012, \apjl, 747, L27
+\bibitem[Fukugita et al. (1996)]{fuk1996} Fukugita, M., Ichikawa, T., Gunn, J.~E., et al.\ 1996, \aj, 111, 1748
+\bibitem[Ghezzi et al. (2010)]{ghe2010} Ghezzi, L., Cunha, K., Smith, V.~V., et al.\ 2010, \apj, 720, 1290
+\bibitem[Gilliland et al. (2011)]{gil2011} Gilliland, R.~L., Chaplin, W.~J., Dunham, E.~W., et al.\ 2011, \apjs, 197, 6
+\bibitem[Gonzalez (1997)]{gon1997} Gonzalez, G.\ 1997, \mnras, 285, 403
+\bibitem[Gonzalez et al. (2001)]{gon2001} Gonzalez, G., Laws, C., Tyagi, S., \& Reddy, B.~E.\ 2001, \aj, 121, 432
+\bibitem[Gonz{\'a}lez Hern{\'a}ndez et al. (2010)]{gon2010} Gonz{\'a}lez Hern{\'a}ndez, J.~I., Israelian, G., Santos, N.~C., et al.\ 2010, \apj, 720, 1592
+\bibitem[Gunn et al. (2006)]{gun2006} Gunn, J.~E., et al.\ 2006, \aj, 131, 2332
+\bibitem[Hirano et al. (2012)]{hir2012} Hirano, T., Sanchis-Ojeda, R., Takeda, Y., et al.\ 2012, \apj, 756, 66
+\bibitem[Holman et al. (2010)]{hol2010} Holman, M.~J., Fabrycky, D.~C., Ragozzine, D., et al.\ 2010, Science, 330, 51
+\bibitem[Howard et al. (2012)]{how2012} Howard, A.~W., Marcy, G.~W., Bryson, S.~T., et al.\ 2012, \apjs, 201, 15
+\bibitem[Howell et al. (2011)]{how2011} Howell, S.~B., Everett, M.~E., Sherry, W., Horch, E., \& Ciardi, D.~R.\ 2011, \aj, 142, 19
+\bibitem[Huber et al. (2014)]{hub2014} Huber, D., Silva Aguirre, V., Matthews, J.~M., et al.\ 2014, \apjs, 211, 2
+\bibitem[Johnson et al. (2010)]{joh2010} Johnson, J.~A., Aller, K.~M., Howard, A.~W., \& Crepp, J.~R.\ 2010, \pasp, 122, 905
+\bibitem[Johnson et al. (2011)]{joh2011} Johnson, J.~A., Clanton, C., Howard, A.~W., et al.\ 2011, \apjs, 197, 26
+\bibitem[Kilic et al. (2012)]{kil2012} Kilic, M., Brown, W.~R., Allende Prieto, C., et al.\ 2012, \apj, 751, 141
+\bibitem[Koch et al. (2010)]{koc2010} Koch, D.~G., Borucki, W.~J., Basri, G., et al.\ 2010, \apjl, 713, L79
+\bibitem[Mahadevan et al. (2014)]{mah2014} Mahadevan, S., Deshpande, R., Bender, C., et al.\ 2014, in prep
+\bibitem[Majewski et al. (2010)]{maj2010} Majewski, S.~R., Wilson, J.~C., Hearty, F., Schiavon, R.~R., \& Skrutskie, M.~F.\ 2010, IAU Symposium, 265, 480
+\bibitem[Mamajek \& Hillenbrand (2008)]{mam2008} Mamajek, E.~E., \& Hillenbrand, L.~A.\ 2008, \apj, 687, 1264
+\bibitem[Marcy \& Butler (2000)]{mar2000} Marcy, G.~W. \& Butler, R.~P.\ 2000, \pasp, 112, 137
+\bibitem[Mayor et al. (2003)]{may2003} Mayor, M., Pepe, F., Queloz, D., et al.\ 2003, The Messenger, 114, 20
+\bibitem[Mayor et al. (2011)]{may2011} Mayor, M., Marmier, M., Lovis, C., et al.\ 2011, arXiv:1109.2497
+\bibitem[Meibom et al. (2011a)]{mei2011a} Meibom, S., Mathieu, R.~D., Stassun, K.~G., Liebesny, P., \& Saar, S.~H.\ 2011, \apj, 733, 115
+\bibitem[Meibom et al. (2011b)]{mei2011b} Meibom, S., Barnes, S.~A., Latham, D.~W., et al.\ 2011, \apjl, 733, L9
+\bibitem[Mel{\'e}ndez et al. (2009)]{mel2009} Mel{\'e}ndez, J., Asplund, M., Gustafsson, B., \& Yong, D.\ 2009, \apjl, 704, L66
+\bibitem[M{\'e}sz{\'a}ros et al. (2012)]{mes2012} M{\'e}sz{\'a}ros, S., Allende Prieto, C., Edvardsson, B., et al.\ 2012, arXiv:1208.1916 
+\bibitem[Moorhead et al. (2011)]{moo2011} Moorhead, A.~V., Ford, E.~B., Morehead, R.~C., et al.\ 2011, \apjs, 197, 1
+\bibitem[Morton (2012)]{mor2012} Morton, T.~D.\ 2012, arXiv:1206.1568
+\bibitem[Morton \& Johnson (2011)]{mor2011} Morton, T.~D., \& Johnson, J.~A.\ 2011, \apj, 738, 170
+\bibitem[Nidever et al. (2012)]{nid2012} Nidever, D.,  et al.\ 2012, in prep
+\bibitem[Ofir et al. (2012)]{ofi2012} Ofir, A., Gandolfi, D., Buchhave, L., et al.\ 2012, \mnras, 423, L1
+\bibitem[Perruchot et al. (2008)]{per2008} Perruchot, S., Kohler, D., Bouchy, F., et al.\ 2008, \procspie, 7014, 17
+\bibitem[Petigura \& Marcy (2011)]{pet2011} Petigura, E.~A., \& Marcy, G.~W.\ 2011, \apj, 735, 41 
+\bibitem[Pr{\v s}a et al. (2011)]{prs2011} Pr{\v s}a, A., Batalha, N., Slawson, R.~W., et al.\ 2011, \aj, 141, 83
+\bibitem[Rhodes \& Budding (2014)]{rho2014} Rhodes, M.D. \& Budding, E.\ 2014, \emph{Ap\&SS}
+\bibitem[Sahlmann et al. (2011)]{sah2011} Sahlmann, J., et al.\ 2011, \aap, 525, 95
+\bibitem[Santerne et al. (2012)]{san2012} Santerne, A., D{\'{\i}}az, R.~F., Moutou, C., et al.\ 2012, arXiv:1206.0601
+\bibitem[Santos et al. (2000)]{san2000} Santos, N.~C., Israelian, G., \& Mayor, M.\ 2000, \aap, 363, 228
+\bibitem[Santos et al. (2001)]{san2001} Santos, N.~C., Israelian, G., \& Mayor, M.\ 2001, \aap, 373, 1019
+\bibitem[Santos et al. (2004)]{san2004} Santos, N.~C., Israelian, G., \& Mayor, M.\ 2004, \aap, 415, 1153
+\bibitem[Schuler et al. (2011)]{sch2011} Schuler, S.~C., Flateau, D., Cunha, K., et al.\ 2011, \apj, 732, 55
+\bibitem[Skumanich (1972)]{sku1972} Skumanich, A.\ 1972, \apj, 171, 565
+\bibitem[Slawson et al. (2011)]{sla2011} Slawson, R.~W., Pr{\v s}a, A., Welsh, W.~F., et al.\ 2011, \aj, 142, 160
+\bibitem[Steffen et al. (2010)]{ste2010} Steffen, J.~H., Batalha, N.~M., Borucki, W.~J., et al.\ 2010, \apj, 725, 1226
+\bibitem[Szentgyorgyi \& Fur{\'e}sz(2007)]{sze2007} Szentgyorgyi, A.~H., \& Fur{\'e}sz, G.\ 2007, Revista Mexicana de Astronomia y Astrofisica Conference Series, 28, 129
+\bibitem[Torres et al. (2011)]{tor2011} Torres, G., Fressin, F., Batalha, N.~M., et al.\ 2011, \apj, 727, 24
+\bibitem[Tull (1998)]{tul1998} Tull, R.~G.\ 1998, \procspie, 3355, 387
+\bibitem[Twicken et al. (2010)]{twi2010} Twicken, J.~D., Clarke, B.~D., Bryson, S.~T., et al.\ 2010, \procspie, 7740, 69
+\bibitem[Vogt et al. (1994)]{vog1994} Vogt, S.~S., Allen, S.~L., Bigelow, B.~C., et al.\ 1994, \procspie, 2198, 362
+\bibitem[Wilson et al. (2012)]{wil2012} Wilson, J.~C., Hearty, F., Skrutskie, M.~F., et al.\ 2012, \procspie, 8446
+\bibitem[Wright \& Howard (2009)]{wri2009} Wright, J.~T., \& Howard, A.~W.\ 2009, \apjs, 182, 205 
+\bibitem[Youdin (2011)]{you2011} Youdin, A.~N.\ 2011, \apj, 742, 38
+\bibitem[Young et al. (2012)]{you2012} Young, P.~A., Liebst, K., \& Pagano, M.\ 2012, \apjl, 755, L31
+\end{thebibliography}
+
+%%%%%%%%%%%%%%%%%% tables here %%%%%%%%%%%%%%%%%%
+
+\clearpage
+
+\begin{deluxetable}{lrrrrrrr}
+\tabletypesize{\scriptsize}
+\tablecaption{Instrument Parameters For $Q$ Factor Calculation\label{instspecs}}
+\tablewidth{0pt}
+\tablehead{
+\colhead{Instrument} & \colhead{Resolution} & \colhead{${\lambda}_{\rm{min}}$} & \colhead{${\lambda}_{\rm{max}}$} & \colhead{Eff. Aperture} & \colhead{Total Throughput} & \colhead{Overhead} & \colhead{\# Targets / Obs.} \\
+\colhead{~} & \colhead{~} & \colhead{$\left( \rm{\AA} \right)$} & \colhead{$\left( \rm{\AA} \right)$} & \colhead{Radius $\left( \rm{m} \right)$} & \colhead{$\left( {\%} \right)$} & \colhead{$\left( \rm{min} \right)$} & \colhead{$\left( H \sim 13.5 \right)$}
+}
+\startdata
+HARPS-North\tablenotemark{a} & 115000 & 3830 & 6930 & 3.58 & 8 & 3 & 1\\
+Keck HIRES\tablenotemark{b} & 55000 & 5000 & 6200 & 10.0 & 13 & 3 & 1\\
+SOPHIE\tablenotemark{c} & 75000 & 3820 & 6930 & 1.93 & 4 & 3 & 1\\
+HET\tablenotemark{d} & 30000 & 4076 & 7838 & 9.2 & 1.5 & 3 & 1\\
+APOGEE\tablenotemark{e} & 22500 & 15100 & 17000 & 2.12 & 16 & 15 & 89\\
+\enddata
+\tablenotetext{a}{Instrument parameters taken from \url{http://www.tng.iac.es/instruments/harps/}.}
+\tablenotetext{b}{Instrument specs as reported in \citet{joh2011}.  Efficiency is taken to be 18\% from \url{http://www2.keck.hawaii.edu/inst/hires/throughput.pdf}, minus an additional 30\% loss due to absorption from the iodine cell.}
+\tablenotetext{c}{Instrument parameters taken from \url{http://www.obs-hp.fr/guide/sophie/sophie-info.html}.}
+\tablenotetext{d}{Instrument parameters are for the 316g5936 cross-disperser in $R = 30000$ mode using ThAr as a wavelength calibration.  Although most planet work has been done using the $R = 60000$ mode, this resolution is not required to achieve $100 \; \rm{m \; s^{-1}}$ RV precision.  Efficiency taken from the HRS exposure time calculator \url{http://het.as.utexas.edu/HET/hetweb/Instruments/HRS/exp/exp_calc.html}, and is calculated at the center of the telescope's observability track.}
+\tablenotetext{e}{Instrument parameters taken from \citet{wil2012}.  Effective aperture radius includes a 30\% loss due to obstruction of the 2.5m diameter \citep{gun2006}.}
+\end{deluxetable}
+
+%%%%%%%%%%%%%%%%%% end tables %%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%% figures here %%%%%%%%%%%%%%%%%%
+
+\clearpage
+
+\begin{figure}
+\includegraphics[scale=0.8]{FigFalsePosDiag.ps}
+\caption{The most common scenarios that can produce a lightcurve consistent with a transiting planet.  The titles qualitatively identify those scenarios that can be detected by a RV survey at the level of $\sim 100 \; \rm{m \; s^{-1}}$ (``Most'', ``Some'', etc.).  In each panel, the larger (yellow) star is the assumed APC host star, while the dashed circles represent a spectrograph's FoV (not to scale).  All sources in each panel lie within the \emph{Kepler} photometric aperture, which is typically many arcseconds in size.  In Case 3, the term ``unresolved'' refers to the fact that the EB is unresolved in the \emph{Kepler} aperture.  In Case 6, only short-period, massive planets would be detected with APOGEE. \label{falseposdiag}}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.9]{FigExpTimes.ps}
+\caption{Total time (integration + overhead) required to achieve a photon-limited RV precision of $100 ~ \rm{m \; s^{-1}}$ on a per target basis, as a function of stellar $T_{\rm{eff}}$.  Note that at this scale, HARPS-North and Keck HIRES are nearly indistinguishable. \label{exptimesfig}}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.9]{FigApgKepFov.ps}
+\caption{\emph{Kepler} module footprint with nominal APOGEE FoV areas (circles, $2.98^\circ$ diameter) and the number of APC host stars within each FoV that have $H < 13.5$.  The total number of APC hosts within these nominal APOGEE FoV areas is 2665, out of a total of 2742 (97.2\%).\label{apgkepfov}}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.9]{FigApgOfir.ps}
+\caption{APOGEE RVs of the \emph{Kepler} EB KIC 01571511 and the best-fit model from \citet{ofi2012} shown as the solid line.  A constant offset between the model and the APOGEE RVs has been applied to account for a zero-point offset.  For the given \emph{Kepler} period and epoch of transit, it is clear even with just three APOGEE RVs that the object is not a planet, because the change in RV over a short fraction of the orbit is much greater ($\sim 10 \; \rm{km \; s^{-1}}$) than expected for a planetary mass.  The RV uncertainties are too small to be seen in the top panel.\label{apgofir}}
+\end{figure}
+
+
+\begin{figure}
+\includegraphics[scale=0.9]{FigKIC3861595.ps}
+\caption{Unfolded RVs for KIC 3861595.  The RV rms is $925 ~ \rm{m \; s^{-1}}$, but they do not phase-fold well with the reported period and ephemeris from the EB and KOI catalogs.  The lack of RV variation at more than a $\rm{km \; s^{-1}}$ excludes the presence of a stellar or substellar companion at the reported orbital period.\label{kic3861595}}
+\end{figure}
+
+
+\begin{figure}[t]
+  \centerline{
+    \includegraphics[width=7.5cm]{FigKOI0340.ps}
+    \includegraphics[width=7.5cm]{FigKOI0419.ps}
+  }
+  \centerline{
+    \includegraphics[width=7.5cm]{FigKOI0607.ps}
+    \includegraphics[width=7.5cm]{FigKOI0698.ps}
+  }
+  \centerline{
+    \includegraphics[width=7.5cm]{FigKOI1786.ps}
+    \includegraphics[width=7.5cm]{FigKIC1571511.ps}
+  }
+\caption{{\color{red}Update this figure to show APCs.}\label{apcphasecov}}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.9]{FigHmagVsPer.ps}
+\caption{Orbital period versus $H$ magnitude for the current APCs.  The dashed, red lines demarcate $H = 14$ and $P = 100 \; \rm{days}$.  Host stars brighter than this $H$ limit and candidates with periods below 100 days represent $> 80$\% of the current APC catalog, and are particularly well-suited for APOGEE to characterize the orbits of binaries, while simply identifying APCs as false positives can be done out to periods of a few hundred days. \label{hmagvsper}}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%% end figures %%%%%%%%%%%%%%%%%%
+
+\end{document}
