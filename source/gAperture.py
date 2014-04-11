@@ -4,7 +4,7 @@ import ast
 from curvetools import *
 from imagetools import * # For JPEG preview image creation
 from optparse import OptionParser
-from dbasetools import fGetTimeRanges
+from dbasetools import fGetTimeRanges, suggest_parameters
 
 parser = OptionParser()
 parser.add_option("-b", "--band", action="store", type="string", dest="band", help="[NF]UV band designation")
@@ -31,6 +31,7 @@ parser.add_option("-g", "--gap", "--maxgap", action="store", type="float", dest=
 parser.add_option("--minexp", action="store", type="float", dest="minexp", help="Minimum contiguous exposure in seconds for data to be reported.", default=1)
 parser.add_option("--detsize", action="store", type="float", dest="detsize", help="Set the effective field diameter in degrees for the exposure search.", default=1.25)
 parser.add_option("--bestparams", "--best", action="store_true", dest="best", help="Set parameters to produce the highest quality lightcurve. Potentially slow.", default=False)
+parser.add_option("--suggest", "--optimize", action="store_true", dest="suggest", help="Suggest optimum parameters for aperture photometry.", default=False)
 
 (options, args) = parser.parse_args()
 
@@ -40,16 +41,25 @@ for key in options.__dict__.keys():
 	if options.__dict__[key]:
 		cmd+=' --'+str(key)+' '+str(options.__dict__[key])
 
-mandatory = ['band','radius']
-for m in mandatory:
-        if not options.__dict__[m]:
-                print "A mandatory option is missing:",m
-                parser.print_help()
-                exit(1)
+#mandatory = ['band']
+#for m in mandatory:
+#	if not options.__dict__[m]:
+#		print "A mandatory option is missing:",m
+#		parser.print_help()
+#		exit(1)
 
-options.band = options.band.upper()
+if not options.band:
+	print "Band must be specified."
+	exit(1)
+else:
+	options.band = options.band.upper()
+
 if options.band != "NUV" and options.band != "FUV":
 	print "Band must be NUV or FUV."
+	exit(1)
+
+if not options.radius and not options.suggest:
+	print "Must specify an aperture radius."
 	exit(1)
 
 if not (options.ra and options.dec) and not options.skypos:
@@ -62,6 +72,12 @@ elif (options.ra and options.dec):
 	skypos = [options.ra,options.dec]
 else:
 	skypos = list(ast.literal_eval(options.skypos))
+
+if options.suggest:
+	options.ra,options.dec,options.radius = suggest_parameters(options.band,[options.ra,options.dec])
+	if options.verbose:
+		print "Recentering on ["+str(options.ra)+", "+str(options.dec)+"]"
+		print "Setting radius to "+str(options.radius)
 
 if options.stepsz and options.coadd:
 	print "Cannot specify both --stepsz and --coadd."

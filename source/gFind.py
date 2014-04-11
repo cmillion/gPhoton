@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import ast
-from dbasetools import fGetTimeRanges
+from dbasetools import fGetTimeRanges, suggest_parameters
 from optparse import OptionParser
 
 parser = OptionParser()
@@ -18,6 +18,7 @@ parser.add_option("--detsize", action="store", type="float", dest="detsize", hel
 parser.add_option("--alt", "--gaper", action="store_true", dest="gaper", help="Format the output so that it can be copied and pasted directly into a gMap or gAperture command line.")
 parser.add_option("--depth", "--exponly", action="store_true", dest="depth", help="Report only the total raw exposure time available in the database, not the individual time ranges.")
 parser.add_option("--minexp", action="store", type="float", dest="minexp", help="Minimum contiguous exposure in seconds for data to be reported.", default=1)
+parser.add_option("--suggest", action="store_true", dest="suggest", help="Suggest optimum parameters for aperture photometry.", default=False)
 
 (options, args) = parser.parse_args()
 
@@ -52,11 +53,16 @@ if options.trange:
 else:
 	trange = [options.tmin,options.tmax]
 ranges = fGetTimeRanges(band,skypos,maxgap=options.gap,minexp=options.minexp,trange=trange,verbose=options.verbose,detsize=options.detsize)
+
+if options.suggest:
+	out = suggest_parameters(band,skypos,verbose=1)
+	print ""
+
 if not len(ranges):
 	print 'No exposure time in database.'
 else:
-        expt   = (ranges[:,1]-ranges[:,0]).sum()
-        print 'Available: '+str(expt)+' seconds (raw) in '+str(len(ranges))+' distinct exposures.'
+	expt   = (ranges[:,1]-ranges[:,0]).sum()
+	print 'Available: '+str(expt)+' seconds (raw) in '+str(len(ranges))+' distinct exposures.'
 	if not options.depth:
 	        print ''
 		if options.gaper:
