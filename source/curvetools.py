@@ -11,7 +11,10 @@ def compute_background(band,skypos,trange,radius,annulus,verbose=0):
 	"""Estimated counts within an aperture based upon rate within an annulus.
 	counts in aperture = (area of aperture) * (counts in annulus) / (area of annulus)
 	"""
-	return (area(radius)/(area(annulus[1])-area(annulus[0]))) * (gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[1]),verbose=verbose)-gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[0]),verbose=verbose)) if (annulus[0] and annulus[1]) else 0.
+	if annulus[1]-annulus[0]<=0:
+		return 0.
+	else:
+		return (area(radius)/(area(annulus[1])-area(annulus[0]))) * (gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[1]),verbose=verbose)-gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[0]),verbose=verbose)) if (annulus[0] and annulus[1]) else 0.
 
 def mask_background_image(band,skypos,trange,radius,annulus,verbose=0,
 			  maglimit=28.,pixsz=0.000416666666666667,NoData=-999):
@@ -60,12 +63,6 @@ def aperture_response(band,skypos,tranges,radius,verbose=0,tscale=1000.,
 						verbose=0)))
 	flatinfo = get_fits_header(flat_filename(band,calpath))
 	detsize, imsz, pixsz = 1.25, flat.shape[0], flatinfo['CDELT2']
-
-	# FIXME: HACK
-	#temp = []
-	#for trange in tranges:
-	#	temp.append(dbt.fGetTimeRanges(band,skypos,verbose=verbose,
-	#				       trange=trange)
 
 	tranges = map(lambda trange: dbt.fGetTimeRanges(band,skypos,verbose=verbose,trange=trange),tranges)[0]
 
