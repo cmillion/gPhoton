@@ -61,9 +61,8 @@ def compute_exptime(band,trange,verbose=0,skypos=[False,False],detsize=1.25):
 
 	return exptime
 
-# Get the MCAT estimated sky background at a location
 def mcat_skybg(band,skypos,radius,verbose=0):
-	"""Grab the background from the MCAT."""
+	"""Estimate the sky background using the MCAT skybg for nearby sources."""
 	# Setting maglimit to 30 so that it gets _everything_.
 	sources = gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=30))
 
@@ -75,4 +74,34 @@ def mcat_skybg(band,skypos,radius,verbose=0):
 
 	# And radius is in degrees
 	return skybg*area(radius*60.*60.)
+
+def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,catalog='MCAT'):
+	"""Return the mean position of sources within the search radius."""
+	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose))
+	ix = np.where(out[:,-2]>0) if band=='NUV' else np.where(out[:,-1]>0)
+	fwhm = out[ix,-2].mean() if band=='NUV' else out[ix,-1].mean()
+	return out[ix,0].mean(),out[ix,1].mean(),round(fwhm,4)
+
+def nearest_source(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT'):
+	"""Return parameters of the nearest MCAT source."""
+	out = gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose)
+	dist=np.sqrt( (np.array(out)[:,0]-skypos[0])**2 + (np.array(out)[:,1]-skypos[1])**2)
+	if verbose > 1:
+			print "Finding nearest among "+str(len(dist))+" nearby sources."
+	# Note that this doesn't cope with multiple entries for the same source.
+	ix = np.where(dist == dist.min())
+	s = np.array(out)[ix][0]
+	# RA, Dec, NUV mag, FUV mag, NUV fwhm, FUV fwhm
+	return avg_sources(band,[s[0],s[1]],verbose=verbose)
+	#return s[0],s[1],s[2],s[3],s[7],s[8]
+
+# TODO: Add suggestion for background annulus
+def suggest_parameters(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT'):
+	"""Suggest an optimum aperture position and size."""
+	ra,dec,fwhm=nearest_source(band,skypos,radius=radius,maglimit=maglimit,verbose=verbose)
+	optrad = round(2*fwhm,4)
+	if verbose:
+		print "Suggested sky position [RA,Dec]: ["+str(ra)+", "+str(dec)+"]"
+		print "Suggested aperture radius (deg): "+str(optrad)
+	return ra,dec,optrad
 
