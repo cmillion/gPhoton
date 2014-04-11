@@ -21,12 +21,12 @@
 #  may have changed over the mission.
 
 from CalUtils import avg_stimpos
-from dbasetools import fGetTimeRanges
+from dbasetools import fGetTimeRanges, compute_exptime
 import numpy as np
 import gQuery
 from MCUtils import print_inline
 
-band = 'FUV'
+band = 'NUV'
 t0,t1 = 766525332.995,766526576.995
 skypos = [176.919525856024,0.255696872807351]
 
@@ -40,9 +40,11 @@ def netdead(band,t0,t1,tstep=1.,refrate=79.,verbose=0):
 		    gQuery.getValue(gQuery.deadtime2(band,t0,t1)))
 	exptime = t1-t0
 	# Method 0
+	# Empirical formula
 	dead0 = tec2fdead*(totcount/exptime)/feeclkratio
 	minrate,maxrate = refrate*.4,refrate+2.
 	# Method 2
+	# Direct measurement of stims
 	bins = np.linspace(0.,exptime-exptime%tstep,exptime//tstep+1)+t0
 	h = np.zeros(len(bins))
 	for i,t in enumerate(bins):
@@ -52,21 +54,25 @@ def netdead(band,t0,t1,tstep=1.,refrate=79.,verbose=0):
 	#h,xh = np.histogram(stimt-trange[0],bins=bins)
 	ix = ((h<=maxrate) & (h>=minrate)).nonzero()[0]
 	dead2 = (1.-((h[ix]/tstep)/feeclkratio)/refrate).mean()
-
 	# Method 1
+	# Empirical formula except with counts binned into 1s
 	h = np.zeros(len(bins))
 	for i,t in enumerate(bins):
 		print_inline(t1-t)
 		h[i] = gQuery.getValue(gQuery.deadtime1(band,t,t+tstep-0.0001)) + gQuery.getValue(gQuery.deadtime2(band,t,t+tstep-0.0001))
 
 	dead1 = (tec2fdead*(h/tstep)/feeclkratio).mean()
-
+	expt = compute_exptime(band,[t0,t1])
 	print dead0,dead1,dead2
-	return [t0, t1, dead0, dead1, dead2, stimcount, totcount]
+	return [t0, t1, dead0, dead1, dead2, expt, stimcount, totcount]
+
+skypos = [294.86493, 47.30736]
+tranges = fGetTimeRanges(band,skypos)
+deadtime = [netdead(band,trange[0],trange[1]) for trange in tranges]
 
 skypos = [323.06766667,0.25400000]
 tranges = fGetTimeRanges(band,skypos)
-deadtime = [netdead(band,trange[0],trange[1]) for trange in tranges]
+deadtime0 = [netdead(band,trange[0],trange[1]) for trange in tranges[np.random.random_integers(0,tranges.shape[0]-1,100)]]
 
 %pylab
 # Two methods vs. global count rate
