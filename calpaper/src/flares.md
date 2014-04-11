@@ -1,4 +1,3 @@
-###Known Flares
 This is mostly a list of known GALEX flares from the literature that we're able to reproduce with gAperture, along with the commands to do so.
 
 One of the things that seems to happen in the literature is that the source positions get rounded off enough that they aren't really useful for positioning the aperture anymore, and we needed to go back to the MCAT to find the most likely nearby source. RA and Dec should really be reported with 5 or 6 significant figures (in decimal degrees).
