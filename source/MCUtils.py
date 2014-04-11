@@ -33,7 +33,7 @@ def rms(data):
 def print_inline(text,blanks=60):
 	"""For updating text in place without a carriage return."""
         stdout.write(" "*blanks+"\r")
-        stdout.write(str(text+'\r'))
+        stdout.write(str(str(text)+'\r'))
         stdout.flush()
         return
 
