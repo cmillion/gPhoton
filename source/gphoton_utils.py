@@ -5,11 +5,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-def read_lc(ifile):
+def read_lc(ifile,header=False):
     """Reads a light curve CSV into a pandas DataFrame"""
     ## Read in the data as a pandas DataFrame object.
     try:
-        data_frame = pd.io.parsers.read_csv(ifile, skipinitialspace=True, names=["t0", "t1", "ap_radius", "cps", "exptime", "cpserr", "flux", "flux_err", "mag", "mag_err", "r_inner", "r_outer", "bkg", "response", "counts", "apcorr1", "apcorr2"])
+        data_frame = pd.io.parsers.read_csv(ifile, skipinitialspace=True, names=["t0", "t1", "ap_radius", "exptime", "cps", "cpserr", "flux", "flux_err", "mag", "mag_err", "r_inner", "r_outer", "bkg", "response", "counts", "apcorr1", "apcorr2"],skiprows=(2 if header else False))
         ## Calculate the timestamp in JD.
         data_frame["JD"] = ((data_frame["t1"] - data_frame["t0"]) / 2. + data_frame["t0"]) / 86400. + 2440587.5
         
@@ -21,10 +21,9 @@ def read_lc(ifile):
     except IOError:
         print "*** Error:  Could not find the file " + ifile + "."
 
-def plot_lc(data_frame, timelabel="JD"):
+def plot_lc(data_frame):
     """Plots a lightcurve from a CSV file
     data_frame - pandas DataFrame from read_lc()
-    timelabel - choose "JD" or "GREG" to plot Julian Date or Gregorian calendar date/times on the x-axis.  Default is JD.
     """
     plt.plot(data_frame.index.values, data_frame["flux"], "ko")
     plt.show()
