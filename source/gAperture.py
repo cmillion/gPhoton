@@ -74,10 +74,11 @@ else:
 	skypos = list(ast.literal_eval(options.skypos))
 
 if options.suggest:
-	options.ra,options.dec,options.radius = suggest_parameters(options.band,[options.ra,options.dec])
+	options.ra,options.dec,options.radius,options.annulus1,options.annulus2 = suggest_parameters(options.band,skypos)
 	if options.verbose:
 		print "Recentering on ["+str(options.ra)+", "+str(options.dec)+"]"
 		print "Setting radius to "+str(options.radius)
+		print "Setting annulus to ["+str(options.annulus1)+", "+str(options.annulus2)+"]"
 
 if options.stepsz and options.coadd:
 	print "Cannot specify both --stepsz and --coadd."
