@@ -36,17 +36,10 @@ parser.add_option("--suggest", "--optimize", action="store_true", dest="suggest"
 (options, args) = parser.parse_args()
 
 # Reconstruct the command line
-cmd = 'gPhoton'
+cmd = 'gAperture'
 for key in options.__dict__.keys():
 	if options.__dict__[key]:
 		cmd+=' --'+str(key)+' '+str(options.__dict__[key])
-
-#mandatory = ['band']
-#for m in mandatory:
-#	if not options.__dict__[m]:
-#		print "A mandatory option is missing:",m
-#		parser.print_help()
-#		exit(1)
 
 if not options.band:
 	print "Band must be specified."
