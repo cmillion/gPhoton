@@ -125,6 +125,7 @@ def compute_flux(band,skypos,tranges,radius,annulus=[None,None],userr=False,
 	# Do we really need this? It would be cleaner if it didn't loop.
 	for trange in tranges:
 		expt = dbt.compute_exptime(band,trange,verbose=verbose,skypos=skypos,detsize=detsize)
+		expt = dbt.compute_exptime(band,trange,verbose=verbose,detsize=detsize)
 		if not expt:
 			continue
 		data['expt'] += expt
