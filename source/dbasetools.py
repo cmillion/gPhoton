@@ -47,6 +47,8 @@ def fGetTimeRanges(band,skypos,trange=[1,1000000000000],tscale=1000.,detsize=1.2
 
 def compute_exptime(band,trange,verbose=0,skypos=[False,False],detsize=1.25):
 	"""Compute the effective exposure time."""
+	# FIXME: This skypos[] check appears to not work properly and leads
+	#  to dramatic _underestimates_ of the exposure time.
 	if skypos[0] and skypos[1]:
 		tranges = fGetTimeRanges(band,skypos,verbose=verbose,trange=trange)
 	else:
