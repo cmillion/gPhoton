@@ -112,22 +112,26 @@ def suggest_bg_radius(band,skypos,radius=0.1,maglimit=22,verbose=0,catalog='MCAT
 	return round(dist-3*nearest[-2 if band=='NUV' else -1],4)
 
 def optimize_annulus(optrad,outann,verbose=0):
-	if outann<=optrad:
-		if verbose:
-			print "Warning: There is no optimum background annulus."
-			print "Using no background correction; CAVEAT EMPTOR!"
-		inann,outann=0,0
-	elif outann<=1.1*optrad:
-		if verbose:
-			print "Warning: Background of questionable utility."
-		inann=optrad
-	elif outann>=3*optrad:
-		inann,outann=round(1.5*optrad,4),round(3*optrad,4)
-	elif outann < 3*optrad:
-		inann=round(1.1*optrad,4)
-	else:
-		print "I DON'T THINK THIS SHOULD HAPPEN!!&!*!!!"
-	return inann,outann
+	if outann<=round(2*optrad,4):
+		print "Warning: There are known sources within the background annulus."
+		print "Use --hrbg to mask these out. (Will increase run times.)"
+#		if verbose:
+#			print "Warning: There is no optimum background annulus."
+#			print "Using no background correction; CAVEAT EMPTOR!"
+#		inann,outann=0,0
+#	elif outann<=1.1*optrad:
+#		if verbose:
+#			print "Warning: Background of questionable utility."
+#		inann=optrad
+#	elif outann>=3*optrad:
+#		inann,outann=round(1.5*optrad,4),round(3*optrad,4)
+#	elif outann < 3*optrad:
+#		inann=round(1.1*optrad,4)
+#	else:
+#		print "I DON'T THINK THIS SHOULD HAPPEN!!&!*!!!"
+#	return inann,outann
+	# Doing the fancy thing above resulted in too many [0,0] annuli
+	return round(1.2*optrad,4),round(2*optrad,4)
 
 def suggest_parameters(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT'):
 	"""Suggest an optimum aperture position and size."""
