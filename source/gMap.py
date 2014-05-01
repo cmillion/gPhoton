@@ -25,7 +25,7 @@ parser.add_option("-v", "--verbose", action="store", type="float", dest="verbose
 parser.add_option("--clobber", action="store_true", dest="clobber", default="False")
 parser.add_option("--memlight", action="store", type="float", dest="memlight", help="Reduce server-side memory usage by requesting data in chunks of no more than this depth in seconds.", default=10)
 parser.add_option("--coadd", action="store_true", dest="coadd", help="Return an image coadded over all requested time ranges.")
-parser.add_option("-g", "--gap", action="store", type="float", dest="gap", help="Maximum gap size in seconds for data to be considered contiguous.", default=1)
+parser.add_option("-g", "--gap", "--maxgap", action="store", type="float", dest="gap", help="Maximum gap size in seconds for data to be considered contiguous.", default=1)
 parser.add_option("--minexp", action="store", type="float", dest="minexp", help="Minimum contiguous exposure in seconds for data to be reported.", default=1)
 parser.add_option("--maskrad", action="store", type="float", dest="maskrad", help="The radius at which detector events will be masked out.", default=1.)
 
