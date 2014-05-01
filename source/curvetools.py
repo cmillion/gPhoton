@@ -121,7 +121,7 @@ def compute_flux(band,skypos,tranges,radius,annulus=[None,None],userr=False,
 	"""
 	# Find the exposure time first. If there's not any, don't bother
 	#  computing the flux at all.
-	data = {'expt':0.,'bg':0., 'bghr':0.,'counts':0.}
+	data = {'expt':0.,'bg':0., 'bghr':0.,'counts':0.,'rr':1.}
 	# Do we really need this? It would be cleaner if it didn't loop.
 	for trange in tranges:
 		expt = dbt.compute_exptime(band,trange,verbose=verbose,skypos=skypos,detsize=detsize)
@@ -135,6 +135,7 @@ def compute_flux(band,skypos,tranges,radius,annulus=[None,None],userr=False,
 	if verbose>1:
 		print 'Integrated '+str(data['expt'])+' seconds of exposure.'
 
+	# FIXME: Need to account for 1.018 response shift after 881881215.995
 	data['rr'] = aperture_response(band,skypos,tranges,radius,verbose=verbose,calpath=calpath)/data['expt'] if userr and expt>0 else 1
 
 	# TODO: This list of assertions should maybe be folded into a
