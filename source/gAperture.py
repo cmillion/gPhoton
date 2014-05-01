@@ -36,7 +36,7 @@ parser.add_option("--suggest", "--optimize", action="store_true", dest="suggest"
 (options, args) = parser.parse_args()
 
 # Reconstruct the command line
-cmd = 'gAperture'
+cmd = './gAperture.py'
 for key in options.__dict__.keys():
 	if options.__dict__[key]:
 		cmd+=' --'+str(key)+' '+str(options.__dict__[key])
