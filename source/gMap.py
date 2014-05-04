@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+import os
 import ast
 from imagetools import *
 from dbasetools import fGetTimeRanges
@@ -28,6 +28,7 @@ parser.add_option("--coadd", action="store_true", dest="coadd", help="Return an 
 parser.add_option("-g", "--gap", "--maxgap", action="store", type="float", dest="gap", help="Maximum gap size in seconds for data to be considered contiguous.", default=1)
 parser.add_option("--minexp", action="store", type="float", dest="minexp", help="Minimum contiguous exposure in seconds for data to be reported.", default=1)
 parser.add_option("--maskrad", action="store", type="float", dest="maskrad", help="The radius at which detector events will be masked out.", default=1.)
+parser.add_option("--overwrite", "--ow", "--clobber", action="store_true", dest="overwrite", default=False)
 
 (options, args) = parser.parse_args()
 
@@ -75,6 +76,17 @@ elif options.raangle and options.decangle:
 else:
 	print "Must specify either --raangle and --decangle or --angle."
 	exit(1)
+
+if not options.overwrite:
+	if options.cntfile and os.path.exists(options.cntfile):
+		print 'File '+str(options.cntfile)+' exists. Use --overwrite.'
+		exit(0)
+	if options.cntfile and os.path.exists(options.cntfile):
+		print 'File '+str(options.cntfile)+' exists. Use --overwrite.'
+		exit(0)
+    if options.cntfile and os.path.exists(options.cntfile):
+		print 'File '+str(options.cntfile)+' exists. Use --overwrite.'
+		exit(0)
 
 if options.tranges:
 	tranges = list(ast.literal_eval(options.tranges))

@@ -1,5 +1,5 @@
 #!/usr/bin/python
-
+import os
 import ast
 from curvetools import *
 from imagetools import * # For JPEG preview image creation
@@ -32,6 +32,7 @@ parser.add_option("--minexp", action="store", type="float", dest="minexp", help=
 parser.add_option("--detsize", action="store", type="float", dest="detsize", help="Set the effective field diameter in degrees for the exposure search.", default=1.25)
 parser.add_option("--bestparams", "--best", action="store_true", dest="best", help="Set parameters to produce the highest quality lightcurve. Potentially slow.", default=False)
 parser.add_option("--suggest", "--optimize", action="store_true", dest="suggest", help="Suggest optimum parameters for aperture photometry.", default=False)
+parser.add_option("--overwrite", "--ow", "--clobber", action="store_true", dest="overwrite", default=False)
 
 (options, args) = parser.parse_args()
 
@@ -115,6 +116,9 @@ if not options.file:
 else:
 	# This initiates the file.
 	outfile = options.file
+	if not options.overwrite and os.path.exists(outfile):
+		print "File "+str(outfile)+"exists. Pass --overwrite to replace it."
+		exit(0)
 	f = open(outfile,iocode)
 	if options.addhdr:
 		# Write the command line to the outfile; should be optional
