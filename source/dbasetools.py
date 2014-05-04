@@ -87,6 +87,16 @@ def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,catalog='MCAT')
 def nearest_source(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT'):
 	"""Return targeting parameters for the nearest MCAT source to a position."""
 	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose))
+	if not len(out) and band=='FUV':
+		if verbose:
+			print "No nearby MCAT source found in FUV. Trying NUV..."
+		band = 'NUV'
+		out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose))
+	if not len(out) and band=='NUV':
+		if verbose:
+			print "No nearby MCAT source found. Using input sky position."
+		return skypos[0],skypos[1],0.01
+	
 	dist=np.sqrt( (out[:,0]-skypos[0])**2 + (out[:,1]-skypos[1])**2)
 	if verbose > 1:
 			print "Finding nearest among "+str(len(dist))+" nearby sources."
