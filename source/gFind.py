@@ -48,15 +48,16 @@ elif (options.ra and options.dec):
 else:
 	skypos = list(ast.literal_eval(options.skypos))
 
+if options.suggest:
+	out = suggest_parameters(band,skypos,verbose=1)
+	print ""
+
+
 if options.trange:
 	trange = list(ast.literal_eval(options.trange))
 else:
 	trange = [options.tmin,options.tmax]
 ranges = fGetTimeRanges(band,skypos,maxgap=options.gap,minexp=options.minexp,trange=trange,verbose=options.verbose,detsize=options.detsize)
-
-if options.suggest:
-	out = suggest_parameters(band,skypos,verbose=1)
-	print ""
 
 if not len(ranges):
 	print 'No exposure time in database.'
