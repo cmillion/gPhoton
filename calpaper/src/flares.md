@@ -23,6 +23,13 @@ Reported in [1].
 
 `./gAperture.py -b 'FUV' --skypos '[131.108178,51.642040]' -s 10 -f 'SDSSJ084425_FUV' -a 0.002 -i 0.004 -o 0.006 -v 2 --maxgap 1000`
 
+####CDFS\_MOS00\_41
+Reported in [2] as an M dwarf with "stochastic variability." The classification was based upon variability per _epoch_. This light curve is a new result.
+
+`./gAperture.py -b 'NUV' --skypos '[53.3453,-27.3361]' --suggest --addhdr -v 2 -f CDFS_MOS00-41.csv --maxgap 1500 --trange '[975218628,975219882]' --hrbg -s 10`
+
 ####Works Cited
 [1] Welsh, Barry Y., et al. "GALEX high time-resolution ultraviolet observations of dMe flare events." arXiv preprint astro-ph/0608254 (2006).
+
+[2] Gezari, S., et al. "The GALEX Time Domain Survey. I. Selection and Classification of Over a Thousand Ultraviolet Variable Sources." The Astrophysical Journal 766.1 (2013): 60.
 
