@@ -186,16 +186,15 @@ def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,verbose
 # TODO: Consolidate duplicate "reference array" code from aperture_response
 def backgroundmap(band,skypos,trange,skyrange,width=False,height=False,tscale=1000,memlight=False,verbose=0,hdu=False,NoData=-999,detsize=1.25,pixsz=0.000416666666666667,maglimit=28.):
 	"""Generate a background (bg) map by masking out MCAT sources."""
-        imsz = gxt.deg2pix(skypos,skyrange)
+	imsz = gxt.deg2pix(skypos,skyrange)
 
 	if verbose:
 		print 'Integrating count map.'
 	img = countmap(band,skypos,[trange],skyrange,width=width,height=height,verbose=verbose,memlight=10.)
 
 	# Build a reference array
-	xind =          np.array([range(int(imsz[0]))]*int(imsz[0]))-(imsz[0]/2.)+0.5
-	yind = np.rot90(np.array([range(int(imsz[1]))]*int(imsz[1]))-(imsz[1]/2.))+0.5
-
+	xind =          np.array([range(int(imsz[1]))]*int(imsz[0]))-(imsz[0]/2.)+0.5
+	yind = np.rot90(np.array([range(int(imsz[0]))]*int(imsz[1]))-(imsz[1]/2.))+0.5
 	# This returns too many sources so
 	# TODO: add some kind of crossmatch to filter duplicate sources
 	#	or just use GCAT
@@ -221,7 +220,7 @@ def backgroundmap(band,skypos,trange,skyrange,width=False,height=False,tscale=10
 		ix = np.where(distarray<=(source_fwhm[i,0] if source_fwhm[i,0]>source_fwhm[i,1] else source_fwhm[i,1])/pixsz)
 		img[ix] = NoData
 
-        return img
+	return img
 
 def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,verbose=0,tscale=1000.,memlight=False,coadd=False,response=False,calpath='../cal/',hdu=False):
 	"""Generate a movie (mov)."""

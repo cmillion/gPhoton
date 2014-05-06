@@ -110,7 +110,6 @@ def deg2pix(skypos,skyrange,pixsz=0.000416666666666667):
 	#		 values of the edge pixels are suspect. Whereas floor() might
 	#		 not catch the whole range, but all the values are meaningful.
 	return np.abs(np.floor(wcs.sip_pix2foc(wcs.wcs_world2pix([coo],1),1)[0]))[::-1]
-#	return [np.floor(skyrange[0]/pixsz),np.floor(skyrange[1]/pixsz)]
 
 def compute_flat_scale(t,band,verbose=1):
 	"""Return the flat scale factor for a given time.
