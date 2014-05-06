@@ -22,7 +22,6 @@ parser.add_option("--tranges", action="store", type="string", dest="tranges", he
 parser.add_option("--frame", "--step", action="store", type="float", dest="framesz", help="Depth of movie frames in seconds.", default=0.)
 parser.add_option("--calpath", action="store", type="string", dest="calpath", help="Path to the directory that contains the calibration files.", default='../cal/')
 parser.add_option("-v", "--verbose", action="store", type="float", dest="verbose", help="Display more output. Set to 0-2.", default=0)
-parser.add_option("--clobber", action="store_true", dest="clobber", default="False")
 parser.add_option("--memlight", action="store", type="float", dest="memlight", help="Reduce server-side memory usage by requesting data in chunks of no more than this depth in seconds.", default=10)
 parser.add_option("--coadd", action="store_true", dest="coadd", help="Return an image coadded over all requested time ranges.")
 parser.add_option("-g", "--gap", "--maxgap", action="store", type="float", dest="gap", help="Maximum gap size in seconds for data to be considered contiguous.", default=1)
@@ -84,7 +83,7 @@ if not options.overwrite:
 	if options.cntfile and os.path.exists(options.cntfile):
 		print 'File '+str(options.cntfile)+' exists. Use --overwrite.'
 		exit(0)
-    if options.cntfile and os.path.exists(options.cntfile):
+	if options.cntfile and os.path.exists(options.cntfile):
 		print 'File '+str(options.cntfile)+' exists. Use --overwrite.'
 		exit(0)
 
@@ -107,5 +106,5 @@ if len(np.array(tranges).shape)==1:
 
 response = True if (options.intfile or options.rrfile) else False
 
-write_images(options.band,skypos,tranges,skyrange,width=False,height=False,write_cnt=options.cntfile,write_int=options.intfile,write_rr=options.rrfile,framesz=options.framesz,clobber=options.clobber,verbose=options.verbose,memlight=options.memlight,coadd=options.coadd,response=response,calpath=options.calpath)
+write_images(options.band,skypos,tranges,skyrange,width=False,height=False,write_cnt=options.cntfile,write_int=options.intfile,write_rr=options.rrfile,framesz=options.framesz,clobber=options.overwrite,verbose=options.verbose,memlight=options.memlight,coadd=options.coadd,response=response,calpath=options.calpath)
 

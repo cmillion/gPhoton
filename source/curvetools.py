@@ -20,7 +20,7 @@ def mask_background_image(band,skypos,trange,radius,annulus,verbose=0,
 			  maglimit=28.,pixsz=0.000416666666666667,NoData=-999):
 	"""Creates an image of the sky within an annulus."""
 	skyrange = [2*annulus[1],2*annulus[1]]
-	imsz = [gxt.deg2pix(skyrange[0]),gxt.deg2pix(skyrange[1])]
+	imsz = gxt.deg2pix(skypos,skyrange)
 	# Create a background map with stars blacked out
 	bg=backgroundmap(band,skypos,trange,skyrange,verbose=verbose,
 			 maglimit=maglimit)
@@ -29,9 +29,10 @@ def mask_background_image(band,skypos,trange,radius,annulus,verbose=0,
 	yind = np.rot90(np.array([range(int(imsz[1]))]*int(imsz[1]))-(imsz[1]/2.))+0.5
 	distarray = np.sqrt(((xind)**2.)+((yind)**2.))
 	# Cut out the annulus
-	ix = np.where(distarray<=gxt.deg2pix(annulus[0]))
+	# FIXME: (?) Distortion in the annulus caused by projection.
+	ix = np.where(distarray<=annulus[0]/pixsz)
 	bg[ix] = NoData
-	ix = np.where(distarray>=gxt.deg2pix(annulus[1]))
+	ix = np.where(distarray>=annulus[1]/pixsz)
 	bg[ix] = NoData
 
 	return bg
@@ -95,7 +96,7 @@ def aperture_response(band,skypos,tranges,radius,verbose=0,tscale=1000.,
 		vectors = rotvec(np.array([col,row]),-asptwist) 
 		scales  = gxt.compute_flat_scale(asptime,band,verbose=0)
 
-		pixrad = gxt.deg2pix(radius,CDELT2=pixsz)
+		pixrad = radius/pixsz#gxt.deg2pix(radius,CDELT2=pixsz)
 		# FIXME: How to avoid this loop??!?
 		for i in xrange(n):
 			if verbose>1:

@@ -3,6 +3,7 @@
 #  database or generate end products of any kind.
 import numpy as np
 import math
+from astropy import wcs as pywcs
 
 gpssecs = 315532800+432000
 
@@ -90,11 +91,26 @@ def counts2flux(cps,band):
 # END
 #
 
-def deg2pix(degrees,CDELT2=0.000416666666666667):
+def deg2pix(skypos,skyrange,pixsz=0.000416666666666667):
 	"""Converts degrees to GALEX pixels rounded up to the nearest pixel
 	so that the number of degrees specified will fully fit into the frame.
 	"""
-        return math.ceil(degrees/CDELT2)
+	wcs = pywcs.WCS(naxis=2) # NAXIS = 2
+	wcs.wcs.cdelt = [pixsz,pixsz]
+	wcs.wcs.ctype = ['RA---TAN','DEC--TAN']
+	# Set the reference pixel to [0,0] (which is actually the default)
+	wcs.wcs.crpix = [0.,0.]
+	# Fix the lower bound [RA, Dec] to the reference pixel
+	wcs.wcs.crval = [skypos[0]-skyrange[0]/2.,skypos[1]-skyrange[1]/2.]
+	# Find the pixel position of the upper bound [RA,Dec]
+	coo = [skypos[0]+skyrange[0]/2.,skypos[1]+skyrange[1]/2.]
+	# This is the image dimensions (at this location)
+	# FIXME: Is it better to ceil() or to floor() here?
+	#		 Because ceil() completely captures the range but the actual
+	#		 values of the edge pixels are suspect. Whereas floor() might
+	#		 not catch the whole range, but all the values are meaningful.
+	return np.abs(np.floor(wcs.sip_pix2foc(wcs.wcs_world2pix([coo],1),1)[0]))[::-1]
+#	return [np.floor(skyrange[0]/pixsz),np.floor(skyrange[1]/pixsz)]
 
 def compute_flat_scale(t,band,verbose=1):
 	"""Return the flat scale factor for a given time.

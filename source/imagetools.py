@@ -10,26 +10,26 @@ from gnomonic import *
 import dbasetools as dbt
 import galextools as gxt
 
-def imgdims(skyrange,width=False,height=False):
-	"""Compute the required image dimension in pixels based on sky range in degrees."""
-	imsz = [gxt.deg2pix(skyrange[0]),gxt.deg2pix(skyrange[1])]
-	if width:
-		imsz[0] = float(np.ceil(width))
-	if height:
-		imsz[1] = float(np.ceil(height))
-	return imsz
+# FIXME: DEPRECATE
+#def imgdims(skyrange,width=False,height=False):
+#	"""Compute the required image dimension in pixels based on sky range in degrees."""
+#	imsz = [gxt.deg2pix(skypos
+#	if width:
+#		imsz[0] = float(np.ceil(width))
+#	if height:
+#		imsz[1] = float(np.ceil(height))
+#	return imsz
 
-def define_wcs(skypos,skyrange,width=False,height=False,verbose=0):
+def define_wcs(skypos,skyrange,width=False,height=False,verbose=0,pixsz=0.000416666666666667):
 	"""Define the world coordinate system (WCS)."""
 	if verbose:
 		print_inline('Defining World Coordinate System (WCS).')
 	wcs = pywcs.WCS(naxis=2) # NAXIS = 2
-	imsz = imgdims(skyrange,width=width,height=height) # NAXIS1, NAXIS2
-	wcs.wcs.cdelt = [-(skyrange[0])/imsz[0],(skyrange[1])/imsz[1]]
+	imsz = gxt.deg2pix(skypos,skyrange)
+	wcs.wcs.cdelt = np.array([-pixsz,pixsz])
 	wcs.wcs.ctype = ['RA---TAN','DEC--TAN']
-	wcs.wcs.crpix = [(imsz[0]/2.)+0.5,(imsz[1]/2.)+0.5]
-	wcs.wcs.crval = skypos[0],skypos[1]
-
+	wcs.wcs.crpix = [(imsz[1]/2.)+0.5,(imsz[0]/2.)+0.5]
+	wcs.wcs.crval = skypos
 	return wcs
 
 def movie_tbl(band,tranges,verbose=0,framesz=0):
@@ -87,11 +87,8 @@ def fits_header(band,skypos,tranges,skyrange,width=False,height=False,verbose=0,
 
 def countmap(band,skypos,tranges,skyrange,width=False,height=False,verbose=0,tscale=1000.,memlight=False,hdu=False):
 	"""Create a count (cnt) map."""
-	# Use the default plate scale unless width or height is commanded
-	imsz = imgdims(skyrange,width=width,height=height)
-
+	imsz = gxt.deg2pix(skypos,skyrange)
 	count = np.zeros(imsz)
-
 	for trange in tranges:
 		# If memlight is requested, break the integration into
 		#  smaller chunks.
@@ -114,17 +111,17 @@ def countmap(band,skypos,tranges,skyrange,width=False,height=False,verbose=0,tsc
 			# If there's no data, return a blank image.
 			if len(coo)==0:
 				if verbose:
-					print 'No data in this frame: '+str([t0,t1])+' at '+str(skypos)
+					print 'No data in this frame: '+str([t0,t1])
 				continue
 
 			# Define World Coordinate System (WCS)
 			wcs = define_wcs(skypos,skyrange,width=False,height=False)
 
 			# Map the sky coordinates onto the focal plane
-			foc = wcs.sip_pix2foc(wcs.wcs_sky2pix(coo,1),1)
+			foc = wcs.sip_pix2foc(wcs.wcs_world2pix(coo,1),1)
 
 			# Bin the events into actual image pixels
-			H,xedges,yedges=np.histogram2d(foc[:,1]-0.5,foc[:,0]-0.5,bins=imsz,range=([ [0,imsz[1]],[0,imsz[0]] ]))
+			H,xedges,yedges=np.histogram2d(foc[:,1]-0.5,foc[:,0]-0.5,bins=imsz,range=([ [0,imsz[0]],[0,imsz[1]] ]))
 			count += H
 
 	return count
@@ -136,7 +133,7 @@ def write_jpeg(filename,band,skypos,tranges,skyrange,width=False,height=False,st
 
 def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,verbose=0,calpath='../cal/',tscale=1000.,response=True,hdu=False):
 	"""Generate a high resolution relative response (rrhr) map."""
-	imsz = [gxt.deg2pix(skyrange[0]),gxt.deg2pix(skyrange[1])]
+	imsz = gxt.deg2pix(skypos,skyrange)
 	# TODO the if width / height
 
 	flat = get_fits_data(flat_filename(band,calpath),verbose=verbose)
@@ -154,7 +151,7 @@ def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,verbose
 	# 	The interpolation function is "congrid" in the same file.
 	# TODO: Should this be first order interpolation? (i.e. bilinear)
 	hrflat = scipy.ndimage.interpolation.zoom(flat,4.,order=0,prefilter=False)
-	img = np.zeros(hrflat.shape)[hrflat.shape[0]/2.-imsz[0]/2.:hrflat.shape[0]/2.+imsz[0]/2.,hrflat.shape[1]/2.-imsz[0]/2.:hrflat.shape[1]/2+imsz[0]/2.]
+	img = np.zeros(hrflat.shape)[hrflat.shape[0]/2.-imsz[0]/2.:hrflat.shape[0]/2.+imsz[0]/2.,hrflat.shape[1]/2.-imsz[1]/2.:hrflat.shape[1]/2+imsz[1]/2.]
 
 	for trange in tranges:
 		t0,t1=trange
@@ -177,10 +174,11 @@ def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,verbose
 
 		vectors = rotvec(np.array([col,row]),-asptwist)
 
+# FIXME: Not returning image of the correct shape.
 		for i in range(n):
 			if verbose>1:
 				print_inline('Stamping '+str(asptime[i]))
-	        	img += scipy.ndimage.interpolation.shift(scipy.ndimage.interpolation.rotate(hrflat,-asptwist[i],reshape=False,order=0,prefilter=False),[vectors[1,i],vectors[0,i]],order=0,prefilter=False)[hrflat.shape[0]/2.-imsz[0]/2.:hrflat.shape[0]/2.+imsz[0]/2.,hrflat.shape[1]/2.-imsz[0]/2.:hrflat.shape[1]/2+imsz[0]/2.]*dbt.compute_exptime(band,[asptime[i],asptime[i]+1],verbose=verbose)*gxt.compute_flat_scale(asptime[i]+0.5,band,verbose=0)
+	        	img += scipy.ndimage.interpolation.shift(scipy.ndimage.interpolation.rotate(hrflat,-asptwist[i],reshape=False,order=0,prefilter=False),[vectors[1,i],vectors[0,i]],order=0,prefilter=False)[hrflat.shape[0]/2.-imsz[0]/2.:hrflat.shape[0]/2.+imsz[0]/2.,hrflat.shape[1]/2.-imsz[1]/2.:hrflat.shape[1]/2+imsz[1]/2.]*dbt.compute_exptime(band,[asptime[i],asptime[i]+1],verbose=verbose)*gxt.compute_flat_scale(asptime[i]+0.5,band,verbose=0)
 
 	return img
 
@@ -188,7 +186,7 @@ def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,verbose
 # TODO: Consolidate duplicate "reference array" code from aperture_response
 def backgroundmap(band,skypos,trange,skyrange,width=False,height=False,tscale=1000,memlight=False,verbose=0,hdu=False,NoData=-999,detsize=1.25,pixsz=0.000416666666666667,maglimit=28.):
 	"""Generate a background (bg) map by masking out MCAT sources."""
-        imsz = [gxt.deg2pix(skyrange[0]),gxt.deg2pix(skyrange[1])]
+        imsz = gxt.deg2pix(skypos,skyrange)
 
 	if verbose:
 		print 'Integrating count map.'
@@ -220,7 +218,7 @@ def backgroundmap(band,skypos,trange,skyrange,width=False,height=False,tscale=10
 
 	for i in range(len(sources)):
 		distarray = np.sqrt(((-vectors[0,i]-xind)**2.)+((vectors[1,i]-yind)**2.))
-		ix = np.where(distarray<=gxt.deg2pix((source_fwhm[i,0] if source_fwhm[i,0]>source_fwhm[i,1] else source_fwhm[i,1])))
+		ix = np.where(distarray<=(source_fwhm[i,0] if source_fwhm[i,0]>source_fwhm[i,1] else source_fwhm[i,1])/pixsz)
 		img[ix] = NoData
 
         return img

@@ -44,24 +44,24 @@ for key in options.__dict__.keys():
 
 if not options.band:
 	print "Band must be specified."
-	exit(1)
+	exit(0)
 else:
 	options.band = options.band.upper()
 
 if options.band != "NUV" and options.band != "FUV":
 	print "Band must be NUV or FUV."
-	exit(1)
+	exit(0)
 
 if not options.radius and not options.suggest:
 	print "Must specify an aperture radius."
-	exit(1)
+	exit(0)
 
 if not (options.ra and options.dec) and not options.skypos:
 	print "Must specify either RA/Dec or skypos."
-	exit(1)
+	exit(0)
 elif (options.ra and options.dec) and options.skypos:
 	print "Must specify either RA/Dec or skypos. Not both."
-	exit(1)
+	exit(0)
 elif (options.ra and options.dec):
 	skypos = [options.ra,options.dec]
 else:
@@ -76,7 +76,7 @@ if options.suggest:
 
 if options.stepsz and options.coadd:
 	print "Cannot specify both --stepsz and --coadd."
-	exit(1)
+	exit(0)
 
 if options.best:
 	options.userr = True
@@ -86,7 +86,7 @@ if options.best:
 if not (options.annulus1 and options.annulus2) and not options.annulus:
 	if options.usehrbg:
 		print "Must specify background annulus with hrbg."
-		exit(1)
+		exit(0)
 	else:
 		annulus = [False,False]
 elif options.annulus1 and options.annulus2:
