@@ -267,7 +267,7 @@ def create_cnt(csvfile,imsz,cntfile,outfile,matchtimes=0,expstart=0,expend=0):
 		if cnt >= chunksz:
 			chunk += 1
 			if len(t)>0:
-				pix = wcs.wcs_sky2pix(coo,1)
+				pix = wcs.wcs_world2pix(coo,1)
 				foc = wcs.sip_pix2foc(pix,1)
 				xpix = foc[:,0]
 				ypix = foc[:,1]
@@ -287,7 +287,7 @@ def create_cnt(csvfile,imsz,cntfile,outfile,matchtimes=0,expstart=0,expend=0):
 			t,coo=[],[]
 
 	if t:
-		pix = wcs.wcs_sky2pix(coo,1)
+		pix = wcs.wcs_world2pix(coo,1)
 		foc = wcs.sip_pix2foc(pix,1)
 		xpix = foc[:,0]
 		ypix = foc[:,1]
