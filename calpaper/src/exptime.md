@@ -7,8 +7,7 @@ We should test the possibility that the scale factor for the global dead time ma
 *Note: The CSP occurred on May 4, 2010. The post-CSP TAC switch occurred on eclipse 38150 (June 23, 2010), which corresponds to a time of t0=881881215.995.*
 
 ---
-`
-from exptime import netdead
+`from exptime import netdead
 from dbasetools import fGetTimeRanges
 
 band = 'NUV'
@@ -27,5 +26,5 @@ plt.plot(np.array(deadtime)[:,-1]/(np.array(deadtime)[:,1]-np.array(deadtime)[:,
 plt.plot(np.array(deadtime)[:,-1]/(np.array(deadtime)[:,1]-np.array(deadtime)[:,0]),np.array(deadtime)[:,3],'.')
 
 # Two methods vs. each other
-plt.plot(np.array(deadtime)[:,2],np.array(deadtime)[:,3],'.')
-`
+plt.plot(np.array(deadtime)[:,2],np.array(deadtime)[:,3],'.')`
+
