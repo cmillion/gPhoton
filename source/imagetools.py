@@ -179,7 +179,7 @@ def backgroundmap(band,skypos,trange,skyrange,width=False,height=False,tscale=10
 
 	if verbose:
 		print 'Integrating count map.'
-	img = countmap(band,skypos,[trange],skyrange,width=width,height=height,verbose=verbose,memlight=10.)
+	img = countmap(band,skypos,[trange],skyrange,width=width,height=height,verbose=verbose,memlight=memlight)
 
 	# Build a reference array
 	xind =          np.array([range(int(imsz[1]))]*int(imsz[0]))-(imsz[0]/2.)+0.5
