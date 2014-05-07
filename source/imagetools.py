@@ -10,16 +10,6 @@ from gnomonic import *
 import dbasetools as dbt
 import galextools as gxt
 
-# FIXME: DEPRECATE
-#def imgdims(skyrange,width=False,height=False):
-#	"""Compute the required image dimension in pixels based on sky range in degrees."""
-#	imsz = [gxt.deg2pix(skypos
-#	if width:
-#		imsz[0] = float(np.ceil(width))
-#	if height:
-#		imsz[1] = float(np.ceil(height))
-#	return imsz
-
 def define_wcs(skypos,skyrange,width=False,height=False,verbose=0,pixsz=0.000416666666666667):
 	"""Define the world coordinate system (WCS)."""
 	if verbose:
@@ -174,7 +164,6 @@ def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,verbose
 
 		vectors = rotvec(np.array([col,row]),-asptwist)
 
-# FIXME: Not returning image of the correct shape.
 		for i in range(n):
 			if verbose>1:
 				print_inline('Stamping '+str(asptime[i]))
@@ -231,7 +220,7 @@ def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,verbos
 		if verbose>2:
 			print 'Coadding across '+str(tranges)
 		mv.append(countmap(band,skypos,tranges,skyrange,width=width,height=height,verbose=verbose,tscale=tscale,memlight=memlight,hdu=hdu))
-		rr.append(rrhr(band,skypos,tranges,skyrange,response=response,width=width,height=height,stepsz=1.,verbose=verbose,calpath=calpath,tscale=tscale,hdu=hdu))
+		rr.append(rrhr(band,skypos,tranges,skyrange,response=response,width=width,height=height,stepsz=1.,verbose=verbose,calpath=calpath,tscale=tscale,hdu=hdu)) if response else rr.append(np.ones(np.shape(mv)[1:]))
 	else:
 		for trange in tranges:
 			stepsz = framesz if framesz else trange[1]-trange[0]
@@ -241,7 +230,8 @@ def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,verbos
 					print_inline('Movie frame '+str(i+1)+' of '+str(int(steps)))
 				t1 = trange[1] if i==steps else t0+stepsz
 				mv.append(countmap(band,skypos,[[t0,t1]],skyrange,width=width,height=height,verbose=verbose,tscale=tscale,memlight=memlight,hdu=hdu))
-				rr.append(rrhr(band,skypos,[[t0,t1]],skyrange,response=response,width=width,height=height,stepsz=1.,verbose=verbose,calpath=calpath,tscale=tscale))
+	# FIXME: This should not create an rr unless it's requested...
+				rr.append(rrhr(band,skypos,[[t0,t1]],skyrange,response=response,width=width,height=height,stepsz=1.,verbose=verbose,calpath=calpath,tscale=tscale)) if response else rr.append(np.ones(np.shape(mv)[1:]))
 
 	return np.array(mv),np.array(rr)
 
@@ -274,19 +264,19 @@ def write_images(band,skypos,tranges,skyrange,write_cnt=False,write_int=False,wr
 		if verbose:
 			print 'Writing count image to '+str(write_cnt)
 		hdulist.writeto(write_cnt,clobber=clobber)
-        if write_rr:
+	if write_rr:
 		hdu = pyfits.PrimaryHDU(rr)
 		hdu = fits_header(band,skypos,tranges,skyrange,width=width,height=height,verbose=verbose,tscale=tscale,hdu=hdu)
 		hdulist = pyfits.HDUList([hdu,tbl])
 		if verbose:
 			print 'Writing response image to '+str(write_rr)
                 hdulist.writeto(write_rr,clobber=clobber)
-        if write_int:
+	if write_int:
 		hdu = pyfits.PrimaryHDU(intensity)
 		hdu = fits_header(band,skypos,tranges,skyrange,width=width,height=height,verbose=verbose,tscale=tscale,hdu=hdu)
 		hdulist = pyfits.HDUList([hdu,tbl])
 		if verbose:
 			print 'Writing intensity image to '+str(write_int)
-                hdulist.writeto(write_int,clobber=clobber)
+		hdulist.writeto(write_int,clobber=clobber)
 
 	return
