@@ -38,7 +38,7 @@ def mcat_sources(band,ra0,dec0,radius,maglimit=20):
 	return str(baseURL)+'select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world from Gr6plus7.Dbo.photoobjall as p inner join Gr6plus7.Dbo.photoextract as pe on p.photoextractid=pe.photoextractid inner join gr6plus7.dbo.fgetnearbyobjeq('+str(ra0)+', '+str(dec0)+', '+str(radius*60.+0.02*60.)+') as nb on p.objid=nb.objid and (band=3 or band='+str(bandflag)+') and '+str(band)+'_mag<'+str(maglimit)+str(formatURL)
 
 def exposure_ranges(band,ra0,dec0,t0=1,t1=10000000000000,tscale=1000.,detsize=1.25):
-	return str(baseURL)+'SELECT DISTINCT a.time FROM aspect AS a INNER JOIN fGetNearbyAspectNTimeEq('+str(ra0)+','+str(dec0)+',(('+str(detsize)+'/2.0)*60.0),'+str(long(t0*tscale))+','+str(long(t1*tscale))+') AS nb ON a.htmID=nb.htmID AND a.eclipse IN (SELECT eclipse FROM PLCoverageV) WHERE time BETWEEN '+str(long(t0*tscale))+' AND '+str(long(t1*tscale))+' AND flag%2=0 ORDER by time'+str(formatURL)
+	return str(baseURL)+'select distinct time from fGetNearbyAspectEq('+str(ra0)+','+str(dec0)+',(('+str(detsize)+'/2.0)*60.0),'+str(long(t0*tscale))+','+str(long(t1*tscale))+') order by time'+str(formatURL)
 
 # Find time ranges for which data exists at a position
 def exposure_range(band,ra0,dec0,t0=1,t1=10000000000000):
@@ -111,7 +111,5 @@ def box(band,ra0,dec0,t0,t1,radius,tscale=1000.):
 
 # Return data within a rectangle centered on ra0, dec0
 def rect(band,ra0,dec0,t0,t1,ra,dec,tscale=1000.):
-	return str(baseURL)+'select time,ra,dec from '+str(band)+'PhotonsV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and ra between '+repr(ra0-ra/2.)+' and '+repr(ra0+ra/2.)+' and dec between '+repr(dec0-dec/2.)+' and '+repr(dec0+dec/2.)+' and flag=0'+str(formatURL)
-
-
+	return str(baseURL)+'select time,ra,dec from fGetObjFromRect'+str(band)+'('+repr(ra0-ra/2.)+','+repr(ra0+ra/2.)+','+repr(dec0-dec/2.)+','+repr(dec0+dec/2.)+','+str(long(t0*tscale))+','+str(long(t1*tscale))+',0)'+str(formatURL)
 
