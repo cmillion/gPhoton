@@ -22,7 +22,7 @@ parser.add_option("--tranges", action="store", type="string", dest="tranges", he
 parser.add_option("--frame", "--step", action="store", type="float", dest="framesz", help="Depth of movie frames in seconds.", default=0.)
 parser.add_option("--calpath", action="store", type="string", dest="calpath", help="Path to the directory that contains the calibration files.", default='../cal/')
 parser.add_option("-v", "--verbose", action="store", type="float", dest="verbose", help="Display more output. Set to 0-2.", default=0)
-parser.add_option("--memlight", action="store", type="float", dest="memlight", help="Reduce server-side memory usage by requesting data in chunks of no more than this depth in seconds.", default=10)
+parser.add_option("--memlight", action="store", type="float", dest="memlight", help="Reduce server-side memory usage by requesting data in chunks of no more than this depth in seconds.", default=100)
 parser.add_option("--coadd", action="store_true", dest="coadd", help="Return an image coadded over all requested time ranges.")
 parser.add_option("-g", "--gap", "--maxgap", action="store", type="float", dest="gap", help="Maximum gap size in seconds for data to be considered contiguous.", default=1)
 parser.add_option("--minexp", action="store", type="float", dest="minexp", help="Minimum contiguous exposure in seconds for data to be reported.", default=1)
