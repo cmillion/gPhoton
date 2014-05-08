@@ -90,8 +90,10 @@ if not options.overwrite:
 if options.tranges:
 	tranges = list(ast.literal_eval(options.tranges))
 else:
-	if options.verbose:
+	if options.verbose and not (options.tmin or options.tmax):
 		print 'No time range given. Using all available exposure time.'
+	else:
+		print 'Using all exposure in ['+str(options.tmin)+','+str(options.tmax)+']'
 	tranges = fGetTimeRanges(options.band,skypos,maxgap=options.gap,verbose=options.verbose,minexp=options.minexp,trange=[options.tmin,options.tmax])
 	if not len(tranges):
 		print 'No exposure time in database.'
