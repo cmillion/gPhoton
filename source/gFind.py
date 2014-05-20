@@ -6,26 +6,26 @@ from dbasetools import fGetTimeRanges, suggest_parameters
 #################################################################
 ## This is the main program in this module.  It prints time ranges to the screen and returns the total exposure time as a float.
 #################################################################
-def gFind(band, skypos, trange, maxgap=1.0, minexp=1.0, verbose=0., detsize=1.25, depth=False, gaper=False):
+def gFind(band, skypos, trange, maxgap=1.0, minexp=1.0, verbose=0., detsize=1.25, depth=False, gaper=False, quiet=False):
 	## Get valid time ranges.
        	ranges = fGetTimeRanges(band,skypos,maxgap=maxgap,minexp=minexp,trange=trange,verbose=verbose,detsize=detsize)
 
 	if not len(ranges):
-		print 'No exposure time in database.'
+		if not quiet: print 'No exposure time in database.'
 		return 0.
 	else:
 		expt = (ranges[:,1]-ranges[:,0]).sum()
-		print 'Available: '+str(expt)+' seconds (raw) in '+str(len(ranges))+' distinct exposures.'
+		if not quiet: print 'Available: '+str(expt)+' seconds (raw) in '+str(len(ranges))+' distinct exposures.'
 		if not depth:
-			print ''
+			if not quiet: print ''
 			if gaper:
 				f = '['
 				for r in ranges:
 					f+='[%.3f' % r[0] + ', %.3f' % r[1] + '],'
-				print f[:-1]+']'
+				if not quiet: print f[:-1]+']'
 			else:
 				for r in ranges:
-					print '    [ %.3f' % r[0] + ', %.3f' % r[1] + ' ], %.3f' % (r[1]-r[0]) + ' seconds'
+					if not quiet: print '    [ %.3f' % r[0] + ', %.3f' % r[1] + ' ], %.3f' % (r[1]-r[0]) + ' seconds'
 		return expt
 #################################################################
 
@@ -116,6 +116,7 @@ def setup_parser():
 	parser.add_argument("--depth", "--exponly", action="store_true", dest="depth", help="Report only the total raw exposure time available in the database, not the individual time ranges.", default=False)
 	parser.add_argument("--minexp", action="store", type=float, dest="minexp", help="Minimum contiguous exposure in seconds for data to be reported.", default=1.)
 	parser.add_argument("--suggest", action="store_true", dest="suggest", help="Suggest optimum parameters for aperture photometry.", default=False)
+	parser.add_argument("--quiet", action="store_true", dest="quiet", help="Suppress all information to STDOUT.", default=False)
 	return parser
 #################################################################
 
@@ -128,5 +129,5 @@ if __name__ == '__main__':
 	import argparse
 	args = setup_parser().parse_args()
 	band, skypos, trange, maxgap, minexp, detsize = check_args(args)
-	gFind(band, skypos, trange, maxgap, minexp, args.verbose, detsize, args.depth, args.gaper)
+	gFind(band, skypos, trange, maxgap, minexp, args.verbose, detsize, args.depth, args.gaper,args.quiet)
 #################################################################
