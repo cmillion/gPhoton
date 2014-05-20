@@ -3,10 +3,10 @@
 import ast
 from dbasetools import fGetTimeRanges, suggest_parameters
 
-#################################################################
-## This is the main program in this module.  It prints time ranges to the screen and returns the total exposure time as a float.
-#################################################################
 def gFind(band, skypos, trange, maxgap=1.0, minexp=1.0, verbose=0., detsize=1.25, depth=False, gaper=False, quiet=False):
+	"""Primary program module. Prints time ranges to the screen and returns
+	the total exposure time as a float.
+	"""
 	## Get valid time ranges.
        	ranges = fGetTimeRanges(band,skypos,maxgap=maxgap,minexp=minexp,trange=trange,verbose=verbose,detsize=detsize)
 
@@ -27,14 +27,10 @@ def gFind(band, skypos, trange, maxgap=1.0, minexp=1.0, verbose=0., detsize=1.25
 				for r in ranges:
 					if not quiet: print '    [ %.3f' % r[0] + ', %.3f' % r[1] + ' ], %.3f' % (r[1]-r[0]) + ' seconds'
 		return expt
-#################################################################
 
-
-#################################################################
-## This function checks some of the command-line arguments.
-#################################################################
 def check_args(args):
-	## Make sure "band" is defined and is a valid choice.
+	"""Checks validity of some command line arguments."""
+	# Make sure "band" is defined and is a valid choice.
 	mandatory = ['band']
 	for m in mandatory:
 		if not args.__dict__[m]:
@@ -47,7 +43,8 @@ def check_args(args):
 		print "Band must be NUV or FUV. "
 		exit(1)
 
-	## Create the "skypos" list whether or not skypos was directly submitted or the RA and DEC were given separately.
+	# Create the "skypos" list whether or not skypos was directly submitted
+	# or the RA and DEC were given separately.
 	if not (args.ra and args.dec) and not args.skypos:
 		print "Must specify either RA/Dec or skypos."
 		parser.print_help()
@@ -61,32 +58,33 @@ def check_args(args):
 	else:
 		skypos = list(ast.literal_eval(args.skypos))
 
-	## Print suggested parameters to screen if requested.
+	# Print suggested parameters to screen if requested.
 	if args.suggest:
 		out = suggest_parameters(band,skypos,verbose=1)
 		print ""
 
-	## Create the "trange" list whether it's given directly or if tmin and tmax are specified separately.
+	# Create the "trange" list whether it's given directly or
+	# if tmin and tmax are specified separately.
        	if args.trange:
 		trange = list(ast.literal_eval(args.trange))
 	else:
 		trange = [args.tmin,args.tmax]
 
-	## Make sure the "gap" parameter is greater or equal to 1.
+	# Make sure the "gap" parameter is greater or equal to 1.
 	if args.gap >= 1.0:
 		maxgap = args.gap
 	else:
 		print "Maximum gap size must be >= 1.0."
 		exit(1)
 
-	## Make sure the "minexp" parameter is greater or equal to 1.
+	# Make sure the "minexp" parameter is greater or equal to 1.
 	if args.minexp >= 1.0:
 		minexp = args.minexp
 	else:
 		print "Minimum contiguous exposure length must be >= 1.0."
 		exit(1)
 
-	## Make sure the "detsize" parameter is greater than 0.
+	# Make sure the "detsize" parameter is greater than 0.
 	if args.detsize > 0.0:
 		detsize = args.detsize
 	else:
@@ -94,13 +92,11 @@ def check_args(args):
 		exit(1)
 
 	return (band, skypos, trange, maxgap, minexp, detsize)
-#################################################################
 
-
-#################################################################
-## Defines the arguments and options for the parser object when called from the command line.
-#################################################################
 def setup_parser():
+	"""Defines the arguments and options for the parser object when
+	called from the command line.
+	"""
 	parser = argparse.ArgumentParser(description="Locate available data at specified coordinates and time intervals.")
 	parser.add_argument("-b", "--band", action="store", dest="band", help="[NF]UV band designation", metavar="BAND")
 	parser.add_argument("-r", "--ra", action="store", type=float, dest="ra", help="Center Right Ascension position in decimal degrees", metavar="RA")
@@ -118,16 +114,11 @@ def setup_parser():
 	parser.add_argument("--suggest", action="store_true", dest="suggest", help="Suggest optimum parameters for aperture photometry.", default=False)
 	parser.add_argument("--quiet", action="store_true", dest="quiet", help="Suppress all information to STDOUT.", default=False)
 	return parser
-#################################################################
 
-
-
-#################################################################
-## This block is called when gFind is executed through the command line directly.
-#################################################################
 if __name__ == '__main__':
+	"""Called when gFind is executed directly through command line."""
 	import argparse
 	args = setup_parser().parse_args()
 	band, skypos, trange, maxgap, minexp, detsize = check_args(args)
 	gFind(band, skypos, trange, maxgap, minexp, args.verbose, detsize, args.depth, args.gaper,args.quiet)
-#################################################################
+
