@@ -122,6 +122,7 @@ def suggest_bg_radius(band,skypos,radius=0.1,maglimit=22,verbose=0,catalog='MCAT
 	return round(dist-3*nearest[-2 if band=='NUV' else -1],4)
 
 def optimize_annulus(optrad,outann,verbose=0):
+	"""Suggest optiumum annulus dimensions."""
 	if outann<=round(2*optrad,4):
 		print "Warning: There are known sources within the background annulus."
 		print "Use --hrbg to mask these out. (Will increase run times.)"
