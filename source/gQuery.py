@@ -38,7 +38,10 @@ def mcat_sources(band,ra0,dec0,radius,maglimit=20):
 	return str(baseURL)+'select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world from Gr6plus7.Dbo.photoobjall as p inner join Gr6plus7.Dbo.photoextract as pe on p.photoextractid=pe.photoextractid inner join gr6plus7.dbo.fgetnearbyobjeq('+str(ra0)+', '+str(dec0)+', '+str(radius*60.+0.02*60.)+') as nb on p.objid=nb.objid and (band=3 or band='+str(bandflag)+') and '+str(band)+'_mag<'+str(maglimit)+str(formatURL)
 
 def exposure_ranges(band,ra0,dec0,t0=1,t1=10000000000000,tscale=1000.,detsize=1.25):
-	return str(baseURL)+'select distinct time from fGetNearbyAspectEq('+str(ra0)+','+str(dec0)+',(('+str(detsize)+'/2.0)*60.0),'+str(long(t0*tscale))+','+str(long(t1*tscale))+') order by time'+str(formatURL)
+	# If band is set to False (or equivalent), search on both bands
+	if not band:
+		band = 'FUV/NUV'
+	return str(baseURL)+'select distinct time from fGetNearbyAspectEqNew('+str(ra0)+','+str(dec0)+',(('+str(detsize)+'/2.0)*60.0),'+str(long(t0*tscale))+','+str(long(t1*tscale))+') where band=\''+str(band)+'\' or band=\'FUV/NUV\' order by time'+str(formatURL)
 
 # Find time ranges for which data exists at a position
 def exposure_range(band,ra0,dec0,t0=1,t1=10000000000000):
