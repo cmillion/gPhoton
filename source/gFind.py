@@ -35,7 +35,6 @@ def check_args(args):
 	for m in mandatory:
 		if not args.__dict__[m]:
 			print "A mandatory option is missing:",m
-			parser.print_help()
 			exit(1)
 	band = args.band
 	band = band.upper()
@@ -47,11 +46,9 @@ def check_args(args):
 	# or the RA and DEC were given separately.
 	if not (args.ra and args.dec) and not args.skypos:
 		print "Must specify either RA/Dec or skypos."
-		parser.print_help()
 		exit(1)
 	elif (args.ra and args.dec) and args.skypos:
 		print "Must specify either RA/Dec or skypos. Not both."
-		parser.print_help()
 		exit(1)
 	elif (args.ra and args.dec):
 		skypos = [args.ra,args.dec]
