@@ -41,7 +41,7 @@ def exposure_ranges(band,ra0,dec0,t0=1,t1=10000000000000,tscale=1000.,detsize=1.
 	# If band is set to False (or equivalent), search on both bands
 	if not band:
 		band = 'FUV/NUV'
-	return str(baseURL)+'select distinct time from fGetNearbyAspectEqNew('+str(ra0)+','+str(dec0)+',(('+str(detsize)+'/2.0)*60.0),'+str(long(t0*tscale))+','+str(long(t1*tscale))+') where band=\''+str(band)+'\' or band=\'FUV/NUV\' order by time'+str(formatURL)
+	return str(baseURL)+'select distinct time from fGetNearbyAspectEq('+str(ra0)+','+str(dec0)+',(('+str(detsize)+'/2.0)*60.0),'+str(long(t0*tscale))+','+str(long(t1*tscale))+') where band=\''+str(band)+'\' or band=\'FUV/NUV\' order by time'+str(formatURL)
 
 # Find time ranges for which data exists at a position
 def exposure_range(band,ra0,dec0,t0=1,t1=10000000000000):
@@ -73,7 +73,6 @@ def stimcount(band,t0,t1,margin=90.01,aspum=68.754932/1000.,tscale=1000,eclipse=
 	avgstim = CalUtils.avg_stimpos(band,eclipse)
 	return str(baseURL)+'select count(*) from '+str(band)+'PhotonsNULLV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and ((x between '+str((avgstim['x1']-margin)/aspum)+' and '+str((avgstim['x1']+margin)/aspum)+' and y between '+str((avgstim['y1']-margin)/aspum)+' and '+str((avgstim['y1']+margin)/aspum)+') or (x between '+str((avgstim['x2']-margin)/aspum)+' and '+str((avgstim['x2']+margin)/aspum)+' and y between '+str((avgstim['y2']-margin)/aspum)+' and '+str((avgstim['y2']+margin)/aspum)+') or (x between '+str((avgstim['x3']-margin)/aspum)+' and '+str((avgstim['x3']+margin)/aspum)+' and y between '+str((avgstim['y3']-margin)/aspum)+' and '+str((avgstim['y3']+margin)/aspum)+') or (x between '+str((avgstim['x4']-margin)/aspum)+' and '+str((avgstim['x4']+margin)/aspum)+' and y between '+str((avgstim['y4']-margin)/aspum)+' and '+str((avgstim['y4']+margin)/aspum)+'))'+str(formatURL)
 
-
 # Find the mean position of events inside of a box in detector space
 def boxcentroid(band,t0,t1,xr,yr,tscale=1000.):
 	return str(baseURL)+'select avg(x), avg(y) from NUVPhotonsNULLV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and x between '+str(xr[0])+' and '+str(xr[1])+' and y between '+str(yr[0])+' and '+str(yr[1])+str(formatURL)
@@ -85,7 +84,8 @@ def boxtimes(band,t0,t1,xr,yr,tscale=1000.):
 def centroid(band,ra0,dec0,t0,t1,radius,tscale=1000.):
 	return str(baseURL)+'select avg(ra), avg(dec) from NUVPhotonsV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and ra between '+repr(ra0-radius)+' and '+repr(ra0+radius)+' and dec between '+repr(dec0-radius)+' and '+repr(dec0+radius)+str(formatURL)
 
-# Return time and RA/Dec position for every event in the aperture
+# Return information on events within in the aperture
+# FIXME: This isn't actually doing a cone search. It's doing a box.
 def allphotons(band,ra0,dec0,t0,t1,radius,tscale=1000.):
 	return str(baseURL)+'select time, ra, dec from NUVPhotonsV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and ra between '+repr(ra0-radius)+' and '+repr(ra0+radius)+' and dec between '+repr(dec0-radius)+' and '+repr(dec0+radius)+str(formatURL)
 
