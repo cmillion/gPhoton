@@ -12,7 +12,7 @@ def read_lc(ifile,header=False):
     try:
         data_frame = pd.io.parsers.read_csv(ifile, skipinitialspace=True, names=["t0", "t1", "ap_radius", "exptime", "cps", "cpserr", "flux", "flux_err", "mag", "mag_err", "r_inner", "r_outer", "bkg", "response", "counts", "apcorr1", "apcorr2"],skiprows=(2 if header else False))
         ## Calculate the timestamp in JD.
-        data_frame["JD"] = ((data_frame["t1"] - data_frame["t0"]) / 2. + data_frame["t0"]) / 86400. + 2440587.5
+        data_frame["JD"] = ((data_frame["t1"] - data_frame["t0"]) / 2. + data_frame["t0"] + 315964800.0) / 86400. + 2440587.5
         
         ## Replace the default index with the timestamp in JD.
         data_frame.set_index("JD", drop=True, inplace=True, verify_integrity=True)
