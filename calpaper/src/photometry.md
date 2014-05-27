@@ -16,4 +16,7 @@ In [222]: counts2mag(mag2counts(data['mag']-data['apcorr2'],'NUV').mean(),'NUV')
 
 `./gAperture.py --skypos [323.06766667,0.25400000] -a 0.005 --annulus [0.01,0.02] -b 'FUV' -v 2 -f 'LDS749B_rr.csv' --maxgap 1600 --minexp 1000 --hrbg --response --overwrite`
 
+In [240]: counts2mag(mag2counts(data['mag']-data['apcorr2'],'FUV').mean(),'FUV')
+Out[240]: 15.414742366262452
+
 
