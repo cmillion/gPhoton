@@ -28,6 +28,7 @@ parser.add_option("-g", "--gap", "--maxgap", action="store", type="float", dest=
 parser.add_option("--minexp", action="store", type="float", dest="minexp", help="Minimum contiguous exposure in seconds for data to be reported.", default=1)
 parser.add_option("--maskrad", action="store", type="float", dest="maskrad", help="The radius at which detector events will be masked out.", default=1.)
 parser.add_option("--overwrite", "--ow", "--clobber", action="store_true", dest="overwrite", default=False)
+parser.add_option("--retries", action="store", type="int", dest="retries", default=20, help="Set the number of times to ping the server for a response before defining a query failure.  Default is 20, set to a large number if you expect, or want to allow, the query to take a long time.")
 
 (options, args) = parser.parse_args()
 
@@ -94,7 +95,7 @@ else:
 		print 'No time range given. Using all available exposure time.'
 	else:
 		print 'Using all exposure in ['+str(options.tmin)+','+str(options.tmax)+']'
-	tranges = fGetTimeRanges(options.band,skypos,maxgap=options.gap,verbose=options.verbose,minexp=options.minexp,trange=[options.tmin,options.tmax])
+	tranges = fGetTimeRanges(options.band,skypos,maxgap=options.gap,verbose=options.verbose,minexp=options.minexp,trange=[options.tmin,options.tmax],retries=options.retries)
 	if not len(tranges):
 		print 'No exposure time in database.'
 		exit(0)
@@ -108,5 +109,5 @@ if len(np.array(tranges).shape)==1:
 
 response = True if (options.intfile or options.rrfile) else False
 
-write_images(options.band,skypos,tranges,skyrange,width=False,height=False,write_cnt=options.cntfile,write_int=options.intfile,write_rr=options.rrfile,framesz=options.framesz,clobber=options.overwrite,verbose=options.verbose,memlight=options.memlight,coadd=options.coadd,response=response,calpath=options.calpath)
+write_images(options.band,skypos,tranges,skyrange,width=False,height=False,write_cnt=options.cntfile,write_int=options.intfile,write_rr=options.rrfile,framesz=options.framesz,clobber=options.overwrite,verbose=options.verbose,memlight=options.memlight,coadd=options.coadd,response=response,calpath=options.calpath,retries=options.retries)
 

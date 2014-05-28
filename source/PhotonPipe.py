@@ -8,7 +8,7 @@ from FileUtils import *
 from gnomonic import *
 from MCUtils import *
 
-def PhotonPipe(raw6file,scstfile,calpath,band,outbase,aspfile=0,ssdfile=0,nullfile=0,verbose=0):
+def PhotonPipe(raw6file,scstfile,calpath,band,outbase,aspfile=0,ssdfile=0,nullfile=0,verbose=0,retries=20):
 
 	startt = time.time()
 
@@ -97,7 +97,7 @@ def PhotonPipe(raw6file,scstfile,calpath,band,outbase,aspfile=0,ssdfile=0,nullfi
 	if aspfile:
 		aspra, aspdec, asptwist, asptime, aspheader, aspflags = load_aspect(aspfile)
 	else:
-		aspra, aspdec, asptwist, asptime, aspheader, aspflags = web_query_aspect(eclipse)
+		aspra, aspdec, asptwist, asptime, aspheader, aspflags = web_query_aspect(eclipse,retries=retries)
 
 	minasp, maxasp = min(asptime), max(asptime)
 	trange = [minasp,maxasp]

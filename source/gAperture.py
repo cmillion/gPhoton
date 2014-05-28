@@ -33,6 +33,7 @@ parser.add_option("--detsize", action="store", type="float", dest="detsize", hel
 parser.add_option("--bestparams", "--best", action="store_true", dest="best", help="Set parameters to produce the highest quality lightcurve. Potentially slow.", default=False)
 parser.add_option("--suggest", "--optimize", action="store_true", dest="suggest", help="Suggest optimum parameters for aperture photometry.", default=False)
 parser.add_option("--overwrite", "--ow", "--clobber", action="store_true", dest="overwrite", default=False)
+parser.add_option("--retries", action="store", type="int", dest="retries", default=20, help="Set the number of times to ping the server for a response before defining a query failure.  Default is 20, set to a large number if you expect, or want to allow, the query to take a long time.")
 
 (options, args) = parser.parse_args()
 
@@ -68,7 +69,7 @@ else:
 	skypos = list(ast.literal_eval(options.skypos))
 
 if options.suggest:
-	options.ra,options.dec,options.radius,options.annulus1,options.annulus2 = suggest_parameters(options.band,skypos)
+	options.ra,options.dec,options.radius,options.annulus1,options.annulus2 = suggest_parameters(options.band,skypos,retries=options.retries)
 	if options.verbose:
 		print "Recentering on ["+str(options.ra)+", "+str(options.dec)+"]"
 		print "Setting radius to "+str(options.radius)
@@ -99,7 +100,7 @@ if options.tranges:
 else:
 	if options.verbose:
 		print 'Using all exposure in ['+str(options.tmin)+','+str(options.tmax)+']'
-	tranges = fGetTimeRanges(options.band,skypos,maxgap=options.gap,verbose=options.verbose,minexp=options.minexp,trange=[options.tmin,options.tmax],detsize=options.detsize)
+	tranges = fGetTimeRanges(options.band,skypos,maxgap=options.gap,verbose=options.verbose,minexp=options.minexp,trange=[options.tmin,options.tmax],detsize=options.detsize,retries=options.retries)
 	if not len(tranges):
 		print 'No exposure time in database.'
 		exit(0)
@@ -134,6 +135,6 @@ if options.stamp:
 	else:
 		skyrange = [2*options.radius,2*options.radius]
 	
-	write_jpeg(options.stamp,options.band,skypos,tranges,skyrange,width=False,height=False,stepsz=options.stepsz,clobber=True,verbose=options.verbose)
+	write_jpeg(options.stamp,options.band,skypos,tranges,skyrange,width=False,height=False,stepsz=options.stepsz,clobber=True,verbose=options.verbose,retries=options.retries)
 
-write_curve(options.band,skypos,tranges,options.radius,outfile=outfile,annulus=annulus,stepsz=options.stepsz,userr=options.userr,usehrbg=options.usehrbg,verbose=options.verbose,calpath=options.calpath,iocode=iocode,coadd=options.coadd,detsize=options.detsize)
+write_curve(options.band,skypos,tranges,options.radius,outfile=outfile,annulus=annulus,stepsz=options.stepsz,userr=options.userr,usehrbg=options.usehrbg,verbose=options.verbose,calpath=options.calpath,iocode=iocode,coadd=options.coadd,detsize=options.detsize,retries=options.retries)

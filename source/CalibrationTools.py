@@ -233,7 +233,7 @@ def compute_exposure2(csvfile,band,eclipse):
 
 	return exptcorr
 
-def create_rr(csvfile,band,calpath,eclipse,aspfile=0.,expstart=0.,expend=0.):
+def create_rr(csvfile,band,calpath,eclipse,aspfile=0.,expstart=0.,expend=0.,retries=20):
 	"""Creates a relative response map for an eclipse, given a photon list."""
 	detsize = 1.25
 	pltscl = 68.754932
@@ -251,7 +251,7 @@ def create_rr(csvfile,band,calpath,eclipse,aspfile=0.,expstart=0.,expend=0.):
 	if aspfile:
 		aspra, aspdec, asptwist, asptime, aspheader, aspflags = load_aspect([aspfile])
 	else:
-		aspra, aspdec, asptwist, asptime, aspheader, aspflags = web_query_aspect(eclipse)
+		aspra, aspdec, asptwist, asptime, aspheader, aspflags = web_query_aspect(eclipse,retries=retries)
 	minasp = min(asptime)
 	maxasp = max(asptime)
 	print "			trange= ( "+str(minasp)+" , "+str(maxasp)+" )"
@@ -305,17 +305,17 @@ def create_rr(csvfile,band,calpath,eclipse,aspfile=0.,expstart=0.,expend=0.):
 
 	return rr*flat_scale*(1-deadt),exp
 
-def write_rr(csvfile,band,calpath,eclipse,rrfile,outfile,aspfile=0,expstart=0.,expend=0.,exptime=0.,imsz=960.):
+def write_rr(csvfile,band,calpath,eclipse,rrfile,outfile,aspfile=0,expstart=0.,expend=0.,exptime=0.,imsz=960.,retries=20):
 	"""Creates a relative response map for an eclipse, given a photon list file,
 	and writes it to a FITS file.
 	"""
-	rr,exptime = create_rr(csvfile,band,calpath,eclipse,aspfile,expstart,expend)
+	rr,exptime = create_rr(csvfile,band,calpath,eclipse,aspfile,expstart,expend,retries=retries)
 
 	#aspra, aspdec, asptwist, asptime, aspheader, aspflags = load_aspect([aspfile])
         if aspfile:
                 aspra, aspdec, asptwist, asptime, aspheader, aspflags = load_aspect([aspfile])
         else:
-                aspra, aspdec, asptwist, asptime, aspheader, aspflags = web_query_aspect(eclipse)
+                aspra, aspdec, asptwist, asptime, aspheader, aspflags = web_query_aspect(eclipse,retries=retries)
 
 	ra0, dec0, roll0 = aspheader['RA'], aspheader['DEC'], aspheader['ROLL']
 

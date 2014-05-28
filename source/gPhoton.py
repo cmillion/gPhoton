@@ -18,6 +18,7 @@ parser.add_option("-d", "--ssd", action="store", type="string", dest="ssdfile", 
 parser.add_option("-n", "--cleanoutput", action="store_true", dest="cleanoutput", help="only write unmasked, fully calibrated data -- DEPRECATED")
 parser.add_option("-u", "--nullout", action="store_true", dest="nullout", help="write NULL entries to a separate file", metavar="NULL")
 parser.add_option("-v", "--verbose", action="store", type="float", dest="verbose", help="Display more output. Set to 0-2", metavar="VRB")
+parser.add_option("--retries", action="store", type="int", dest="retries", default=20, help="Set the number of times to ping the server for a response before defining a query failure.  Default is 20, set to a large number if you expect, or want to allow, the query to take a long time.")
 
 (options, args) = parser.parse_args()
 
@@ -61,5 +62,5 @@ if not options.verbose:
 else:
 	verbose=options.verbose
 
-PhotonPipe(options.raw6file,options.scstfile,options.calpath,band,options.outbase,aspfile,ssdfile,options.nullout,verbose=verbose)
+PhotonPipe(options.raw6file,options.scstfile,options.calpath,band,options.outbase,aspfile,ssdfile,options.nullout,verbose=verbose,retries=options.retries)
 

@@ -3,12 +3,12 @@
 import ast
 from dbasetools import fGetTimeRanges, suggest_parameters
 
-def gFind(band, skypos, trange, maxgap=1.0, minexp=1.0, verbose=0., detsize=1.25, depth=False, gaper=False, quiet=False):
+def gFind(band, skypos, trange, maxgap=1.0, minexp=1.0, verbose=0., detsize=1.25, depth=False, gaper=False, quiet=False, retries=20):
 	"""Primary program module. Prints time ranges to the screen and returns
 	the total exposure time as a float.
 	"""
 	## Get valid time ranges.
-       	ranges = fGetTimeRanges(band,skypos,maxgap=maxgap,minexp=minexp,trange=trange,verbose=verbose,detsize=detsize)
+       	ranges = fGetTimeRanges(band,skypos,maxgap=maxgap,minexp=minexp,trange=trange,verbose=verbose,detsize=detsize,retries=retries)
 
 	if not len(ranges):
 		if not quiet: print 'No exposure time in database.'
@@ -57,7 +57,7 @@ def check_args(args):
 
 	# Print suggested parameters to screen if requested.
 	if args.suggest:
-		out = suggest_parameters(band,skypos,verbose=1)
+		out = suggest_parameters(band,skypos,verbose=1,retries=args.retries)
 		print ""
 
 	# Create the "trange" list whether it's given directly or
@@ -88,7 +88,14 @@ def check_args(args):
 		print "Minimum effective field diameter must be > 0.0."
 		exit(1)
 
-	return (band, skypos, trange, maxgap, minexp, detsize)
+	# Make sure the number of "retries" is greater than 0.
+	if args.retries > 0:
+		retries = args.retries
+	else:
+		print "Number of retries must be > 0 if specified."
+		exit(1)
+
+	return (band, skypos, trange, maxgap, minexp, detsize, retries)
 
 def setup_parser():
 	"""Defines the arguments and options for the parser object when
@@ -110,12 +117,13 @@ def setup_parser():
 	parser.add_argument("--minexp", action="store", type=float, dest="minexp", help="Minimum contiguous exposure in seconds for data to be reported.", default=1.)
 	parser.add_argument("--suggest", action="store_true", dest="suggest", help="Suggest optimum parameters for aperture photometry.", default=False)
 	parser.add_argument("--quiet", action="store_true", dest="quiet", help="Suppress all information to STDOUT.", default=False)
+	parser.add_argument("--retries", action="store", type=int, dest="retries", help="Set the number of times to ping the server for a response before defining a query failure.  Default is 20, set to a large number if you expect, or want to allow, the query to take a long time.", default=20)
 	return parser
 
 if __name__ == '__main__':
 	"""Called when gFind is executed directly through command line."""
 	import argparse
 	args = setup_parser().parse_args()
-	band, skypos, trange, maxgap, minexp, detsize = check_args(args)
-	gFind(band, skypos, trange, maxgap, minexp, args.verbose, detsize, args.depth, args.gaper,args.quiet)
+	band, skypos, trange, maxgap, minexp, detsize, retries = check_args(args)
+	gFind(band, skypos, trange, maxgap, minexp, args.verbose, detsize, args.depth, args.gaper, args.quiet, args.retries)
 

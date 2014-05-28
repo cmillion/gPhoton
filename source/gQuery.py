@@ -12,20 +12,20 @@ baseURL = 'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonL
 # Defines the standard return format and timeout
 formatURL = '&format=json&timeout={}'
 
-def getValue(query,verbose=0):
+def getValue(query,verbose=0,retries=20):
 	if verbose>2:
 		print query
 	try:
-		out = float(manage_requests(query).json()['Tables'][0]['Rows'][0][0])
+		out = float(manage_requests(query,maxcnt=retries).json()['Tables'][0]['Rows'][0][0])
 	except:
 		print 'CONNECTION TIMEOUT'
 	return out
 
-def getArray(query,verbose=0): 
+def getArray(query,verbose=0,retries=20):
 	if verbose>2:
 		print query
 	try:
-		out = manage_requests(query).json()['Tables'][0]['Rows']
+		out = manage_requests(query,maxcnt=retries).json()['Tables'][0]['Rows']
 	except:
 		print 'CONNECTION TIMEOUT'
 	return out
