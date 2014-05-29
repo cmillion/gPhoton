@@ -57,7 +57,8 @@ def aperture_response(band,skypos,tranges,radius,verbose=0,tscale=1000.,
 		      calpath='../cal/'):
 	"""Estimates the mean response within the aperture by averaging over
 	the portion of the flat upon which the detector falls.
-	This might be less accurate than building a response image, but it is fast(er).
+	This might be less accurate than building a response image,
+	but it is fast(er).
 	"""
 	if verbose>1:
 		print 'Computing relative response over a '+str(radius)+' degree aperture.'

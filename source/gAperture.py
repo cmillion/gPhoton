@@ -117,7 +117,7 @@ else:
 	# This initiates the file.
 	outfile = options.file
 	if not options.overwrite and os.path.exists(outfile):
-		print "File "+str(outfile)+"exists. Pass --overwrite to replace it."
+		print "File "+str(outfile)+" exists. Pass --overwrite to replace it."
 		exit(0)
 	f = open(outfile,iocode)
 	if options.addhdr:
