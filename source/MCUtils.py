@@ -37,8 +37,10 @@ def print_inline(text,blanks=60):
         stdout.flush()
         return
 
-def manage_requests(query,maxcnt=20,wait=1):
-	"""Make simple 'requests' calls slightly more robust against network issues."""
+def manage_requests(query,maxcnt=100,wait=10):
+	""" Make simple 'requests' calls slightly more robust against network
+    issues.
+    """
 	cnt = 0
 	while cnt < maxcnt:
 		try:
@@ -58,7 +60,9 @@ def manage_requests(query,maxcnt=20,wait=1):
 	return 0
 
 def manage_grequests(queries,maxcnt=20,wait=1):
-	"""Make simple 'grequests' calls slightly more robust against network issues."""
+	"""Make simple 'grequests' calls slightly more robust against
+    network issues.
+    """
 	cnt = 0
 	while cnt < maxcnt:
 		try:
@@ -96,7 +100,9 @@ def wherefalse(conditions):
 	return np.where(conditions==False)[0]
 
 def find_nearest_lower(array,value):
-	"""Finds the index of the value in the array that is closest without going over.
+	"""Finds the index of the value in the array that is closest
+    without going over.
+
 	This function assumes that:
 		1. value is within the range of array
 		2. array is ordered
@@ -107,7 +113,7 @@ def find_nearest_lower(array,value):
                 idx -= 1
         return idx
 
-def get_fits_data(filename,dim=0,verbose=1):
+def get_fits_data(filename,dim=0,verbose=0):
 	"""Reads FITS data. A wrapper for common pyfits commands."""
 	if verbose:
         	print "         ",filename
@@ -137,7 +143,9 @@ def get_tbl_data(filename,comment='|'):
         return np.array(tbl,dtype='float64')
 
 def chunk(a,b,length=1,verbose=0):
-	"""Produces an array of 2x1 delimiting ranges between a and b with the requested length."""
+	"""Produces an array of 2x1 delimiting ranges between a and b with
+    the requested length.
+    """
 	if not length:
 		return [[a,b]]
 	else:
@@ -147,9 +155,27 @@ def chunk(a,b,length=1,verbose=0):
 		return arr.tolist()
 
 def chunks(array,length=10,verbose=0):
-	"""Takes an array of ranges and produces a new array of ranges within the initial array that are of the requested length (or smaller)."""
+	"""Takes an array of ranges and produces a new array of ranges
+    within the initial array that are of the requested length (or smaller).
+    """
 	out = []
 	for a in array:
 		out += chunk(a[0],a[1],length=length,verbose=verbose)
 	return out
+
+def angularSeparation(ra0,dec0,ra1,dec1):
+	"""Compute angular separation in degrees of points on the sky.
+    It is important, especially for small angular separations, that the
+    values for ra[01] and dec[01] have precision of float65 or better.
+    """
+	dtor = np.pi/180.
+	radeg = 1./dtor
+	d0 = dec0*dtor
+	d1 = dec1*dtor
+	sep = np.sin(d0)*np.sin(d1)+np.cos(d0)*np.cos(d1)*np.cos((ra1-ra0)*dtor)
+	r = np.arccos(sep)*radeg
+	zero = (np.isfinite(r) == False)
+	if any(zero):
+		r[zero] = 0.0
+	return r
 

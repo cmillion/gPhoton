@@ -111,7 +111,7 @@ def deg2pix(skypos,skyrange,pixsz=0.000416666666666667):
 	#		 not catch the whole range, but all the values are meaningful.
 	return np.abs(np.floor(wcs.sip_pix2foc(wcs.wcs_world2pix([coo],1),1)[0]))[::-1]
 
-def compute_flat_scale(t,band,verbose=1):
+def compute_flat_scale(t,band,verbose=0):
 	"""Return the flat scale factor for a given time.
 	These are empirically determined linear scales to the flat field
 	as a function of time due to diminished detector response. They

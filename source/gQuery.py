@@ -12,20 +12,20 @@ baseURL = 'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonL
 # Defines the standard return format and timeout
 formatURL = '&format=json&timeout={}'
 
-def getValue(query,verbose=0):
+def getValue(query,verbose=0,maxcnt=20):
 	if verbose>2:
 		print query
 	try:
-		out = float(manage_requests(query).json()['Tables'][0]['Rows'][0][0])
+		out = float(manage_requests(query,maxcnt=maxcnt).json()['Tables'][0]['Rows'][0][0])
 	except:
 		print 'CONNECTION TIMEOUT'
 	return out
 
-def getArray(query,verbose=0): 
+def getArray(query,verbose=0,maxcnt=100): 
 	if verbose>2:
 		print query
 	try:
-		out = manage_requests(query).json()['Tables'][0]['Rows']
+		out = manage_requests(query,maxcnt=maxcnt).json()['Tables'][0]['Rows']
 	except:
 		print 'CONNECTION TIMEOUT'
 	return out
@@ -66,7 +66,7 @@ def deadtime(band,t0,t1,tscale=1000.):
 # Find the number of events inside of a box defined by an x range and a y range
 #  in detector space coordinates
 def boxcount(band,t0,t1,xr,yr,tscale=1000.):
-	return str(baseURL)+'select count(*) from NUVPhotonsNULLV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and x between '+str(xr[0])+' and '+str(xr[1])+' and y between '+str(yr[0])+' and '+str(yr[1])+str(formatURL)
+	return str(baseURL)+'select count(*) from '+str(band)+'PhotonsNULLV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and x between '+str(xr[0])+' and '+str(xr[1])+' and y between '+str(yr[0])+' and '+str(yr[1])+str(formatURL)
 
 # FIXME: convert t0 to eclipse
 def stimcount(band,t0,t1,margin=90.01,aspum=68.754932/1000.,tscale=1000,eclipse=31000):
@@ -85,9 +85,9 @@ def centroid(band,ra0,dec0,t0,t1,radius,tscale=1000.):
 	return str(baseURL)+'select avg(ra), avg(dec) from NUVPhotonsV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and ra between '+repr(ra0-radius)+' and '+repr(ra0+radius)+' and dec between '+repr(dec0-radius)+' and '+repr(dec0+radius)+str(formatURL)
 
 # Return information on events within in the aperture
-# FIXME: This isn't actually doing a cone search. It's doing a box.
 def allphotons(band,ra0,dec0,t0,t1,radius,tscale=1000.):
-	return str(baseURL)+'select time, ra, dec from NUVPhotonsV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and ra between '+repr(ra0-radius)+' and '+repr(ra0+radius)+' and dec between '+repr(dec0-radius)+' and '+repr(dec0+radius)+str(formatURL)
+#	return str(baseURL)+'select time, ra, dec from NUVPhotonsV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and ra between '+repr(ra0-radius)+' and '+repr(ra0+radius)+' and dec between '+repr(dec0-radius)+' and '+repr(dec0+radius)+str(formatURL)
+	return str(baseURL)+'select time,ra,dec,xi,eta from dbo.fGetNearbyObjEq'+str(band)+'AllColumns('+repr(ra0)+','+repr(dec0)+','+repr(radius)+','+str(long(t0*tscale))+','+str(long(t1*tscale))+',0)'+str(formatURL)
 
 # Shutter correction
 #  i.e. number of 0.05s gaps in data

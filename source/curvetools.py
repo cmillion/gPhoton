@@ -19,23 +19,23 @@ def compute_background(band,skypos,trange,radius,annulus,verbose=0):
 def mask_background_image(band,skypos,trange,radius,annulus,verbose=0,
 			  maglimit=28.,pixsz=0.000416666666666667,NoData=-999):
 	"""Creates an image of the sky within an annulus."""
-	skyrange = [2*annulus[1],2*annulus[1]]
+	skyrange = [2*annulus[1], 2*annulus[1]]
 	imsz = gxt.deg2pix(skypos,skyrange)
 	# FIXME: Duplicate code from backgroundmap()
 	# Create a background map with stars blacked out
 	bg=backgroundmap(band,skypos,trange,skyrange,verbose=verbose,
 			 maglimit=maglimit)
 	# Create a position reference array
-	xind =          np.array([range(int(imsz[1]))]*int(imsz[0]))-(imsz[0]/2.)+0.5
-	yind = np.rot90(np.array([range(int(imsz[0]))]*int(imsz[1]))-(imsz[1]/2.))+0.5
-	distarray = np.sqrt(((xind)**2.)+((yind)**2.))
+	xind = np.array([range(int(imsz[1]))]*int(imsz[0])) - (imsz[0]/2.) + 0.5
+	yind = np.rot90(
+           np.array([range(int(imsz[0]))]*int(imsz[1])) - (imsz[1]/2.)) + 0.5
+	distarray = np.sqrt(((xind)**2.) + ((yind)**2.))
 	# Cut out the annulus
 	# FIXME: (?) Distort the annulus to match the projection?
 	ix = np.where(distarray<=annulus[0]/pixsz)
 	bg[ix] = NoData
 	ix = np.where(distarray>=annulus[1]/pixsz)
 	bg[ix] = NoData
-
 	return bg
 
 def compute_background_improved(band,skypos,trange,radius,annulus,verbose=0,
