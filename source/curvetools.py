@@ -8,113 +8,115 @@ import dbasetools as dbt
 import galextools as gxt
 
 def compute_background(band,skypos,trange,radius,annulus,verbose=0):
-	"""Estimated counts within an aperture based upon rate within an annulus.
-	counts in aperture = (area of aperture) * (counts in annulus) / (area of annulus)
-	"""
-	if annulus[1]-annulus[0]<=0:
-		return 0.
-	else:
-		return (area(radius)/(area(annulus[1])-area(annulus[0]))) * (gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[1]),verbose=verbose)-gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[0]),verbose=verbose)) if (annulus[0] and annulus[1]) else 0.
+    """Estimated counts within an aperture based upon rate within an annulus.
+    counts in aperture = (area of aperture) * (counts in annulus) / (area of annulus)
+    """
+    if annulus[1]-annulus[0]<=0:
+        return 0.
+    else:
+        return (area(radius)/(area(annulus[1])-area(annulus[0]))) * (gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[1]),verbose=verbose)-gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[0]),verbose=verbose)) if (annulus[0] and annulus[1]) else 0.
 
 def mask_background_image(band,skypos,trange,radius,annulus,verbose=0,
-			  maglimit=28.,pixsz=0.000416666666666667,NoData=-999):
-	"""Creates an image of the sky within an annulus."""
-	skyrange = [2*annulus[1], 2*annulus[1]]
-	imsz = gxt.deg2pix(skypos,skyrange)
-	# FIXME: Duplicate code from backgroundmap()
-	# Create a background map with stars blacked out
-	bg=backgroundmap(band,skypos,trange,skyrange,verbose=verbose,
-			 maglimit=maglimit)
-	# Create a position reference array
-	xind = np.array([range(int(imsz[1]))]*int(imsz[0])) - (imsz[0]/2.) + 0.5
-	yind = np.rot90(
+        maglimit=28.,pixsz=0.000416666666666667,NoData=-999):
+    """Creates an image of the sky within an annulus."""
+    skyrange = [2*annulus[1], 2*annulus[1]]
+    imsz = gxt.deg2pix(skypos,skyrange)
+    # FIXME: Duplicate code from backgroundmap()
+    # Create a background map with stars blacked out
+    bg=backgroundmap(band,skypos,trange,skyrange,verbose=verbose,
+                     maglimit=maglimit)
+    # Create a position reference array
+    xind = np.array([range(int(imsz[1]))]*int(imsz[0])) - (imsz[0]/2.) + 0.5
+    yind = np.rot90(
            np.array([range(int(imsz[0]))]*int(imsz[1])) - (imsz[1]/2.)) + 0.5
-	distarray = np.sqrt(((xind)**2.) + ((yind)**2.))
-	# Cut out the annulus
-	# FIXME: (?) Distort the annulus to match the projection?
-	ix = np.where(distarray<=annulus[0]/pixsz)
-	bg[ix] = NoData
-	ix = np.where(distarray>=annulus[1]/pixsz)
-	bg[ix] = NoData
-	return bg
+    distarray = np.sqrt(((xind)**2.) + ((yind)**2.))
+    # Cut out the annulus
+    # FIXME: (?) Distort the annulus to match the projection?
+    ix = np.where(distarray<=annulus[0]/pixsz)
+    bg[ix] = NoData
+    ix = np.where(distarray>=annulus[1]/pixsz)
+    bg[ix] = NoData
+    return bg
 
 def compute_background_improved(band,skypos,trange,radius,annulus,verbose=0,
-				maglimit=28.,pixsz=0.000416666666666667,
-				NoData=-999):
-	"""Estimated counts within the aperture based on counts within the annulus
-	with sources within the annulus masked out (to the specified maglimit).
-	"""
-	bg = mask_background_image(band,skypos,trange,radius,annulus,
-				   verbose=verbose,maglimit=maglimit,
-				   pixsz=pixsz,NoData=NoData)
-	# The mean, unmasked background pixel value normalized by the area
-	#  of a pixel and scaled to the area of the aperture
-	return (area(radius)*bg[np.where(bg>=0)].mean()/(pixsz)**2.)
+                                maglimit=28.,pixsz=0.000416666666666667,
+                                NoData=-999):
+    """Estimated counts within the aperture based on counts within the annulus
+    with sources within the annulus masked out (to the specified maglimit).
+    """
+    bg = mask_background_image(band,skypos,trange,radius,annulus,
+                               verbose=verbose,maglimit=maglimit,
+                               pixsz=pixsz,NoData=NoData)
+    # The mean, unmasked background pixel value normalized by the area
+    #  of a pixel and scaled to the area of the aperture
+    return (area(radius)*bg[np.where(bg>=0)].mean()/(pixsz)**2.)
 
 # This computes the mean response within the aperture. It is slightly less
 #  precise but much faster than building a relative response map.
 def aperture_response(band,skypos,tranges,radius,verbose=0,tscale=1000.,
-		      calpath='../cal/'):
-	"""Estimates the mean response within the aperture by averaging over
-	the portion of the flat upon which the detector falls.
-	This might be less accurate than building a response image,
-	but it is fast(er).
-	"""
-	if verbose>1:
-		print 'Computing relative response over a '+str(radius)+' degree aperture.'
-	flat = np.flipud(np.rot90(get_fits_data(flat_filename(band,calpath),
-						verbose=0)))
-	flatinfo = get_fits_header(flat_filename(band,calpath))
-	detsize, imsz, pixsz = 1.25, flat.shape[0], flatinfo['CDELT2']
+                      calpath='../cal/'):
+    """Estimates the mean response within the aperture by averaging over
+    the portion of the flat upon which the detector falls.
+    This might be less accurate than building a response image,
+    but it is fast(er).
+    """
+    if verbose>1:
+        print 'Computing relative response over a '+str(radius)+' degree aperture.'
+    flat = np.flipud(np.rot90(get_fits_data(flat_filename(band,calpath),
+                              verbose=0)))
+    flatinfo = get_fits_header(flat_filename(band,calpath))
+    detsize, imsz, pixsz = 1.25, flat.shape[0], flatinfo['CDELT2']
 
-	tranges = map(lambda trange: dbt.fGetTimeRanges(band,skypos,verbose=verbose,trange=trange),tranges)[0]
+    tranges = map(lambda trange: dbt.fGetTimeRanges(band,skypos,verbose=verbose,trange=trange),tranges)[0]
 
-	response = 0.
-	# FIXME: Dupe code. A lot of this should be its own function.
-	for trange in tranges:
-		# Load all the aspect data.
-		entries = gQuery.getArray(gQuery.aspect(trange[0],trange[1]),
-					  verbose=verbose)
-		n 	= len(entries)
-		asptime	= np.float64(np.array(entries)[:,2])/tscale
-		aspra	= np.float32(np.array(entries)[:,3])
-		aspdec	= np.float32(np.array(entries)[:,4])
-		asptwist= np.float32(np.array(entries)[:,5])
-		aspflags= np.float32(np.array(entries)[:,6])
-		asptwist= np.float32(np.array(entries)[:,9])
-		aspra0	= np.zeros(n)+skypos[0]
-		aspdec0	= np.zeros(n)+skypos[1]
+    response = 0.
+    # FIXME: Dupe code. A lot of this should be its own function.
+    for trange in tranges:
+        # Load all the aspect data.
+        entries = gQuery.getArray(gQuery.aspect(trange[0],trange[1]),
+                                  verbose=verbose)
+        n = len(entries)
+        asptime	= np.float64(np.array(entries)[:,2])/tscale
+        aspra	= np.float32(np.array(entries)[:,3])
+        aspdec	= np.float32(np.array(entries)[:,4])
+        asptwist= np.float32(np.array(entries)[:,5])
+        aspflags= np.float32(np.array(entries)[:,6])
+        asptwist= np.float32(np.array(entries)[:,9])
+        aspra0	= np.zeros(n)+skypos[0]
+        aspdec0	= np.zeros(n)+skypos[1]
 
-		# Compute vectors
-		xi_vec, eta_vec = gnomfwd_simple(aspra0,aspdec0,aspra,aspdec,-asptwist,1.0/36000.,0.)
-		col  = (((( xi_vec/36000.)/(detsize/2.)*(detsize/(imsz*pixsz))+1.)/2.*imsz)-(imsz/2.))
-		row  = ((((eta_vec/36000.)/(detsize/2.)*(detsize/(imsz*pixsz))+1.)/2.*imsz)-(imsz/2.))
+        # Compute vectors
+        xi_vec, eta_vec = gnomfwd_simple(aspra0,aspdec0,aspra,aspdec,-asptwist,1.0/36000.,0.)
+        col  = (((( xi_vec/36000.)/(detsize/2.)*(detsize/(imsz*pixsz))+1.)/2.*imsz)-(imsz/2.))
+        row  = ((((eta_vec/36000.)/(detsize/2.)*(detsize/(imsz*pixsz))+1.)/2.*imsz)-(imsz/2.))
 
-		# Build reference arrays in which each element is equal to
-		#  its x or y value.
-		xind =          np.array([range(int(imsz))]*int(imsz))-(imsz/2.)
-		yind = np.rot90(np.array([range(int(imsz))]*int(imsz))-(imsz/2.))
+        # Build reference arrays in which each element is equal to
+        #  its x or y value.
+        xind =          np.array([range(int(imsz))]*int(imsz))-(imsz/2.)
+        yind = np.rot90(np.array([range(int(imsz))]*int(imsz))-(imsz/2.))
 
-		vectors = rotvec(np.array([col,row]),-asptwist) 
-		scales  = gxt.compute_flat_scale(asptime,band,verbose=0)
+        vectors = rotvec(np.array([col,row]),-asptwist) 
+        scales  = gxt.compute_flat_scale(asptime,band,verbose=0)
 
-		pixrad = radius/pixsz#gxt.deg2pix(radius,CDELT2=pixsz)
-		# FIXME: How to avoid this loop??!?
-		for i in xrange(n):
-			if verbose>1:
-				print_inline(' Stamping '+str(i+1)+' of '+str(n)+'...')
-			asprange=[asptime[i], asptime[i]+1 if asptime[i]+1<trange[1] else trange[1]]
-			if asprange[0]==asprange[1]:
-				if verbose>1:
-					print_inline(str(asprange[0])+'=='+str(asprange[1])+' so skipping...')
-				continue
-			distarray = np.sqrt(((vectors[0,i]-xind)**2.)+((vectors[1,i]-yind)**2.))
-			ix = np.where(distarray<=pixrad)
-			response += dbt.compute_exptime(band,asprange,verbose=verbose)*scales[i]*flat[ix].mean()
-		if verbose >1:
-			print_inline('                                             ')
+        pixrad = radius/pixsz#gxt.deg2pix(radius,CDELT2=pixsz)
+        # FIXME: How to avoid this loop??!?
+        for i in xrange(n):
+            if verbose>1:
+                print_inline(' Stamping '+str(i+1)+' of '+str(n)+'...')
+            asprange=[asptime[i], asptime[i]+1
+                      if asptime[i]+1<trange[1] else trange[1]]
+            if asprange[0]==asprange[1]:
+                if verbose>1:
+                    print_inline(str(asprange[0])+'=='+str(asprange[1])+' so skipping...')
+                continue
+            distarray = np.sqrt(((vectors[0,i]-xind)**2.)+
+                                ((vectors[1,i]-yind)**2.))
+            ix = np.where(distarray<=pixrad)
+            response += dbt.compute_exptime(band,asprange,verbose=verbose)*scales[i]*flat[ix].mean()
+            if verbose >1:
+                print_inline('                                             ')
 
-	return response
+    return response
 
 # Returns the flux data within a radius/annulus
 def compute_flux(band,skypos,tranges,radius,annulus=[None,None],userr=False,

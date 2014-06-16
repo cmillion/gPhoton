@@ -45,7 +45,7 @@ def manage_requests(query,maxcnt=100,wait=10):
 	while cnt < maxcnt:
 		try:
 			r = requests.get(query)
-			# This specifically tests for the return structure
+			# HACK: This specifically tests for the return structure
 			#  from the MAST photon database and is therefore
 			#  not a good general test condition.
 			test = r.json()['Tables'][0]['Rows']
@@ -57,25 +57,6 @@ def manage_requests(query,maxcnt=100,wait=10):
 
 	print 'Query unsuccessful after '+str(int(maxcnt))+' attempts.'
 	print '		'+str(query)
-	return 0
-
-def manage_grequests(queries,maxcnt=20,wait=1):
-	"""Make simple 'grequests' calls slightly more robust against
-    network issues.
-    """
-	cnt = 0
-	while cnt < maxcnt:
-		try:
-			r = (grequests.get(q) for q in queries)
-			return r
-		except:
-			time.sleep(wait)
-			cnt +=1
-			print_inline('Queries retry attempt'+str(int(cnt))+'.')
-
-	print 'Queries unsuccessful after '+str(int(maxcnt))+' attempts.'
-	for q in queries:
-		print '		'+str(q)
 	return 0
 
 def wheretrue(conditions):

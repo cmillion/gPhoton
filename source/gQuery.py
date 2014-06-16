@@ -59,6 +59,17 @@ def deadtime1(band,t0,t1,tscale=1000.):
 def deadtime2(band,t0,t1,tscale=1000.):
 	return str(baseURL)+'select count(*) from '+str(band)+'PhotonsNULLV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+str(formatURL)
 
+def hyper_deadtime(band,tranges,tscale=1000.):
+    """ Given an array of times, return an array photon counts
+        for those time ranges.
+    """
+    query = str(baseURL)
+    for i,t in enumerate(tranges):
+        query+='select sum(dt) * 0.0000057142857142857145 / ('+repr(t[1])+'-'+repr(t[0])+') from(select count(*) as dt from '+str(band)+'PhotonsNULLV where time between '+str(long(t[0]*tscale))+' and '+str(long(t[1]*tscale))+' union all select count(*) as dt from '+str(band)+'PhotonsV where time between '+str(long(t[0]*tscale))+' and '+str(long(t[1]*tscale))+') x'
+        if i!=len(tranges)-1:
+            query+=' union all '
+    return query+str(formatURL)
+
 # Returns the empirically determined deadtime correction
 def deadtime(band,t0,t1,tscale=1000.):
 	return str(baseURL)+'select sum(dt) * 0.0000057142857142857145 / ('+repr(t1)+'-'+repr(t0)+') from(select count(*) as dt from '+str(band)+'PhotonsNULLV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+' union all select count(*) as dt from '+str(band)+'PhotonsV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+') x'+str(formatURL)
@@ -92,7 +103,7 @@ def allphotons(band,ra0,dec0,t0,t1,radius,tscale=1000.):
 # Shutter correction
 #  i.e. number of 0.05s gaps in data
 def shutter(band,t0,t1,tscale=1000.):
-	return str(baseURL)+'select * from fGet'+str(band)+'Shutter('+str(long(t0*tscale))+','+str(long(t1*tscale))+')'+str(formatURL)
+	return str(baseURL)+'select shutter*0.05 from fGet'+str(band)+'Shutter('+str(long(t0*tscale))+','+str(long(t1*tscale))+')'+str(formatURL)
 
 def shutdead(band,t0,t1,tscale=1000.):
 	return str(baseURL)+'SELECT shutter*0.05 FROM fGetNUVShutter('+str(long(t0*tscale))+','+str(long(t1*tscale))+') AS time UNION ALL SELECT SUM(dt) * 0.0000057142857142857145 / ('+repr(t1)+'-'+repr(t0)+') AS dead FROM(SELECT count(*) AS dt FROM NUVPhotonsNULLV WHERE time BETWEEN '+str(long(t0*tscale))+' AND '+str(long(t1*tscale))+' UNION ALL SELECT count(*) AS dt FROM NUVPhotonsV WHERE time BETWEEN '+str(long(t0*tscale))+' AND '+str(long(t1*tscale))+') x'+str(formatURL)
