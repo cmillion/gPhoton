@@ -264,3 +264,4 @@ def read_curve(csvfile):
 		data['aperture correction 2'] = np.append(data['aperture correction 2'],np.float(row[16]))
 
 	return data
+

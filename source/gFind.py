@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import ast
+import argparse
 from dbasetools import fGetTimeRanges, suggest_parameters
 
 def gFind(band, skypos, trange, maxgap=1.0, minexp=1.0, verbose=0., detsize=1.25, depth=False, gaper=False, quiet=False):
@@ -95,13 +96,13 @@ def setup_parser():
 	called from the command line.
 	"""
 	parser = argparse.ArgumentParser(description="Locate available data at specified coordinates and time intervals.")
-	parser.add_argument("-b", "--band", action="store", dest="band", help="[NF]UV band designation", metavar="BAND")
-	parser.add_argument("-r", "--ra", action="store", type=float, dest="ra", help="Center Right Ascension position in decimal degrees", metavar="RA")
-	parser.add_argument("-d", "--dec", action="store", type=float, dest="dec", help="Center Declination position in decimal degrees", metavar="DEC")
+	parser.add_argument("-b", "--band", action="store", dest="band", help="[NF]UV band designation", choices=['NUV','FUV'])
+	parser.add_argument("-r", "--ra", action="store", type=float, dest="ra", help="Center Right Ascension position in decimal degrees")
+	parser.add_argument("-d", "--dec", action="store", type=float, dest="dec", help="Center Declination position in decimal degrees")
 	parser.add_argument("--skypos", action="store", dest="skypos", help="Alternate method for specifying sky position with format '[RA,Dec]'")
-	parser.add_argument("-v", "--verbose", action="store", type=float, dest="verbose", help="Display more output. Set to 0-2", metavar="VRB",default=0.,choices=[0,1,2])
+	parser.add_argument("-v", "--verbose", action="store", type=float, dest="verbose", help="Display more output. Set to 0-2", default=0., choices=[0,1,2])
 	parser.add_argument("-g", "--gap", "--maxgap", action="store", type=float, dest="gap", help="Maximum gap size in seconds for data to be considered contiguous.", default=1.)
-	parser.add_argument("--t0", "--tmin", action="store", type=float, dest="tmin", help="Minimum time to consider.",default=1.)
+	parser.add_argument("--t0", "--tmin", action="store", type=float, dest="tmin", help="Minimum time to consider.", default=1.)
 	parser.add_argument("--t1", "--tmax", action="store", type=float, dest="tmax", help="Maxium time to consider.",default=1000000000000.)
 	parser.add_argument("--trange", "--tranges", action="store", dest="trange", help="Time range in which to limit the search with format '[t0,t1]'")
 	parser.add_argument("--detsize", action="store", type=float, dest="detsize", help="Set the effective field diameter in degrees for the exposure search.", default=1.25)
@@ -114,7 +115,6 @@ def setup_parser():
 
 if __name__ == '__main__':
 	"""Called when gFind is executed directly through command line."""
-	import argparse
 	args = setup_parser().parse_args()
 	band, skypos, trange, maxgap, minexp, detsize = check_args(args)
 	gFind(band, skypos, trange, maxgap, minexp, args.verbose, detsize, args.depth, args.gaper,args.quiet)
