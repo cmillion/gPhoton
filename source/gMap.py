@@ -18,8 +18,8 @@ parser.add_option("--raangle", action="store", type="float", dest="raangle", hel
 parser.add_option("--decangle", action="store", type="float", dest="decangle", help="The angle of sky in degrees that the declination subtends. Overrides --angle")
 parser.add_option("--t0", "--tmin", action="store", type="float", dest="tmin", help="Minimum time to consider.",default=1.)
 parser.add_option("--t1", "--tmax", action="store", type="float", dest="tmax", help="Maxium time to consider.",default=1000000000000.)
-parser.add_option("--tranges", action="store", type="string", dest="tranges", help="List of time ranges with format '[[t0,t1,],[t2,t3],...]'")
-parser.add_option("--frame", "--step", action="store", type="float", dest="framesz", help="Depth of movie frames in seconds.", default=0.)
+parser.add_option("--trange", action="store", type="string", dest="trange", help="List of time ranges with format '[[t0,t1,],[t2,t3],...]'")
+parser.add_option("--frame", "--step", action="store", type="float", dest="stepsz", help="Depth of movie frames in seconds.", default=0.)
 parser.add_option("--calpath", action="store", type="string", dest="calpath", help="Path to the directory that contains the calibration files.", default='../cal/')
 parser.add_option("-v", "--verbose", action="store", type="float", dest="verbose", help="Display more output. Set to 0-2.", default=0)
 parser.add_option("--memlight", action="store", type="float", dest="memlight", help="Reduce server-side memory usage by requesting data in chunks of no more than this depth in seconds.", default=100)
@@ -57,7 +57,7 @@ elif (options.ra and options.dec):
 else:
 	skypos = list(ast.literal_eval(options.skypos))
 
-if options.framesz and options.coadd:
+if options.stepsz and options.coadd:
 	print "Cannot specify by --frame and --coadd."
 	exit(1)
 
@@ -88,26 +88,26 @@ if not options.overwrite:
 		print 'File '+str(options.cntfile)+' exists. Use --overwrite.'
 		exit(0)
 
-if options.tranges:
-	tranges = list(ast.literal_eval(options.tranges))
+if options.trange:
+	trange = list(ast.literal_eval(options.trange))
 else:
 	if options.verbose and not (options.tmin or options.tmax):
 		print 'No time range given. Using all available exposure time.'
 	else:
 		print 'Using all exposure in ['+str(options.tmin)+','+str(options.tmax)+']'
-	tranges = fGetTimeRanges(options.band,skypos,maxgap=options.gap,verbose=options.verbose,minexp=options.minexp,trange=[options.tmin,options.tmax],retries=options.retries)
-	if not len(tranges):
+	trange = fGetTimeRanges(options.band,skypos,maxgap=options.gap,verbose=options.verbose,minexp=options.minexp,trange=[options.tmin,options.tmax],retries=options.retries)
+	if not len(trange):
 		print 'No exposure time in database.'
 		exit(0)
 	if options.verbose:
-		print 'Using '+str((tranges[:,1]-tranges[:,0]).sum())+' seconds (raw) in '+str(len(tranges))+' distinct exposures.'
+		print 'Using '+str((trange[:,1]-trange[:,0]).sum())+' seconds (raw) in '+str(len(trange))+' distinct exposures.'
 
-# Make sure tranges is a 2D array
-if len(np.array(tranges).shape)==1:
-	tranges=[tranges]
+# Make sure trange is a 2D array
+if len(np.array(trange).shape)==1:
+	trange=[trange]
 
 
 response = True if (options.intfile or options.rrfile) else False
 
-write_images(options.band,skypos,tranges,skyrange,width=False,height=False,write_cnt=options.cntfile,write_int=options.intfile,write_rr=options.rrfile,framesz=options.framesz,clobber=options.overwrite,verbose=options.verbose,memlight=options.memlight,coadd=options.coadd,response=response,calpath=options.calpath,retries=options.retries)
+write_images(options.band,skypos,trange,skyrange,width=False,height=False,write_cnt=options.cntfile,write_int=options.intfile,write_rr=options.rrfile,framesz=options.stepsz,clobber=options.overwrite,verbose=options.verbose,memlight=options.memlight,coadd=options.coadd,response=response,calpath=options.calpath,retries=options.retries)
 
