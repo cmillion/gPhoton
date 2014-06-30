@@ -2,26 +2,40 @@
 import os
 import ast
 import argparse
-from curvetools import *
+import curvetools as ct
+#from curvetools import 
 from imagetools import * # For JPEG preview image creation
 from optparse import OptionParser
 from dbasetools import fGetTimeRanges, suggest_parameters
-import ref # refactored lightcurve cration
+#import ref # refactored lightcurve cration
 
-def gAperture(args):
+#def gAperture(args):
+def gAperture(band,skypos,radius,csvfile=False,annulus=[False,False],
+              stepsz=False,verbose=0,clobber=False,trange=[1,1000000000000]):
+    """Runs gAperture and returns the data in a python dict() and as
+    a CSV file if outfile is specified. Can be called from the interpreter.
+    """
     if args.verbose>1:
-        print args.band,args.skypos[0],args.skypos[1],args.radius,args.csvfile,args.annulus,args.stepsz,args.verbose
-    print args.band,args.skypos[0],args.skypos[1],args.radius,args.csvfile,args.annulus,args.stepsz,args.verbose
-    ref.new_write_curve(args.band,args.skypos[0],args.skypos[1],args.radius,args.csvfile,annulus=args.annulus,stepsz=args.stepsz,verbose=args.verbose)
-    return
+        print "Generating a light curve with the following paramters:"
+        print " band:    "+str(band)
+        print " skypos:  "+str(skypos)
+        print " radius:  "+str(radius)
+        print " annulus: "+str(annulus)
+        print " stepsz:  "+str(stepsz)
+        print " csvfile: "+str(csvfile)
+        print " verbose: "+str(verbose)
+    data = ct.write_curve(band,skypos[0],skypos[1],radius,csvfile=csvfile,annulus=annulus,stepsz=stepsz,verbose=verbose,clobber=clobber)
+    return data
 
 def check_radius(args):
+    """Checks the radius value."""
     if not args.radius and not args.suggest:
         print "Must specify an aperture radius."
         exit(0)
     return
 
 def suggest(args):
+    """Generates suggested lightcurve parameters. Wraps suggest_parameters()"""
     (args.ra, args.dec, args.radius, args.annulus1,
                     args.annulus2) = suggest_parameters(args.band,args.skypos)
     if args.verbose:
@@ -31,6 +45,7 @@ def suggest(args):
     return args
 
 def check_skypos(args):
+    """Checks and formats the skypos values."""
     if not (args.ra and args.dec) and not args.skypos:
         print "Must specify either RA/Dec or skypos."
         exit(0)
@@ -46,12 +61,14 @@ def check_skypos(args):
     return args
 
 def check_stepsz(args):
+    """Checks the stepsz value."""
     if args.stepsz and args.coadd:
         print "Cannot specify both --stepsz and --coadd."
         exit(0)
     return
 
 def check_annulus(args):
+    """Checks and formats the annulus values."""
     if not (args.annulus1 and args.annulus2) and not args.annulus:
         args.annulus = [False,False]
     elif args.annulus1 and args.annulus2:
@@ -60,7 +77,10 @@ def check_annulus(args):
         args.annulus = ast.literal_eval(args.annulus)
     return args
 
+# TODO: fGetTimeRanges is probalby not actually necessary. What we want
+# instead is for a way to specifically include or exclude time ranges.
 def check_tranges(args):
+    """Checks and formats the tranges values."""
     args.tranges = (list(ast.literal_eval(args.tranges)) if
                                     args.tranges else [args.tmin,args.tmax])
     if args.verbose:
@@ -84,7 +104,6 @@ def check_args(args):
     check_stepsz(args)
     args = check_skypos(args)
     args = check_annulus(args)
-    # FIXME: This whole fGetTimeRanges thing is probably unnecessary now.
     args = check_tranges(args)
     return args
 
@@ -150,14 +169,14 @@ def setup_parser():
     parser.add_argument("--bestparams", "--best", action="store_true",
         dest="best",
         help="Auto set params to produce the highest quality lightcurve.",
-        default=False)#, type=bool)
+        default=False)
     parser.add_argument("--suggest", "--optimize", action="store_true",
         dest="suggest",
         help="Suggest optimum parameters for aperture photometry.",
-        default=False)#, type=bool)
+        default=False)
     parser.add_argument("--overwrite", "--ow", "--clobber",
         action="store_true", dest="overwrite", default=False,
-        help="Overwrite any preexisting files. Will supress warnings.")#, type=bool)
+        help="Overwrite any preexisting files. Will supress warnings.")
     parser.add_argument("--iocode", action="store", dest="iocode",
         default="wb",
         help="The iocode to be past to the cvs writer. Don't much with this.",
@@ -165,7 +184,7 @@ def setup_parser():
     return parser
 
 def reconstruct_command(args):
-    # Reconstruct the command line
+    """Reconstruct the command line."""
     cmd = './gAperture.py'
     for key in args.__dict__.keys():
     	if args.__dict__[key]:
@@ -175,6 +194,9 @@ def reconstruct_command(args):
     return cmd
 
 def setup_file(args):
+    """ If requested, create a header for the CSV that includes the column
+    names and a reconstruction of the command line call.
+    """
     if not args.csvfile:
         args.csvfile = False
     else:
@@ -201,7 +223,8 @@ def stamp(args):
         args.skyrange = [width,width]
         write_jpeg(args.stamp, args.band, args.skypos, args.tranges,
                    args.skyrange, width=False, height=False,
-                   stepsz=args.stepsz, clobber=True, verbose=args.verbose)
+                   stepsz=args.stepsz, clobber=args.overwrite,
+                   verbose=args.verbose)
         return
  
 if __name__ == '__main__':
@@ -209,5 +232,9 @@ if __name__ == '__main__':
     args = setup_parser().parse_args()
     args = check_args(args)
     args = setup_file(args)
-    gAperture(args)
+    # TODO: add support for trange(s)
+    data = gAperture(args.band, args.skypos, args.radius,
+                     csvfile=args.csvfile, annulus=args.annulus,
+                     stepsz=args.stepsz, verbose=args.verbose,
+                     clobber=args.overwrite)
 

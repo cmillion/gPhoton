@@ -54,10 +54,11 @@ def manage_requests(query,maxcnt=100,wait=10):
 			time.sleep(wait)
 			cnt += 1
 			print_inline('Query retry attempt '+str(int(cnt))+'.')
+            
 
 	print 'Query unsuccessful after '+str(int(maxcnt))+' attempts.'
 	print '		'+str(query)
-	return 0
+	return False
 
 def wheretrue(conditions):
 	"""Returns indices for which the input conditions are true.
