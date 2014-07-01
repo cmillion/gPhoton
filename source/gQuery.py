@@ -19,7 +19,7 @@ def getValue(query,verbose=0,maxcnt=20):
 		out = float(manage_requests(query,maxcnt=maxcnt).json()['Tables'][0]['Rows'][0][0])
 	except:
 		print 'CONNECTION TIMEOUT'
-        raise
+        #raise
 	return out
 
 def getArray(query,verbose=0,maxcnt=100): 
@@ -29,7 +29,7 @@ def getArray(query,verbose=0,maxcnt=100):
 		out = manage_requests(query,maxcnt=maxcnt).json()['Tables'][0]['Rows']
 	except:
 		print 'CONNECTION TIMEOUT'
-        raise
+        #raise
 	return out
 
 def mcat_sources(band,ra0,dec0,radius,maglimit=20):
