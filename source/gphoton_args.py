@@ -50,7 +50,7 @@ def setup_args(function_name=None):
 
         #ANGLE is accepted by gMap only.
         if function_name == 'gmap':
-            parser.add_argument("--angle", action="store", type=float, dest="angle", help="The angle subtended in both RA and DEC in degrees.")
+            parser.add_argument("--angle", action="store", type=float, dest="angle", help="The angle subtended in both RA and DEC in degrees.",default=None)
 
         # ANNULUS is accepted by gAperture only.
         if function_name == 'gaperture':
@@ -88,7 +88,7 @@ def setup_args(function_name=None):
 
         #DECANGLE is accepted by gMap only.
         if function_name == 'gmap':
-            parser.add_argument("--decangle", action="store", type=float, dest="decangle", help="The angle of sky in degrees that the declination subtends.  Overrides --angle.")
+            parser.add_argument("--decangle", action="store", type=float, dest="decangle", help="The angle of sky in degrees that the declination subtends.  Overrides --angle.",default=None)
 
         # DETSIZE is accepted by gFind, gAperture, and gMap.
         if function_name == 'gfind' or function_name == 'gaperture' or function_name == 'gmap':
@@ -148,7 +148,7 @@ def setup_args(function_name=None):
 
         #RAANGLE is accepted by gMap only.
         if function_name == 'gmap':
-            parser.add_argument("--raangle", action="store", type=float, dest="raangle", help="The angle of sky in degrees that the right ascension subtends.  Overrides --angle.")
+            parser.add_argument("--raangle", action="store", type=float, dest="raangle", help="The angle of sky in degrees that the right ascension subtends.  Overrides --angle.",default=None)
 
         #RESPONSE is accepted by gMap only.
         if function_name == 'gmap':
@@ -439,6 +439,19 @@ def check_args(args, function_name=None):
             elif (ra and dec):
 		skypos = [ra,dec]
 
+        # Create the "skyrange" list if skyrange ("angle") was not directly supplied on input.
+        if function_name == 'gmap':
+            if angle is not None:
+                skyrange = [angle,angle]
+                if raangle is not None:
+                    skyrange[0] = raangle
+                if decangle is not None:
+                    skyrange[1] = decangle
+            elif raangle is not None and decangle is not None:
+                skyrange = [raangle,decangle]
+            else:
+                raise gPhotonArgsError("Must specify either RAANGLE/DECANGLE or ANGLE.")
+
 	# Make sure tmin < tmax, create the "trange" list if trange was not directly supplied on input, but tmin and tmax were.  Note that since there are default values we don't need to check if these variables are None.
         if function_name == 'gfind' or function_name == 'gaperture' or function_name == 'gmap':
             if tmin >= tmax:
@@ -461,6 +474,26 @@ def check_args(args, function_name=None):
         if function_name == 'gaperture':
             if usehrbg and not annulus:
                 raise gPhotonArgsError("You must specify a background annulus with HRBG.")
+
+        # If the OVERWRITE option is not set, and output files already exist, then exit early to not waste computation on stuff that won't get saved.  We can consider changing this later to ask the user if they want to continue anyways, but I don't think that makes a lot of sense.
+        if function_name == 'gaperture':
+            if outfile:
+                if not args.overwrite and os.path.exists(outfile):
+                    raise gPhotonArgsError("Output lightcurve file "+outfile+" already exists.  Use --overwrite or specify a different output file name.")
+            if stamp:
+                if not args.overwrite and os.path.exists(stamp):
+                    raise gPhotonArgsError("Output preview image file "+stamp+" already exists.  Use --overwrite or specify a different output file name.")
+            
+        if function_name == 'gmap':
+            if cntfile:
+                if not args.overwrite and os.path.exists(cntfile):
+                    raise gPhotonArgsError("Count image file "+cntfile+" already exists.  Use --overwrite or specify a different output file name.")
+            if intfile:
+                if not args.overwrite and os.path.exists(intfile):
+                    raise gPhotonArgsError("Intensity image file "+intfile+" already exists.  Use --overwrite or specify a different output file name.")
+            if rrfile:
+                if not args.overwrite and os.path.exists(rrfile):
+                    raise gPhotonArgsError("Response image file "+rrfile+" already exists.  Use --overwrite or specify a different output file name.")
         
         # Return the appropriate set of parameters given the input function.  We do not return parameters that aren't used later, or that have no possibility of changing from their input values (e.g., Booleans that do not depend on other parameters).
 	if function_name == 'gfind':
@@ -468,5 +501,4 @@ def check_args(args, function_name=None):
         elif function_name == 'gaperture':
             return (annulus,band,best,detsize,outfile,maxgap,minexp,radius,retries,skypos,stamp,stepsz,trange,usehrbg,userr)
         elif function_name == 'gmap':
-            return (band, skypos, trange, maxgap, minexp, detsize, retries)
-
+            return (band,cntfile,detsize,intfile,rrfile,skypos,maxgap,memlight,minexp,retries,skyrange,stepsz,trange)
