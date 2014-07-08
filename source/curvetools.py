@@ -7,24 +7,24 @@ from imagetools import backgroundmap
 import dbasetools as dbt
 import galextools as gxt
 
-def compute_background(band,skypos,trange,radius,annulus,verbose=0):
+def compute_background(band,skypos,trange,radius,annulus,verbose=0,retries=20):
 	"""Estimated counts within an aperture based upon rate within an annulus.
 	counts in aperture = (area of aperture) * (counts in annulus) / (area of annulus)
 	"""
 	if annulus[1]-annulus[0]<=0:
 		return 0.
 	else:
-		return (area(radius)/(area(annulus[1])-area(annulus[0]))) * (gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[1]),verbose=verbose)-gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[0]),verbose=verbose)) if (annulus[0] and annulus[1]) else 0.
+		return (area(radius)/(area(annulus[1])-area(annulus[0]))) * (gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[1]),verbose=verbose,retries=retries)-gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[0]),verbose=verbose,retries=retries)) if (annulus[0] and annulus[1]) else 0.
 
 def mask_background_image(band,skypos,trange,radius,annulus,verbose=0,
-			  maglimit=28.,pixsz=0.000416666666666667,NoData=-999):
+			  maglimit=28.,pixsz=0.000416666666666667,NoData=-999,retries=20):
 	"""Creates an image of the sky within an annulus."""
 	skyrange = [2*annulus[1],2*annulus[1]]
 	imsz = gxt.deg2pix(skypos,skyrange)
 	# FIXME: Duplicate code from backgroundmap()
 	# Create a background map with stars blacked out
 	bg=backgroundmap(band,skypos,trange,skyrange,verbose=verbose,
-			 maglimit=maglimit)
+			 maglimit=maglimit,retries=retries)
 	# Create a position reference array
 	xind =          np.array([range(int(imsz[1]))]*int(imsz[0]))-(imsz[0]/2.)+0.5
 	yind = np.rot90(np.array([range(int(imsz[0]))]*int(imsz[1]))-(imsz[1]/2.))+0.5
@@ -40,13 +40,13 @@ def mask_background_image(band,skypos,trange,radius,annulus,verbose=0,
 
 def compute_background_improved(band,skypos,trange,radius,annulus,verbose=0,
 				maglimit=28.,pixsz=0.000416666666666667,
-				NoData=-999):
+				NoData=-999,retries=20):
 	"""Estimated counts within the aperture based on counts within the annulus
 	with sources within the annulus masked out (to the specified maglimit).
 	"""
 	bg = mask_background_image(band,skypos,trange,radius,annulus,
 				   verbose=verbose,maglimit=maglimit,
-				   pixsz=pixsz,NoData=NoData)
+				   pixsz=pixsz,NoData=NoData,retries=retries)
 	# The mean, unmasked background pixel value normalized by the area
 	#  of a pixel and scaled to the area of the aperture
 	return (area(radius)*bg[np.where(bg>=0)].mean()/(pixsz)**2.)
@@ -54,7 +54,7 @@ def compute_background_improved(band,skypos,trange,radius,annulus,verbose=0,
 # This computes the mean response within the aperture. It is slightly less
 #  precise but much faster than building a relative response map.
 def aperture_response(band,skypos,tranges,radius,verbose=0,tscale=1000.,
-		      calpath='../cal/'):
+		      calpath='../cal/',retries=20):
 	"""Estimates the mean response within the aperture by averaging over
 	the portion of the flat upon which the detector falls.
 	This might be less accurate than building a response image,
@@ -67,14 +67,14 @@ def aperture_response(band,skypos,tranges,radius,verbose=0,tscale=1000.,
 	flatinfo = get_fits_header(flat_filename(band,calpath))
 	detsize, imsz, pixsz = 1.25, flat.shape[0], flatinfo['CDELT2']
 
-	tranges = map(lambda trange: dbt.fGetTimeRanges(band,skypos,verbose=verbose,trange=trange),tranges)[0]
+	tranges = map(lambda trange: dbt.fGetTimeRanges(band,skypos,verbose=verbose,trange=trange,retries=retries),tranges)[0]
 
 	response = 0.
 	# FIXME: Dupe code. A lot of this should be its own function.
 	for trange in tranges:
 		# Load all the aspect data.
 		entries = gQuery.getArray(gQuery.aspect(trange[0],trange[1]),
-					  verbose=verbose)
+					  verbose=verbose,retries=retries)
 		n 	= len(entries)
 		asptime	= np.float64(np.array(entries)[:,2])/tscale
 		aspra	= np.float32(np.array(entries)[:,3])
@@ -110,7 +110,7 @@ def aperture_response(band,skypos,tranges,radius,verbose=0,tscale=1000.,
 				continue
 			distarray = np.sqrt(((vectors[0,i]-xind)**2.)+((vectors[1,i]-yind)**2.))
 			ix = np.where(distarray<=pixrad)
-			response += dbt.compute_exptime(band,asprange,verbose=verbose)*scales[i]*flat[ix].mean()
+			response += dbt.compute_exptime(band,asprange,verbose=verbose,retries=retries)*scales[i]*flat[ix].mean()
 		if verbose >1:
 			print_inline('                                             ')
 
@@ -118,7 +118,7 @@ def aperture_response(band,skypos,tranges,radius,verbose=0,tscale=1000.,
 
 # Returns the flux data within a radius/annulus
 def compute_flux(band,skypos,tranges,radius,annulus=[None,None],userr=False,
-		 usehrbg=False,verbose=0,calpath='../cal/',detsize=1.25):
+		 usehrbg=False,verbose=0,calpath='../cal/',detsize=1.25,retries=20):
 	"""Returns a data structure with a bunch of information about the target.
 	This includes flux, exposure time, background, response, etc.
 	"""
@@ -127,19 +127,19 @@ def compute_flux(band,skypos,tranges,radius,annulus=[None,None],userr=False,
 	data = {'expt':0.,'bg':0., 'bghr':0.,'counts':0.,'rr':1.}
 	# Do we really need this? It would be cleaner if it didn't loop.
 	for trange in tranges:
-		expt = dbt.compute_exptime(band,trange,verbose=verbose,skypos=skypos,detsize=detsize)
-		expt = dbt.compute_exptime(band,trange,verbose=verbose,detsize=detsize)
+		expt = dbt.compute_exptime(band,trange,verbose=verbose,skypos=skypos,detsize=detsize,retries=retries)
+		expt = dbt.compute_exptime(band,trange,verbose=verbose,detsize=detsize,retries=retries)
 		if not expt:
 			continue
 		data['expt'] += expt
-		data['bg'] += compute_background_improved(band,skypos,trange,radius,annulus,verbose=verbose) if usehrbg else compute_background(band,skypos,trange,radius,annulus,verbose=verbose)
-		data['counts'] += gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],radius),verbose=verbose)
+		data['bg'] += compute_background_improved(band,skypos,trange,radius,annulus,verbose=verbose,retries=retries) if usehrbg else compute_background(band,skypos,trange,radius,annulus,verbose=verbose,retries=retries)
+		data['counts'] += gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],radius),verbose=verbose,retries=retries)
 
 	if verbose>1:
 		print 'Integrated '+str(data['expt'])+' seconds of exposure.'
 
 	# FIXME: Need to account for 1.018 response shift after 881881215.995
-	data['rr'] = aperture_response(band,skypos,tranges,radius,verbose=verbose,calpath=calpath)/data['expt'] if userr and expt>0 else 1
+	data['rr'] = aperture_response(band,skypos,tranges,radius,verbose=verbose,calpath=calpath,retries=retries)/data['expt'] if userr and expt>0 else 1
 
 	# TODO: This list of assertions should maybe be folded into a
 	#  list comprehension of some kind.
@@ -165,9 +165,9 @@ def compute_flux(band,skypos,tranges,radius,annulus=[None,None],userr=False,
 	return data
 
 def coadd_mag(band,skypos,radius,annulus=[None,None],userr=False,usehrbg=False,
-	      verbose=0,detsize=1.25,maxgap=1,minexp=1,calpath='../cal/'):
-	tranges = dbt.fGetTimeRanges(band,skypos,verbose=verbose,maxgap=maxgap,minexp=minexp)
-	return compute_flux(band,skypos,tranges,radius,annulus=annulus,userr=userr,usehrbg=usehrbg,verbose=verbose,calpath=calpath,detsize=detsize)
+	      verbose=0,detsize=1.25,maxgap=1,minexp=1,calpath='../cal/',retries=20):
+	tranges = dbt.fGetTimeRanges(band,skypos,verbose=verbose,maxgap=maxgap,minexp=minexp,retries=retries)
+	return compute_flux(band,skypos,tranges,radius,annulus=annulus,userr=userr,usehrbg=usehrbg,verbose=verbose,calpath=calpath,detsize=detsize,retries=retries)
 
 def colnames():
 	"""Defines the column names for the light curve CSV file."""
@@ -183,7 +183,7 @@ def flux_row_constructor(data):
 
 def compute_curve(band,skypos,tranges,radius,annulus=[None,None],stepsz=None,
 		  coadd=False,userr=False,usehrbg=False,verbose=0,
-		  calpath='../cal/',detsize=1.25,maxgap=1,minexp=1):
+		  calpath='../cal/',detsize=1.25,maxgap=1,minexp=1,retries=20):
 	"""Computes a light curve over the requested parameters."""
 	data = []
 	# If coadd is specified, integrate across all time ranges.
@@ -192,7 +192,8 @@ def compute_curve(band,skypos,tranges,radius,annulus=[None,None],stepsz=None,
 		result = compute_flux(band,skypos,tranges,radius,
 				      annulus=annulus,userr=userr,
 				      usehrbg=usehrbg,verbose=verbose,
-				      calpath=calpath,detsize=detsize)
+				      calpath=calpath,detsize=detsize,
+				      retries=retries)
 		data.append(flux_row_constructor(result))
 	else:
 		# TODO: map()
@@ -202,7 +203,7 @@ def compute_curve(band,skypos,tranges,radius,annulus=[None,None],stepsz=None,
 			result=compute_flux(band,skypos,[trange],radius,
 					    annulus=annulus,verbose=verbose,
 					    userr=userr,usehrbg=usehrbg,
-					    calpath=calpath)
+					    calpath=calpath,retries=retries)
 			if verbose>1:
 				print '        '+str(result['mag'])+' magnitude'
                         data.append(flux_row_constructor(result))
@@ -211,11 +212,11 @@ def compute_curve(band,skypos,tranges,radius,annulus=[None,None],stepsz=None,
 
 def write_curve(band,skypos,tranges,radius,outfile=False,annulus=[None,None],
 		stepsz=None,coadd=False,userr=False,usehrbg=False,verbose=0,
-		iocode='wb',calpath='../cal/',detsize=1.25):
+		iocode='wb',calpath='../cal/',detsize=1.25,retries=20):
 	"""Generates a light curve and writes it to the a CSV file."""
 	data = compute_curve(band,skypos,tranges,radius,annulus=annulus,
 			     stepsz=stepsz,userr=userr,usehrbg=usehrbg,
-			     verbose=verbose,coadd=coadd,calpath=calpath,detsize=detsize)
+			     verbose=verbose,coadd=coadd,calpath=calpath,detsize=detsize,retries=retries)
 	if outfile:
 		spreadsheet = csv.writer(open(outfile,iocode), delimiter=',',
 					 quotechar='|',

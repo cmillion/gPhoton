@@ -4,14 +4,14 @@ import numpy as np
 import gQuery
 from MCUtils import print_inline,area
 
-def fGetTimeRanges(band,skypos,trange=[1,1000000000000],tscale=1000.,detsize=1.25,verbose=0,maxgap=1.,minexp=1.):
+def fGetTimeRanges(band,skypos,trange=[1,1000000000000],tscale=1000.,detsize=1.25,verbose=0,maxgap=1.,minexp=1.,retries=20):
 	"""Find the contiguous time ranges within a time range at a specific location.
 	minexp - Don't include exposure time less than this.
 	maxgap - Gaps in exposure longer than this initiate a new time range.
 	detsize- Fiddle with this if you want to exlude the edges of the detector.
 	"""
 	try:
-		times = np.array(gQuery.getArray(gQuery.exposure_ranges(band,skypos[0],skypos[1],t0=trange[0],t1=trange[1],detsize=detsize,tscale=tscale),verbose=verbose),dtype='float64')[:,0]/tscale
+		times = np.array(gQuery.getArray(gQuery.exposure_ranges(band,skypos[0],skypos[1],t0=trange[0],t1=trange[1],detsize=detsize,tscale=tscale),verbose=verbose,retries=retries),dtype='float64')[:,0]/tscale
 	except:
 		return np.array([],dtype='float64')
 	if verbose:
@@ -45,12 +45,12 @@ def fGetTimeRanges(band,skypos,trange=[1,1000000000000],tscale=1000.,detsize=1.2
 
 	return np.array(chunks,dtype='float64')
 
-def compute_exptime(band,trange,verbose=0,skypos=[False,False],detsize=1.25):
+def compute_exptime(band,trange,verbose=0,skypos=[False,False],detsize=1.25,retries=20):
 	"""Compute the effective exposure time."""
 	# FIXME: This skypos[] check appears to not work properly and leads
 	#  to dramatic _underestimates_ of the exposure time.
 	if skypos[0] and skypos[1]:
-		tranges = fGetTimeRanges(band,skypos,verbose=verbose,trange=trange)
+		tranges = fGetTimeRanges(band,skypos,verbose=verbose,trange=trange,retries=retries)
 	else:
 		tranges = [trange]
 	exptime = 0.
@@ -58,15 +58,15 @@ def compute_exptime(band,trange,verbose=0,skypos=[False,False],detsize=1.25):
 		if trange[0]==trange[1]:
 			continue
 		rawexpt  = trange[1]-trange[0]
-		shutdead = gQuery.getArray(gQuery.shutdead(band,trange[0],trange[1]),verbose=verbose)
+		shutdead = gQuery.getArray(gQuery.shutdead(band,trange[0],trange[1]),verbose=verbose,retries=retries)
 		exptime += (rawexpt-shutdead[0][0])*(1.-shutdead[1][0])
 
 	return exptime
 
-def mcat_skybg(band,skypos,radius,verbose=0):
+def mcat_skybg(band,skypos,radius,verbose=0,retries=20):
 	"""Estimate the sky background using the MCAT skybg for nearby sources."""
 	# Setting maglimit to 30 so that it gets _everything_.
-	sources = gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=30))
+	sources = gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=30),retries=retries)
 
 	# The MCAT reports skybg in photons/sec/sq.arcsec
 	if band=='NUV':
@@ -77,21 +77,21 @@ def mcat_skybg(band,skypos,radius,verbose=0):
 	# And radius is in degrees
 	return skybg*area(radius*60.*60.)
 
-def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,catalog='MCAT'):
+def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,catalog='MCAT',retries=20):
 	"""Return the mean position of sources within the search radius."""
-	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose))
+	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
 	ix = np.where(out[:,-2]>0) if band=='NUV' else np.where(out[:,-1]>0)
 	fwhm = out[ix,-2].mean() if band=='NUV' else out[ix,-1].mean()
 	return out[ix,0].mean(),out[ix,1].mean(),round(fwhm,4)
 
-def nearest_source(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT'):
+def nearest_source(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT',retries=20):
 	"""Return targeting parameters for the nearest MCAT source to a position."""
-	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose))
+	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
 	if not len(out) and band=='FUV':
 		if verbose:
 			print "No nearby MCAT source found in FUV. Trying NUV..."
 		band = 'NUV'
-		out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose))
+		out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
 	if not len(out) and band=='NUV':
 		if verbose:
 			print "No nearby MCAT source found. Using input sky position."
@@ -103,21 +103,21 @@ def nearest_source(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT
 	# Note that this doesn't cope with multiple entries for the same source.
 	s = out[np.where(dist == dist.min())][0]
 	# RA, Dec, NUV mag, FUV mag, NUV fwhm, FUV fwhm
-	return avg_sources(band,[s[0],s[1]],verbose=verbose)
+	return avg_sources(band,[s[0],s[1]],verbose=verbose,retries=retries)
 	#return s[0],s[1],s[2],s[3],s[7],s[8]
 
-def nearest_distinct_source(band,skypos,radius=0.1,maglimit=22.0,verbose=0,catalog='MCAT'):
+def nearest_distinct_source(band,skypos,radius=0.1,maglimit=22.0,verbose=0,catalog='MCAT',retries=20):
 	"""Return parameters for the nearest non-targeted source."""
-	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose))
+	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
 	dist=np.sqrt( (out[:,0]-skypos[0])**2 + (out[:,1]-skypos[1])**2)
 	ix = np.where(dist>0.005)
 	return np.array(out)[ix][np.where(dist[ix]==dist[ix].min())][0]
 
-def suggest_bg_radius(band,skypos,radius=0.1,maglimit=22,verbose=0,catalog='MCAT'):
+def suggest_bg_radius(band,skypos,radius=0.1,maglimit=22,verbose=0,catalog='MCAT',retries=20):
 	"""Returns a recommended background radius based upon the
 	positions and FWHM of nearby sources in the MCAT.
 	"""
-	nearest = nearest_distinct_source(band,skypos,verbose=verbose)
+	nearest = nearest_distinct_source(band,skypos,verbose=verbose,retries=retries)
 	dist = np.sqrt( (nearest[0]-skypos[0])**2 + (nearest[1]-skypos[1])**2 )
 	return round(dist-3*nearest[-2 if band=='NUV' else -1],4)
 
@@ -144,11 +144,11 @@ def optimize_annulus(optrad,outann,verbose=0):
 	# Doing the fancy thing above resulted in too many [0,0] annuli
 	return round(1.2*optrad,4),round(2*optrad,4)
 
-def suggest_parameters(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT'):
+def suggest_parameters(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT',retries=20):
 	"""Suggest an optimum aperture position and size."""
-	ra,dec,fwhm=nearest_source(band,skypos,radius=radius,maglimit=maglimit,verbose=verbose)
+	ra,dec,fwhm=nearest_source(band,skypos,radius=radius,maglimit=maglimit,verbose=verbose,retries=retries)
 	optrad = round(2*fwhm,4)
-	outann = suggest_bg_radius(band,skypos,maglimit=maglimit,verbose=verbose)
+	outann = suggest_bg_radius(band,skypos,maglimit=maglimit,verbose=verbose,retries=retries)
 	annulus = optimize_annulus(optrad,outann,verbose=verbose)
 	if verbose:
 		print "Suggested sky position [RA,Dec]: ["+str(ra)+", "+str(dec)+"]"

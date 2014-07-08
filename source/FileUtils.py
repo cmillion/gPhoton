@@ -64,10 +64,10 @@ def load_aspect(aspfile):
 
 	return ra[ix], dec[ix], twist[ix], time[ix], header, aspflags[ix]
 
-def web_query_aspect(eclipse):
+def web_query_aspect(eclipse,retries=20):
 	"""Grabs the aspect data from MAST databases based on eclipse."""
 	print "Attempting to query MAST database for aspect records."
-	entries = gQuery.getArray(gQuery.aspect_ecl(eclipse))
+	entries = gQuery.getArray(gQuery.aspect_ecl(eclipse),retries=retries)
 	n = len(entries)
 	print '		Located '+str(n)+' aspect entries.'
 	if not n:
