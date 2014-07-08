@@ -137,6 +137,11 @@ def compute_flat_scale(t,band,verbose=1):
 
 	flat_scale=flat_correct_0+(flat_correct_1*t)+(flat_correct_2*t)*t
 
+	# There's a bulk shift in the response after the CSP
+	ix = np.where(t>=881881215.995)
+	if len(ix):
+		flat_scale[ix] *= 1.018
+
 	if verbose:
 		print "         flat scale = ",flat_scale
 
