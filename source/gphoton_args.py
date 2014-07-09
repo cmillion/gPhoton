@@ -167,7 +167,7 @@ def setup_args(function_name=None):
         if function_name == 'gmap':
             parser.add_argument("--memlight", action="store", type=float,
             dest="memlight", default=100.,
-            help="Reduce server-side memory usage by requesting data in chunks of no more than this depth in seconds.  Default = 100.", default=100.)
+            help="Reduce server-side memory usage by requesting data in chunks of no more than this depth in seconds.  Default = 100.")
 
         # MINEXP is accepted by gFind, gAperture, and gMap.
         if function_name == 'gfind' or function_name == 'gaperture' or function_name == 'gmap':

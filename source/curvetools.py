@@ -1,265 +1,262 @@
-import csv
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+# gPhoton specific 
 import gQuery
-from MCUtils import *
-from gnomonic import *
+import MCUtils as mc
+import dbasetools as dbt # fGetTimeRanges(), compute_exptime()
+import galextools as gxt # compute_flat_scale()
 from FileUtils import flat_filename
-from imagetools import backgroundmap
-import dbasetools as dbt
-import galextools as gxt
 
-def compute_background(band,skypos,trange,radius,annulus,verbose=0,retries=20):
-	"""Estimated counts within an aperture based upon rate within an annulus.
-	counts in aperture = (area of aperture) * (counts in annulus) / (area of annulus)
-	"""
-	if annulus[1]-annulus[0]<=0:
-		return 0.
-	else:
-		return (area(radius)/(area(annulus[1])-area(annulus[0]))) * (gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[1]),verbose=verbose,retries=retries)-gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],annulus[0]),verbose=verbose,retries=retries)) if (annulus[0] and annulus[1]) else 0.
+def gphot_params(band,skypos,radius,annulus=[False,False],calpath='../cal/',
+                 verbose=False,detsize=1.25,stepsz=False,
+                 trange=[1,1000000000000],maglimit=False):
+    """Populate a dict() with parameters that are constant over all bins."""
+    return {'band':band,'ra0':skypos[0],'dec0':skypos[1],'skypos':skypos,
+            'trange':trange,'radius':radius,'annulus':annulus,
+            'stepsz':stepsz,'calpath':calpath,'verbose':verbose,
+            'maglimit':maglimit,'detsize':detsize,
+            'apcorrect1':gxt.apcorrect1(radius,band),
+            'apcorrect2':gxt.apcorrect2(radius,band),
+            'detbg':gxt.detbg(mc.area(radius),band)}
 
-def mask_background_image(band,skypos,trange,radius,annulus,verbose=0,
-			  maglimit=28.,pixsz=0.000416666666666667,NoData=-999,retries=20):
-	"""Creates an image of the sky within an annulus."""
-	skyrange = [2*annulus[1],2*annulus[1]]
-	imsz = gxt.deg2pix(skypos,skyrange)
-	# FIXME: Duplicate code from backgroundmap()
-	# Create a background map with stars blacked out
-	bg=backgroundmap(band,skypos,trange,skyrange,verbose=verbose,
-			 maglimit=maglimit,retries=retries)
-	# Create a position reference array
-	xind =          np.array([range(int(imsz[1]))]*int(imsz[0]))-(imsz[0]/2.)+0.5
-	yind = np.rot90(np.array([range(int(imsz[0]))]*int(imsz[1]))-(imsz[1]/2.))+0.5
-	distarray = np.sqrt(((xind)**2.)+((yind)**2.))
-	# Cut out the annulus
-	# FIXME: (?) Distort the annulus to match the projection?
-	ix = np.where(distarray<=annulus[0]/pixsz)
-	bg[ix] = NoData
-	ix = np.where(distarray>=annulus[1]/pixsz)
-	bg[ix] = NoData
+def xieta2colrow(xi, eta, calfile, detsize=1.25):
+    """Convert detector xi, eta into col, row."""
+    flat = mc.get_fits_data(calfile)
+    flatinfo = mc.get_fits_header(calfile)
+    # should be able to get npix from the header...
+    npixx = flat.shape[0]
+    npixy = flat.shape[1]
+    pixsz = flatinfo['CDELT2']
+    flatfill = detsize/(npixx*pixsz)
+    col = ((( xi/36000.)/(detsize/2.)*flatfill + 1.)/2. * npixx)
+    row = (((eta/36000.)/(detsize/2.)*flatfill + 1.)/2. * npixy)
+    # You could theoretically drop a cut on detector position / detsize here...
+    # Also, is this cut absolutely necessary? I think it's already been taken
+    #  care of by the flag==0 assertion in the SQL query.
+    #cut = ((col > 0.) & (col < flat.shape[0]-1) &
+    #       (row > 0.) & (row < flat.shape[1]-1))
+    #cut = np.where(ix == True)
+    return col, row
 
-	return bg
+def hashresponse(band,events,calpath='../cal/',verbose=0):
+    """Given detector xi, eta, return the response at each position."""
+    # Hash out the response correction
+    if verbose:
+        mc.print_inline("Applying the response correction.")
+    flat = mc.get_fits_data(flat_filename(band, calpath))
+    events['col'], events['row'] = xieta2colrow(events['xi'], events['eta'],
+                                                flat_filename(band, calpath))
+    events['flat'] = flat[np.array(events['col'], dtype='int16'),
+                          np.array(events['row'], dtype='int16')]
+    events['scale'] = gxt.compute_flat_scale(events['t'], band)
+    # TODO: Separately do the binlinearly interpolated response
+    events['response'] = (events['flat']*events['scale'])
+    return events
 
-def compute_background_improved(band,skypos,trange,radius,annulus,verbose=0,
-				maglimit=28.,pixsz=0.000416666666666667,
-				NoData=-999,retries=20):
-	"""Estimated counts within the aperture based on counts within the annulus
-	with sources within the annulus masked out (to the specified maglimit).
-	"""
-	bg = mask_background_image(band,skypos,trange,radius,annulus,
-				   verbose=verbose,maglimit=maglimit,
-				   pixsz=pixsz,NoData=NoData,retries=retries)
-	# The mean, unmasked background pixel value normalized by the area
-	#  of a pixel and scaled to the area of the aperture
-	return (area(radius)*bg[np.where(bg>=0)].mean()/(pixsz)**2.)
+def pullphotons(band, ra0, dec0, t0, t1, radius, events={}, verbose=0,
+                tscale=1000.,calpath='../cal/'):
+    """Retrieve photons within an aperture from the database."""
+    if verbose:
+        mc.print_inline("Retrieving all photons at ["+str(ra0)+", "+
+                        str(dec0)+"] within a radius of "+str(radius)+
+                        " and between "+str(t0)+" and "+str(t1)+".")
+    stream = gQuery.getArray(
+        gQuery.allphotons(band, ra0, dec0, t0, t1, radius), verbose=verbose)
+    if not stream:
+        return events
+    events['t'] = np.array(stream,dtype='float64')[:,0]/tscale
+    # The float64 precision _is_ significant for RA / Dec.
+    events['ra'] = np.array(stream,dtype='float64')[:,1]
+    events['dec'] = np.array(stream,dtype='float64')[:,2]
+    events['xi'] = np.array(stream,dtype='float32')[:,3]
+    events['eta']= np.array(stream,dtype='float32')[:,4]
+    events = hashresponse(band, events, calpath=calpath, verbose=verbose)
+    return events
 
-# This computes the mean response within the aperture. It is slightly less
-#  precise but much faster than building a relative response map.
-def aperture_response(band,skypos,tranges,radius,verbose=0,tscale=1000.,
-		      calpath='../cal/',retries=20):
-	"""Estimates the mean response within the aperture by averaging over
-	the portion of the flat upon which the detector falls.
-	This might be less accurate than building a response image,
-	but it is fast(er).
-	"""
-	if verbose>1:
-		print 'Computing relative response over a '+str(radius)+' degree aperture.'
-	flat = np.flipud(np.rot90(get_fits_data(flat_filename(band,calpath),
-						verbose=0)))
-	flatinfo = get_fits_header(flat_filename(band,calpath))
-	detsize, imsz, pixsz = 1.25, flat.shape[0], flatinfo['CDELT2']
+def bg_sources(band,ra0,dec0,radius,maglimit=28.):
+    sources = gQuery.getArray(gQuery.mcat_sources(band,ra0,dec0,radius,
+                                                      maglimit=maglimit))
+    return {'ra':np.float32(np.array(sources)[:,0]),
+            'dec':np.float32(np.array(sources)[:,1]),
+            'fwhm':np.float32(np.array(sources)[:,7:9]),
+            'maglimit':maglimit,'radius':radius}
 
-	tranges = map(lambda trange: dbt.fGetTimeRanges(band,skypos,verbose=verbose,trange=trange,retries=retries),tranges)[0]
+def bg_mask_annulus(band,ra0,dec0,annulus,ras,decs,responses):
+    ix = np.where((mc.angularSeparation(ra0,dec0,ras,decs)>=annulus[0]) &
+                  (mc.angularSeparation(ra0,dec0,ras,decs)<=annulus[1]))
+    return ras[ix],decs[ix],responses[ix]
 
-	response = 0.
-	# FIXME: Dupe code. A lot of this should be its own function.
-	for trange in tranges:
-		# Load all the aspect data.
-		entries = gQuery.getArray(gQuery.aspect(trange[0],trange[1]),
-					  verbose=verbose,retries=retries)
-		n 	= len(entries)
-		asptime	= np.float64(np.array(entries)[:,2])/tscale
-		aspra	= np.float32(np.array(entries)[:,3])
-		aspdec	= np.float32(np.array(entries)[:,4])
-		asptwist= np.float32(np.array(entries)[:,5])
-		aspflags= np.float32(np.array(entries)[:,6])
-		asptwist= np.float32(np.array(entries)[:,9])
-		aspra0	= np.zeros(n)+skypos[0]
-		aspdec0	= np.zeros(n)+skypos[1]
+def bg_mask_sources(band,ra0,dec0,ras,decs,responses,sources):
+    for i in range(len(sources['ra'])):
+        ix = np.where(mc.angularSeparation(sources['ra'][i], sources['dec'][i],
+                      ras,decs)>=sources['fwhm'][i,:].max())
+        ras, decs, responses = ras[ix], decs[ix], responses[ix]
+    return ras,decs,responses
 
-		# Compute vectors
-		xi_vec, eta_vec = gnomfwd_simple(aspra0,aspdec0,aspra,aspdec,-asptwist,1.0/36000.,0.)
-		col  = (((( xi_vec/36000.)/(detsize/2.)*(detsize/(imsz*pixsz))+1.)/2.*imsz)-(imsz/2.))
-		row  = ((((eta_vec/36000.)/(detsize/2.)*(detsize/(imsz*pixsz))+1.)/2.*imsz)-(imsz/2.))
+def bg_mask(band,ra0,dec0,annulus,ras,decs,responses,sources):
+    ras,decs,responses = bg_mask_annulus(band,ra0,dec0,annulus,ras,
+                                         decs,responses)
+    return bg_mask_sources(band,ra0,dec0,ras,decs,responses,sources)
 
-		# Build reference arrays in which each element is equal to
-		#  its x or y value.
-		xind =          np.array([range(int(imsz))]*int(imsz))-(imsz/2.)
-		yind = np.rot90(np.array([range(int(imsz))]*int(imsz))-(imsz/2.))
 
-		vectors = rotvec(np.array([col,row]),-asptwist) 
-		scales  = gxt.compute_flat_scale(asptime,band,verbose=0)
+def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e4,ntests=10):
+    mc.print_inline('Estimating area of masked background annulus.')
+    ratios = np.zeros(ntests)
+    for i in range(ntests):
+        ann_events = bg_mask_annulus(band,ra0,dec0,annulus,
+                 np.random.uniform(ra0-annulus[1],ra0+annulus[1],nsamples),
+                 np.random.uniform(dec0-annulus[1],dec0+annulus[1],nsamples),
+                 np.ones(nsamples))
+        mask_events= bg_mask_sources(band,ra0,dec0,
+                 ann_events[0],ann_events[1],ann_events[2],sources)
+        ratios[i] = float(mask_events[2].sum())/float(ann_events[2].sum())
+    return (mc.area(annulus[1])-mc.area(annulus[0]))*ratios.mean()
 
-		pixrad = radius/pixsz#gxt.deg2pix(radius,CDELT2=pixsz)
-		# FIXME: How to avoid this loop??!?
-		for i in xrange(n):
-			if verbose>1:
-				print_inline(' Stamping '+str(i+1)+' of '+str(n)+'...')
-			asprange=[asptime[i], asptime[i]+1 if asptime[i]+1<trange[1] else trange[1]]
-			if asprange[0]==asprange[1]:
-				if verbose>1:
-					print_inline(str(asprange[0])+'=='+str(asprange[1])+' so skipping...')
-				continue
-			distarray = np.sqrt(((vectors[0,i]-xind)**2.)+((vectors[1,i]-yind)**2.))
-			ix = np.where(distarray<=pixrad)
-			response += dbt.compute_exptime(band,asprange,verbose=verbose,retries=retries)*scales[i]*flat[ix].mean()
-		if verbose >1:
-			print_inline('                                             ')
+def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maglimit=28.,
+              eff_area=False,sources=False):
+    """ Returns the estimate number of counts (not count rate) within the
+    aperture based upon a masked background annulus.
+    """
+    mc.print_inline('Swiss cheesing the background annulus.')
+    if not sources:
+        sources = bg_sources(band,ra0,dec0,annulus[1],maglimit=maglimit)
+    bg_counts = bg_mask(band,ra0,dec0,annulus,ras,decs,responses,
+                        sources)[2].sum()
+    mc.print_inline('Numerically integrating area of masked annulus.')
+    if not eff_area:
+        eff_area = cheese_bg_area(band,ra0,dec0,annulus,sources)
+    return mc.area(radius)*bg_counts/eff_area
 
-	return response
+def quickmag(band, ra0, dec0, trange, radius, annulus=False, data={},
+             stepsz=False, calpath='../cal/', verbose=0, maglimit=28.,
+             detsize=1.25):
+    if verbose:
+        mc.print_inline("Retrieving all of the target events.")
+    data = pullphotons(band, ra0, dec0, trange[0], trange[1],
+                       radius if not annulus else annulus[1])
+    if verbose:
+        mc.print_inline("Isolating source from background.")
+    angSep = mc.angularSeparation(ra0, dec0, data['ra'], data['dec'])
+    if verbose:
+        mc.print_inline("Binning data according to requested depth.")
+    bins = (np.append(np.arange(min(trange), max(trange), stepsz), max(trange)) 
+            if stepsz else np.array([min(trange), max(trange)]))
+    # This is equivalent in function to np.digitize(data['t'],bins) except
+    # that it's much, much faster. See numpy issue #2656.
+    ix = np.searchsorted(bins,data['t'],"right")
+    # Initialize histogrammed arrays
+    # FIXME: allocate these from a dict of constructors
+    lcurve_cols = ['counts', 'sources', 'bg_counts', 'bkgrnds', 'responses',
+                   'detxs', 'detys', 't0_data', 't1_data', 't_mean']
+    lcurve = {'params':gphot_params(band,[ra0,dec0],radius,annulus=annulus,
+                                    calpath=calpath,verbose=verbose,
+                                    detsize=detsize,stepsz=stepsz,
+                                    trange=trange,maglimit=maglimit)}
+    for col in lcurve_cols:
+        lcurve[col] = np.zeros(len(bins)-1)
+    # FIXME: Bottleneck. There's probably a way to do this without looping.
+    # Don't bother looping through anything with no data.
+    lcurve['bg'] = {'simple':np.zeros(len(bins)-1),
+                    'cheese':np.zeros(len(bins)-1)}
+    lcurve['bg']['sources'] = bg_sources(band,ra0,dec0,annulus[1],
+                                         maglimit=maglimit)
+    lcurve['bg']['eff_area'] = cheese_bg_area(band,ra0,dec0,annulus,
+                                              lcurve['bg']['sources'])
+    if verbose:
+        mc.print_inline("Populating histograms.")
+    for cnt,i in enumerate(np.unique(ix)):
+        if verbose:
+            mc.print_inline('Binning '+str(i)+' of '+str(len(ix))+'.')
+        t_ix = np.where(ix==i)
+        lcurve['t0_data'][i-1] = data['t'][t_ix].min()
+        lcurve['t1_data'][i-1] = data['t'][t_ix].max()
+        lcurve['t_mean'][i-1] = data['t'][t_ix].mean()
+        # TODO: Optionally limit data to specific parts of detector.
+        rad_ix = np.where((angSep <= radius) & (ix == i))
+        lcurve['counts'][i-1] = len(rad_ix[0])
+        lcurve['sources'][i-1] = (1./data['response'][rad_ix]).sum()
+        lcurve['responses'][i-1] = data['response'][rad_ix].mean()
+        lcurve['detxs'][i-1] = data['col'][rad_ix].mean()
+        lcurve['detys'][i-1] = data['row'][rad_ix].mean()
+        ann_ix = np.where((angSep > annulus[0]) &
+                          (angSep <= annulus[1]) & (ix == i))
+        lcurve['bg_counts'][i-1] = len(ann_ix[0])
+        lcurve['bg']['simple'][i-1] = (mc.area(radius) *
+            (1./data['response'][ann_ix]).sum() /
+            (mc.area(annulus[1])-mc.area(annulus[0])))
+        lcurve['bg']['cheese'][i-1] = cheese_bg(band, ra0, dec0, radius,
+            annulus, data['ra'][t_ix], data['dec'][t_ix],
+            data['response'][t_ix], maglimit=maglimit,
+            eff_area=lcurve['bg']['eff_area'],sources=lcurve['bg']['sources'])
+    # Only return bins that contain data.
+    ix = np.where((np.isfinite(lcurve['sources'])) &
+                  (np.array(lcurve['sources']) > 0))
+    lcurve['t0'] = bins[ix]
+    lcurve['t1'] = bins[ix[0]+1]
+    for col in lcurve_cols:
+        lcurve[col] = lcurve[col][ix]
+    lcurve['bg']['simple']=lcurve['bg']['simple'][ix]
+    lcurve['bg']['cheese']=lcurve['bg']['cheese'][ix]
+    if verbose:
+        mc.print_inline("Returning curve data.")
+    lcurve['photons'] = data
+    return lcurve
 
-# Returns the flux data within a radius/annulus
-def compute_flux(band,skypos,tranges,radius,annulus=[None,None],userr=False,
-		 usehrbg=False,verbose=0,calpath='../cal/',detsize=1.25,retries=20):
-	"""Returns a data structure with a bunch of information about the target.
-	This includes flux, exposure time, background, response, etc.
-	"""
-	# Find the exposure time first. If there's not any, don't bother
-	#  computing the flux at all.
-	data = {'expt':0.,'bg':0., 'bghr':0.,'counts':0.,'rr':1.}
-	# Do we really need this? It would be cleaner if it didn't loop.
-	for trange in tranges:
-		expt = dbt.compute_exptime(band,trange,verbose=verbose,skypos=skypos,detsize=detsize,retries=retries)
-		expt = dbt.compute_exptime(band,trange,verbose=verbose,detsize=detsize,retries=retries)
-		if not expt:
-			continue
-		data['expt'] += expt
-		data['bg'] += compute_background_improved(band,skypos,trange,radius,annulus,verbose=verbose,retries=retries) if usehrbg else compute_background(band,skypos,trange,radius,annulus,verbose=verbose,retries=retries)
-		data['counts'] += gQuery.getValue(gQuery.aperture(band,skypos[0],skypos[1],trange[0],trange[1],radius),verbose=verbose,retries=retries)
+def getcurve(band, ra0, dec0, radius, annulus=False, stepsz=False, lcurve={},
+             trange=[1,1000000000000], verbose=0):
+    if verbose:
+        mc.print_inline("Getting exposure ranges.")
+    tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange, maxgap=100,
+                                 minexp=100, verbose=verbose)
+    # TODO: Add an ability to specify or exclude specific time ranges
+    if verbose:
+        mc.print_inline("Moving to photon level operations.")
+    lcurve = quickmag(band, ra0, dec0, [tranges.min(), tranges.max()], radius,
+                      annulus=annulus, stepsz=stepsz, verbose=verbose)
+    if verbose:
+        mc.print_inline("Scaling background to aperture.")
+    # FIXME: This exposure time calculation is a bottleneck!
+    # The overhead is in the actual network call, so you could construct
+    # a single large query that returns an array with all of the exposure
+    # time parameters (for all bins) at once.
+    if verbose:
+        mc.print_inline("Computing exposure times... could take a while...")
+    lcurve['exptime'] = np.array(
+        [dbt.compute_exptime(band, [lcurve['t0_data'][i], 
+         lcurve['t1_data'][i]])#, skypos=[ra0,dec0])
+         for i in range(len(lcurve['t0_data']))])
+    lcurve['cps'] = (lcurve['counts']-lcurve['bg']['cheese'])/lcurve['exptime']
+    lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
+    if verbose:
+        mc.print_inline("Done.")
+        mc.print_inline("")
+    return lcurve
 
-	if verbose>1:
-		print 'Integrated '+str(data['expt'])+' seconds of exposure.'
-
-	# FIXME: Need to account for 1.018 response shift after 881881215.995
-	data['rr'] = aperture_response(band,skypos,tranges,radius,verbose=verbose,calpath=calpath,retries=retries)/data['expt'] if userr and expt>0 else 1
-
-	# TODO: This list of assertions should maybe be folded into a
-	#  list comprehension of some kind.
-	data['band'] = band
-	data['skypos'] = skypos
-	data['tranges'] = tranges
-	data['tmin'] = np.array(tranges).min()
-	data['tmax'] = np.array(tranges).max()
-	data['radius'] = radius
-	data['annulus'] = annulus
-	data['apcor1'] = gxt.apcorrect1(radius,band)
-	data['apcor2'] = gxt.apcorrect2(radius,band)
-	data['cps'] = ((data['counts']-data['bg'])/data['expt'])/data['rr'] if expt else None
-	data['error'] = (np.sqrt(data['counts']-data['bg'])/data['expt'])/data['rr'] if data['cps']>=0 else None
-	data['flux'] = gxt.counts2flux(data['cps'],band) if data['cps']>=0 else None
-	data['fluxerror'] = gxt.counts2flux(data['error'],band) if data['cps']>=0 else None
-	data['mag'] = gxt.counts2mag(data['cps'],band) if data['cps']>0 else None
-	if data['cps']>0:
-		data['magerr'] = [gxt.counts2mag(data['cps']-data['error'],band) if data['cps']>data['error'] else None, gxt.counts2mag(data['cps']+data['error'],band)]
-	else:
-		data['magerr']=[None,None]
-
-	return data
-
-def coadd_mag(band,skypos,radius,annulus=[None,None],userr=False,usehrbg=False,
-	      verbose=0,detsize=1.25,maxgap=1,minexp=1,calpath='../cal/',retries=20):
-	tranges = dbt.fGetTimeRanges(band,skypos,verbose=verbose,maxgap=maxgap,minexp=minexp,retries=retries)
-	return compute_flux(band,skypos,tranges,radius,annulus=annulus,userr=userr,usehrbg=usehrbg,verbose=verbose,calpath=calpath,detsize=detsize,retries=retries)
-
-def colnames():
-	"""Defines the column names for the light curve CSV file."""
-	return ['tmin','tmax','radius','exptime','cps','error','flux','fluxerror','mag','magerr','inner annulus','outer annulus','background','response','counts','apcor1','apcor2']
-
-def flux_row_constructor(data):
-	"""Constructs rows for the light curve CSV file."""
-	return [data['tmin'],data['tmax'],data['radius'],data['expt'],
-		data['cps'],data['error'],data['flux'],data['fluxerror'],
-		data['mag'],data['magerr'][1],data['annulus'][0],
-		data['annulus'][1],data['bg'],data['rr'],data['counts'],
-		data['apcor1'],data['apcor2']]
-
-def compute_curve(band,skypos,tranges,radius,annulus=[None,None],stepsz=None,
-		  coadd=False,userr=False,usehrbg=False,verbose=0,
-		  calpath='../cal/',detsize=1.25,maxgap=1,minexp=1,retries=20):
-	"""Computes a light curve over the requested parameters."""
-	data = []
-	# If coadd is specified, integrate across all time ranges.
-	if coadd:
-		# TODO: reduce()
-		result = compute_flux(band,skypos,tranges,radius,
-				      annulus=annulus,userr=userr,
-				      usehrbg=usehrbg,verbose=verbose,
-				      calpath=calpath,detsize=detsize,
-				      retries=retries)
-		data.append(flux_row_constructor(result))
-	else:
-		# TODO: map()
-		for trange in chunks(tranges,length=stepsz,verbose=verbose):
-			if verbose>1:
-				print 'Computing flux for '+str(trange[0])+' to '+str(trange[1])
-			result=compute_flux(band,skypos,[trange],radius,
-					    annulus=annulus,verbose=verbose,
-					    userr=userr,usehrbg=usehrbg,
-					    calpath=calpath,retries=retries)
-			if verbose>1:
-				print '        '+str(result['mag'])+' magnitude'
-                        data.append(flux_row_constructor(result))
-
-	return data
-
-def write_curve(band,skypos,tranges,radius,outfile=False,annulus=[None,None],
-		stepsz=None,coadd=False,userr=False,usehrbg=False,verbose=0,
-		iocode='wb',calpath='../cal/',detsize=1.25,retries=20):
-	"""Generates a light curve and writes it to the a CSV file."""
-	data = compute_curve(band,skypos,tranges,radius,annulus=annulus,
-			     stepsz=stepsz,userr=userr,usehrbg=usehrbg,
-			     verbose=verbose,coadd=coadd,calpath=calpath,detsize=detsize,retries=retries)
-	if outfile:
-		spreadsheet = csv.writer(open(outfile,iocode), delimiter=',',
-					 quotechar='|',
-					 quoting=csv.QUOTE_MINIMAL)
-		spreadsheet.writerows(data)
-	else:
-		for frame in data:
-			print frame
-	return
-
-# FIXME: This is probably redundant or should be replaced with pandas.
-def read_curve(csvfile):
-	"""Reads a light curve into a dict."""
-	data = {'tstart':np.array([]),'tstop':np.array([]),
-		'radius':np.array([]),'exptime':np.array([]),
-		'cps':np.array([]),'error':np.array([]),
-		'magnitude':np.array([]),'mag_error':np.array([]),
-		'inner annulus':np.array([]),'outer annulus':np.array([]),
-		'background':np.array([]),'response':np.array([]),
-		'counts':np.array([]),'aperture correction 1':np.array([]),
-		'aperture correction 2':np.array([])}
-
-	reader = csv.reader(open(csvfile,'rb'),delimiter=',',quotechar='|')
-	for row in reader:
-		if row[4] == '':
-			continue
-		data['tstart'] = np.append(data['tstart'],np.float(row[0]))
-		data['tstop'] = np.append(data['tstop'],np.float(row[1]))
-		data['radius'] = np.append(data['radius'],np.float(row[2]))
-		data['exptime'] = np.append(data['exptime'],np.float(row[3]))
-		data['cps'] = np.append(data['cps'],np.float(row[4]))
-		data['error'] = np.append(data['error'],np.float(row[5]))
-		data['magnitude'] = np.append(data['magnitude'],
-				    np.float(row[8]))
-		data['mag_error'] = np.append(data['mag_error'],
-				    np.float(row[9]))
-	        #data['inner annulus'] = np.append(data['inner annulus'],np.float(row[10]))
-	        #data['outer annulus'] = np.append(data['outer annulus'],np.float(row[11]))
-		data['background'] = np.append(data['background'],
-				     np.float(row[12]))
-		data['response'] = np.append(data['response'],np.float(row[13]))
-		data['counts'] = np.append(data['counts'],np.float(row[14]))
-		data['aperture correction 1'] = np.append(data['aperture correction 1'],np.float(row[15]))
-		data['aperture correction 2'] = np.append(data['aperture correction 2'],np.float(row[16]))
-
-	return data
+def write_curve(band, ra0, dec0, radius, csvfile=False, annulus=False,
+                stepsz=False, trange=[1,1000000000000], verbose=0,
+                iocode='wb',calpath='../cal/',detsize=1.25,clobber=False):
+    if os.path.exists(str(csvfile)) and not clobber:
+        print "Error: "+str(csvfile)+" already exists."
+        print "Specify clobber=True to overwrite."
+        return
+    data = getcurve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
+                    trange=trange, verbose=verbose)
+    if csvfile:
+        cols = ['counts', 'sources', 'bg_counts', 'bkgrnds', 'responses',
+                'detxs', 'detys', 't0_data', 't1_data', 't_mean', 'cps',
+                'mag', 'exptime']
+        test=pd.DataFrame({'t0':data['t0'],'t1':data['t1'],
+                           't_mean':data['t_mean'],'t0_data':data['t0_data'],
+                           't1_data':data['t1_data'],'exptime':data['exptime'],
+                           'cps':data['cps'],'counts':data['counts'],
+                           'bg':data['bg']['cheese'],'mag':data['mag']})
+        try:
+            test.to_csv(csvfile,index=False)
+        except:
+            print 'Failed to write to: '+str(csvfile)
+    else:
+        if verbose:
+            print "No CSV file requested."
+    return data

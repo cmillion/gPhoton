@@ -1,62 +1,239 @@
 #!/usr/bin/python
 import os
 import ast
-import sys
-from curvetools import *
+import argparse
+import curvetools as ct
+#from curvetools import 
 from imagetools import * # For JPEG preview image creation
 from optparse import OptionParser
 from dbasetools import fGetTimeRanges, suggest_parameters
-from gphoton_args import setup_args, check_args
+#import ref # refactored lightcurve cration
 
-def gAperture(addhdr=False,annulus=None,annulus1=None,annulus2=None,band=None,best=False,calpath=os.pardir+os.sep+"cal"+os.sep,cmd=None,coadd=False,dec=None,detsize=1.25,outfile=None,maxgap=1500.,minexp=1.,overwrite=False,ra=None,radius=None,retries=20,skypos=None,stamp=None,stepsz=0.,suggest=False,t0=1.,t1=1000000000000.,trange=None,usehrbg=False,userr=False,verbose=0):
-	"""Primary program in the module.  Generates lightcurve CSV files and preview stamp images."""
+#def gAperture(args):
+def gAperture(band,skypos,radius,csvfile=False,annulus=[False,False],
+              stepsz=False,verbose=0,clobber=False,trange=[1,1000000000000]):
+    """Runs gAperture and returns the data in a python dict() and as
+    a CSV file if outfile is specified. Can be called from the interpreter.
+    """
+    if args.verbose>1:
+        print "Generating a light curve with the following paramters:"
+        print " band:    "+str(band)
+        print " skypos:  "+str(skypos)
+        print " radius:  "+str(radius)
+        print " annulus: "+str(annulus)
+        print " stepsz:  "+str(stepsz)
+        print " csvfile: "+str(csvfile)
+        print " verbose: "+str(verbose)
+    data = ct.write_curve(band,skypos[0],skypos[1],radius,csvfile=csvfile,annulus=annulus,stepsz=stepsz,verbose=verbose,clobber=clobber)
+    return data
 
-	if verbose:
-		print 'Using all exposure in ['+str(trange[0])+','+str(trange[1])+']'
-	trange = fGetTimeRanges(band,skypos,maxgap=maxgap,verbose=verbose,minexp=minexp,trange=trange,detsize=detsize,retries=retries)
-	if not len(trange):
-		print 'No exposure time in database.'
-		exit(0)
-	if verbose:
-		print 'Using '+str((trange[:,1]-trange[:,0]).sum())+' seconds (raw) in '+str(len(trange))+' distinct exposures.'
+def check_radius(args):
+    """Checks the radius value."""
+    if not args.radius and not args.suggest:
+        print "Must specify an aperture radius."
+        exit(0)
+    return
 
-	# Make sure trange is a 2D array
-	if len(np.array(trange).shape)==1:
-		trange=[trange]
+def suggest(args):
+    """Generates suggested lightcurve parameters. Wraps suggest_parameters()"""
+    (args.ra, args.dec, args.radius, args.annulus1,
+                    args.annulus2) = suggest_parameters(args.band,args.skypos)
+    if args.verbose:
+        print "Recentering on ["+str(args.ra)+", "+str(args.dec)+"]"
+        print "Setting radius to "+str(args.radius)
+        print "Setting annulus to ["+str(args.annulus1)+", "+str(args.annulus2)+"]"
+    return args
 
-	iocode = 'wb'
-	if not outfile:
-		outfile = False
-	else:
-		# This initiates the file.
-		if not overwrite and os.path.exists(outfile):
-			print "File "+str(outfile)+"exists.  Use --overwrite to replace it."
-			exit(0)
-		f = open(outfile,iocode)
-		if addhdr:
-			# Write the command line to the outfile; should be optional
-			f.write('| '+cmd+'\n')
-			f.write('| tstart, tstop, radius, exptime, cps, error, flux, flux_error, magnitude, mag_error, inner annulus, outer annulus, background, response, counts, aperture correction 1, aperture correction 2\n')
-			f.close()
-			# Setting this will now append to the file we just created
-			iocode = 'ab'
+def check_skypos(args):
+    """Checks and formats the skypos values."""
+    if not (args.ra and args.dec) and not args.skypos:
+        print "Must specify either RA/Dec or skypos."
+        exit(0)
+    elif (args.ra and args.dec) and args.skypos:
+        print "Must specify either RA/Dec or skypos. Not both."
+        exit(0)
+    elif (args.ra and args.dec):
+        args.skypos = [args.ra,args.dec]
+    else:
+        args.skypos = list(ast.literal_eval(args.skypos))
+    if args.suggest:
+        args = suggest(args)
+    return args
 
-	if stamp:
-		if annulus:
-			skyrange = [2.*annulus[1],2.*annulus[1]]
-		else:
-			skyrange = [2.*radius,2.*radius]
-		write_jpeg(stamp,band,skypos,trange,skyrange,width=False,height=False,stepsz=stepsz,clobber=overwrite,verbose=verbose,retries=retries)
+def check_stepsz(args):
+    """Checks the stepsz value."""
+    if args.stepsz and args.coadd:
+        print "Cannot specify both --stepsz and --coadd."
+        exit(0)
+    return
 
-	write_curve(band,skypos,trange,radius,outfile=outfile,annulus=annulus,stepsz=stepsz,userr=userr,usehrbg=usehrbg,verbose=verbose,calpath=calpath,iocode=iocode,coadd=coadd,detsize=detsize,retries=retries)
+def check_annulus(args):
+    """Checks and formats the annulus values."""
+    if not (args.annulus1 and args.annulus2) and not args.annulus:
+        args.annulus = [False,False]
+    elif args.annulus1 and args.annulus2:
+        args.annulus = [args.annulus1,args.annulus2]
+    else:
+        args.annulus = ast.literal_eval(args.annulus)
+    return args
 
+# TODO: fGetTimeRanges is probalby not actually necessary. What we want
+# instead is for a way to specifically include or exclude time ranges.
+def check_tranges(args):
+    """Checks and formats the tranges values."""
+    args.tranges = (list(ast.literal_eval(args.tranges)) if
+                                    args.tranges else [args.tmin,args.tmax])
+    if args.verbose:
+        print 'Using all exposure in ['+str(args.tmin)+','+str(args.tmax)+']'
+    tranges = fGetTimeRanges(args.band,args.skypos,maxgap=args.gap,verbose=args.verbose,minexp=args.minexp,trange=args.tranges,detsize=args.detsize)
+    if not len(tranges):
+        print 'No exposure time in database.'
+        exit(0)
+    if args.verbose:
+        print 'Using '+str((tranges[:,1]-tranges[:,0]).sum())+' seconds (raw) in '+str(len(tranges))+' distinct exposures.'
+    # Make sure tranges is a 2D array
+    if len(np.array(tranges).shape)==1:
+        tranges=[tranges]
+    return args
+
+def check_args(args):
+    """Checks validity of command line arguments and, in some cases
+    massages them a little bit.
+    """
+    check_radius(args)
+    check_stepsz(args)
+    args = check_skypos(args)
+    args = check_annulus(args)
+    args = check_tranges(args)
+    return args
+
+def setup_parser():
+    """Defines command line arguments."""
+    parser = argparse.ArgumentParser(description="Generate a light curve")
+    parser.add_argument("-b", "--band", action="store", dest="band", 
+        help="[NF]UV band designation", choices=['NUV','FUV'], type=str.upper,
+        required=True)
+    parser.add_argument("-r", "--ra", action="store", dest="ra",
+        help="Center Right Ascension position in decimal degrees",
+        type=np.float64)
+    parser.add_argument("-d", "--dec", action="store", dest="dec",
+        help="Center Declination position in decimal degrees", type=np.float64)
+    parser.add_argument("--skypos", action="store", dest="skypos",
+        help="Alternate method for specifying sky position as '[RA,Dec]'",
+        type=ast.literal_eval)
+    parser.add_argument("-a", "--aperture", action="store", dest="radius",
+        help="Aperture radius in decimal degrees",
+        type=float)
+    parser.add_argument("-i", "--inner", action="store", dest="annulus1",
+        help="Inner annulus radius for background subtraction", type=float)
+    parser.add_argument("-o", "--outer", action="store", dest="annulus2",
+        help="Outer annulus radius for background subtraction", type=float)
+    parser.add_argument("--annulus", action="store", type=ast.literal_eval,
+        dest="annulus",
+        help="Annulus inner and outer radius definition as '[inner,outer]'")
+    parser.add_argument("--t0", "--tmin", action="store", dest="tmin",
+        help="Minimum time to consider.",default=1.,type=np.float64)
+    parser.add_argument("--t1", "--tmax", action="store", dest="tmax",
+        help="Maxium time to consider.",default=1000000000000.,type=np.float64)
+    parser.add_argument("--tranges", action="store", type=str,
+        dest="tranges",
+        help="List of time ranges with format '[[t0,t1],[t2,t3],...]'")
+    parser.add_argument("-s", "--step", "--frame", action="store", type=float,
+        dest="stepsz", help="Step size in seconds",default=0)
+    parser.add_argument("-f", "--file", "--outfile", "--csvfile",
+        action="store", type=str, dest="csvfile", help="CSV output file")
+    parser.add_argument("-v", "--verbose", action="store", type=int,
+        dest="verbose", help="Display more output. Set to 0-2.", default=0,
+        choices=[0,1,2,3])
+    parser.add_argument("--stamp", action="store", type=str, dest="stamp",
+        help="Filename for a JPEG preview stamp of the targeted region.")
+    parser.add_argument("--calpath", action="store", type=str, dest="calpath",
+        help="Path to the directory that contains the calibration files.",
+        default='../cal/')
+    parser.add_argument("--addhdr", action="store_true", dest="addhdr",
+        help="Add command line and column names to the top of the .csv file.")
+    parser.add_argument("--coadd", action="store_true", dest="coadd",
+        help="Return the coadded flux over all requested time ranges.")
+    parser.add_argument("-g", "--gap", "--maxgap", action="store",
+        type=float, dest="gap",
+        help="Max gap size in seconds to be considered contiguous.",
+        default=1)
+    parser.add_argument("--minexp", action="store", type=float,
+        dest="minexp",
+        help="Minimum contiguous exposure in seconds for data to be reported.",
+        default=1)
+    parser.add_argument("--detsize", action="store", type=float,
+        dest="detsize",
+        help="Set the FOVdiameter in degrees for the exposure search.",
+        default=1.25)
+    parser.add_argument("--bestparams", "--best", action="store_true",
+        dest="best",
+        help="Auto set params to produce the highest quality lightcurve.",
+        default=False)
+    parser.add_argument("--suggest", "--optimize", action="store_true",
+        dest="suggest",
+        help="Suggest optimum parameters for aperture photometry.",
+        default=False)
+    parser.add_argument("--overwrite", "--ow", "--clobber",
+        action="store_true", dest="overwrite", default=False,
+        help="Overwrite any preexisting files. Will supress warnings.")
+    parser.add_argument("--iocode", action="store", dest="iocode",
+        default="wb",
+        help="The iocode to be past to the cvs writer. Don't much with this.",
+        type=str)
+    return parser
+
+def reconstruct_command(args):
+    """Reconstruct the command line."""
+    cmd = './gAperture.py'
+    for key in args.__dict__.keys():
+    	if args.__dict__[key]:
+	    	cmd+=' --'+str(key)+' '+str(args.__dict__[key])
+    if args.verbose>1:
+        print cmd
+    return cmd
+
+def setup_file(args):
+    """ If requested, create a header for the CSV that includes the column
+    names and a reconstruction of the command line call.
+    """
+    if not args.csvfile:
+        args.csvfile = False
+    else:
+    # This initiates the file.
+        if not args.overwrite and os.path.exists(args.csvfile):
+            print "File "+str(args.csvfile)+" exists. Pass --overwrite to replace it."
+            exit(0)
+        f = open(args.csvfile,args.iocode)
+        if args.addhdr:
+            # Write the command line to the outfile; should be optional
+            f.write('| '+reconstruct_command(args)+'\n')
+            # FIXME: These are no longer the correct column names.
+            f.write('| tstart, tstop, radius, exptime, cps, error, flux, flux_error, magnitude, mag_error, inner annulus, outer annulus, background, response, counts, aperture correction 1, aperture correction 2\n')
+        f.close()
+        # Setting this will now append to the file we just created
+        args.iocode = 'ab'
+    return args
+
+def stamp(args):
+    if not args.stamp:
+        return
+    else:
+        width = 2.*(args.annulus2 if args.annulus2 else args.radius)
+        args.skyrange = [width,width]
+        write_jpeg(args.stamp, args.band, args.skypos, args.tranges,
+                   args.skyrange, width=False, height=False,
+                   stepsz=args.stepsz, clobber=args.overwrite,
+                   verbose=args.verbose)
+        return
+ 
 if __name__ == '__main__':
-	"""Called when gAperture is executed directly through command line."""
-	import argparse
-	args = setup_args('gAperture').parse_args()
-	# Reconstruct the command line to pass to gAperture if ADDHDR is requested.
-	cmd = " ".join(sys.argv)
-	# Check command-line arguments.
-	annulus,band,best,detsize,outfile,maxgap,minexp,radius,retries,skypos,stamp,stepsz,trange,usehrbg,userr = check_args(args,"gAperture")
-	# Call gAperture main program.
-	gAperture(addhdr=args.addhdr,annulus=annulus,band=band,best=best,calpath=args.calpath,cmd=cmd,coadd=args.coadd,detsize=detsize,outfile=outfile,maxgap=maxgap,minexp=minexp,overwrite=args.overwrite,radius=radius,retries=retries,skypos=skypos,stamp=stamp,stepsz=stepsz,suggest=args.suggest,trange=trange,usehrbg=usehrbg,userr=userr,verbose=args.verbose)
+    """Called when gAperture is executed through the command line."""
+    args = setup_parser().parse_args()
+    args = check_args(args)
+    args = setup_file(args)
+    # TODO: add support for trange(s)
+    data = gAperture(args.band, args.skypos, args.radius,
+                     csvfile=args.csvfile, annulus=args.annulus,
+                     stepsz=args.stepsz, verbose=args.verbose,
+                     clobber=args.overwrite)
