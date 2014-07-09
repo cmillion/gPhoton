@@ -104,7 +104,7 @@ def setup_args(function_name=None):
 
         #HRBG is accepted by gAperture only.
         if function_name == 'gaperture':
-            parser.add_argument("--usehrbg", action="store_true", dest="usehrbg", help="Use the higher quality 'swiss cheese' background estimation method?  Default = False.", default=False)
+            parser.add_argument("--usehrbg", "--hrbg", action="store_true", dest="usehrbg", help="Use the higher quality 'swiss cheese' background estimation method?  Default = False.", default=False)
 
         # INNER is accepted by gAperture only.
         if function_name == 'gaperture':
@@ -160,7 +160,7 @@ def setup_args(function_name=None):
                 
 	# SKYPOS is accepted by gFind, gAperture, and gMap.
         if function_name == 'gfind' or function_name == 'gaperture' or function_name == 'gmap':
-            parser.add_argument("--skypos", action="store", type=float, dest="skypos", help="Alternate method for specifying sky position with format '[RA,Dec]'")
+            parser.add_argument("--skypos", action="store", dest="skypos", help="Alternate method for specifying sky position with format '[RA,Dec]'",type=ast.literal_eval)
 
         #STAMP is accepted by gAperture only.
         if function_name == 'gaperture':
@@ -184,11 +184,11 @@ def setup_args(function_name=None):
 
 	# TRANGE is accepted by gFind, gAperture, and gMap.
         if function_name == 'gfind' or function_name == 'gaperture' or function_name == 'gmap':
-            parser.add_argument("--trange", "--tranges", action="store", type=float, dest="trange", help="Time range in which to limit the search, in the format '[t0,t1]' (specify in GALEX time standard).")
+            parser.add_argument("--trange", "--tranges", action="store", dest="trange", help="Time range in which to limit the search, in the format '[t0,t1]' (specify in GALEX time standard).", type=ast.literal_eval)
 
         #USERR is accepted by gAperture only.
         if function_name == 'gaperture':
-            parser.add_argument("--userr", action="store_true", dest="userr", help="Use the relative response correction?  Default = False.", default=False)
+            parser.add_argument("--userr", "--response", action="store_true", dest="userr", help="Use the relative response correction?  Default = False.", default=False)
 
 	# VERBOSE is accepted by gFind, gAperture, and gMap.
         if function_name == 'gfind' or function_name == 'gaperture' or function_name == 'gmap':
