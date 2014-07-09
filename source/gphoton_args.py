@@ -1,4 +1,6 @@
-""" This module contains functions for checking arguments across gFind, gAperture, gMap, and other gPhoton functions."""
+""" This module contains functions for checking arguments across gFind,
+gAperture, gMap, and other gPhoton functions.
+"""
 
 import argparse
 import os
@@ -15,17 +17,19 @@ class gPhotonArgsError(Exception):
 def setup_args(function_name=None):
 	"""Defines the arguments and options for the parser object when
 	called from the command line.  Accepts a string used to determine which
-        arguments to add to the Parser object.  Valid function names are "gfind",
-        "gaperture", or "gmap" (all case insensitive).
+    arguments to add to the Parser object.  Valid function names are "gfind",
+    "gaperture", or "gmap" (all case insensitive).
 	"""
         if function_name is not None:
             function_name = function_name.strip().lower()
-            if function_name != 'gfind' and function_name != 'gaperture' and function_name != 'gmap':
-                raise gPhotonArgsError("Choice of function not understood.  Could not setup command-line arguments.  Name provided = " + function_name+".")
+            if (function_name != 'gfind' and function_name != 'gaperture'
+                                         and function_name != 'gmap'):
+                raise gPhotonArgsError("Choice of function not understood. Could not setup command-line arguments.  Name provided = "+str(function_name)+".")
         else:
             raise gPhotonArgsError("Name of function must be provided to setup command-line arguments.")
 
-        # Initiate argument parser object with help description appropriate for the function.
+        # Initiate argument parser object with help description appropriate
+        # for the function.
         if function_name == 'gfind':
             parser = argparse.ArgumentParser(description="Locate available data at specified coordinates and time intervals.")
         elif function_name == 'gaperture':
@@ -36,95 +40,134 @@ def setup_args(function_name=None):
             # Should never get here, but raise an Exception just in case.
             raise gPhotonArgsError("Name of function not understood.  Name provided = " + function_name+".")
 
-        #
-        # Now we add arguments to the Parser object based on what function is being supplied.
-        #
+        # Add arguments to the Parser object per function.
 
         #ADDHDR is accepted by gAperture only.
         if function_name == 'gaperture':
-            parser.add_argument("--addhdr", action="store_true", dest="addhdr", help="Write the command line and column headers to the top of the .csv file?  Default = False.", default=False)
+            parser.add_argument("--addhdr", action="store_true", dest="addhdr",
+            default=False,
+            help="Write the command line and column headers to the top of the .csv file?  Default = False.")
 
         # ALT is accepted by gFind only.
         if function_name == 'gfind':
-            parser.add_argument("--alt", "--gaper", action="store_true", dest="gaper", help="Format the output so that it can be copied and pasted directly into a gMap or gAperture command line? Default = False.", default=False)
+            parser.add_argument("--alt", "--gaper", action="store_true",
+            dest="gaper", default=False, help="Format the output so that it can be copied and pasted directly into a gMap or gAperture command line? Default = False.")
 
         #ANGLE is accepted by gMap only.
         if function_name == 'gmap':
-            parser.add_argument("--angle", action="store", type=float, dest="angle", help="The angle subtended in both RA and DEC in degrees.",default=None)
+            parser.add_argument("--angle", action="store", type=float,
+            dest="angle", default=None,
+            help="The angle subtended in both RA and DEC in degrees.")
 
         # ANNULUS is accepted by gAperture only.
         if function_name == 'gaperture':
-            parser.add_argument("--annulus", action="store", dest="annulus", help="Annulus inner and outer radius definition with format [inner,outer] in degrees.")
+            parser.add_argument("--annulus", action="store", dest="annulus",
+            help="Annulus inner and outer radius definition with format [inner,outer] in degrees.")
 
         # APERTURE is accepted by gAperture only.
         if function_name == 'gaperture':
-            parser.add_argument("-a", "--aperture", action="store", type=float, dest="radius", help="Aperture radius in decimal degrees.")
+            parser.add_argument("-a", "--aperture", action="store", type=float,
+            dest="radius", help="Aperture radius in decimal degrees.")
 
         # Band is accepted by gFind, gAperture, and gMap, but only gFind can accept "both" as a valid choice.
         if function_name == 'gfind':
-            parser.add_argument("-b", "--band", action="store", type=str, dest="band", help="Band designation, choice of {FUV, NUV, BOTH}.  Default is BOTH.", metavar="BAND", choices=["NUV","FUV","BOTH", "nuv", "fuv", "both"], default="BOTH")
+            parser.add_argument("-b", "--band", action="store", type=str,
+            dest="band", help="Band designation, choice of {FUV, NUV, BOTH}.  Default is BOTH.",
+            metavar="BAND", default="BOTH", 
+            choices=["NUV","FUV","BOTH", "nuv", "fuv", "both"])
         elif function_name == 'gaperture' or function_name == 'gmap':
-            parser.add_argument("-b", "--band", action="store", type=str, dest="band", help="Band designation, choice of {FUV, NUV}.", metavar="BAND", choices=["NUV","FUV","nuv","fuv"])
+            parser.add_argument("-b", "--band", action="store", type=str,
+            dest="band", help="Band designation, choice of {FUV, NUV}.",
+            metavar="BAND", choices=["NUV","FUV","nuv","fuv"])
 
         #BESTPARAMS is accepted by gAperture only.
         if function_name == 'gaperture':
-            parser.add_argument("--bestparams", "--best", action="store_true", dest="best", help="Set parameters to produce the highest quality lightcurve?  Potentially slow.  Default = False.", default=False)
+            parser.add_argument("--bestparams", "--best", action="store_true",
+            dest="best", default=False,
+            help="Set parameters to produce the highest quality lightcurve?  Potentially slow.  Default = False.")
 
         #CALPATH is accepted by gAperture and gMap.
         if function_name == 'gaperture' or function_name == 'gmap':
-            parser.add_argument("--calpath", action="store", type=str, dest="calpath", help="Path to the directory that contains the calibration files.  Default = '../cal/'", default=os.pardir+os.sep+"cal"+os.sep)
+            parser.add_argument("--calpath", action="store", type=str,
+            dest="calpath", default=os.pardir+os.sep+"cal"+os.sep,
+            help="Path to the directory that contains the calibration files.  Default = '../cal/'")
 
         #COADD is accepted by gAperture and gMap only.
         if function_name == 'gaperture' or function_name == 'gmap':
-            parser.add_argument("--coadd", action="store_true", dest="coadd", help="Return the coadded flux (gAperture) or a coadded image (gMap) over all requested time ranges?  Default = False.", default=False)
+            parser.add_argument("--coadd", action="store_true", dest="coadd",
+            default=False,
+            help="Return the coadded flux (gAperture) or a coadded image (gMap) over all requested time ranges?  Default = False.")
 
         #COUNT is accepted by gMap only.
         if function_name == 'gmap':
-            parser.add_argument("--count", action="store", type=str, dest="cntfile", help="File name (full path) for the count image.", default=None)
+            parser.add_argument("--count", action="store", type=str,
+            dest="cntfile", default=None, help="File name (full path) for the count image.")
 
         # DEC is accepted by gFind, gAperture, and gMap.
         if function_name == 'gfind' or function_name == 'gaperture' or function_name == 'gmap':
-            parser.add_argument("-d", "--dec", action="store", type=float, dest="dec", help="Center Declination position in decimal degrees.  Must be 0 < DEC < 90.", metavar="DEC")
+            parser.add_argument("-d", "--dec", action="store", type=float,
+            dest="dec", metavar="DEC",
+            help="Center Declination position in decimal degrees.  Must be 0 < DEC < 90.")
 
         #DECANGLE is accepted by gMap only.
         if function_name == 'gmap':
-            parser.add_argument("--decangle", action="store", type=float, dest="decangle", help="The angle of sky in degrees that the declination subtends.  Overrides --angle.",default=None)
+            parser.add_argument("--decangle", action="store", type=float,
+            dest="decangle", default=None,
+            help="The angle of sky in degrees that the declination subtends.  Overrides --angle.")
 
         # DETSIZE is accepted by gFind, gAperture, and gMap.
         if function_name == 'gfind' or function_name == 'gaperture' or function_name == 'gmap':
-            parser.add_argument("--detsize", action="store", type=float, dest="detsize", help="Set the effective field diameter in degrees for the exposure search.  Default = 1.25.", default=1.25)
+            parser.add_argument("--detsize", action="store", type=float,
+            dest="detsize", default=1.25,
+            help="Set the effective field diameter in degrees for the exposure search.  Default = 1.25.")
 
         # EXPONLY is accepted by gFind only.
         if function_name == 'gfind':
-            parser.add_argument("--total", "--exponly", action="store_true", dest="exponly", help="Report only the total raw exposure time available in the database, not the individual time ranges? Default = False.", default=False)
+            parser.add_argument("--total", "--exponly", action="store_true",
+            dest="exponly", default=False,
+            help="Report only the total raw exposure time available in the database, not the individual time ranges? Default = False.")
 
         # FILE is accepted by gAperture only.
         if function_name == 'gaperture':
-            parser.add_argument("-f", "--file", action="store", type=str, dest="file", help="File name (full path) for CSV lightcurve file.",default=None)
+            parser.add_argument("-f", "--file", action="store", type=str,
+            dest="file",
+            help="File name (full path) for CSV lightcurve file.",default=None)
 
         #HRBG is accepted by gAperture only.
         if function_name == 'gaperture':
-            parser.add_argument("--usehrbg", "--hrbg", action="store_true", dest="usehrbg", help="Use the higher quality 'swiss cheese' background estimation method?  Default = False.", default=False)
+            parser.add_argument("--usehrbg", "--hrbg", action="store_true",
+            dest="usehrbg", default=False, 
+            help="Use the higher quality 'swiss cheese' background estimation method?  Default = False.")
 
         # INNER is accepted by gAperture only.
         if function_name == 'gaperture':
-            parser.add_argument("-i", "--inner", action="store", type=float, dest="annulus1", help="Inner annulus radius for background subtraction in degrees.")
+            parser.add_argument("-i", "--inner", action="store", type=float,
+            dest="annulus1",
+            help="Inner annulus radius for background subtraction in degrees.")
 
         #INTENSITY is accepted by gMap only.
         if function_name == 'gmap':
-            parser.add_argument("--intensity", action="store", type=str, dest="intfile", help="File name (full path) for the intensity image.", default=None)
+            parser.add_argument("--intensity", action="store", type=str,
+            dest="intfile", default=None,
+            help="File name (full path) for the intensity image.")
 
         #MASKRAD is accepted by gMap only.
         if function_name == 'gmap':
-            parser.add_argument("--maskrad", action="store", type=float, dest="maskrad", help="The radius in degrees at which detector events will be masked out.  Default = 1.", default=1.)
+            parser.add_argument("--maskrad", action="store", type=float,
+            dest="maskrad", default=1.,
+            help="The radius in degrees at which detector events will be masked out.  Default = 1.")
 
 	# MAXGAP is accepted by gFind, gAperture, and gMap.
         if function_name == 'gfind' or function_name == 'gaperture' or function_name == 'gmap':
-            parser.add_argument("-g", "--gap", "--maxgap", action="store", type=float, dest="gap", help="Maximum gap size in seconds for data to be considered contiguous.  Default = 1500.", default=1500.)
+            parser.add_argument("-g", "--gap", "--maxgap", action="store",
+            type=float, dest="gap", default=1500.,
+            help="Maximum gap size in seconds for data to be considered contiguous.  Default = 1500.")
 
         #MEMLIGHT is accepted by gMap only.
         if function_name == 'gmap':
-            parser.add_argument("--memlight", action="store", type=float, dest="memlight", help="Reduce server-side memory usage by requesting data in chunks of no more than this depth in seconds.  Default = 100.", default=100.)
+            parser.add_argument("--memlight", action="store", type=float,
+            dest="memlight", default=100.,
+            help="Reduce server-side memory usage by requesting data in chunks of no more than this depth in seconds.  Default = 100.", default=100.)
 
         # MINEXP is accepted by gFind, gAperture, and gMap.
         if function_name == 'gfind' or function_name == 'gaperture' or function_name == 'gmap':
