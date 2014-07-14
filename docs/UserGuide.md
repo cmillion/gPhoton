@@ -72,18 +72,31 @@ From the command line, navigate to the `gPhoton/source` directory. Run the first
 From the command line, navigate to the `gPhoton/source` directory. Then try running the following commands.
 
 This generates the aspect corrected FUV photons for eclipse 31000 and writes them to `FUVphotons.csv`.
+
     ./gPhoton.py -r '../e31000/MISWZN11_12494_0315_0002-fd-raw6.fits' -a '../e31000/MISWZN11_12494_0315_0002-asprta.fits' -c '../cal/' -o '../e31000/FUVphotons' -s '../e31000/MISWZN11_12494_0315_0002-scst.fits' -d '../e31000/SSD_fuv_31000.tbl'
 
 This generates the aspect corrected NUV photons for eclipse 31000 and writes them to `NUVphotons.csv`. Note that because GALEX countrates are much higher in the NUV, this will take ~10x longer to run than the previous command.
+
     ./gPhoton.py -r '../e31000/MISWZN11_12494_0315_0002-nd-raw6.fits' -a '../e31000/MISWZN11_12494_0315_0002-asprta.fits' -c '../cal/' -o '../e31000/NUVphotons' -s '../e31000/MISWZN11_12494_0315_0002-scst.fits' -d '../e31000/SSD_nuv_31000.tbl'
 
-###gPhoton
+##gPhoton.py - The Standalone Calibration Pipeline
 
-###gFind
+_Syntax Note:_ The name _gPhoton_ can refer to both the standalone calibration pipeline  `gPhoton.py` and the MAST/GALEX photon database project as a whole. We know that this is confusing. For this reason, we try to refer to `gPhoton.py` as "the standalone calibration pipeline" and reserve "gPhoton" to refer to the project as a whole.
 
-###gAperture
+A number of the command line parameters given above are actually option. If (and only if) you have a working internet connection, then the aspect file (`-a`) parameter can be omitted; the software will instead query the aspect database table at MAST for the appropriate values. The Stime Separation Data (SSD) file parameter (`-d`) is _always optional_ because the values in this reference table can be generated directly from the raw data (at a very small cost in terms of total run time). Try the following command, which omits both of these parameters.
 
-###gMap
+    ./gPhoton.py -r '../e31000/MISWZN11_12494_0315_0002-fd-raw6.fits' -c '../cal/' -o '../e31000/FUVphotons' -s '../e31000/MISWZN11_12494_0315_0002-scst.fits'
+
+##The Photon Tools
+
+###gFind.py
+_gFind_ is the data location tool. Given a target sky position (and, optionally, bands and time ranges), it will return the estimated raw exposure time and approximate time ranges of data that is currently available in the photon database. That is, _gFind_ is your convenient utility for assessing what data is currently available for use by _gAperture_ and _gMap_.
+
+
+
+###gAperture.py
+
+###gMap.py
 
 ###Common Questions, Issues, and Gotchas
 1. **"My data is not available!"** You can verify that data for your desired target does or does not exist in the database and present by using the `gFind` commands described above. If data for your target is not available, there are two possible explanations: (1) we have not yet loaded those observations into the photon database, or (2) that target was never observed by the GALEX mission. As of this writing, we have only loaded about 5% of the total GALEX corpus into the photon database. You can confirm that your target was, indeed, observed by GALEX by searching for it in the [GALEX Catalog](http://galex.stsci.edu/GR6/?page=mastform). If your target was, indeed, observed by GALEX but has not yet been loaded into the gPhoton database, please contact Chase Million (chase.million@gmail.com) and Bernie Shiao (shiao@stsci.edu) with your target coordinates, and we will try to prioritize the associated data.
