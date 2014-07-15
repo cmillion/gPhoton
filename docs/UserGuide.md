@@ -40,11 +40,15 @@ The standalone tools are written exclusively in Python which is a flexible and p
 Because the standalone tools are written in Python, they are theoretically cross platform. The software has only been thoroughly used and tested on Ubuntu Linux, however. At last attempt, we were not able to run the tools on Debian Linux because some of the required libraries are not yet supported.
 
 ####Prebuilt Distributions
-There are several versions of Python available which include no only the core "standard" version itself, but many common and popular modules as a single package, eliminating the ened for users to manage such dependencies themeselves. At present, the most promising of these appears to be Anaconda, which is available as a free download (with some advanced features available as paid add-ons). Anaconda contains all of the required dependencies for the gPhoton project. Advanced users and Python developers will probably want to manage their own dependencies; if you are not one of these, you can [download Anaconda here](https://store.continuum.io/cshop/anaconda/) and get started using gPhoton immediately.
+There are several versions of Python available which include not only the core "standard" version itself, but many common and popular modules as a single package, eliminating the ened for users to manage such dependencies themeselves. At present, the most promising of these appears to be Anaconda, which is available as a free download (with some advanced features available as paid add-ons). Anaconda contains all of the required dependencies for the gPhoton project. Advanced users and Python developers will probably want to manage their own dependencies; if you are not one of these, you can [download Anaconda here](https://store.continuum.io/cshop/anaconda/) and get started using gPhoton immediately.
 
 ####Manual Package Management
+You will need to install _python2.7_, _numpy_, _scipy_, _astropy_ and _requests_. To use some of the Python helper utilities (contained in gphoton_utils.py), you will also need to install _pandas_. The recommended commands for doing this appear below under the appropriate operating system.
+
+The best specific tools for package installation and management shift rapidly. We'll try to keep this section up to date. If anything suggested here is actually _broken_, please let us know.
+
 #####Linux
-With your preferred method, install python2.7, numpy, scipy, astropy and requests. Here are the recommended commands for Ubuntu. If you are using Fedora, substitute `yum` for `apt-get` everywhere.
+Here are the recommended commands for Ubuntu. If you are using Fedora, substitute `yum` for `apt-get` everywhere.
 
     sudo apt-get install python-setuptools
     sudo apt-get install python-numpy python-scipy
@@ -53,12 +57,19 @@ You should use `pip` to get the latest versions of _requests_ and _astropy_. If 
 
     sudo pip install requests
     sudo pip install astropy
+    sudo pip install pandas
 
 #####Mac (OSX)
-**[PLACEHOLDER TEXT]** (use macports)
+**DRAFT** For installing and managing your custom python build in Mac OSX, we suggest using the [MacPorts package](https://www.macports.org/). There is also a tutorial for installing Python on Mac with MacPorts [here](https://astrofrog.github.io/macports-python/).
+
+    sudo port install py27-numpy
+    sudo port install py27-scipy
+    sudo port install py27-astropy
+    sudo port install py27-requests
+    sudo port install py27-pandas
 
 #####Windows
-**[PLACEHOLDER TEXT]**
+**[PLACEHOLDER TEXT]** We haven't actually tried to do any of this on Windows.
 
 ###Testing Your Build
 If you want to test your build or run any of the `gPhoton` commands below, you will need to download the sample eclipse directory from [here](https://www.dropbox.com/s/2c26jafccqz5ahh/e31000.tar.gz). This directory contains the raw science (raw6), spacecraft state (scst), and refined aspect (asprta) files for eclipse e31000. Unzip this test eclipse into the same directory as gPhoton (i.e. the directory `e31000` should be on the same level and in the same directory as `source` and `cal`).
