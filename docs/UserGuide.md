@@ -2,10 +2,10 @@
 
 **User Documentation for the MAST/GALEX Photon Database and Tools**
 
-[Chase Million](chase.million@gmail.com)<sup>1</sup>, Bernie Shiao<sup>2</sup>, Scott Fleming<sup>2</sup>,
+Chase Million<sup>1</sup>, Bernie Shiao<sup>2</sup>, Scott Fleming<sup>2</sup>,
 Myron Smith<sup>2</sup>
 
-<sup>1</sup>Million Concepts,
+<sup>1</sup>Million Concepts (chase.million@gmail.com),
 <sup>2</sup>Space Telescope Science Institute
 
 ###Raison d'Etre
@@ -83,20 +83,133 @@ This generates the aspect corrected NUV photons for eclipse 31000 and writes the
 
 _Syntax Note:_ The name _gPhoton_ can refer to both the standalone calibration pipeline  `gPhoton.py` and the MAST/GALEX photon database project as a whole. We know that this is confusing. For this reason, we try to refer to `gPhoton.py` as "the standalone calibration pipeline" and reserve "gPhoton" to refer to the project as a whole.
 
+###Optional parameters
 A number of the command line parameters given above are actually option. If (and only if) you have a working internet connection, then the aspect file (`-a`) parameter can be omitted; the software will instead query the aspect database table at MAST for the appropriate values. The Stime Separation Data (SSD) file parameter (`-d`) is _always optional_ because the values in this reference table can be generated directly from the raw data (at a very small cost in terms of total run time). Try the following command, which omits both of these parameters.
 
     ./gPhoton.py -r '../e31000/MISWZN11_12494_0315_0002-fd-raw6.fits' -c '../cal/' -o '../e31000/FUVphotons' -s '../e31000/MISWZN11_12494_0315_0002-scst.fits'
 
-##The Photon Tools
+###NULL vs. non-NULL data
+A large number of events cannot be aspect corrected either because they fall in a time range for which noa spect solution is available (for a variety of possible reasons) or because they don't actually fall on the detector proper (e.g. stims). Such events appear in the .csv output file with _NULL_ entries for RA and Dec and are referred to as "null data." You can optionally write null data to a separate file from non-null data by passign the `-u` flag. This will create a second .csv file for null data with "_NULL.csv" appended to the filname.
+
+    ./gPhoton.py -r '../e31000/MISWZN11_12494_0315_0002-fd-raw6.fits' -a '../e31000/MISWZN11_12494_0315_0002-asprta.fits' -c '../cal/' -o '../e31000/FUVphotons' -s '../e31000/MISWZN11_12494_0315_0002-scst.fits' -u
+
+###Multi-visit Eclipses
+For multi-visit eclipses (e.g. AIS), you can specify more than one aspect file for a single raw6 file using the following syntax.
+
+    -a '../FOO_sv01-asprta.fits,../FOO_sv02-asprta.fits,../FOO_sv03-asprta.fits'
+
+Again, if you do not specify `-a` at all, then the software will query the aspect database at MAST for the appropriate values, even for multi-visit eclipses.
+
+###Other Notes
+####Photon File Column Definitions
+The column definitions for the .csv file output by gPhoton.py are as follows.
+1. _t_ - time of the event (in "GALEX Time" = "UNIX Time" - 315964800)
+2. _x_ - detector x position
+3. _y_ - detector y position
+4. _xa_ - (if you don't already know, it's not important)
+5. _ya_ - (ditto)
+6. _q_ - (also ditto)
+7. _xi_ - aspect corrected detector position
+8. _eta_ - aspect corrected detector position
+9. _ra_ - aspect corrected right ascension of the event (decimal degrees)
+10. _dec_ - aspect corrected declination of the event (decimal degrees)
+11. _flags_ - status information (see below)
+
+####Flag Column Definitions
+These are the definitions of various values of the _flag_ column in the gPhoton .csv output file. Note that these are not identical to any flag column definitions for output created by the canonical pipeline. In general, end users will be most interested in events for which _flag = 1_, and this is the default search criterion for all queries performed by the Photon Tools.
+1. successfully calibrated (no errors)
+2. _N/A_
+3. event skipped
+4. _N/A_
+5. _N/A_
+6. classified as stim
+7. hotspot (covered by hotspot mask)
+8. bad aspect (unkown aspect solution)
+9. out of range (off of detector prior to the wiggle correction)
+10. bad walk (off of detector prior to the walk correction)
+11. bad linearity (off of the detector prior to the linearity correction)
+12. bad distortion (off of the detector prior to the distortion correction)
+13. aspect jump (questionable aspect due to occuring during a jump or gap in the aspect solution or bracketed by one or more flagged aspect values)
+14. _N/A_
+15. _N/A_
+16. _N/A_
+
+##The Database Tools
+The "database tools" or "photon tools" are the command line programs that provide basic functionality for interacting with he photon database at MAST to produce scientifically useful data products.
+
+_Note:_ For the rest of this User Guide, we will use the M dwarf flare star GJ 3685A as our standard example target. The GALEX observation of this flare was described in _Robinson, et al. "GALEX observations of an energetic ultraviolet flare on the dM4e star GJ 3685A." The Astrophysical Journal 633.1 (2005): 447._ It's a good test because it has an obvious and dramatic light curve; you'll know it when you see it.
 
 ###gFind.py
-_gFind_ is the data location tool. Given a target sky position (and, optionally, bands and time ranges), it will return the estimated raw exposure time and approximate time ranges of data that is currently available in the photon database. That is, _gFind_ is your convenient utility for assessing what data is currently available for use by _gAperture_ and _gMap_.
+_gFind_ is the data location tool. Given a target sky position (and, optionally, bands and time ranges), it will return the estimated raw exposure time and approximate time ranges of data that is currently available in the photon database. That is, _gFind_ is your convenient utility for assessing what data is currently available for use by _gAperture_ and _gMap_. Attempt the following command.
 
+    ./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351
 
+_For the curious:_ The estimates returned by _gFind_ are computed by finding the boresight pointings (in the aspect database) which fall within a detector radius (~0.625 degrees) of the desired sky position and comparing the associated time stamps against the time stamps of data that has actually been loaded into the photon database.
+
+####Tweaking Search Parameters
+The default allowable gap between two time stamps for them to be considered contiguous for the purposes of a _gFind_ estimate is one second. This is a reasonable minimum gap because it is the default spacing between adjacent entries in the aspect table. This parameter is adjustable, however, with the `-g` or `--gap` parameter. To consider data with gaps of as much as 100 seconds to be contiguous--a reasonable value if you want to treat all data in the same eclipse as part of the same observation--try the following command.
+
+    ./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --gap 100
+
+If, additionally, you want to exclude contiguous time ranges below some minimum raw exposure time, pass that time to the `--minexp` parameter.
+
+    ./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --minexp 100
+
+And, naturally, the `--gap` and `--minexp` parameters can be used in conjunction.
+
+    ./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --gap 100 --minexp 100
+
+If you want to exclude times when the source is on the edge of the detector, you can adjust the `--detsize` parameter to the desired effective detector _width_ (default = 1.25 degrees).
+
+    ./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --detsize 1
+
+_For the curious:_ The estimates returned by _gFind_ are computed by finding the boresight pointings (in the aspect database) which fall within a detector _radius_ (nominally 0.625 degrees) of the desired sky position and comparing the associated time stamps against the time stamps of data that has actually been loaded into the photon database.
+
+####Alternative I/O Formats
+Rather than passing RA (`-r`) and Dec (`-d`) separately, you can pass them to `--skypos` as follows.
+
+    ./gFind.py -b 'NUV' --skypos '[176.919525856024,0.255696872807351]'
+
+If you are interested only in the available raw exposure times and not the individual time ranges, pass the `--exponly` flag.
+
+    ./gFind.py -b 'NUV' --skypos '[176.919525856024,0.255696872807351]' --exponly
 
 ###gAperture.py
+_gAperture_ is the photometry tool.
+
+####Lightcurve File Column Definitions
+**[TBD]**
 
 ###gMap.py
+_gMap_ is the image creation tool. It can generate integrated count, intensity, and response (equivalent to GALEX _cnt_, _int_ and _rrhr_) maps of arbitrary size<sup>+</sup>, shape and depth, including coadds across epochs and survey designation. It can also create "movie" (time-binned, multi-plane) versions of such maps.
+
+<sup>+</sup>Caveat emptor. Arbitrariness is limited by your available RAM.
+
+####Count Maps
+Count (_cnt_) maps are integrated, aspect corrected but uncalibrated (that is, not adjusted for resonse or exposure time) images of the sky. Count images are good for "quick looks" at the data, to ensure that you are pointing in the location that you expected and that you are seeing the sources or features desired. But because they are not calibrated by either the relative response or the effective exposure time, you should not use them for photometric analyses of any kind.
+
+You can create a count image from the command line by specifying the band (`-b`), sky position (`-r` and `-d` or just `--skypos`), the angular extent of the desired image in degrees (`--angle`), an output FITS filename (`--count`), and optionally a time range (`--t0` and `--t1` or just `--trange` or `--tranges`). Try the following simple command.
+
+    ./gMap.py -b 'FUV' -r 176.919525856024 -d 0.255696872807351 --angle 0.5 --t0 766525332.995 --t1 766526576.995 --count 'count.fits'
+
+Or, using the alternative formats for specifying sky position and time range, try the following.
+
+    ./gMap.py -b 'FUV' --skypos '[176.919525856024,0.255696872807351]' --angle 0.5 --tranges '[[766525332.995, 766526576.995], [919755500.995, 919755916.995]]' --count 'count.fits'
+
+Note that the most recent command created an image with two planes corresonding to the time ranges `[766525332.995, 766526576.995]` and `[919755500.995, 919755916.995]`, respectively. This behavior can be used to specify custom time ranges for a movie (see **Movies** below), or you can force _gMap_ to coadd these two time ranges with the `--coadd` flag.
+
+    ./gMap.py -b 'FUV' --skypos '[176.919525856024,0.255696872807351]' --angle 0.5 --tranges '[[766525332.995, 766526576.995], [919755500.995, 919755916.995]]' --count 'count.fits' --coadd
+
+However, if you do not specify any time range, _gMap_ will automatically use all available exposure. (And uses the same underlying function as _gFind_ to locate said exposure time, so therefore will also accept the `--gap` and `--minexp` and `--detsize` keywords if desired.)
+
+    ./gMap.py -b 'FUV' --skypos '[176.919525856024,0.255696872807351]' --angle 0.5 --count 'count.fits' --coadd
+
+####Response Maps
+Relative response maps (_rrhr_) can be thought of as the detector flat field as projected onto the sky as a function of the detector boresight over time. Because the creation of relative response maps requires multiple computationally intensive interpolations, they take a long time to run. Intensity maps require response maps and therefore also take a long time to run. So, therefore, **WARNING: Making a response map will take longer than you expect. Do it sparingly.**
+
+####Intensity Maps
+
+####Movies
 
 ###Common Questions, Issues, and Gotchas
 1. **"My data is not available!"** You can verify that data for your desired target does or does not exist in the database and present by using the `gFind` commands described above. If data for your target is not available, there are two possible explanations: (1) we have not yet loaded those observations into the photon database, or (2) that target was never observed by the GALEX mission. As of this writing, we have only loaded about 5% of the total GALEX corpus into the photon database. You can confirm that your target was, indeed, observed by GALEX by searching for it in the [GALEX Catalog](http://galex.stsci.edu/GR6/?page=mastform). If your target was, indeed, observed by GALEX but has not yet been loaded into the gPhoton database, please contact Chase Million (chase.million@gmail.com) and Bernie Shiao (shiao@stsci.edu) with your target coordinates, and we will try to prioritize the associated data.
