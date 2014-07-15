@@ -8,11 +8,11 @@ Myron Smith<sup>2</sup>
 <sup>1</sup>Million Concepts (chase.million@gmail.com),
 <sup>2</sup>Space Telescope Science Institute
 
-###Raison d'Etre
+###Summary
 
-The MAST/GALEX photon database and tools exist in an effort to maximize the flexibility and utility of the GALEX data set. The GALEX detectors are microchannel plates which record detector position and time-of-arrival information for every detected photon event with a time resolution of five thousandths of a second, composing a huge and rich short time domain survey of the UV. Due to digital storage space and processing limitations, the data was only formally released by the mission team as integrated images. The photon list files--internally known as _x-files_--were only available by special request, and there was little to no additional support for their calibration or use.
+The MAST/GALEX photon database and tools exist in an effort to maximize the flexibility and utility of the GALEX data set. The GALEX detectors were microchannel plates which recorded detector position and time-of-arrival information for every detected photon event with a time resolution of five thousandths of a second, composing a huge and rich short time domain survey of the UV. Due to digital storage space and processing limitations, the data was only formally released by the mission team as integrated images. The photon list files--internally known as _x-files_--were only available by special request, and there was little to no additional support for their calibration or use.
 
-The official GALEX calibration pipeline software ("the canonical pipeline")--written in about half a dozen langauges with a sprawling network of complex dependencies--has also never been successfully ported to any system outside of the GALEX internal network at Caltech. Even though the source code for this pipeline will be made publicly available through the Mikulski Archive at Space Telescope (MAST) in the future, the end of the GALEX project would have effectively marked the end of the capability to generate photon level data specifically and revisit the GALEX calibration more generally. A software tool known as _gPhoton_ ("the standalone pipelien") has been developed by the authors with support of MAST and Space Telescope Science Institute (STScI) which reproduces a large portion of the official GALEX pipeline in Python and makes it possible for individual researchers to both generate their own photon level data and calibrated lightcurves or integrated images, and also to adjust or improve upon the calibration.
+The official GALEX calibration pipeline software ("the canonical pipeline")--written in about half a dozen langauges with a sprawling network of complex dependencies--has also never been successfully ported to any system outside of the GALEX internal network at Caltech. Even though the source code for this pipeline will be made publicly available through the Mikulski Archive at Space Telescope (MAST) in the future, the end of the GALEX project would have effectively marked the end of the capability to generate photon level data specifically and revisit the GALEX calibration more generally. A software tool known as _gPhoton_ ("the standalone pipeline") has been developed by the authors with support of MAST and Space Telescope Science Institute (STScI) which reproduces a large portion of the official GALEX pipeline in Python and makes it possible for individual researchers to generate the photon level data and calibrated lightcurves or integrated images. It also opens the possibility of modifying or improving upon the astrometric and photometric calibrations.
 
 Additionally, the authors and MAST have undertaken to process all of the GALEX data with gPhoton and store the photon level data in a database. Once the database is fully populated (_est. 2015_), it will comprise ~180 terabytes and contain approximately 1.5 trillion rows (at one event per row). In addition to the standalone calibration pipeline, _gPhoton_, the authors have created tools ("the database tools") for querying and working with output from the photon database. These include
 * _gFind_, for searching the database for specific coverage.
@@ -60,7 +60,7 @@ You should use `pip` to get the latest versions of _requests_ and _astropy_. If 
     sudo pip install pandas
 
 #####Mac (OSX)
-**DRAFT** For installing and managing your custom python build in Mac OSX, we suggest using the [MacPorts package](https://www.macports.org/). There is also a tutorial for installing Python on Mac with MacPorts [here](https://astrofrog.github.io/macports-python/).
+**Draft.** For installing and managing your custom python build in Mac OSX, we suggest using the [MacPorts package](https://www.macports.org/). There is also a tutorial for installing Python on Mac with MacPorts [here](https://astrofrog.github.io/macports-python/).
 
     sudo port install py27-numpy
     sudo port install py27-scipy
@@ -69,7 +69,7 @@ You should use `pip` to get the latest versions of _requests_ and _astropy_. If 
     sudo port install py27-pandas
 
 #####Windows
-**[PLACEHOLDER TEXT]** We haven't actually tried to do any of this on Windows.
+**Draft.** We haven't actually tried to do any of this on Windows. We suggest trying the [Enthought Python Distribution (EPD)](https://www.enthought.com/products/epd/) or the aforementioned [Anaconda](https://store.continuum.io/cshop/anaconda/) distribution.
 
 ###Testing Your Build
 If you want to test your build or run any of the `gPhoton` commands below, you will need to download the sample eclipse directory from [here](https://www.dropbox.com/s/2c26jafccqz5ahh/e31000.tar.gz). This directory contains the raw science (raw6), spacecraft state (scst), and refined aspect (asprta) files for eclipse e31000. Unzip this test eclipse into the same directory as gPhoton (i.e. the directory `e31000` should be on the same level and in the same directory as `source` and `cal`).
@@ -153,7 +153,7 @@ The "database tools" or "photon tools" are the command line programs that provid
 _Note:_ For the rest of this User Guide, we will use the M dwarf flare star GJ 3685A as our standard example target. The GALEX observation of this flare was described in _Robinson, et al. "GALEX observations of an energetic ultraviolet flare on the dM4e star GJ 3685A." The Astrophysical Journal 633.1 (2005): 447._ It's a good test because it has an obvious and dramatic light curve; you'll know it when you see it.
 
 ###gFind.py
-_gFind_ is the data location tool. Given a target sky position (and, optionally, bands and time ranges), it will return the estimated raw exposure time and approximate time ranges of data that is currently available in the photon database. That is, _gFind_ is your convenient utility for assessing what data is currently available for use by _gAperture_ and _gMap_. Attempt the following command.
+_gFind_ is the data location tool. Given a target sky position (and, optionally, bands and time ranges), it will return the estimated raw exposure time and approximate time ranges of data that are currently available in the photon database. That is, _gFind_ is your convenient utility for assessing what data is currently available for use by _gAperture_ and _gMap_. Attempt the following command.
 
     ./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351
 
@@ -187,11 +187,54 @@ If you are interested only in the available raw exposure times and not the indiv
 
     ./gFind.py -b 'NUV' --skypos '[176.919525856024,0.255696872807351]' --exponly
 
+####Calling from within the Python Interpreter
+If you prefer to work from within the Python interpreter, _gFind_ can be imported like any other module. The two functions of the most interest to most users will be `gFind.gFind` and `gFind.fGetTimeRanges`.
+
+    import gFind
+    help(gFind.gFind)
+
+> Help on function gFind in module gFind:
+>
+> **gFind**(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1.0, minexp=1.0, quiet=False, retries=20, skypos=None, trange=None, verbose=0)
+>
+>   Primary program in the module. Prints time ranges to the screen and returns the total exposure time as a float.
+
+    help(gFind.fGetTimeRanges)
+
+> Help on function fGetTimeRanges in module dbasetools:
+>
+> **fGetTimeRanges**(band, skypos, trange=[1, 1000000000000], tscale=1000.0, detsize=1.25, verbose=0, maxgap=1.0, minexp=1.0, retries=100.0)
+>
+> Find the contiguous time ranges within a time range at a specific location.
+>
+>    minexp - Do not include exposure time less than this.
+>
+>    maxgap - Gaps in exposure longer than this initiate a new time range.
+>
+>    detsize - Fiddle with this if you want to exlude the edges of the detector.
+
+For example, an equivalent call to `./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --gap 100 --minexp 100` within the interpreter would be the following.
+
+    gFind.gFind(band='NUV',skypos=[176.919525856024,0.255696872807351],maxgap=100.,minexp=100.)
+
 ###gAperture.py
 _gAperture_ is the photometry tool.
 
 ####Lightcurve File Column Definitions
-**[TBD]**
+**TBD:** The column definitions for the .csv output from _gAperture_ are in flux following the recent v1.10 feature update. Please see the .csv headers.
+
+####Calling from within the Python Interpreter
+You can also import and work with _gAperture_ and its modules from within the Python interpeter.
+
+    import gAperture
+    help(gAperture.gAperture)
+
+> Help on function gAperture in module gAperture:
+
+> **gAperture**(band, skypos, radius, csvfile=False, annulus=[False, False], stepsz=False, verbose=0, clobber=False, trange=[1, 1000000000000])
+>
+>    Runs gAperture and returns the data in a python dict() and as
+>    a CSV file if outfile is specified. Can be called from the interpreter.
 
 ###gMap.py
 _gMap_ is the image creation tool. It can generate integrated count, intensity, and response (equivalent to GALEX _cnt_, _int_ and _rrhr_) maps of arbitrary size<sup>+</sup>, shape and depth, including coadds across epochs and survey designation. It can also create "movie" (time-binned, multi-plane) versions of such maps.
