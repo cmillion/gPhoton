@@ -213,8 +213,13 @@ If you prefer to work from within the Python interpreter, _gFind_ can be importe
 >
 >    detsize - Fiddle with this if you want to exlude the edges of the detector.
 
-For example, an equivalent call to `./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --gap 100 --minexp 100` within the interpreter would be the following.
+For example, an equivalent call to
 
+    ./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --gap 100 --minexp 100
+
+within the interpreter would be the following.
+
+    import gFind
     gFind.gFind(band='NUV',skypos=[176.919525856024,0.255696872807351],maxgap=100.,minexp=100.)
 
 ###gAperture.py
@@ -230,7 +235,7 @@ You can also import and work with _gAperture_ and its modules from within the Py
     help(gAperture.gAperture)
 
 > Help on function gAperture in module gAperture:
-
+>
 > **gAperture**(band, skypos, radius, csvfile=False, annulus=[False, False], stepsz=False, verbose=0, clobber=False, trange=[1, 1000000000000])
 >
 >    Runs gAperture and returns the data in a python dict() and as
