@@ -223,7 +223,32 @@ within the interpreter would be the following.
     gFind.gFind(band='NUV',skypos=[176.919525856024,0.255696872807351],maxgap=100.,minexp=100.)
 
 ###gAperture.py
-_gAperture_ is the photometry tool.
+_gAperture_ is the photometry tool which computes source fluxes or light curves for specified targets and time ranges with customizable apertures and background annuli. If an output filename is provided, the light curve data will be written to a .csv file.
+
+The minimum required parameters are RA (`-r` or `--ra`), Dec (`-d` or `--dec`), and aperture radius (`-a`), all in decimal degrees. This will compute the integrated flux over all available data with no background subtraction. For our flare star example and an aperture with radius of 0.03 degrees, that command looks like this.
+
+    ./gAperture.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 -a 0.03
+
+You can also limit the computation to specific time ranges with `--t0` and `--t1` or `--trange` (or `--tranges`). You can also perform a background correction by specifying the inner and outer radii of a background annulus (in decimal degrees) centered on the target with the `-i`/`--inner` and `-o`/`--outer` or `--annulus` flags.
+
+Let's limit further analysis to the time range in which flare occurs in this data, `[766525332.995,766526576.995]`. Let's also extract the background from an annulus with an inner radius of 0.03 degrees and an outer radius of 0.04 degrees.
+
+    ./gAperture.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 -a 0.03 -i 0.03 -o 0.04 --t0 766525332.995 --t1 766526576.995
+
+which is equivalent to
+
+    ./gAperture.py -b 'NUV' --skypos [176.919525856024,0.255696872807351] -a 0.03 --annulus [0.03,0.04] --trange [766525332.995,766526576.995]
+
+Because you didn't specify an output file, the previous commands simply printed the AB Magnitude values. You can write all of the data to a .csv file by passing a filename to `-f` or `--filename`.
+
+    ./gAperture.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 -a 0.03 -i 0.03 -o 0.04 --t0 766525332.995 --t1 766526576.995 -f 'lightcurve.csv'
+
+Note that if you try to run that command a second time, it won't let you because the software detects that the file already exists and suggests that you use `--clobber` (or `--overwrite`) to force it to overwrite _lightcurve.csv_. Therefore, `--clobber` is appended to all of the following commands to avoid this error. (But you should use it with caution. It's there for a reason.)
+
+If you want to generate a light curve rather than an integrated value, pass the desired (raw) bin depth in seconds to the step size flag (`-s`). For example, to generate a light curve with 100 second bins, try the following.
+
+    ./gAperture.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 -a 0.03 -i 0.03 -o 0.04 --t0 766525332.995 --t1 766526576.995 -f 'lightcurve.csv' -s 100.
+
 
 ####Lightcurve File Column Definitions
 **TBD:** The column definitions for the .csv output from _gAperture_ are in flux following the recent v1.10 feature update. Please see the .csv headers.
