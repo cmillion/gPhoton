@@ -10,8 +10,8 @@ from dbasetools import fGetTimeRanges, suggest_parameters
 #import ref # refactored lightcurve cration
 
 #def gAperture(args):
-def gAperture(band,skypos,radius,csvfile=False,annulus=[False,False],
-              stepsz=False,verbose=0,clobber=False,trange=[1,1000000000000]):
+def gAperture(band,skypos,radius,csvfile=False,annulus=None,
+              stepsz=False,verbose=0,clobber=False,trange=None):
     """Runs gAperture and returns the data in a python dict() and as
     a CSV file if outfile is specified. Can be called from the interpreter.
     """
@@ -19,12 +19,13 @@ def gAperture(band,skypos,radius,csvfile=False,annulus=[False,False],
         print "Generating a light curve with the following paramters:"
         print " band:    "+str(band)
         print " skypos:  "+str(skypos)
+        print " trange:  "+str(trange)
         print " radius:  "+str(radius)
         print " annulus: "+str(annulus)
         print " stepsz:  "+str(stepsz)
         print " csvfile: "+str(csvfile)
         print " verbose: "+str(verbose)
-    data = ct.write_curve(band,skypos[0],skypos[1],radius,csvfile=csvfile,annulus=annulus,stepsz=stepsz,verbose=verbose,clobber=clobber)
+    data = ct.write_curve(band,skypos[0],skypos[1],radius,csvfile=csvfile,annulus=annulus,stepsz=stepsz,verbose=verbose,clobber=clobber,trange=trange)
     return data
 
 def check_radius(args):
@@ -55,7 +56,7 @@ def check_skypos(args):
     elif (args.ra and args.dec):
         args.skypos = [args.ra,args.dec]
     else:
-        args.skypos = list(ast.literal_eval(args.skypos))
+        args.skypos = list(args.skypos)
     if args.suggest:
         args = suggest(args)
     return args
@@ -70,30 +71,32 @@ def check_stepsz(args):
 def check_annulus(args):
     """Checks and formats the annulus values."""
     if not (args.annulus1 and args.annulus2) and not args.annulus:
-        args.annulus = [False,False]
+        args.annulus = False
     elif args.annulus1 and args.annulus2:
         args.annulus = [args.annulus1,args.annulus2]
     else:
-        args.annulus = ast.literal_eval(args.annulus)
+        args.annulus = list(args.annulus)
     return args
 
 # TODO: fGetTimeRanges is probalby not actually necessary. What we want
 # instead is for a way to specifically include or exclude time ranges.
 def check_tranges(args):
     """Checks and formats the tranges values."""
-    args.tranges = (list(ast.literal_eval(args.tranges)) if
+    args.tranges = (list(args.tranges) if
                                     args.tranges else [args.tmin,args.tmax])
+    args.trange = [np.array(args.tranges).flatten().min(),
+                   np.array(args.tranges).flatten().max()]
     if args.verbose:
         print 'Using all exposure in ['+str(args.tmin)+','+str(args.tmax)+']'
-    tranges = fGetTimeRanges(args.band,args.skypos,maxgap=args.gap,verbose=args.verbose,minexp=args.minexp,trange=args.tranges,detsize=args.detsize)
-    if not len(tranges):
+    args.tranges = fGetTimeRanges(args.band,args.skypos,maxgap=args.gap,verbose=args.verbose,minexp=args.minexp,trange=args.tranges,detsize=args.detsize)
+    if not len(args.tranges):
         print 'No exposure time in database.'
         exit(0)
     if args.verbose:
-        print 'Using '+str((tranges[:,1]-tranges[:,0]).sum())+' seconds (raw) in '+str(len(tranges))+' distinct exposures.'
+        print 'Using '+str((args.tranges[:,1]-args.tranges[:,0]).sum())+' seconds (raw) in '+str(len(args.tranges))+' distinct exposures.'
     # Make sure tranges is a 2D array
-    if len(np.array(tranges).shape)==1:
-        tranges=[tranges]
+    if len(np.array(args.tranges).shape)==1:
+        args.tranges=[args.tranges]
     return args
 
 def check_args(args):
@@ -135,8 +138,8 @@ def setup_parser():
         help="Minimum time to consider.",default=1.,type=np.float64)
     parser.add_argument("--t1", "--tmax", action="store", dest="tmax",
         help="Maxium time to consider.",default=1000000000000.,type=np.float64)
-    parser.add_argument("--tranges", action="store", type=str,
-        dest="tranges",
+    parser.add_argument("--tranges", "--trange", action="store",
+        type=ast.literal_eval, dest="tranges",
         help="List of time ranges with format '[[t0,t1],[t2,t3],...]'")
     parser.add_argument("-s", "--step", "--frame", action="store", type=float,
         dest="stepsz", help="Step size in seconds",default=0)
@@ -236,4 +239,4 @@ if __name__ == '__main__':
     data = gAperture(args.band, args.skypos, args.radius,
                      csvfile=args.csvfile, annulus=args.annulus,
                      stepsz=args.stepsz, verbose=args.verbose,
-                     clobber=args.overwrite)
+                     clobber=args.overwrite,trange=args.trange)

@@ -161,3 +161,29 @@ def angularSeparation(ra0,dec0,ra1,dec1):
 		r[zero] = 0.0
 	return r
 
+def intersect(r1,r2):
+    #FIXME
+    t0,t1=np.array(r1)
+    trange=np.array(r2)
+    """Returns the intersection of r1 and r2."""
+    if (t0<=trange[0]) & (t1>trange[1]):
+        return trange[0],trange[1]
+    elif (t0<=trange[0]) & (t1<trange[1]):
+        return trange[0],t1
+    elif (t0>trange[0]) & (t1>trange[1]):
+        return t0,trange[1]
+    elif (t0>trange[0]) & (t1<=trange[1]):
+        return t0,t1
+    else:
+        print t0,t1,trange
+        return None
+
+def algebraicIntersection(steps,tranges):
+    """Returns intervals defining the intersection of r1 and r2."""
+    t0=np.array(steps)[:,0]
+    t1=np.array(steps)[:,1]
+    sect = []
+    for trange in tranges:
+        ix = np.where(((t0>=trange[0]) & (t0<trange[1])) | ((t1>=trange[0]) & (t1<trange[1])) | ((t0<=trange[0]) & (t1>trange[1])))[0]
+        sect+=[intersect([t0[i],t1[i]],trange) for i in ix]
+    return sect

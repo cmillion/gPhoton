@@ -235,7 +235,7 @@ def setup_args(function_name=None):
 
 	# VERBOSE is accepted by gFind, gAperture, and gMap.
         if function_name == 'gfind' or function_name == 'gaperture' or function_name == 'gmap':
-            parser.add_argument("-v", "--verbose", action="store", type=int, dest="verbose", help="Prints extra information to STDOUT (higher number = more output). Choices are {0,1,2}, default = 0.", metavar="VRB",default=0.,choices=[0,1,2])
+            parser.add_argument("-v", "--verbose", action="store", type=int, dest="verbose", help="Prints extra information to STDOUT (higher number = more output). Choices are {0,1,2,3}, default = 0.", metavar="VRB",default=0.,choices=[0,1,2,3])
 
         # Return the Parser object.
 	return parser

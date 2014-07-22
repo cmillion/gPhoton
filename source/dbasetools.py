@@ -4,7 +4,7 @@ import numpy as np
 import gQuery
 from MCUtils import print_inline,area
 
-def fGetTimeRanges(band,skypos,trange=[1,1000000000000],tscale=1000.,detsize=1.25,verbose=0,maxgap=1.,minexp=1.,retries=100.):
+def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,maxgap=1.,minexp=1.,retries=100.):
     """Find the contiguous time ranges within a time range at a 
     specific location.
 	minexp - Do not include exposure time less than this.
@@ -13,6 +13,13 @@ def fGetTimeRanges(band,skypos,trange=[1,1000000000000],tscale=1000.,detsize=1.2
     detector.
 	"""
     try:
+        #FIXME: t[01] appears to have no impact on this
+        # if trange is not set, set it to an arbitrary large range in order
+        # to capture the whole mission
+        if not trange:
+            trange = [1,1000000000000]
+        if len(np.shape(trange))==2:
+            trange=trange[0]
         times = np.array(gQuery.getArray(gQuery.exposure_ranges(band,skypos[0],skypos[1],t0=trange[0],t1=trange[1],detsize=detsize,tscale=tscale),verbose=verbose,retries=retries),dtype='float64')[:,0]/tscale
     except:
         return np.array([],dtype='float64')
@@ -47,23 +54,36 @@ def fGetTimeRanges(band,skypos,trange=[1,1000000000000],tscale=1000.,detsize=1.2
 
     return np.array(chunks,dtype='float64')
 
-def compute_exptime(band,trange,verbose=0,skypos=[False,False],detsize=1.25,retries=20):
-	"""Compute the effective exposure time."""
-	# FIXME: This skypos[] check appears to not work properly and leads
-	#  to dramatic _underestimates_ of the exposure time.
-	if skypos[0] and skypos[1]:
-		tranges = fGetTimeRanges(band,skypos,verbose=verbose,trange=trange,retries=retries)
-	else:
-		tranges = [trange]
-	exptime = 0.
-	for trange in tranges:
-		if trange[0]==trange[1]:
-			continue
-		rawexpt  = trange[1]-trange[0]
-		shutdead = gQuery.getArray(gQuery.shutdead(band,trange[0],trange[1]),verbose=verbose,retries=retries)
-		exptime += (rawexpt-shutdead[0][0])*(1.-shutdead[1][0])
+def exposure(band,trange,verbose=0,retries=20):
+    """Compute the effective exposure time for a time range."""
+    rawexpt = trange[1]-trange[0]
+    if rawexpt<=0:
+        return 0.
+    shutdead = gQuery.getArray(gQuery.shutdead(band,trange[0],trange[1]),verbose=verbose,retries=retries)
+    return (rawexpt-shutdead[0][0])*(1.-shutdead[1][0])
 
-	return exptime
+def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,retries=20):
+    """Compute the effective exposure time."""
+    # FIXME: This skypos[] check appears to not work properly and leads
+    #  to dramatic _underestimates_ of the exposure time.
+    if skypos:
+        tranges = fGetTimeRanges(band,skypos,verbose=verbose,trange=trange,
+                                 retries=retries)
+    else:
+        tranges=[trange]
+    exptime = 0.
+    for trange in tranges:
+        # To create manageable queries, only compute exposure time in
+        # chunks <=10e6 seconds
+        chunksz = 10.e6
+        chunks = (np.linspace(trange[0],trange[1],
+                             num=np.ceil((trange[1]-trange[0])/chunksz)) if 
+                                 (trange[1]-trange[0])>chunksz else
+                                 np.array(trange))
+        for i,t in enumerate(chunks[:-1]):
+            exptime += exposure(band,[chunks[i],chunks[i+1]],verbose=verbose,
+                                retries=retries)
+    return exptime
 
 def mcat_skybg(band,skypos,radius,verbose=0,retries=20):
 	"""Estimate the sky background using the MCAT skybg for nearby sources."""
