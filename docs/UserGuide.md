@@ -1,5 +1,3 @@
-#DRAFT DRAFT DRAFT DRAFT DRAFT
-
 **User Documentation for the MAST/GALEX Photon Database and Tools**
 
 Chase Million<sup>1</sup>, Bernie Shiao<sup>2</sup>, Scott Fleming<sup>2</sup>,
@@ -247,8 +245,9 @@ Note that if you try to run that command a second time, it won't let you because
 
 If you want to generate a light curve rather than an integrated value, pass the desired (raw) bin depth in seconds to the step size flag (`-s`). For example, to generate a light curve with 100 second bins, try the following.
 
-    ./gAperture.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 -a 0.03 -i 0.03 -o 0.04 --t0 766525332.995 --t1 766526576.995 -f 'lightcurve.csv' -s 100.
+    ./gAperture.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 -a 0.03 -i 0.03 -o 0.04 --t0 766525332.995 --t1 766526576.995 -f 'lightcurve.csv' -s 100. --overwrite
 
+For any command, you can always request more information be printed to the terminal by setting the `--verbose` or `-v` flag to a number between 1-3 (defualt is 0) where larger numbers indicate increasing levels of output. Setting `-v 3` will print out complete SQL commands and should really only be used for debugging.
 
 ####Lightcurve File Column Definitions
 **TBD:** The column definitions for the .csv output from _gAperture_ are in flux following the recent v1.10 feature update. Please see the .csv headers.
