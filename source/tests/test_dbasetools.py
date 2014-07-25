@@ -9,5 +9,6 @@ class TestDbasetoolsFunctions(unittest.TestCase):
     def test_fGetTimeRanges(self):
         self.assertTrue(True)
 
-if __name__ == '__main__':
-    unittest.main()
+suite = unittest.TestLoader().loadTestsFromTestCase(TestDbasetoolsFunctions)
+unittest.TextTestRunner(verbosity=2).run(suite)
+

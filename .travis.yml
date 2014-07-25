@@ -15,6 +15,4 @@ install:
 # command to run tests, e.g. python setup.py test
 script:
   - cd source
-  - python -m tests.test_dbasetools.py
-  - python -m tests.test_galextools.py
-  - python -m tests.test_gQuery.py
+  - python -m unittest discover
