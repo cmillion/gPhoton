@@ -3,9 +3,6 @@ from astropy.io import fits as pyfits
 import numpy as np
 from sys import stdout
 
-import pyximport
-pyximport.install()
-
 # A package for html queries
 import requests
 from MCUtils import *

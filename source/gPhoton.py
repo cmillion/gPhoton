@@ -1,8 +1,5 @@
 #!/usr/bin/python
 
-# This compiles the Cython code at runtime.
-import pyximport
-pyximport.install()
 from PhotonPipe import *
 
 from optparse import OptionParser
