@@ -95,6 +95,11 @@ def deg2pix(skypos,skyrange,pixsz=0.000416666666666667):
 	"""Converts degrees to GALEX pixels rounded up to the nearest pixel
 	so that the number of degrees specified will fully fit into the frame.
 	"""
+    # FIXME
+    # > gt.deg2pix([0,90],[0,0])
+    # >  array([ 0.,  1.])
+    # > gt.deg2pix([0,0],[0,0])
+    # >  array([ 1.,  0.])
 	wcs = pywcs.WCS(naxis=2) # NAXIS = 2
 	wcs.wcs.cdelt = [pixsz,pixsz]
 	wcs.wcs.ctype = ['RA---TAN','DEC--TAN']
@@ -112,38 +117,43 @@ def deg2pix(skypos,skyrange,pixsz=0.000416666666666667):
 	return np.abs(np.floor(wcs.sip_pix2foc(wcs.wcs_world2pix([coo],1),1)[0]))[::-1]
 
 def compute_flat_scale(t,band,verbose=0):
-	"""Return the flat scale factor for a given time.
-	These are empirically determined linear scales to the flat field
-	as a function of time due to diminished detector response. They
-	were determined by Tom Barlow and are in the original GALEX pipeline
-	but there is no published source of which I am aware.
-	"""
-	if verbose:
-		print "Calculating flat scale for t=",t,", and band=",band
-	if band=='NUV':
-		flat_correct=-0.0154
-		flat_t0=840418779.02
-		flat_correct_0=1.9946352
-		flat_correct_1=-1.9679445e-09
-		flat_correct_2=9.3025231e-19
-	elif band=='FUV':
-		flat_correct=-0.0154
-		flat_t0=840418779.02
-		flat_correct_0=1.2420282
-		flat_correct_1=-2.8843099e-10
-		flat_correct_2=0.000
-	else:
-		print "Band not specified."
+    """Return the flat scale factor for a given time.
+    These are empirically determined linear scales to the flat field
+    as a function of time due to diminished detector response. They
+    were determined by Tom Barlow and are in the original GALEX pipeline
+    but there is no published source of which I am aware.
+    """
+    if verbose:
+        print "Calculating flat scale for t=",t,", and band=",band
+    if band=='NUV':
+        flat_correct=-0.0154
+        flat_t0=840418779.02
+        flat_correct_0=1.9946352
+        flat_correct_1=-1.9679445e-09
+        flat_correct_2=9.3025231e-19
+    elif band=='FUV':
+        flat_correct=-0.0154
+        flat_t0=840418779.02
+        flat_correct_0=1.2420282
+        flat_correct_1=-2.8843099e-10
+        flat_correct_2=0.000
+    else:
+        print "Band not specified."
 
-	flat_scale=flat_correct_0+(flat_correct_1*t)+(flat_correct_2*t)*t
+    t = np.array(t)
+    flat_scale=flat_correct_0+(flat_correct_1*t)+(flat_correct_2*t)*t
 
-	# There's a bulk shift in the response after the CSP
-	ix = np.where(t>=881881215.995)
-	if len(ix):
-		flat_scale[ix] *= 1.018
+    # There's a bulk shift in the response after the CSP
+    ix = np.where(t>=881881215.995)
+    if len(ix[0]):
+        try:
+            flat_scale[ix] *= 1.018
+        except:
+            # if it does not have '__getitem__'
+            flat_scale *= 1.018
 
-	if verbose:
-		print "         flat scale = ",flat_scale
+    if verbose:
+        print "         flat scale = ",flat_scale
 
-	return flat_scale
+    return flat_scale
 

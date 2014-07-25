@@ -1,4 +1,5 @@
-# This file defines common queries that are passed to the GALEX photon database at MAST.
+# This file defines common queries that are passed to the GALEX photon
+# database at MAST.
 from MCUtils import manage_requests
 import CalUtils
 
@@ -6,12 +7,9 @@ import CalUtils
 # If the database ever "moves" or if someone builds a mirror, you should
 #  be able to just change this string and everything else will still work.
 baseURL = 'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
-# Or a sometimes used dev server.
-#baseURL = 'http://mastdev.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQuery?query='
 
 # Defines the standard return format and timeout
 formatURL = '&format=json&timeout={}'
-
 
 def getValue(query,verbose=0,retries=20):
 	if verbose>2:
@@ -62,6 +60,7 @@ def deadtime1(band,t0,t1,tscale=1000.):
 def deadtime2(band,t0,t1,tscale=1000.):
 	return str(baseURL)+'select count(*) from '+str(band)+'PhotonsNULLV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+str(formatURL)
 
+# FIXME: Failed experiment. This should probably be deprecated.
 def hyper_deadtime(band,tranges,tscale=1000.):
     """ Given an array of times, return an array photon counts
         for those time ranges.
