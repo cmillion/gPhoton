@@ -1,10 +1,17 @@
+virtualenv:
+  system_site_packages: true
 language: python
 python:
-  - "3.3"
   - "2.7"
+virtualenv:
+  system_site_packages: true
+before_install:
+  sudo apt-get install -qq python-numpy python-scipy
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install:
-  - pip install -r source/requirements.txt
+  - pip install requests
+  - pip install astropy
+  - pip install pandas
 # command to run tests, e.g. python setup.py test
 script:
   - cd source
