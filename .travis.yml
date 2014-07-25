@@ -17,4 +17,4 @@ script:
   - cd source
   - python -m tests.test_dbasetools.py
   - python -m tests.test_galextools.py
-  - python -m tests.test-gQuery.py
+  - python -m tests.test_gQuery.py
