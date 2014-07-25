@@ -5,5 +5,14 @@ python:
   - "2.6"
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: PLEASE CHANGE ME
+  - "pip install numpy"
+  - "pip install scipy"
+  - "pip install requests"
+  - "pip install astropy"
+  - "pip install pandas"
 # command to run tests, e.g. python setup.py test
-script:  PLEASE CHANGE ME
+script:
+  - cd source
+  - python -m tests.test_dbasetools.py
+  - python -m tests.test_galextools.py
+  - python -m tests.test-gQuery.py
