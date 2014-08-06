@@ -15,7 +15,7 @@ def gAperture(band,skypos,radius,csvfile=False,annulus=None,
     """Runs gAperture and returns the data in a python dict() and as
     a CSV file if outfile is specified. Can be called from the interpreter.
     """
-    if args.verbose>1:
+    if verbose>1:
         print "Generating a light curve with the following paramters:"
         print " band:    "+str(band)
         print " skypos:  "+str(skypos)

@@ -129,13 +129,18 @@ def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maglimit=28.,
         eff_area = cheese_bg_area(band,ra0,dec0,annulus,sources)
     return mc.area(radius)*bg_counts/eff_area
 
-def quickmag(band, ra0, dec0, trange, radius, annulus=None, data={},
+def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
              stepsz=None, calpath='../cal/', verbose=0, maglimit=28.,
              detsize=1.25):
     if verbose:
         mc.print_inline("Retrieving all of the target events.")
-    data = pullphotons(band, ra0, dec0, trange[0], trange[1],
-                       radius if not annulus else annulus[1])
+    trange = [np.array(tranges).min(),np.array(tranges).max()]
+    try:
+        searchradius = annulus[1]
+    except:
+        searchradius = radius
+    data = pullphotons(band, ra0, dec0, trange[0], trange[1], searchradius,
+                       verbose=verbose)
     if verbose:
         mc.print_inline("Isolating source from background.")
     angSep = mc.angularSeparation(ra0, dec0, data['ra'], data['dec'])
@@ -230,7 +235,7 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     # TODO: Add an ability to specify or exclude specific time ranges
     if verbose:
         mc.print_inline("Moving to photon level operations.")
-    lcurve = quickmag(band, ra0, dec0, trange, radius, annulus=annulus,
+    lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
                       stepsz=stepsz, verbose=verbose)
     lcurve['cps'] = (lcurve['counts']-lcurve['bg']['cheese'])/lcurve['exptime']
     lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
