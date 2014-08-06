@@ -6,25 +6,24 @@ This method is reproduced in `aperture_response()` in curvetools.py.
 ###Post-CSP Response Scale
 From: http://www.galex.caltech.edu/wiki/Public:Documentation/Chapter_8#New_Calibration "A new response correction has been applied to data taken after the TAC scale change on 2010 June 23 (at eclipse number 38150). The response was found to be 1.8% greater in these data, so a scale correction factor of 1.018 was applied uniformly across the detector. The calibration scale was computed in the same manner as with prior GALEX data (GALEX general release 6)-- using the star LDS 749b and a very large aperture. Therefore, the new calibration includes any contribution from the ghost images (averaged across the detector). However, this contribution is less than 0.1% on average, well within the flux calibration accuracy (about +/-1%) for individual sources."
 
-`
-import numpy as np
-from MCUtils import print_inline
-import imagetools as it
-import curvetools as ct
 
-band = 'FUV'
-t0,t1 = 766525332.995,766526576.995
-skypos = [176.919525856024,0.255696872807351]
-radius = 0.01
-skyrange = [radius*2.,radius*2.]
-trange = [t0,t1]
-tranges= [trange]
-verbose = 2
+    import numpy as np
+    from MCUtils import print_inline
+    import imagetools as it
+    import curvetools as ct
 
-rrhr = it.rrhr(band,skypos,tranges,skyrange,verbose=verbose)
+    band = 'FUV'
+    t0,t1 = 766525332.995,766526576.995
+    skypos = [176.919525856024,0.255696872807351]
+    radius = 0.01
+    skyrange = [radius*2.,radius*2.]
+    trange = [t0,t1]
+    tranges= [trange]
+    verbose = 2
 
-aprr = ct.aperture_response(band,skypos,tranges,radius,verbose=verbose)
-`
+    rrhr = it.rrhr(band,skypos,tranges,skyrange,verbose=verbose)
+
+    aprr = ct.aperture_response(band,skypos,tranges,radius,verbose=verbose)
 
 In [126]: rrhr.mean()
 Out[126]: 913.89075085365528
