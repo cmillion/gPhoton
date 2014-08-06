@@ -5,3 +5,4 @@ To get started, please read the [User Guide](https://github.com/cmillion/gPhoton
 If you use gPhoton software in your research, please cite:
 Million, C., Fleming, S. W., Shiao, B. (2014) gPhoton. Software available at https://github.com/cmillion/gPhoton
 
+![Logo](https://travis-ci.org/cmillion/gPhoton.svg?branch=master)
