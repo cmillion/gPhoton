@@ -32,11 +32,15 @@ def getArray(query,verbose=0,retries=20):
 	return out
 
 def mcat_sources(band,ra0,dec0,radius,maglimit=20):
-	# 1=nuv, 2=fuv, 3=both
-	bandflag = 1 if band=='NUV' else 2
-	# fgetnearbyobjeq takes radius in arcminutes
-	# add a buffer to the radius to catch stars just outside
-	return str(baseURL)+'select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world from Gr6plus7.Dbo.photoobjall as p inner join Gr6plus7.Dbo.photoextract as pe on p.photoextractid=pe.photoextractid inner join gr6plus7.dbo.fgetnearbyobjeq('+str(ra0)+', '+str(dec0)+', '+str(radius*60.+0.02*60.)+') as nb on p.objid=nb.objid and (band=3 or band='+str(bandflag)+') and '+str(band)+'_mag<'+str(maglimit)+str(formatURL)
+    ''' Return the MCAT sources given sky position and search radius
+    (and optional lower magnitude limit). The columns returned are
+    ['ra','dec','nuv_mag','fuv_mag','fov_radius','nuv_skybg','fuv_skybg','nuv_fwhm_world','fuv_fwhm_world']
+    '''
+    # 1=nuv, 2=fuv, 3=both
+    bandflag = 1 if band=='NUV' else 2
+    # fgetnearbyobjeq takes radius in arcminutes
+    # add a buffer to the radius to catch stars just outside
+    return str(baseURL)+'select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world from Gr6plus7.Dbo.photoobjall as p inner join Gr6plus7.Dbo.photoextract as pe on p.photoextractid=pe.photoextractid inner join gr6plus7.dbo.fgetnearbyobjeq('+str(ra0)+', '+str(dec0)+', '+str(radius*60.+0.02*60.)+') as nb on p.objid=nb.objid and (band=3 or band='+str(bandflag)+') and '+str(band)+'_mag<'+str(maglimit)+str(formatURL)
 
 def exposure_ranges(band,ra0,dec0,t0=1,t1=10000000000000,tscale=1000.,detsize=1.25):
 	# If band is set to False (or equivalent), search on both bands
@@ -59,18 +63,6 @@ def deadtime1(band,t0,t1,tscale=1000.):
 # Returns global counts for null data
 def deadtime2(band,t0,t1,tscale=1000.):
 	return str(baseURL)+'select count(*) from '+str(band)+'PhotonsNULLV where time between '+str(long(t0*tscale))+' and '+str(long(t1*tscale))+str(formatURL)
-
-# FIXME: Failed experiment. This should probably be deprecated.
-def hyper_deadtime(band,tranges,tscale=1000.):
-    """ Given an array of times, return an array photon counts
-        for those time ranges.
-    """
-    query = str(baseURL)
-    for i,t in enumerate(tranges):
-        query+='select sum(dt) * 0.0000057142857142857145 / ('+repr(t[1])+'-'+repr(t[0])+') from(select count(*) as dt from '+str(band)+'PhotonsNULLV where time between '+str(long(t[0]*tscale))+' and '+str(long(t[1]*tscale))+' union all select count(*) as dt from '+str(band)+'PhotonsV where time between '+str(long(t[0]*tscale))+' and '+str(long(t[1]*tscale))+') x'
-        if i!=len(tranges)-1:
-            query+=' union all '
-    return query+str(formatURL)
 
 # Returns the empirically determined deadtime correction
 def deadtime(band,t0,t1,tscale=1000.):
