@@ -43,9 +43,6 @@ class TestGQueryFunctions(unittest.TestCase):
     def test_deadtime2(self):
         self.assertEqual(gq.deadtime2(self.NUV,self.t0,self.t1),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select count(*) from NUVPhotonsNULLV where time between 766525332995 and 866526576995&format=json&timeout={}')
 
-    def test_hyper_deadtime(self):
-        self.assertEqual(gq.hyper_deadtime(self.NUV,[[self.t0,self.t1]]),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select sum(dt) * 0.0000057142857142857145 / (866526576.995-766525332.995) from(select count(*) as dt from NUVPhotonsNULLV where time between 766525332995 and 866526576995 union all select count(*) as dt from NUVPhotonsV where time between 766525332995 and 866526576995) x&format=json&timeout={}')
-
     def test_deadtime(self):
         self.assertEqual(gq.deadtime(self.NUV,self.t0,self.t1),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select sum(dt) * 0.0000057142857142857145 / (866526576.995-766525332.995) from(select count(*) as dt from NUVPhotonsNULLV where time between 766525332995 and 866526576995 union all select count(*) as dt from NUVPhotonsV where time between 766525332995 and 866526576995) x&format=json&timeout={}')
 
