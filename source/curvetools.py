@@ -100,7 +100,6 @@ def bg_mask(band,ra0,dec0,annulus,ras,decs,responses,sources):
                                          decs,responses)
     return bg_mask_sources(band,ra0,dec0,ras,decs,responses,sources)
 
-
 def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e4,ntests=10):
     mc.print_inline('Estimating area of masked background annulus.')
     ratios = np.zeros(ntests)
@@ -111,7 +110,10 @@ def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e4,ntests=10):
                  np.ones(nsamples))
         mask_events= bg_mask_sources(band,ra0,dec0,
                  ann_events[0],ann_events[1],ann_events[2],sources)
-        ratios[i] = float(mask_events[2].sum())/float(ann_events[2].sum())
+        try:
+            ratios[i] = float(mask_events[2].sum())/float(ann_events[2].sum())
+        except ZeroDivisionError:
+            ratios[i] = 0.
     return (mc.area(annulus[1])-mc.area(annulus[0]))*ratios.mean()
 
 def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maglimit=28.,
@@ -127,7 +129,13 @@ def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maglimit=28.,
     mc.print_inline('Numerically integrating area of masked annulus.')
     if not eff_area:
         eff_area = cheese_bg_area(band,ra0,dec0,annulus,sources)
-    return mc.area(radius)*bg_counts/eff_area
+    return mc.area(radius)*bg_counts/eff_area if eff_area else 0.
+
+def create_bins(style='regstep'):
+    if not style in ['regstep','maxexpt']:
+        print "Invalid style passed to create_bins()."
+        exit(1)
+    return
 
 def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
              stepsz=None, calpath='../cal/', verbose=0, maglimit=28.,
@@ -148,9 +156,6 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         mc.print_inline("Binning data according to requested depth.")
     bins = (np.append(np.arange(min(trange), max(trange), stepsz), max(trange)) 
             if stepsz else np.array(trange))
-    #print bins
-    #bins = (mc.algebraicIntersection(np.arange(min(trange),max(trange),stepsz),trange) if stepsz else np.array(trange))
-    #print bins
     # This is equivalent in function to np.digitize(data['t'],bins) except
     # that it's much, much faster. See numpy issue #2656.
     ix = np.searchsorted(bins,data['t'],"right")
@@ -220,7 +225,9 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     else:
         lcurve['bg']['simple']=0.
         lcurve['bg']['simple']=0.
-    lcurve['exptime'] = np.array([dbt.compute_exptime(band,trange,skypos=[ra0,dec0],verbose=verbose) for trange in zip(lcurve['t0'],lcurve['t1'])])
+#    lcurve['exptime_bad1'] = np.array([dbt.compute_exptime(band,trange,skypos=[ra0,dec0],verbose=verbose) for trange in zip(lcurve['t0'],lcurve['t1'])])
+#    lcurve['exptime_bad2'] = np.array([dbt.compute_exptime(band,trange,verbose=verbose) for trange in zip(lcurve['t0'],lcurve['t1'])])
+    lcurve['exptime'] = np.array([dbt.compute_exptime(band,trange,verbose=verbose) for trange in zip(lcurve['t0_data'],lcurve['t1_data'])])
     if verbose:
         mc.print_inline("Returning curve data.")
     lcurve['photons'] = data
