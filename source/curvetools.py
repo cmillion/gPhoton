@@ -224,9 +224,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         lcurve['bg']['cheese']=lcurve['bg']['cheese'][ix]
     else:
         lcurve['bg']['simple']=0.
-        lcurve['bg']['simple']=0.
-#    lcurve['exptime_bad1'] = np.array([dbt.compute_exptime(band,trange,skypos=[ra0,dec0],verbose=verbose) for trange in zip(lcurve['t0'],lcurve['t1'])])
-#    lcurve['exptime_bad2'] = np.array([dbt.compute_exptime(band,trange,verbose=verbose) for trange in zip(lcurve['t0'],lcurve['t1'])])
+        lcurve['bg']['cheese']=0.
+
     lcurve['exptime'] = np.array([dbt.compute_exptime(band,trange,verbose=verbose) for trange in zip(lcurve['t0_data'],lcurve['t1_data'])])
     if verbose:
         mc.print_inline("Returning curve data.")
@@ -244,7 +243,7 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
         mc.print_inline("Moving to photon level operations.")
     lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
                       stepsz=stepsz, verbose=verbose)
-    lcurve['cps'] = (lcurve['counts']-lcurve['bg']['cheese'])/lcurve['exptime']
+    lcurve['cps'] = (lcurve['sources']-lcurve['bg']['cheese'])/lcurve['exptime']
     lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
     if verbose:
         mc.print_inline("Done.")
