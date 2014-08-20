@@ -12,10 +12,13 @@
 \author{
 Chase Million\altaffilmark{1},
 Scott W. Fleming\altaffilmark{2,3},
-Bernie Shiao\altaffilmark{2}}
+Bernie Shiao\altaffilmark{2},
+Randy Thompson\altaffilmark{2,3},
+Richard L. White\altaffilmark{2},
+Karen Levay\altaffilmark{2,3}}
 
 \email{chase.million@gmail.com}
-\altaffiltext{1}{Million Concepts, {\color{red}fill in address}, USA}
+\altaffiltext{1}{Million Concepts, 2204 Mountain View Ave., State College, PA 16801, USA}
 \altaffiltext{2}{Space Telescope Science Institute, 3700 San Martin Dr, Baltimore, MD, 21218, USA}
 \altaffiltext{3}{Computer Sciences Corporation, 3700 San Martin Dr, Baltimore, MD, 21218, USA}
 
@@ -27,7 +30,7 @@ We describe the gPhoton project, an effort to calibrate, archive, and make avail
 \section{Introduction}
 The Galaxy Evolution Explorer \citep[GALEX;][]{mar2005} was a NASA Small Explorer telescope that spent approximately ten years performing an all sky survey with a 1.25 degree field-of-view in two ultraviolet (UV) bands, centered around $1528\,\rm{\AA}$ (“FUV”) and $2271\,\rm{\AA}$ (“NUV”). Each band used its own microchannel detector, while a $\rm{CaF_{2}}$ grism provided slitless spectroscopy across the entire GALEX field-of-view. The spacecraft was launched on 28 April 2003 and operated until 28 June 2013, although the FUV detector failed in May 2009. On 4 May 2010, an event occurred that is referred to as ``the Course Sun Point'' (CSP), which generated substantial streaking in the NUV detector's Y-direction. Although the effect is largely correctable through subsequent calibration and onboard adjustments, observations taken between 4 May and 23 June 2010 all have reduced point spread functions. NASA support for the mission ended in February 2011. The spacecraft was then transferred to the California Institute of Technology for the “Complete the All-sky UV Survey Extension” (CAUSE) phase of the mission, during which operating costs were solicited from individuals or institutions. The GALEX mission collected data over {\color{red}some number of eclipses}, observing {\color{red}some fraction of the sky}, and accumulating {\color{red}some amount of} approximate total raw data volume and {\color{red}some other amount of} approximate reduced data volume.
 
-The spacecraft, detectors, and calibration are well described in \citet{mor2005,mor2007}. We will attempt to restrict discussion to elements that are not discussed in those papers, or that have changed in the intervening years, or that apply only to gPhoton.  In Section \ref{motivation} we describe the motivation behind constructing the gPhoton database and software suite.  In Section \ref{database} we describe the design and content of the $\sim\;1.8$ trillion row database hosted at the Mikulski Archive for Space Telescopes (MAST).  In Section \ref{softwaretools} we describe the main programs available to use with the databse for constructing lightcurves, images, and animated data cubes.  In Section \ref{implementation} we highlight some of the implementation challenges we came across, and our solutions, some of which may be applicable to other photon event databases.  In Section \ref{calibration} we conduct some initial tests of the calibration precision by studying the astrometric, relative, and absolute fluxes produced by the software.  Finally, in Section \ref{scienceexamples}, we highlight a few example science cases enabled by gPhoton, including the study of stellar flares, high cadence lightcurves of known variables, and cross-mission science that can be conducted by combining gPhoton with data from other missions.
+The spacecraft, detectors, and calibration are well described in \citet{mor2005,mor2007}. We will attempt to restrict discussion to elements that are not discussed in those papers, or that have changed in the intervening years, or that apply only to gPhoton.  In Section \ref{motivation} we describe the motivation behind constructing the gPhoton database and software suite.  In Section \ref{database} we describe the design and content of the $\sim 1.8$ trillion row database hosted at the Mikulski Archive for Space Telescopes (MAST).  In Section \ref{softwaretools} we describe the main programs available to use with the databse for constructing lightcurves, images, and animated data cubes.  In Section \ref{implementation} we highlight some of the implementation challenges we came across, and our solutions, some of which may be applicable to other photon event databases.  In Section \ref{calibration} we conduct some initial tests of the calibration precision by studying the astrometric, relative, and absolute fluxes produced by the software.  Finally, in Section \ref{scienceexamples}, we highlight a few example science cases enabled by gPhoton, including the study of stellar flares, high cadence lightcurves of known variables, and cross-mission science that can be conducted by combining gPhoton with data from other missions.
 
 \section{Motivation}
 \label{motivation}
@@ -61,7 +64,7 @@ This utility allows the user to inspect the available data coverage for a partic
 This utility generates aperture photometry for requested target positions and time ranges. Simple aperture photometry is used. The user provides a target position, aperture radius, optional inner and outer radii for a background annulus, and optional time ranges. The fact that we have the aspect corrected photon-level data allows us to do some innovative things in terms of computing the photometry. Rather than binning the photons into pixels, losing spatial precision in the process, and then performing complex interpolations over the pixels in order to estimate the content of a circular aperture, the counts within the aperture can be computed directly by performing a cone search on the data. The background counts are similarly computed. In order to increase the reliability of the background correction, we’ve implemented a ``swiss cheese'' algorithm that masks out known sources within the annulus.  The count rate within the effective area of the annulus following the ``swiss cheese'' masking is then scaled to the area of the aperture. Rather than integrating a relative response map, the photon events can be individually weighted by using their detector positions to directly sample the flat. Effective exposure times are computed directly from the global count rates (to estimate both shutter and deadtime corrections). The photometry can be computed within any time bin, up to and including an integration over the entire mission. The output format is a csv file containing a large number of columns including raw counts, background rates, estimated errors, mean response over the aperture, and mean time of arrival for photon events within the time bin.
 
 \subsection{gMap}
-This utility generates integrated image maps for targeted regions and time ranges. The format of all output is in the Flexible Image Transport System (FITS). Images are generated by performing a box search for events in the requested region and then binning the events into a histogram that has been properly proportioned based upon the World Coordinate System (WCS) in that region. Note that because the gnomonic projection used by GALEX increasingly distorts images as you approach the poles, you can expect images generated by \textit{gMap} to, in general, not have the same aspect ratio in pixels as they have in degrees. {\color{red}Need to discuss animated data cubes here as well}
+This utility generates integrated image maps for targeted regions and time ranges. The format of all output is in the Flexible Image Transport System (FITS). Images are generated by performing a box search for events in the requested region and then binning the events into a histogram that has been properly proportioned based upon the World Coordinate System (WCS) in that region. Note that because the gnomonic projection used by GALEX increasingly distorts images as you approach the poles, you can expect images generated by \textit{gMap} to, in general, not have the same aspect ratio in pixels as they have in degrees. {\color{red}Need to discuss animated data cubes here as well.}
 
 \section{Implementation Challenges and Solutions}
 \label{implementation}
@@ -77,11 +80,13 @@ The relative response (i.e. flat field) was not characterized at spatial resolut
 
 \subsection{Flux Uncertainties}
 {\color{red}We are going to need to explain the current way the pipeline estimates uncertainty, some of the challenges with deriving an accurate uncertainty estimate, and perhaps some ideas for improvements in the future.}
+{\color{red}Note: Include a plot of LDS 749B vs. effective exposure time, like Chase has made, and comment.}
 
 \section{Calibration Tests}
 \label{calibration}
 
 \subsection{Astrometric Solutions}
+{\color{red}I'm not sure what the best tests here are, other than to trace the photocenters of objects across time?}
 
 \subsection{Relative Flux Precision}
 {\color{red}Here is where we will take a bunch of plates and study the variability as a function of distance from plate center, working under the assumption that most non-extended sources should be constant within their uncertainties.}
@@ -89,9 +94,7 @@ The relative response (i.e. flat field) was not characterized at spatial resolut
 \subsection{Absolute Flux Precision}
 We have made use of the same white dwarf standard stars that were used by the GALEX mission pipeline to help calibrate and test our absolute flux precision.  Specifically, we use the white dwarf stars LDS 749B {\color{red}What are the other ones?}.
 
-{\color{red}Note 1: Include a plot of LDS 749B vs. effective exposure time, like Chase has made, and comment.}
-
-{\color{red}Note 2: Include as many white dwarfs from Camarota \& Holberg 2014 as possible to compare their final fluxes and ours.}
+{\color{red}Note: Include as many white dwarfs from Camarota \& Holberg 2014 as possible to compare their final fluxes and ours.}
 
 \section{Example Science Applications}
 \label{scienceexamples}
