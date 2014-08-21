@@ -37,7 +37,7 @@ def gFind(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1.0, min
 					for r in ranges:
 						if not quiet: print '    [ %.3f' % r[0] + ', %.3f' % r[1] + ' ], %.3f' % (r[1]-r[0]) + ' seconds'
 			all_expt.append(expt)
-	return all_expt
+	return {'t0':ranges[:,0],'t1':ranges[:,1],'expt':all_expt}
 
 if __name__ == '__main__':
 	"""Called when gFind is executed directly through command line."""

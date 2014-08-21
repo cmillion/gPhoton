@@ -4,13 +4,29 @@ import numpy as np
 import gQuery
 from MCUtils import print_inline,area
 
-def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,maxgap=1.,minexp=1.,retries=100.):
+def get_aspect(band,skypos,trange,tscale=1000.,verbose=0):
+    """Get aspect solution in a dict() for given time range."""
+    asp = np.array(gQuery.getArray(gQuery.aspect(trange[0],trange[1]),
+                   verbose=verbose))
+    return {'eclipse':np.array(asp[:,0],dtype='int16'),'filename':asp[:,1],
+            't':np.array(asp[:,2],dtype='float64')/tscale,
+            'ra':np.array(asp[:,3],dtype='float64'),
+            'dec':np.array(asp[:,4],dtype='float64'),
+            'twist':np.array(asp[:,5],dtype='float64'),
+            'flag':np.array(asp[:,6],dtype='int8'),
+            'ra0':np.array(asp[:,7],dtype='float64'),
+            'dec0':np.array(asp[:,8],dtype='float64'),
+            'twist0':np.array(asp[:,9],dtype='float64')}
+
+def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,maxgap=1.,minexp=1.,retries=100.,predicted=False):
     """Find the contiguous time ranges within a time range at a 
     specific location.
 	minexp - Do not include exposure time less than this.
 	maxgap - Gaps in exposure longer than this initiate a new time range.
 	detsize - Fiddle with this if you want to exlude the edges of the
     detector.
+    predicted - Use the aspect solutions to estimate what exposure will be
+    available once the database is fully populated.
 	"""
     try:
         #FIXME: t[01] appears to have no impact on this
@@ -20,7 +36,7 @@ def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,m
             trange = [1,1000000000000]
         if len(np.shape(trange))==2:
             trange=trange[0]
-        times = np.array(gQuery.getArray(gQuery.exposure_ranges(band,skypos[0],skypos[1],t0=trange[0],t1=trange[1],detsize=detsize,tscale=tscale),verbose=verbose,retries=retries),dtype='float64')[:,0]/tscale
+        times = np.array(gQuery.getArray(gQuery.exposure_ranges(band,skypos[0],skypos[1],t0=trange[0],t1=trange[1],detsize=detsize,tscale=tscale),verbose=verbose,retries=retries),dtype='float64')[:,0]/tscale if not predicted else get_aspect(band,skypos,trange,tscale=tscale,verbose=verbose)['t']
     except:
         return np.array([],dtype='float64')
     if verbose:
