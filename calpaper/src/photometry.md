@@ -24,5 +24,55 @@ Out[240]: 15.414742366262452
     ra0,dec0 = skypos
     radius = 0.005
     annulus = [0.01,0.02]
-    band = 'NUV'
-    gAperture.gAperture(band,skypos,radius,annulus=annulus,verbose=2)
+    band = 'FUV'
+
+    data = gAperture.gAperture('FUV',[323.06766667,0.25400000],0.005,
+                               annulus=[0.01,0.02],stepsz=1500,verbose=2)
+    data = gAperture.gAperture('NUV',[323.06766667,0.25400000],0.005,
+                               annulus=[0.01,0.02],stepsz=1500,verbose=2,
+                               trange=[0,870103402.995])
+
+    %pylab
+    import galextools as gt
+    catmag,band = 15.57,'FUV'
+    ap2 = gt.apcorrect2(band,radius)
+    import gphoton_utils as gu
+    plt.figure()
+    plt.gca().invert_yaxis()
+    plt.plot(data['exptime'],data['mag']-ap2,'.')
+    err = gu.model_errors(15.57,'FUV',sigma=5)
+    plt.plot(np.arange(1,1600),err[0])
+    plt.plot(np.arange(1,1600),err[1])
+    plt.plot(np.arange(0,1600),np.ones(1600)*catmag)
+
+    data['dist']=sqrt((data['detxs']-400.)**2. + (data['detys']-400.)**2.)
+
+    import gQuery as gq
+    query = 'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, vpe.fexptime, vpe.nexptime, n_zpmag, f_zpmag, nuv_mag_aper_4, fuv_mag_aper_4 from Gr6plus7.Dbo.visitphotoobjall as vpo inner join Gr6plus7.Dbo.visitphotoextract as vpe on vpo.photoextractid=vpe.photoextractid inner join gr6plus7.dbo.fGetNearbyVisitObjEq(323.06766667, 0.254, 0.1) as nb on vpo.objid=nb.objid&format=json&timeout={}'
+    out = np.array(gq.getArray(query))
+    LDS749B = {'ra':out[:,0],'dec':out[:,1],'nmag':out[:,2],'fmag':out[:,3],'fexpt':out[:,9],'nexpt':out[:,10],'nzp':out[:,11],'fzp':out[:,12],'n4':out[:,13],'f4':out[:,14]}
+    ix=np.where(LDS749B['fmag']>0)
+    # The FUV catalog magnitude is converted to the true magnitude using the
+    # zero-point conversion (see header card
+    # "F_ZPMAG": fuv_mag = FUV_MAG_AUTO + F_ZPMAG)
+    plt.plot(LDS749B['fexpt'][ix],LDS749B['fmag'][ix],'x')
+    plt.xlabel('Exposure time (s)')
+    plt.ylabel('AB Mag')
+    plt.title('LDS749B - FUV')
+
+
+-----------
+
+    plt.figure()
+    catmag,band = 14.71,'NUV'
+    err = gu.model_errors(catmag,'FUV',sigma=5)
+    plt.plot(np.arange(1,1600),err[0])
+    plt.plot(np.arange(1,1600),err[1])
+    plt.plot(np.arange(0,1600),np.ones(1600)*catmag)
+    ix=np.where(LDS749B['nmag']>0)
+    plt.plot(LDS749B['nexpt'][ix],LDS749B['nmag'][ix],'.')
+    plt.xlabel('Exposure time (s)')
+    plt.ylabel('AB Mag')
+    plt.title('LDS749B - NUV')
+
+
