@@ -4,7 +4,7 @@ import numpy as np
 import gQuery
 from MCUtils import print_inline,area
 
-def get_aspect(band,skypos,trange,tscale=1000.,verbose=0):
+def get_aspect(band,skypos,trange=[6e8,11e8],tscale=1000.,verbose=0):
     """Get aspect solution in a dict() for given time range."""
     asp = np.array(gQuery.getArray(gQuery.aspect(trange[0],trange[1]),
                    verbose=verbose))

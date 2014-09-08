@@ -6,8 +6,8 @@ from dbasetools import fGetTimeRanges, suggest_parameters
 from gphoton_args import setup_args, check_args
 
 def gFind(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1.0, minexp=1.0, quiet=False, retries=20, skypos=None, trange=None, verbose=0):
-	"""Primary program in the module. Prints time ranges to the screen and returns
-	the total exposure time as a float.
+	"""Primary program in the module. Prints time ranges to the screen and
+    returns the total exposure time as a float.
 	"""
 	# Determine if we have to loop over both bands or just one.
 	if band.lower() == 'both':
@@ -22,7 +22,7 @@ def gFind(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1.0, min
 
 		if not len(ranges):
 			if not quiet: print 'No '+this_band.upper()+' exposure time in database.'
-			return [0.] * len(all_bands)
+			return {'t0':None,'t1':None,'expt':None}
 		else:
 			expt = (ranges[:,1]-ranges[:,0]).sum()
 			if not quiet: print this_band.upper()+': Available: '+str(expt)+' seconds (raw) in '+str(len(ranges))+' distinct exposures.'

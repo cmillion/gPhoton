@@ -7,55 +7,71 @@ from astropy import wcs as pywcs
 
 gpssecs = 315532800+432000
 
+def aper2deg(aper):
+    """Convert SExtractor APER numbers to decimal degrees radii."""
+    if not aper==int(aper) or aper < 1 or aper > 7:
+        print "APER must be an integer in interval [1,7]."
+        return -1
+    apers = np.array([1.5,2.3,3.8,6.0,9.0,12.8,17.3,30.,60.,90.])/3600.
+    return apers[int(aper)-1]
+
 # TODO: handle arrays
 def apcorrect1(radius,band):
-	"""Compute an apeture correction. 1st way.
-	radius - in degrees
-	Uses the table data in Figure 4 from Morissey, et al., 2007
-	"""
-	aper = np.array([1.5,2.3,3.8,6.0,9.0,12.8,17.3,30.,60.,90.])/3600.
-	if radius>aper[-1]:
-		return 0.
-	if band=='FUV':
-		dmag = [1.65,0.96,0.36,0.15,0.1,0.09,0.07,0.06,0.03,0.01]
-	else:
-		dmag = [2.09,1.33,0.59,0.23,0.13,0.09,0.07,0.04,-0.00,-0.01]
-		if radius>aper[-2]:
-			return 0.
-	if radius<aper[0]:
-		return dmag[0]
+    """Compute an apeture correction. 1st way.
+    radius - in degrees
+    Uses the table data in Figure 4 from Morissey, et al., 2007
+    """
+    if not band in ['NUV','FUV']:
+        print "Invalid band."
+        exit(1)
+    aper = np.array([1.5,2.3,3.8,6.0,9.0,12.8,17.3,30.,60.,90.])/3600.
+    if radius>aper[-1]:
+        return 0.
+    if band=='FUV':
+        dmag = [1.65,0.96,0.36,0.15,0.1,0.09,0.07,0.06,0.03,0.01]
+    else:
+        dmag = [2.09,1.33,0.59,0.23,0.13,0.09,0.07,0.04,-0.00,-0.01]
+        if radius>aper[-2]:
+            return 0.
+    if radius<aper[0]:
+        return dmag[0]
 
-	ix  = np.where((aper-radius)>=0.)
-	x   = [aper[ix[0][0]-1],aper[ix[0][0]]]
-	y   = [dmag[ix[0][0]-1],dmag[ix[0][0]]]
-	m,C = np.polyfit(x,y,1)
-	return m*radius+C
+    ix  = np.where((aper-radius)>=0.)
+    x   = [aper[ix[0][0]-1],aper[ix[0][0]]]
+    y   = [dmag[ix[0][0]-1],dmag[ix[0][0]]]
+    m,C = np.polyfit(x,y,1)
+    return m*radius+C
 
 # TODO: handle arrays
 # Compute an aperture correction in mag based upon an aperture radius in
 #  degrees. Uses the data in Table 1 from
 #  www.galex.caltech.edu/research/techdoch-ch5.html
 def apcorrect2(radius,band):
-	"""Compute an aperture correction. 2nd way.
-	radius - in degrees
-	Uses the data in Table 1 from www.galex.caltech.edu/research/techdoch-ch5.html
-	"""
-	aper = np.array([1.5,2.3,3.8,6.0,9.0,12.8,17.3])/3600.
-	if band=='FUV':
-		dmag = [1.65,0.77,0.2,0.1,0.07,0.05,0.04]
-	else:
-		dmag = [1.33,0.62,0.21,0.12,0.08,0.06,0.04]
-	if radius>aper[-1]:
-		# FIXME: This isn't quite right...
-		return dmag[-1]
-	if radius<aper[0]:
-		return dmag[0]
+    """Compute an aperture correction. 2nd way.
+    radius - in degrees
+	Uses the data in Table 1 from 
+    www.galex.caltech.edu/research/techdoch-ch5.html
+    """
+    if not band in ['NUV','FUV']:
+        print "Invalid band."
+        exit(1)
 
-	ix  = np.where((aper-radius)>=0.)
-	x   = [aper[ix[0][0]-1],aper[ix[0][0]]]
-	y   = [dmag[ix[0][0]-1],dmag[ix[0][0]]]
-	m,C = np.polyfit(x,y,1)
-	return m*radius+C
+    aper = np.array([1.5,2.3,3.8,6.0,9.0,12.8,17.3])/3600.
+    if band=='FUV':
+        dmag = [1.65,0.77,0.2,0.1,0.07,0.05,0.04]
+    else:
+        dmag = [1.33,0.62,0.21,0.12,0.08,0.06,0.04]
+    if radius>aper[-1]:
+        # FIXME: This isn't quite right...
+        return dmag[-1]
+    if radius<aper[0]:
+        return dmag[0]
+
+    ix  = np.where((aper-radius)>=0.)
+    x   = [aper[ix[0][0]-1],aper[ix[0][0]]]
+    y   = [dmag[ix[0][0]-1],dmag[ix[0][0]]]
+    m,C = np.polyfit(x,y,1)
+    return m*radius+C
 
 #
 # Conversion facts for the following five functions can be found here:

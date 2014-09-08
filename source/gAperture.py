@@ -10,8 +10,9 @@ from dbasetools import fGetTimeRanges, suggest_parameters
 #import ref # refactored lightcurve cration
 
 #def gAperture(args):
-def gAperture(band,skypos,radius,csvfile=False,annulus=None,
-              stepsz=False,verbose=0,clobber=False,trange=None):
+def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
+              stepsz=False,verbose=0,clobber=False,trange=None,minexp=1.,
+              maxgap=1.):
     """Runs gAperture and returns the data in a python dict() and as
     a CSV file if outfile is specified. Can be called from the interpreter.
     """
@@ -25,7 +26,10 @@ def gAperture(band,skypos,radius,csvfile=False,annulus=None,
         print " stepsz:  "+str(stepsz)
         print " csvfile: "+str(csvfile)
         print " verbose: "+str(verbose)
-    data = ct.write_curve(band,skypos[0],skypos[1],radius,csvfile=csvfile,annulus=annulus,stepsz=stepsz,verbose=verbose,clobber=clobber,trange=trange)
+    data = ct.write_curve(band, skypos[0], skypos[1], radius, csvfile=csvfile,
+                          annulus=annulus, stepsz=stepsz, verbose=verbose,
+                          clobber=clobber, trange=trange, coadd=coadd,
+                          minexp=minexp, maxgap=maxgap)
     return data
 
 def check_radius(args):
@@ -236,7 +240,8 @@ if __name__ == '__main__':
     args = check_args(args)
     args = setup_file(args)
     # TODO: add support for trange(s)
-    data = gAperture(args.band, args.skypos, args.radius,
-                     csvfile=args.csvfile, annulus=args.annulus,
-                     stepsz=args.stepsz, verbose=args.verbose,
-                     clobber=args.overwrite,trange=args.trange)
+    data = gAperture(args.band, args.skypos, args.radius, csvfile=args.csvfile,
+                     annulus=args.annulus, stepsz=args.stepsz,
+                     verbose=args.verbose, clobber=args.overwrite,
+                     trange=args.trange, coadd=args.coadd, minexp=args.minexp,
+                     maxgap=args.gap)

@@ -55,23 +55,36 @@ def hashresponse(band,events,calpath='../cal/',verbose=0):
     events['response'] = (events['flat']*events['scale'])
     return events
 
-def pullphotons(band, ra0, dec0, t0, t1, radius, events={}, verbose=0,
-                tscale=1000.,calpath='../cal/'):
+def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
+                tscale=1000., calpath='../cal/', chunksz=10e6):
     """Retrieve photons within an aperture from the database."""
-    if verbose:
-        mc.print_inline("Retrieving all photons at ["+str(ra0)+", "+
-                        str(dec0)+"] within a radius of "+str(radius)+
-                        " and between "+str(t0)+" and "+str(t1)+".")
-    stream = gQuery.getArray(
-        gQuery.allphotons(band, ra0, dec0, t0, t1, radius), verbose=verbose)
-    if not stream:
-        return events
-    events['t'] = np.array(stream,dtype='float64')[:,0]/tscale
-    # The float64 precision _is_ significant for RA / Dec.
-    events['ra'] = np.array(stream,dtype='float64')[:,1]
-    events['dec'] = np.array(stream,dtype='float64')[:,2]
-    events['xi'] = np.array(stream,dtype='float32')[:,3]
-    events['eta']= np.array(stream,dtype='float32')[:,4]
+    events = {'t':[],'ra':[],'dec':[],'xi':[],'eta':[]}
+    print "Retrieving photons at ["+str(ra0)+", "+str(dec0)+"] within a radius of "+str(radius)
+    for trange in tranges:
+        if verbose:
+            mc.print_inline(" and between "+str(trange[0])+" and "+
+                            str(trange[1])+".")
+        stream = gQuery.getArray(
+            gQuery.allphotons(band, ra0, dec0, trange[0], trange[1], radius),
+                              verbose=verbose,retries=100)
+        if not stream:
+            continue
+        events['t'] = events['t']+np.array(np.array(stream,
+                                        dtype='float64')[:,0]/tscale).tolist()
+        # The float64 precision _is_ significant for RA / Dec.
+        events['ra'] = events['ra']+np.array(np.array(stream,
+                                        dtype='float64')[:,1]).tolist()
+        events['dec'] = events['dec']+np.array(np.array(stream,
+                                        dtype='float64')[:,2]).tolist()
+        events['xi'] = events['xi']+np.array(np.array(stream,
+                                        dtype='float32')[:,3]).tolist()
+        events['eta'] = events['eta']+np.array(np.array(stream,
+                                        dtype='float32')[:,4]).tolist()
+    events['t'] = np.array(events['t'],dtype='float64')
+    events['ra'] = np.array(events['ra'],dtype='float64')
+    events['dec'] = np.array(events['dec'],dtype='float64')
+    events['xi'] = np.array(events['xi'],dtype='float32')
+    events['eta'] = np.array(events['eta'],dtype='float32')
     events = hashresponse(band, events, calpath=calpath, verbose=verbose)
     return events
 
@@ -116,6 +129,7 @@ def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e4,ntests=10):
             ratios[i] = 0.
     return (mc.area(annulus[1])-mc.area(annulus[0]))*ratios.mean()
 
+# FIXME: This recomputes eff_area every pass at huge computational cost.
 def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maglimit=28.,
               eff_area=False,sources=False):
     """ Returns the estimate number of counts (not count rate) within the
@@ -131,15 +145,9 @@ def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maglimit=28.,
         eff_area = cheese_bg_area(band,ra0,dec0,annulus,sources)
     return mc.area(radius)*bg_counts/eff_area if eff_area else 0.
 
-def create_bins(style='regstep'):
-    if not style in ['regstep','maxexpt']:
-        print "Invalid style passed to create_bins()."
-        exit(1)
-    return
-
 def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
              stepsz=None, calpath='../cal/', verbose=0, maglimit=28.,
-             detsize=1.25):
+             detsize=1.25,coadd=False):
     if verbose:
         mc.print_inline("Retrieving all of the target events.")
     trange = [np.array(tranges).min(),np.array(tranges).max()]
@@ -147,22 +155,28 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         searchradius = annulus[1]
     except:
         searchradius = radius
-    data = pullphotons(band, ra0, dec0, trange[0], trange[1], searchradius,
+    data = pullphotons(band, ra0, dec0, tranges, searchradius,
                        verbose=verbose)
     if verbose:
         mc.print_inline("Isolating source from background.")
     angSep = mc.angularSeparation(ra0, dec0, data['ra'], data['dec'])
     if verbose:
         mc.print_inline("Binning data according to requested depth.")
-    bins = (np.append(np.arange(min(trange), max(trange), stepsz), max(trange)) 
-            if stepsz else np.array(trange))
+    # Multiple ways of defining bins
+    if coadd:
+        bins = np.array(trange)
+    elif stepsz:
+        bins = np.append(np.arange(min(trange), max(trange), stepsz), max(trange))
+    else:
+        bins = np.unique(np.array(tranges).flatten())
     # This is equivalent in function to np.digitize(data['t'],bins) except
     # that it's much, much faster. See numpy issue #2656.
     ix = np.searchsorted(bins,data['t'],"right")
     # Initialize histogrammed arrays
     # FIXME: allocate these from a dict of constructors
     lcurve_cols = ['counts', 'sources', 'bg_counts', 'bkgrnds', 'responses',
-                   'detxs', 'detys', 't0_data', 't1_data', 't_mean']
+                   'detxs', 'detys', 't0_data', 't1_data', 't_mean', 'racent',
+                   'deccent']
     lcurve = {'params':gphot_params(band,[ra0,dec0],radius,annulus=annulus,
                                     calpath=calpath,verbose=verbose,
                                     detsize=detsize,stepsz=stepsz,
@@ -197,6 +211,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         lcurve['responses'][i-1] = data['response'][rad_ix].mean()
         lcurve['detxs'][i-1] = data['col'][rad_ix].mean()
         lcurve['detys'][i-1] = data['row'][rad_ix].mean()
+        lcurve['racent'][i-1] = data['ra'][rad_ix].mean()
+        lcurve['deccent'][i-1] = data['dec'][rad_ix].mean()
         if annulus:
             ann_ix = np.where((angSep > annulus[0]) &
                               (angSep <= annulus[1]) & (ix == i))
@@ -233,16 +249,16 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     return lcurve
 
 def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
-             trange=None, verbose=0):
+             trange=None, verbose=0, coadd=False,minexp=1.,maxgap=1.):
     if verbose:
         mc.print_inline("Getting exposure ranges.")
-    tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange, maxgap=100,
-                                 minexp=100, verbose=verbose)
+    tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
+                                 maxgap=maxgap, minexp=minexp, verbose=verbose)
     # TODO: Add an ability to specify or exclude specific time ranges
     if verbose:
         mc.print_inline("Moving to photon level operations.")
     lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
-                      stepsz=stepsz, verbose=verbose)
+                      stepsz=stepsz, verbose=verbose, coadd=coadd)
     lcurve['cps'] = (lcurve['sources']-lcurve['bg']['cheese'])/lcurve['exptime']
     lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
     if verbose:
@@ -251,15 +267,17 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     return lcurve
 
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
-                stepsz=None, trange=None, verbose=0,
-                iocode='wb',calpath='../cal/',detsize=1.25,clobber=False):
+                stepsz=None, trange=None, verbose=0, coadd=False,
+                iocode='wb',calpath='../cal/',detsize=1.25,clobber=False,
+                minexp=1.,maxgap=1.):
 #   This gets confused when gAperture.py initializes the file
 #    if os.path.exists(str(csvfile)) and not clobber:
 #        print "Error: {csvfile} already exists.".format(csvfile=csvfile)
 #        print "Specify clobber=True to overwrite."
 #        return
     data = getcurve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
-                    trange=trange, verbose=verbose)
+                    trange=trange, verbose=verbose, coadd=coadd, minexp=minexp,
+                    maxgap=maxgap)
     if csvfile:
         cols = ['counts', 'sources', 'bg_counts', 'bkgrnds', 'responses',
                 'detxs', 'detys', 't0_data', 't1_data', 't_mean', 'cps',
@@ -276,6 +294,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
     else:
         if verbose>2:
             print "No CSV file requested."
-        print "AB Magnitudes:"
-        print data['mag']
+        if verbose:
+            print "AB Magnitudes:"
+            print data['mag']
     return data
