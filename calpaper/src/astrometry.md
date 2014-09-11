@@ -35,7 +35,7 @@ for i, pos in enumerate(skypos):
     plt.figure()
     plt.gca().invert_yaxis()
     c = dt.get_mags(band,pos[0],pos[1],0.001,maglimit+1,mode='visit')
-    plt.plot(c[band]['expt'],c[band][aper],'x')
+    plt.plot(c[band]['expt'],c[band][aper]-ac,'x')
     plt.plot(top)
     plt.plot(bot)
     for mag in c[band][aper]:
