@@ -23,7 +23,7 @@ def apcorrect1(radius,band):
     """
     if not band in ['NUV','FUV']:
         print "Invalid band."
-        exit(1)
+        return
     aper = np.array([1.5,2.3,3.8,6.0,9.0,12.8,17.3,30.,60.,90.])/3600.
     if radius>aper[-1]:
         return 0.
@@ -54,7 +54,7 @@ def apcorrect2(radius,band):
     """
     if not band in ['NUV','FUV']:
         print "Invalid band."
-        exit(1)
+        return
 
     aper = np.array([1.5,2.3,3.8,6.0,9.0,12.8,17.3])/3600.
     if band=='FUV':

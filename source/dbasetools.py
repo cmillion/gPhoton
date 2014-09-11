@@ -2,7 +2,7 @@
 #  a number of different modules.
 import numpy as np
 import gQuery
-from MCUtils import print_inline,area
+from MCUtils import print_inline,area,distance
 
 def get_aspect(band,skypos,trange=[6e8,11e8],tscale=1000.,verbose=0):
     """Get aspect solution in a dict() for given time range."""
@@ -114,6 +114,54 @@ def mcat_skybg(band,skypos,radius,verbose=0,retries=20):
 
 	# And radius is in degrees
 	return skybg*area(radius*60.*60.)
+
+def get_mags(band,ra0,dec0,radius,maglimit,mode='coadd',
+                   zpmag={'NUV':20.08,'FUV':18.82}):
+    """Given RA, Dec and search radius, searches the coadd MCAT for sources.
+    Returns a dict() which contains magnitudes for all of the APER settings.
+    Note: Visit mode returns a lot more sources, more slowly than coadd mode
+    given the same search parameters. You should probably use smaller search
+    radii in visit mode. If you're just trying to find unique sources in a
+    large region, use coadd mode and then pass the result through the
+    parse_unique_sources() function contained in this module.
+    """
+    zpf,zpn = zpmag['FUV'],zpmag['NUV']
+    if mode=='coadd':
+        out =np.array(gQuery.getArray(
+                  gQuery.mcat_sources(band,ra0,dec0,radius,maglimit=maglimit)))
+        if not len(out):
+            print "Warning: No sources found!"
+            return 0
+        return {'ra':out[:,0],'dec':out[:,1],'FUV':{'mag':out[:,3],1:out[:,9]+zpf,2:out[:,10]+zpf,3:out[:,11]+zpf,4:out[:,12]+zpf,5:out[:,13]+zpf,6:out[:,14],7:out[:,15]+zpf},'NUV':{'mag':out[:,2],1:out[:,16]+zpn,2:out[:,17]+zpn,3:out[:,18]+zpn,4:out[:,19]+zpn,5:out[:,20]+zpn,6:out[:,21]+zpn,7:out[:,22]+zpn}}
+    elif mode=='visit':
+        out = np.array(gQuery.getArray(
+                       gQuery.mcat_visit_sources(ra0,dec0,radius)))
+        # NOTE: For runtime considerations, mcat_visit_sources() does not
+        # make any slices on time or maglimit, so we need to do it here.
+        ix = np.where((out[:,2 if band=='NUV' else 3]<maglimit) &
+                                           (out[:,2 if band=='NUV' else 3]>0))
+        return {'ra':out[:,0][ix],'dec':out[:,1][ix],'NUV':{'mag':out[:,2][ix],'expt':out[:,8][ix],1:out[:,18][ix]+zpn,2:out[:,19][ix]+zpn,3:out[:,20][ix]+zpn,4:out[:,21][ix]+zpn,5:out[:,22][ix]+zpn,6:out[:,23][ix]+zpn,7:out[:,24][ix]+zpn},'FUV':{'mag':out[:,3][ix],'expt':out[:,9][ix],1:out[:,11][ix]+zpf,2:out[:,12][ix]+zpf,3:out[:,13][ix]+zpf,4:out[:,14][ix]+zpf,5:out[:,15][ix]+zpf,6:out[:,16][ix]+zpf,7:out[:,17][ix]+zpf}}
+    else:
+        print "mode must be in [coadd,visit]"
+        return
+
+def parse_unique_sources(ras,decs,fmags,nmags,margin=0.005):
+    """Iteratively returns unique sources based upon a _margin_ within
+    which two sources should be considered the same sources. Is a little
+    bit sensitive to the first entry and could probably be written to be
+    more robust, but works well enough.
+    """
+    skypos = zip(ras,decs)
+    for i,pos in enumerate(skypos):
+        ix = np.where(distance(pos[0],pos[1],ras,decs)<=margin)
+        skypos[i]=[ras[ix].mean(),decs[ix].mean()]
+        a = skypos #unique_sources(data['ra'],data['dec'])
+    b = []
+    for i in a:
+        if not (i in b):
+            b+=[i]
+    return b
+
 
 def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,catalog='MCAT',retries=20):
 	"""Return the mean position of sources within the search radius."""

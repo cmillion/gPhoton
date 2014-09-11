@@ -259,8 +259,12 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
         mc.print_inline("Moving to photon level operations.")
     lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
                       stepsz=stepsz, verbose=verbose, coadd=coadd)
-    lcurve['cps'] = (lcurve['sources']-lcurve['bg']['cheese'])/lcurve['exptime']
+    lcurve['cps'] = lcurve['sources']/lcurve['exptime']
+    lcurve['cps_bgsub'] = (lcurve['sources']-lcurve['bg']['simple'])/lcurve['exptime']
+    lcurve['cps_bgsub_cheese'] = (lcurve['sources']-lcurve['bg']['cheese'])/lcurve['exptime']
     lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
+    lcurve['mag_bgsub'] = gxt.counts2mag(lcurve['cps_bgsub'],band)
+    lcurve['mag_bgsub_cheese'] = gxt.counts2mag(lcurve['cps_bgsub_cheese'],band)
     if verbose:
         mc.print_inline("Done.")
         mc.print_inline("")

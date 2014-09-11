@@ -15,7 +15,12 @@ def error(program,note=''):
         return
 
 def area(radius):
-	return np.pi*radius**2.
+    """Returns area of a circle of given radius."""
+    return np.pi*radius**2.
+
+def distance(a,b,c,d):
+    """Computes Euclidean distance between [a,b] and [c,d]."""
+    return np.sqrt( (a-c)**2. + (b-d)**2. )
 
 def rotvec(vector,theta):
 	"""Rotate vectors clockwise by theta degrees

@@ -41,18 +41,17 @@ def mcat_sources(band,ra0,dec0,radius,maglimit=20):
     # 1=nuv, 2=fuv, 3=both
     bandflag = 1 if band=='NUV' else 2
     # fGetNearbyObjEq takes radius in arcminutes
-    # add a buffer to the radius to catch stars just outside
-    # FIXME: Don't default to adding a buffer to the search radius.
-    return str(baseURL)+'select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world from Gr6plus7.Dbo.photoobjall as p inner join Gr6plus7.Dbo.photoextract as pe on p.photoextractid=pe.photoextractid inner join gr6plus7.dbo.fgetnearbyobjeq('+str(ra0)+', '+str(dec0)+', '+str(radius*60.+0.02*60.)+') as nb on p.objid=nb.objid and (band=3 or band='+str(bandflag)+') and '+str(band)+'_mag<'+str(maglimit)+str(formatURL) 
+    # TODO: Add exposure time.
+    return str(baseURL)+'select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7 from Gr6plus7.Dbo.photoobjall as p inner join Gr6plus7.Dbo.photoextract as pe on p.photoextractid=pe.photoextractid inner join gr6plus7.dbo.fgetnearbyobjeq('+str(ra0)+', '+str(dec0)+', '+str(radius*60.)+') as nb on p.objid=nb.objid and (band=3 or band='+str(bandflag)+') and '+str(band)+'_mag<'+str(maglimit)+str(formatURL) 
 
-def mcat_visit_sources(band,ra0,dec0,radius,maglimit=20):
+def mcat_visit_sources(ra0,dec0,radius):
     ''' Return the MCAT per-visit sources given sky position and search radius.
     '''
-    bandflag = 1 if band=='NUV' else 2
+    #bandflag = 1 if band=='NUV' else 2
     # fGetNearbyVisitObjEq takes radius in arcminutes
-    # add a buffer to the radius to catch stars just outside
-    # FIXME: Don't default ot adding a buffer to the search radius.
-    return str(baseURL)+'select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, vpe.fexptime, vpe.nexptime from Gr6plus7.Dbo.visitphotoobjall as vpo inner join Gr6plus7.Dbo.visitphotoextract as vpe on vpo.photoextractid=vpe.photoextractid inner join gr6plus7.dbo.fGetNearbyVisitObjEq('+str(ra0)+', '+str(dec0)+', '+str(radius*60.+0.02*60.)+') as nb on vpo.objid=nb.objid'+str(formatURL)
+    # NOTE: Because it adds hugely to overhead, this query doesn't actually
+    # make slices on either band or maglimit...
+    return str(baseURL)+'select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, vpe.fexptime, vpe.nexptime, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7 from Gr6plus7.Dbo.visitphotoobjall as vpo inner join Gr6plus7.Dbo.visitphotoextract as vpe on vpo.photoextractid=vpe.photoextractid inner join gr6plus7.dbo.fGetNearbyVisitObjEq('+str(ra0)+', '+str(dec0)+', '+str(radius*60.)+') as nb on vpo.objid=nb.objid'+str(formatURL)
 
 def exposure_ranges(band,ra0,dec0,t0=1,t1=10000000000000,tscale=1000.,detsize=1.25):
     """Returns a list of times (in one second increments) where data exists
