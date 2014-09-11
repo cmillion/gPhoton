@@ -1,30 +1,7 @@
-**Steps:**
-1. Use the coadds to find a bunch of bright-ish sources in a deep-ish part of the sky (like CDFS).
-2. Compute the astrometric centers for all of those sources from the photons and compare to the coadd centers.
-3. Crossmatch the visit level detections to the coadd and compare.
-
-def distance(a,b,c,d):
-    return np.sqrt( (a-c)**2. + (b-d)**2. )
-
-def unique_sources(ras,decs,fmags,nmags,margin=0.005):
-    skypos = zip(ras,decs)
-    for i,pos in enumerate(skypos):
-        ix = np.where(distance(pos[0],pos[1],ras,decs)<=margin)
-        skypos[i]=[ras[ix].mean(),decs[ix].mean()]
-    a = skypos #unique_sources(data['ra'],data['dec'])
-    b = []
-    for i in a:
-        if not (i in b):
-            b+=[i]
-    return b
-
-def get_coadds(band,ra0,dec0,radius,maglimit):
-    out =np.array( gq.getArray(gq.mcat_sources(band,ra0,dec0,radius,maglimit=maglimit)))
-    return {'ra':out[:,0],'dec':out[:,1],'nmag':out[:,2],'fmag':out[:,3]}
-
 %pylab
 import gQuery as gq
 import galextools as gt
+import dbasetools as dt
 import gphoton_utils as gu
 from gAperture import gAperture
 band, ra0, dec0, radius = ('FUV', 323.06766667, 0.254, 0.1)
@@ -34,28 +11,42 @@ radius = 0.5
 maglimit = 20.
 aper = 4
 
-out =np.array( gq.getArray(gq.mcat_sources(band,ra0,dec0,0.5,maglimit=maglimit)))
-#data = {'ra':out[:,0],'dec':out[:,1],'nmag':out[:,2],'fmag':out[:,3],'fexpt':out[:,9],'nexpt':out[:,10]}
-data = {'ra':out[:,0],'dec':out[:,1],'nmag':out[:,2],'fmag':out[:,3]}
+data = dt.get_mags(band,ra0,dec0,0.5,maglimit,mode='coadd')
+skypos = np.array(dt.parse_unique_sources(data['ra'],data['dec'],
+                         data['FUV']['mag'],data['NUV']['mag'],margin=0.001))
 
-skypos = unique_sources(data['ra'],data['dec'],data['fmag'],data['nmag'])
+# Time range query...
+#   select top 10 objid, minPhotoObsDate, maxPhotoObsDate, obs_date, obsdatim, nobs_dat, nobssecs, nobsdati, fobs_dat, fobssecs, fobsdati, nexptime, fexptime
+#   from visitphotoobjall as vp
+#   inner join imgrun as ir on vp.photoextractid=ir.imgrunid
+#   inner join visitphotoextract as vpe on vp.photoextractid=vpe.photoextractid
 
-radius = 0.005
+aper = 4
+radius = gt.aper2deg(aper)
+annulus = [0.01,0.02]
+ac = gt.apcorrect1(radius,band)
 plt.ioff()
-for pos in skypos:
-    print pos
-    d = gAperture(band,pos,radius,verbose=2)
-    c = get_coadds(band,pos[0],pos[1],radius,maglimit)
-    bot,top=gu.model_errors(c['fmag'].mean(),band)
-    fig = plt.figure()
+for i, pos in enumerate(skypos):
+    print i, pos
+    d = gAperture(band,pos,radius,verbose=2,minexp=30,maxgap=10)#,annulus=annulus)
+    c = dt.get_mags(band,pos[0],pos[1],0.0001,maglimit+1,mode='coadd')
+    refmag = gt.counts2mag(gt.mag2counts(c[band][aper],band).mean(),band)
+    bot,top=gu.model_errors(refmag-ac,band)
+    plt.figure()
     plt.gca().invert_yaxis()
-    plt.plot(d['exptime'],d['mag']-gt.apcorrect2(band,radius),'.')
-    plt.axis([0,1600.,d['mag'].min()-0.01,d['mag'].max()+0.01])
+    c = dt.get_mags(band,pos[0],pos[1],0.001,maglimit+1,mode='visit')
+    plt.plot(c[band]['expt'],c[band][aper],'x')
     plt.plot(top)
     plt.plot(bot)
-    plt.savefig(str(pos[0])+'_'+str(pos[1])+'.png')
-    for mag in c['fmag']:
-        plt.plot(np.arange(1600),np.zeros(1600)+mag-gt.apcorrect1(gt.aper2deg(aper),band))
+    for mag in c[band][aper]:
+        plt.plot(np.arange(1600),np.zeros(1600)+mag-ac,color='0.75')
+    #plt.plot(d['exptime'],d['mag_bgsub_cheese']-ac,'o')
+    #plt.plot(d['exptime'],d['mag_bgsub']-ac,'x')    
+    plt.plot(d['exptime'],d['mag']-ac,'.')
+    plt.axis([0,1600.,min(d['mag'].min()-ac-0.01,c[band][aper].min()-0.01),
+                      max(d['mag'].max()-ac+0.01,c[band][aper].max()+0.01)])
+    print "Saving figure."
+    plt.savefig(str(i)+'_'+str(pos[0])+'_'+str(pos[1])+'.png')
     plt.close()
 
 
