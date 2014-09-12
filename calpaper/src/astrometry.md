@@ -23,28 +23,29 @@ skypos = np.array(dt.parse_unique_sources(data['ra'],data['dec'],
 
 aper = 4
 radius = gt.aper2deg(aper)
+search_radius = 0.001
 annulus = [0.01,0.02]
 ac = gt.apcorrect1(radius,band)
 plt.ioff()
 for i, pos in enumerate(skypos):
     print i, pos
     d = gAperture(band,pos,radius,verbose=2,minexp=30,maxgap=10)#,annulus=annulus)
-    c = dt.get_mags(band,pos[0],pos[1],0.0001,maglimit+1,mode='coadd')
+    c = dt.get_mags(band,pos[0],pos[1],search_radius,maglimit+1,mode='coadd')
     refmag = gt.counts2mag(gt.mag2counts(c[band][aper],band).mean(),band)
     bot,top=gu.model_errors(refmag-ac,band)
     plt.figure()
     plt.gca().invert_yaxis()
-    c = dt.get_mags(band,pos[0],pos[1],0.001,maglimit+1,mode='visit')
+    c = dt.get_mags(band,pos[0],pos[1],search_radius,maglimit+1,mode='visit')
+    for mag in c[band][aper]:
+        plt.plot(np.arange(1600),np.zeros(1600)+mag-ac,color='0.75')
     plt.plot(c[band]['expt'],c[band][aper]-ac,'x')
     plt.plot(top)
     plt.plot(bot)
-    for mag in c[band][aper]:
-        plt.plot(np.arange(1600),np.zeros(1600)+mag-ac,color='0.75')
     #plt.plot(d['exptime'],d['mag_bgsub_cheese']-ac,'o')
     #plt.plot(d['exptime'],d['mag_bgsub']-ac,'x')    
     plt.plot(d['exptime'],d['mag']-ac,'.')
-    plt.axis([0,1600.,min(d['mag'].min()-ac-0.01,c[band][aper].min()-0.01),
-                      max(d['mag'].max()-ac+0.01,c[band][aper].max()+0.01)])
+    plt.axis([0,1600.,min(d['mag'].min()-ac-0.01,c[band][aper].min()-ac-0.01),
+                      max(d['mag'].max()-ac+0.01,c[band][aper].max()-ac+0.01)])
     print "Saving figure."
     plt.savefig(str(i)+'_'+str(pos[0])+'_'+str(pos[1])+'.png')
     plt.close()
