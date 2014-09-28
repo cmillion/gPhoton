@@ -34,8 +34,8 @@ skypos = {'LDS749B':[323.06766667,0.25400000],
           'CDFS_00':[53.1273118244, -27.8744513656]}
 band = ['NUV','FUV']
 
-maglimit = 23.
-coadds = dt.get_mags(band,skypos['CDFS_00'][0],skypos['CDFS_00'][1],0.5,
+maglimit = 22.
+coadds = dt.get_mags(band[1],skypos['CDFS_00'][0],skypos['CDFS_00'][1],0.5,
                                                         maglimit,mode='coadd')
 uniques = np.array(dt.parse_unique_sources(coadds['ra'],coadds['dec'],
                        coadds['FUV']['mag'],coadds['NUV']['mag'],margin=0.001))
@@ -51,22 +51,25 @@ annulus = [0.01,0.02]
 #data['dist']=np.sqrt((data['detxs']-400.)**2. + (data['detys']-400.)**2.)
 
 # Grab the per-visit MCAT magnitudes
-
-out = np.array(gq.getArray(gq.mcat_visit_sources(skypos[src][0],
-                                                 skypos[src][1],0.005)))
-mcat = {'objid':out[:,0],'ra':out[:,1],'dec':out[:,2],'NUV':{'mag':out[:,3],'expt':out[:,9],1:out[:,19],2:out[:,20],3:out[:,21],4:out[:,22],5:out[:,23],6:out[:,24],7:out[:25]},'FUV':{'mag':out[:,4],'expt':out[:,10],1:out[:,12],2:out[:,13],3:out[:,14],4:out[:,15],5:out[:,16],6:out[:,17],7:out[:,18]}}
-
 mag = np.array([])
 dmag = np.array([])
-for i,objid in enumerate(mcat['objid']):
-    out = exp_from_objid(objid)
-    if out[band[1]]['t0']<0:
-        continue
-    data = gAperture(band[1],skypos[src],radius,annulus=annulus,verbose=0,trange=[out[band[1]]['t0'],out[band[1]]['t1']],coadd=True)
-    if data['mag_bgsub_cheese']:
-        print objid,[out[band[1]]['t0'],out[band[1]]['t1']],data['mag_bgsub_cheese'],float(mcat[band[1]][4][i])+18.82,float(mcat[band[1]][4][i])+18.82-data['mag_bgsub_cheese']
-        dmag = np.append(dmag,(float(mcat[band[1]][4][i])+18.82-data['mag_bgsub_cheese'])[0])
-        mag = np.append(mag,float(mcat[band[1]][4][i])+18.82)
+for pos in uniques:
+    print 'Gettin visits for'+str(pos)
+    out = np.array(gq.getArray(gq.mcat_visit_sources(pos[0],pos[1],0.005)))
+    mcat = {'objid':out[:,0],'ra':out[:,1],'dec':out[:,2],'NUV':{'mag':out[:,3],'expt':out[:,9],1:out[:,19],2:out[:,20],3:out[:,21],4:out[:,22],5:out[:,23],6:out[:,24],7:out[:25]},'FUV':{'mag':out[:,4],'expt':out[:,10],1:out[:,12],2:out[:,13],3:out[:,14],4:out[:,15],5:out[:,16],6:out[:,17],7:out[:,18]}}
+
+    for i,objid in enumerate(mcat['objid']):
+        out = exp_from_objid(objid)
+        if out[band[1]]['t0']<0:
+            print 'skip'
+            continue
+        data = gAperture(band[1],pos,radius,annulus=annulus,verbose=0,trange=[out[band[1]]['t0'],out[band[1]]['t1']],coadd=True)
+        if data['mag_bgsub_cheese']:
+            print objid,[out[band[1]]['t0'],out[band[1]]['t1']],data['mag_bgsub_cheese'],float(mcat[band[1]][4][i])+18.82,float(mcat[band[1]][4][i])+18.82-data['mag_bgsub_cheese']
+            dmag = np.append(dmag,(float(mcat[band[1]][4][i])+18.82-data['mag_bgsub_cheese'])[0])
+            mag = np.append(mag,float(mcat[band[1]][4][i])+18.82)
+        else:
+            print 'no exposure'
 
 # Set up the plot
 plt.figure()
