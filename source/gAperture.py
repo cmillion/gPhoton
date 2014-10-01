@@ -7,6 +7,7 @@ import curvetools as ct
 from imagetools import * # For JPEG preview image creation
 from optparse import OptionParser
 from dbasetools import fGetTimeRanges, suggest_parameters
+import sys
 #import ref # refactored lightcurve cration
 
 #def gAperture(args):
@@ -192,11 +193,8 @@ def setup_parser():
 
 def reconstruct_command(args):
     """Reconstruct the command line."""
-    cmd = './gAperture.py'
-    for key in args.__dict__.keys():
-    	if args.__dict__[key]:
-	    	cmd+=' --'+str(key)+' '+str(args.__dict__[key])
-    if args.verbose>1:
+    cmd = " ".join(sys.argv)
+    if args.verbose > 1:
         print cmd
     return cmd
 
