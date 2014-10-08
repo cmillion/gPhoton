@@ -35,8 +35,7 @@ def getArray(query,verbose=0,retries=20):
 
 def mcat_sources(band,ra0,dec0,radius,maglimit=20):
     ''' Return the MCAT _coadd_ sources given sky position and search radius
-    (and optional lower magnitude limit). The columns returned are
-    ['ra','dec','nuv_mag','fuv_mag','fov_radius','nuv_skybg','fuv_skybg','nuv_fwhm_world','fuv_fwhm_world']
+    (and optional lower magnitude limit).
     '''
     # 1=nuv, 2=fuv, 3=both
     bandflag = 1 if band=='NUV' else 2
@@ -51,7 +50,13 @@ def mcat_visit_sources(ra0,dec0,radius):
     # fGetNearbyVisitObjEq takes radius in arcminutes
     # NOTE: Because it adds hugely to overhead, this query doesn't actually
     # make slices on either band or maglimit...
-    return str(baseURL)+'select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, vpe.fexptime, vpe.nexptime, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7 from Gr6plus7.Dbo.visitphotoobjall as vpo inner join Gr6plus7.Dbo.visitphotoextract as vpe on vpo.photoextractid=vpe.photoextractid inner join gr6plus7.dbo.fGetNearbyVisitObjEq('+str(ra0)+', '+str(dec0)+', '+str(radius*60.)+') as nb on vpo.objid=nb.objid'+str(formatURL)
+    return str(baseURL)+'select vpo.objid, ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, vpe.fexptime, vpe.nexptime, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7 from Gr6plus7.Dbo.visitphotoobjall as vpo inner join Gr6plus7.Dbo.visitphotoextract as vpe on vpo.photoextractid=vpe.photoextractid inner join gr6plus7.dbo.fGetNearbyVisitObjEq('+str(ra0)+', '+str(dec0)+', '+str(radius*60.)+') as nb on vpo.objid=nb.objid'+str(formatURL)
+
+def mcat_objid_search(objid,mode='visit'):
+    """Return a bunch of observation data for a visit level objid (ggoid).
+    Doing the same for coadd level data is not yet supported.
+    """
+    return str(baseURL)+'select objid, minPhotoObsDate, maxPhotoObsDate, obs_date, obsdatim, nobssecs, fobssecs, nexptime, fexptime, nexpstar, nexpend, fexpstar, fexpend from Gr6plus7.Dbo.visitphotoobjall as vp inner join Gr6plus7.Dbo.imgrun as ir on vp.photoextractid=ir.imgrunid inner join Gr6plus7.Dbo.visitphotoextract as vpe on vp.photoextractid=vpe.photoextractid where objid = '+str(long(objid))+str(formatURL)
 
 def exposure_ranges(band,ra0,dec0,t0=1,t1=10000000000000,tscale=1000.,detsize=1.25):
     """Returns a list of times (in one second increments) where data exists
