@@ -59,7 +59,8 @@ def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
                 tscale=1000., calpath='../cal/', chunksz=10e6):
     """Retrieve photons within an aperture from the database."""
     events = {'t':[],'ra':[],'dec':[],'xi':[],'eta':[]}
-    print "Retrieving photons at ["+str(ra0)+", "+str(dec0)+"] within a radius of "+str(radius)
+    if verbose:
+        print "Retrieving photons at ["+str(ra0)+", "+str(dec0)+"] within a radius of "+str(radius)
     for trange in tranges:
         if verbose:
             mc.print_inline(" and between "+str(trange[0])+" and "+
@@ -114,7 +115,7 @@ def bg_mask(band,ra0,dec0,annulus,ras,decs,responses,sources):
     return bg_mask_sources(band,ra0,dec0,ras,decs,responses,sources)
 
 def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e4,ntests=10):
-    mc.print_inline('Estimating area of masked background annulus.')
+    #mc.print_inline('Estimating area of masked background annulus.')
     ratios = np.zeros(ntests)
     for i in range(ntests):
         ann_events = bg_mask_annulus(band,ra0,dec0,annulus,
@@ -135,12 +136,12 @@ def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maglimit=28.,
     """ Returns the estimate number of counts (not count rate) within the
     aperture based upon a masked background annulus.
     """
-    mc.print_inline('Swiss cheesing the background annulus.')
+    #mc.print_inline('Swiss cheesing the background annulus.')
     if not sources:
         sources = bg_sources(band,ra0,dec0,annulus[1],maglimit=maglimit)
     bg_counts = bg_mask(band,ra0,dec0,annulus,ras,decs,responses,
                         sources)[2].sum()
-    mc.print_inline('Numerically integrating area of masked annulus.')
+    #mc.print_inline('Numerically integrating area of masked annulus.')
     if not eff_area:
         eff_area = cheese_bg_area(band,ra0,dec0,annulus,sources)
     return mc.area(radius)*bg_counts/eff_area if eff_area else 0.
@@ -174,7 +175,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     ix = np.searchsorted(bins,data['t'],"right")
     # Initialize histogrammed arrays
     # FIXME: allocate these from a dict of constructors
-    lcurve_cols = ['counts', 'sources', 'bg_counts', 'bkgrnds', 'responses',
+    lcurve_cols = ['counts', 'sources', 'bg_counts','responses',
                    'detxs', 'detys', 't0_data', 't1_data', 't_mean', 'racent',
                    'deccent']
     lcurve = {'params':gphot_params(band,[ra0,dec0],radius,annulus=annulus,
@@ -198,6 +199,9 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     if verbose:
         mc.print_inline("Populating histograms.")
     for cnt,i in enumerate(np.unique(ix)):
+        # Exclude data outside of the bins in searchsorted.
+        if i-1<0 or i==len(bins):
+            continue
         if verbose:
             mc.print_inline('Binning '+str(i)+' of '+str(len(ix))+'.')
         t_ix = np.where(ix==i)
@@ -254,11 +258,17 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
         mc.print_inline("Getting exposure ranges.")
     tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
                                  maxgap=maxgap, minexp=minexp, verbose=verbose)
+    # FIXME: Everything goes to hell if no exposure time is available...
     # TODO: Add an ability to specify or exclude specific time ranges
     if verbose:
         mc.print_inline("Moving to photon level operations.")
-    lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
-                      stepsz=stepsz, verbose=verbose, coadd=coadd)
+    lcurve = {'cps':[],'cps_bgsub':[],'cps_bgsub_cheese':[],'mag':[],
+                                        'mag_bgsub':[],'mag_bgsub_cheese':[]}
+    try:
+        lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
+                          stepsz=stepsz, verbose=verbose, coadd=coadd)
+    except:
+        return lcurve
     lcurve['cps'] = lcurve['sources']/lcurve['exptime']
     lcurve['cps_bgsub'] = (lcurve['sources']-lcurve['bg']['simple'])/lcurve['exptime']
     lcurve['cps_bgsub_cheese'] = (lcurve['sources']-lcurve['bg']['cheese'])/lcurve['exptime']
@@ -283,7 +293,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                     trange=trange, verbose=verbose, coadd=coadd, minexp=minexp,
                     maxgap=maxgap)
     if csvfile:
-        cols = ['counts', 'sources', 'bg_counts', 'bkgrnds', 'responses',
+        cols = ['counts', 'sources', 'bg_counts', 'responses',
                 'detxs', 'detys', 't0_data', 't1_data', 't_mean', 'cps',
                 'mag', 'exptime']
         test=pd.DataFrame({'t0':data['t0'],'t1':data['t1'],
