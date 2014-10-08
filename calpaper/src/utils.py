@@ -55,13 +55,14 @@ def file_setup(outfile):
     return extant_objids
 
 def construct_row(i,band,objid,mcat,data):
+    zpmag = {'NUV':20.08238,'FUV':18.81707}
     # Note: mcat['skybg'] is in counts per second per square arcseconds
     #       where as gPhoton is reporting cps over the aperture area.
     return (objid, data['t0'][0], data['t1'][0], 
             mcat[band]['expt'][i], data['exptime'][0],
             mcat['ra'][i], mcat['dec'][i],
             data['racent'][0], data['deccent'][0],
-            mcat[band][4][i]+18.82, data['mag_bgsub_cheese'][0],
+            mcat[band][4][i]+zpmag[band], data['mag_bgsub_cheese'][0],
             data['mag_bgsub'][0], data['mag'][0],
             mc.distance(data['detxs'],data['detys'],400,400)[0],
             data['responses'][0], mcat[band]['skybg'][i],
@@ -77,6 +78,7 @@ def datamaker(band,skypos,outfile,maglimit=20.,detsize=0.5,
                                                     detsize,maglimit=maglimit)
     for pos in uniques:
         mcat = get_mcat_data(pos,0.005)
+        extant_objids = file_setup(outfile)
         for i,objid in enumerate(mcat['objid']):
             if objid in extant_objids:
                 print 'Already processed.'
