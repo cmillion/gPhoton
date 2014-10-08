@@ -3,6 +3,7 @@
 import numpy as np
 import gQuery
 from MCUtils import print_inline,area,distance
+from galextools import gpssecs
 
 def get_aspect(band,skypos,trange=[6e8,11e8],tscale=1000.,verbose=0):
     """Get aspect solution in a dict() for given time range."""
@@ -116,7 +117,7 @@ def mcat_skybg(band,skypos,radius,verbose=0,retries=20):
 	return skybg*area(radius*60.*60.)
 
 def get_mags(band,ra0,dec0,radius,maglimit,mode='coadd',
-                   zpmag={'NUV':20.08,'FUV':18.82}):
+                   zpmag={'NUV':20.08,'FUV':18.82},verbose=0):
     """Given RA, Dec and search radius, searches the coadd MCAT for sources.
     Returns a dict() which contains magnitudes for all of the APER settings.
     Note: Visit mode returns a lot more sources, more slowly than coadd mode
@@ -128,14 +129,14 @@ def get_mags(band,ra0,dec0,radius,maglimit,mode='coadd',
     zpf,zpn = zpmag['FUV'],zpmag['NUV']
     if mode=='coadd':
         out =np.array(gQuery.getArray(
-                  gQuery.mcat_sources(band,ra0,dec0,radius,maglimit=maglimit)))
+                  gQuery.mcat_sources(band,ra0,dec0,radius,maglimit=maglimit),verbose=verbose))
         if not len(out):
             print "Warning: No sources found!"
             return 0
         return {'ra':out[:,0],'dec':out[:,1],'FUV':{'mag':out[:,3],1:out[:,9]+zpf,2:out[:,10]+zpf,3:out[:,11]+zpf,4:out[:,12]+zpf,5:out[:,13]+zpf,6:out[:,14],7:out[:,15]+zpf},'NUV':{'mag':out[:,2],1:out[:,16]+zpn,2:out[:,17]+zpn,3:out[:,18]+zpn,4:out[:,19]+zpn,5:out[:,20]+zpn,6:out[:,21]+zpn,7:out[:,22]+zpn}}
     elif mode=='visit':
         out = np.array(gQuery.getArray(
-                       gQuery.mcat_visit_sources(ra0,dec0,radius)))
+                       gQuery.mcat_visit_sources(ra0,dec0,radius),verbose=verbose))
         # NOTE: For runtime considerations, mcat_visit_sources() does not
         # make any slices on time or maglimit, so we need to do it here.
         ix = np.where((out[:,2 if band=='NUV' else 3]<maglimit) &
@@ -144,6 +145,10 @@ def get_mags(band,ra0,dec0,radius,maglimit,mode='coadd',
     else:
         print "mode must be in [coadd,visit]"
         return
+
+def exp_from_objid(objid):
+    out = np.array(gQuery.getArray(gQuery.mcat_objid_search(objid)))
+    return {'NUV':{'expt':np.array(out[:,7],dtype='float')[0],'t0':np.array(out[:,9],dtype='float64')[0]-gpssecs,'t1':np.array(out[:,10],dtype='float64')[0]-gpssecs},'FUV':{'expt':np.array(out[:,8],dtype='float')[0],'t0':np.array(out[:,11],dtype='float64')[0]-gpssecs,'t1':np.array(out[:,12],dtype='float64')[0]-gpssecs}}
 
 def parse_unique_sources(ras,decs,fmags,nmags,margin=0.005):
     """Iteratively returns unique sources based upon a _margin_ within
@@ -161,6 +166,11 @@ def parse_unique_sources(ras,decs,fmags,nmags,margin=0.005):
         if not (i in b):
             b+=[i]
     return b
+
+def find_unique_sources(band,ra0,dec0,searchradius,maglimit=23,margin=0.001,verbose=0):
+    coadds = get_mags(band,ra0,dec0,searchradius,maglimit,mode='coadd',verbose=verbose)
+    return np.array(parse_unique_sources(coadds['ra'],coadds['dec'],
+                       coadds['FUV']['mag'],coadds['NUV']['mag'],margin=margin))
 
 
 def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,catalog='MCAT',retries=20):
