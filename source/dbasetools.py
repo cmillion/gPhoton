@@ -3,7 +3,7 @@
 import numpy as np
 import gQuery
 from MCUtils import print_inline,area,distance
-from galextools import gpssecs
+from galextools import gpssecs, zpmag
 
 def get_aspect(band,skypos,trange=[6e8,11e8],tscale=1000.,verbose=0):
     """Get aspect solution in a dict() for given time range."""
@@ -102,6 +102,35 @@ def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,retries=20):
                                 retries=retries)
     return exptime
 
+def get_mcat_data(skypos,rad):
+    out = np.array(gQuery.getArray(
+                         gQuery.mcat_visit_sources(skypos[0],skypos[1],rad)))
+    return {'objid':np.array(out[:,0],dtype='int64'),
+            'ra':np.array(out[:,1],dtype='float32'),
+            'dec':np.array(out[:,2],dtype='float32'),
+            'NUV':{'mag':np.array(out[:,3],dtype='float32'),
+            'skybg':np.array(out[:,6],dtype='float32'),
+            'expt':np.array(out[:,11],dtype='float32'),
+            'fwhm':np.array(out[:,9],dtype='float32'),
+            1:np.array(out[:,19],dtype='float32')+zpmag('NUV'),
+            2:np.array(out[:,20],dtype='float32')+zpmag('NUV'),
+            3:np.array(out[:,21],dtype='float32')+zpmag('NUV'),
+            4:np.array(out[:,22],dtype='float32')+zpmag('NUV'),
+            5:np.array(out[:,23],dtype='float32')+zpmag('NUV'),
+            6:np.array(out[:,24],dtype='float32')+zpmag('NUV'),
+            7:np.array(out[:,25],dtype='float32')+zpmag('NUV')},
+            'FUV':{'mag':np.array(out[:,4],dtype='float32'),
+            'skybg':np.array(out[:,7],dtype='float32'),
+            'expt':np.array(out[:,10],dtype='float32'),
+            'fwhm':np.array(out[:,8],dtype='float32'),
+            1:np.array(out[:,12],dtype='float32')+zpmag('FUV'),
+            2:np.array(out[:,13],dtype='float32')+zpmag('FUV'),
+            3:np.array(out[:,14],dtype='float32')+zpmag('FUV'),
+            4:np.array(out[:,15],dtype='float32')+zpmag('FUV'),
+            5:np.array(out[:,16],dtype='float32')+zpmag('FUV'),
+            6:np.array(out[:,17],dtype='float32')+zpmag('FUV'),
+            7:np.array(out[:,18],dtype='float32')+zpmag('FUV') } }
+
 def mcat_skybg(band,skypos,radius,verbose=0,retries=20):
 	"""Estimate the sky background using the MCAT skybg for nearby sources."""
 	# Setting maglimit to 30 so that it gets _everything_.
@@ -170,8 +199,7 @@ def parse_unique_sources(ras,decs,fmags,nmags,margin=0.005):
 def find_unique_sources(band,ra0,dec0,searchradius,maglimit=23,margin=0.001,verbose=0):
     coadds = get_mags(band,ra0,dec0,searchradius,maglimit,mode='coadd',verbose=verbose)
     return np.array(parse_unique_sources(coadds['ra'],coadds['dec'],
-                       coadds['FUV']['mag'],coadds['NUV']['mag'],margin=margin))
-
+                    coadds['FUV']['mag'],coadds['NUV']['mag'],margin=margin))
 
 def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,catalog='MCAT',retries=20):
 	"""Return the mean position of sources within the search radius."""
@@ -181,7 +209,8 @@ def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,catalog='MCAT',
 	return out[ix,0].mean(),out[ix,1].mean(),round(fwhm,4)
 
 def nearest_source(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT',retries=20):
-	"""Return targeting parameters for the nearest MCAT source to a position."""
+	"""Return targeting parameters for the nearest MCAT source to a position.
+    """
 	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
 	if not len(out) and band=='FUV':
 		if verbose:
@@ -224,15 +253,32 @@ def optimize_annulus(optrad,outann,verbose=0):
 		print "Use --hrbg to mask these out. (Will increase run times.)"
 	return round(1.2*optrad,4),round(2*optrad,4)
 
-def suggest_parameters(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT',retries=20):
-	"""Suggest an optimum aperture position and size."""
-	ra,dec,fwhm=nearest_source(band,skypos,radius=radius,maglimit=maglimit,verbose=verbose,retries=retries)
-	optrad = round(2*fwhm,4)
-	outann = suggest_bg_radius(band,skypos,maglimit=maglimit,verbose=verbose,retries=retries)
-	annulus = optimize_annulus(optrad,outann,verbose=verbose)
-	if verbose:
-		print "Suggested sky position [RA,Dec]: ["+str(ra)+", "+str(dec)+"]"
-		print "Suggested aperture radius (deg): "+str(optrad)
-		print "Suggested background annulus:    ["+str(annulus[0])+", "+str(annulus[1])+"]"
-	return ra,dec,optrad,annulus[0],annulus[1]
+#def suggest_parameters(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT',retries=20):
+#    """Suggest an optimum aperture position and size."""
+#    print band, skypos
+#    ra,dec,fwhm=nearest_source(band,skypos,radius=radius,maglimit=maglimit,verbose=verbose,retries=retries)
+#    print ra,dec,fwhm
+#    optrad = round(2*fwhm,4)
+#    outann = suggest_bg_radius(band,skypos,maglimit=maglimit,verbose=verbose,retries=retries)
+#    annulus = optimize_annulus(optrad,outann,verbose=verbose)
+#    if verbose:
+#        print "Suggested sky position [RA,Dec]: ["+str(ra)+", "+str(dec)+"]"
+#        print "Suggested aperture radius (deg): "+str(optrad)
+#        print "Suggested background annulus:    ["+str(annulus[0])+", "+str(annulus[1])+"]"
+#    return ra,dec,optrad,annulus[0],annulus[1]
 
+def suggest_parameters(band,skypos,verbose=0,retries=20):
+    mcat = get_mcat_data(skypos,0.0005)
+    ix = np.where((mcat[band]['mag']>0) & (mcat[band]['fwhm']>0))
+    pos,fwhm = None, None
+    if mcat['objid'].any(): # There is a known star at the target position!
+        pos = [mcat['ra'][ix].mean(),mcat['dec'][ix].mean()]
+        radius = 2*mcat[band]['fwhm'][ix].mean()
+        if verbose:
+            print 'Recentering on {pos}.'.format(pos=pos)
+            print 'Using aperture radius of {rad} degrees.'.format(rad=fwhm)
+    else: # There is no known star at the target position...
+        pos = skypos
+        radius = gt.aper2deg(4)
+    annulus = [3*radius, 5*radius]
+    return pos[0],pos[1],radius,annulus[0],annulus[1] 

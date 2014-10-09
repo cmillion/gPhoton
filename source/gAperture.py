@@ -42,7 +42,7 @@ def check_radius(args):
 def suggest(args):
     """Generates suggested lightcurve parameters with suggest_parameters()"""
     (args.ra, args.dec, args.radius, args.annulus1,
-                    args.annulus2) = suggest_parameters(args.band,args.skypos)
+                   args.annulus2) = suggest_parameters(args.band,args.skypos)
     if args.verbose:
         print "Recentering on ["+str(args.ra)+", "+str(args.dec)+"]"
         print "Setting radius to "+str(args.radius)

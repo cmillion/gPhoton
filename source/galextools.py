@@ -7,6 +7,10 @@ from astropy import wcs as pywcs
 
 gpssecs = 315532800+432000
 
+def zpmag(band):
+    """Define the zero point magnitude offset for the APER MCAT values."""
+    return {'NUV':20.08238,'FUV':18.81707}[band]
+
 def aper2deg(aper):
     """Convert SExtractor APER numbers to decimal degrees radii."""
     if not aper==int(aper) or aper < 1 or aper > 7:

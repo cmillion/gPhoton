@@ -49,11 +49,11 @@ def mcat_sources(band,ra0,dec0,radius,maglimit=20):
 
 def mcat_visit_sources(ra0,dec0,radius):
     ''' Return the MCAT per-visit sources given sky position and search radius.
+    The columns are as follows:
+    [1,objid],[2,ra],[3,dec],[4,NUV_mag],[5,FUV_mag],[6,FoV_radius],
+    [7,NUV_skybg],[8,FUV_skybg],[9,NUV_FWHM],[10,FUV_FWHM],[11,FUV_expt],
+    [12,NUV_expt],[13:19,FUV_mag_aper1:7],[20:26,NUV_mag_aper1:7]
     '''
-    #bandflag = 1 if band=='NUV' else 2
-    # fGetNearbyVisitObjEq takes radius in arcminutes
-    # NOTE: Because it adds hugely to overhead, this query doesn't actually
-    # make slices on either band or maglimit...
     return str(baseURL)+'select vpo.objid, ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, vpe.fexptime, vpe.nexptime, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7 from Gr6plus7.Dbo.visitphotoobjall as vpo inner join Gr6plus7.Dbo.visitphotoextract as vpe on vpo.photoextractid=vpe.photoextractid inner join gr6plus7.dbo.fGetNearbyVisitObjEq('+str(ra0)+', '+str(dec0)+', '+str(radius*60.)+') as nb on vpo.objid=nb.objid'+str(formatURL)
 
 def mcat_objid_search(objid,mode='visit'):
