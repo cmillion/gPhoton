@@ -262,8 +262,9 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     # TODO: Add an ability to specify or exclude specific time ranges
     if verbose:
         mc.print_inline("Moving to photon level operations.")
-    lcurve = {'cps':[],'cps_bgsub':[],'cps_bgsub_cheese':[],'mag':[],
-                                        'mag_bgsub':[],'mag_bgsub_cheese':[]}
+    lcurve = {'cps':[],'cps_bgsub':[],'cps_bgsub_cheese':[],
+              'mag':[],'mag_bgsub':[],'mag_bgsub_cheese':[],
+              'flux':[],'flux_bgsub':[],'flux_bgsub_cheese':[]}
     try:
         lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
                           stepsz=stepsz, verbose=verbose, coadd=coadd)
@@ -275,6 +276,10 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
     lcurve['mag_bgsub'] = gxt.counts2mag(lcurve['cps_bgsub'],band)
     lcurve['mag_bgsub_cheese'] = gxt.counts2mag(lcurve['cps_bgsub_cheese'],band)
+    lcurve['flux'] = gxt.counts2flux(lcurve['cps'],band)
+    lcurve['flux_bgsub'] = gxt.counts2flux(lcurve['cps_bgsub'],band)
+    lcurve['flux_bgsub_cheese'] = gxt.counts2flux(lcurve['cps_bgsub_cheese'],band)
+
     if verbose:
         mc.print_inline("Done.")
         mc.print_inline("")
@@ -300,7 +305,12 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                            't_mean':data['t_mean'],'t0_data':data['t0_data'],
                            't1_data':data['t1_data'],'exptime':data['exptime'],
                            'cps':data['cps'],'counts':data['counts'],
-                           'bg':data['bg']['cheese'],'mag':data['mag']})
+                           'bg':data['bg']['cheese'],'mag':data['mag'],
+                           'mag_bgsub':data['mag_bgsub'],
+                           'mag_bgsub_cheese':data['mag_bgsub_cheese'],
+                           'flux':data['flux'],
+                           'flux_bgsub':data['flux_bgsub'],
+                           'flux_bgsub_cheese':data['flux_bgsub_cheese']})
         try:
             test.to_csv(csvfile,index=False)
         except:
