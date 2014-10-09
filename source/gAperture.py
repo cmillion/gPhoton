@@ -8,7 +8,6 @@ from imagetools import * # For JPEG preview image creation
 from optparse import OptionParser
 from dbasetools import fGetTimeRanges, suggest_parameters
 import sys
-#import ref # refactored lightcurve cration
 
 #def gAperture(args):
 def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
@@ -41,7 +40,7 @@ def check_radius(args):
     return
 
 def suggest(args):
-    """Generates suggested lightcurve parameters. Wraps suggest_parameters()"""
+    """Generates suggested lightcurve parameters with suggest_parameters()"""
     (args.ra, args.dec, args.radius, args.annulus1,
                     args.annulus2) = suggest_parameters(args.band,args.skypos)
     if args.verbose:
