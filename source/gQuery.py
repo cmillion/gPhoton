@@ -36,6 +36,10 @@ def getArray(query,verbose=0,retries=20):
 def mcat_sources(band,ra0,dec0,radius,maglimit=20):
     ''' Return the MCAT _coadd_ sources given sky position and search radius
     (and optional lower magnitude limit).
+    Columns are:
+    [0,RA],[1,Dec],[2,NUV_mag],[3,FUV_mag],[4,FoV_radius],[5,NUV_skybg],
+    [6,FUV_skybg],[7,NUV_FWHM_world],[8,FUV_FWHM_world],
+    [9:15,FUV_mag_aper_1:7],[16:22,NUV_mag_aper_1:7]
     '''
     # 1=nuv, 2=fuv, 3=both
     bandflag = 1 if band=='NUV' else 2
