@@ -8,9 +8,9 @@ band, ra0, dec0, radius = ('FUV', 323.06766667, 0.254, 0.1)
 ra0, dec0 = 53.1032558472, -27.7963826072 # PS_CDFS_MOS00
 ra0, dec0 = 53.1273118244, -27.8744513656 # CDFS_00
 radius = 0.5
-maglimit = 20.
 aper = 4
 
+maglimit = 23.
 data = dt.get_mags(band,ra0,dec0,0.5,maglimit,mode='coadd')
 skypos = np.array(dt.parse_unique_sources(data['ra'],data['dec'],
                          data['FUV']['mag'],data['NUV']['mag'],margin=0.001))

@@ -1,4 +1,5 @@
-from utils import *
+%pylab # only in iPython
+from testutils import *
 import galextools as gt
 import MCUtils as mc
 import pandas as pd
@@ -20,7 +21,10 @@ band = 'NUV'
 outfile = 'LDS749B_NUV.csv'
 datamaker(band,skypos['LDS749B'],outfile)
 
-# Let's do this on more reasonable data...
+# To avoid wasting a lot of time on the same tiles and also biasing the
+# result with the same few super deep tiles (LDS and CDFS, mostly), the
+# following filters on <5000s coadd depth, more or less, based upon
+# the most recent coadd level database coverage reference table.
 coaddlist = pd.read_csv('coaddList_061714.csv')
 for skypos in zip(coaddlist['avaspra'],coaddlist['avaspdec']):
     expt = gFind.gFind(skypos=skypos,band='FUV',quiet=True)['expt'][0]
@@ -29,7 +33,6 @@ for skypos in zip(coaddlist['avaspra'],coaddlist['avaspdec']):
         datamaker('FUV',skypos,'calrun_FUV.csv')
     else:
         print skypos, expt, False
-
 
 coaddlist = pd.read_csv('coaddList_061714.csv')
 for skypos in zip(coaddlist['avaspra'],coaddlist['avaspdec']):
@@ -40,6 +43,7 @@ for skypos in zip(coaddlist['avaspra'],coaddlist['avaspdec']):
     else:
         print skypos, expt, False
 
+###############################################################################
 
 fuv=pd.read_csv('calrun_FUV.csv')
 nuv=pd.read_csv('calrun_NUV.csv')
@@ -50,22 +54,24 @@ print 'NUV samples: {cnt} (red)'.format(cnt=nuv.shape[0])
 plt.figure()
 plt.title('FUV Delta Mag vs. Mag')
 dmag = fuv['aper4']-fuv['mag_bgsub_cheese']
+# Make a cut on crazy outliers in the MCAT.
 ix = np.where((fuv['aper4']>0) & (fuv['aper4']<30))
 plt.axis([10,24,-1.3,1.3])
 plt.plot(fuv['aper4'].ix[ix],dmag.ix[ix],'.',alpha=0.1)
 plt.figure()
 plt.title('FUV Delta Mag Histogram')
-plt.axis([-1.3,1.3,0,425])
+#plt.axis([-1.3,1.3,0,425])
 plt.hist(dmag.ix[ix],bins=500,range=[-1.3,1.3])
 
 plt.figure()
 plt.title('NUV Delta Mag vs. Mag')
 dmag = nuv['aper4']-nuv['mag_bgsub_cheese']
+# Make a cut on crazy outliers in the MCAT.
 ix = np.where((nuv['aper4']>0) & (nuv['aper4']<30))
 plt.plot(nuv['aper4'].ix[ix],dmag.ix[ix],'.',alpha=0.1)
 plt.figure()
 plt.title('NUV Delta Mag Histogram')
-plt.axis([-1.3,1.3,0,4500])
+#plt.axis([-1.3,1.3,0,4500])
 plt.hist(dmag.ix[ix],bins=500,range=[-1.3,1.3])
 
 # According to the calibration paper, the FUV deadtime correction should be
@@ -84,6 +90,21 @@ plt.title('FUV Delta Mag Histogram ({dt}% deadtime)'.format(dt=dtime*100))
 plt.hist(fuv['aper4']-gt.counts2mag(
   gt.mag2counts(fuv['mag'],'FUV')*fuv['t_eff']/(fuv['t_raw']*(1-dtime)),'FUV'),
                                                         range=[-1,1],bins=100)
+
+# Test different deadtime methods...
+#   This shows that the error is in the reference table at MAST.
+for i,objid in enumerate(fuv['objid']):
+  band,t0,t1='FUV',fuv['t0'][i],fuv['t1'][i]
+  shutdead = gq.getArray(gq.shutdead(band,t0,t1))
+  dead = gq.getValue(gq.deadtime(band,t0,t1))
+  print i,objid,shutdead[1][0],dead
+
+# Test NUV just for sanity... both methods are identical.
+for i,objid in enumerate(nuv['objid']):
+  band,t0,t1='NUV',fuv['t0'][i],fuv['t1'][i]
+  shutdead = gq.getArray(gq.shutdead(band,t0,t1))
+  dead = gq.getValue(gq.deadtime(band,t0,t1))
+  print i,objid,shutdead[1][0],dead
 
 # Do a sanity check of the reponse sampling
 flat_FUV = mc.get_fits_data(flat_filename('FUV','../cal/'))
