@@ -3,6 +3,7 @@ import galextools as gt
 import MCUtils as mc
 import pandas as pd
 import gFind
+from FileUtils import flat_filename
 
 skypos = {'LDS749B':[323.06766667,0.25400000],
           'PS_CDFS_MOS00':[53.1032558472, -27.7963826072],
@@ -45,6 +46,7 @@ nuv=pd.read_csv('calrun_NUV.csv')
 print 'FUV samples: {cnt} (blue)'.format(cnt=fuv.shape[0])
 print 'NUV samples: {cnt} (red)'.format(cnt=nuv.shape[0])
 
+# NOTE: There is a ~15% systematic offset in FUV!
 plt.figure()
 plt.title('FUV Delta Mag vs. Mag')
 dmag = fuv['aper4']-fuv['mag_bgsub_cheese']
@@ -66,21 +68,70 @@ plt.title('NUV Delta Mag Histogram')
 plt.axis([-1.3,1.3,0,4500])
 plt.hist(dmag.ix[ix],bins=500,range=[-1.3,1.3])
 
+# According to the calibration paper, the FUV deadtime correction should be
+# small (~ a few percent), but it is actually bigger than the NUV correction.
 plt.figure()
-ix = np.where(fuv['aper4']>0)
-plt.hist(fuv['aper4'].ix[ix]-fuv['mag_bgsub_cheese'].ix[ix],bins=1000)
-ix = np.where(nuv['aper4']>0)
-plt.hist(nuv['aper4'].ix[ix]-nuv['mag_bgsub_cheese'].ix[ix],bins=1000)
+plt.title('FUV Deadtime Ratio Histogram')
+plt.hist(fuv['t_eff']/fuv['t_raw'],bins=100,range=[0.2,1.2])
+plt.figure()
+plt.title('NUV Deadtime Ratio Histogram')
+plt.hist(nuv['t_eff']/nuv['t_raw'],bins=100,range=[0.2,1.2])
 
+# So what happens to Delta Mag if we estimate ~3% FUV deadtime?
+dtime = 0.03
+plt.figure()
+plt.title('FUV Delta Mag Histogram ({dt}% deadtime)'.format(dt=dtime*100))
+plt.hist(fuv['aper4']-gt.counts2mag(
+  gt.mag2counts(fuv['mag'],'FUV')*fuv['t_eff']/(fuv['t_raw']*(1-dtime)),'FUV'),
+                                                        range=[-1,1],bins=100)
+
+# Do a sanity check of the reponse sampling
+flat_FUV = mc.get_fits_data(flat_filename('FUV','../cal/'))
+flat_NUV = mc.get_fits_data(flat_filename('NUV','../cal/'))
+plt.figure()
+plt.hist(flat_FUV.flatten(),bins=100,range=[0.2,1.2])
+plt.hist(fuv['response'],bins=100,range=[0.2,1.2])
+plt.figure()
+plt.hist(flat_NUV.flatten(),bins=100,range=[0.2,1.2])
+plt.hist(nuv['response'],bins=100,range=[0.2,1.2])
+
+
+# RA v Dec
 plt.figure()
 plt.title('Delta Dec vs. Delta RA')
 plt.plot(fuv['ra'].ix[ix]-fuv['racent'].ix[ix],fuv['dec'].ix[ix]-fuv['deccent'].ix[ix],'.')
 plt.plot(nuv['ra'].ix[ix]-nuv['racent'].ix[ix],nuv['dec'].ix[ix]-nuv['deccent'].ix[ix],'x')
 
+# Background plots
+gphot_back = gt.counts2mag(fuv['bg_cheese']/fuv['t_eff'],'FUV')
+mcat_back = gt.counts2mag(fuv['skybg']*3600**2*mc.area(gt.aper2deg(4)),'FUV')
+delta = mcat_back - gphot_back
 plt.figure()
-plt.title('SkyBG Delta Mag vs. Mag (within APER4)')
-plt.plot(gt.counts2mag(fuv['skybg'].ix[ix]*3600**2*mc.area(gt.aper2deg(4)),'FUV'),gt.counts2mag(fuv['skybg'].ix[ix]*3600**2*mc.area(gt.aper2deg(4)),'FUV')-gt.counts2mag(fuv['bg_cheese'].ix[ix]/fuv['t_eff'].ix[ix],'FUV'),'.')
-plt.plot(gt.counts2mag(nuv['skybg'].ix[ix]*3600**2*mc.area(gt.aper2deg(4)),'NUV'),gt.counts2mag(nuv['skybg'].ix[ix]*3600**2*mc.area(gt.aper2deg(4)),'NUV')-gt.counts2mag(nuv['bg_cheese'].ix[ix]/nuv['t_eff'].ix[ix],'NUV'),'x')
+plt.title('gPhoton Background Histogram')
+ix = np.where(np.isfinite(gphot_back))
+plt.axis([18,26,0,300])
+plt.hist(gphot_back.ix[ix],bins=500,range=[18,26])
+plt.figure()
+plt.title('MCAT Background Histogram')
+ix = np.where(np.isfinite(mcat_back))
+plt.axis([18,26,0,300])
+plt.hist(mcat_back.ix[ix],bins=500,range=[18,26])
+plt.figure()
+plt.title('MCAT-gPhoton Background Histogram')
+ix = np.where(np.isfinite(delta))
+plt.axis([-3,3,0,350])
+plt.hist(delta.ix[ix],bins=500,range=[-3,3])
+
+
+
+
+
+plt.plot(gt.counts2mag(fuv['skybg']*3600**2*mc.area(gt.aper2deg(4)),'FUV'),delta,'.',alpha=0.1)
+
+
+plt.plot(gt.counts2mag(nuv['skybg'].ix[ix]*3600**2*mc.area(gt.aper2deg(4)),'NUV'),
+         gt.counts2mag(nuv['skybg'].ix[ix]*3600**2*mc.area(gt.aper2deg(4)),'NUV')
+        -gt.counts2mag(nuv['bg_cheese'].ix[ix]/nuv['t_eff'].ix[ix],'NUV'),'x')
 
 
 
