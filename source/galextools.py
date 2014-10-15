@@ -5,7 +5,7 @@ import numpy as np
 import math
 from astropy import wcs as pywcs
 
-gpssecs = 315532800+432000
+GPSSECS = 315532800+432000
 
 def zpmag(band):
     """Define the zero point magnitude offset for the APER MCAT values."""
