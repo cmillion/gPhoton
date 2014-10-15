@@ -22,7 +22,7 @@ def gFind(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1.0, min
 
 		if not len(ranges):
 			if not quiet: print 'No '+this_band.upper()+' exposure time in database.'
-			return {'t0':None,'t1':None,'expt':None}
+			return {'t0':[0],'t1':[0],'expt':[0]}
 		else:
 			expt = (ranges[:,1]-ranges[:,0]).sum()
 			if not quiet: print this_band.upper()+': Available: '+str(expt)+' seconds (raw) in '+str(len(ranges))+' distinct exposures.'

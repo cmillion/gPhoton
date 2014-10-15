@@ -9,7 +9,7 @@ from MCUtils import *
 from CalUtils import *
 from gnomonic import *
 
-gpssecs = 315532800+432000
+GPSSECS = 315532800+432000
 
 def load_txy(csvfile):
 	"""Loads just the t,x,y columns from a photon CSV file."""
@@ -272,9 +272,9 @@ def create_rr(csvfile,band,calpath,eclipse,aspfile=0.,expstart=0.,expend=0.,retr
 
 	#startt=time.time()
 	if not expstart:
-		expstart = asptime.min()+gpssecs
+		expstart = asptime.min()+GPSSECS
 	if not expend:
-		expend = asptime.max()+gpssecs
+		expend = asptime.max()+GPSSECS
 	flatbuff = np.zeros([960,960])
 	# Rotate the flat into the correct orientation to start
 	flatbuff[80:960-80,80:960-80] = np.flipud(np.rot90(flat))
@@ -285,12 +285,12 @@ def create_rr(csvfile,band,calpath,eclipse,aspfile=0.,expstart=0.,expend=0.,retr
 	#print len(asptime),len(xi_vec),len(eta_vec),len(col),len(row)
 	for i in xrange(len(asptime)-1):
 		#print i
-		if (asptime[i]+gpssecs)<expstart or (asptime[i]+gpssecs)>expend:
-			print "		",asptime[i]+gpssecs," out of range."
+		if (asptime[i]+GPSSECS)<expstart or (asptime[i]+GPSSECS)>expend:
+			print "		",asptime[i]+GPSSECS," out of range."
 			continue
 		elif (aspflags[i]%2!=0) or (aspflags[i+1]%2!=0):
 			continue
-			print "		",asptime[i]+gpssecs," flagged."
+			print "		",asptime[i]+GPSSECS," flagged."
 		else:
 			#print "ping"
 			rr += scipy.ndimage.interpolation.shift(scipy.ndimage.interpolation.rotate(flatbuff,-asptwist[i],reshape=False,order=0,prefilter=False),[col[i],row[i]],order=0,prefilter=False)

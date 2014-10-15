@@ -10,7 +10,7 @@ from CalUtils import *
 
 from MCUtils import *
 
-gpssecs = 315532800+432000 # conversion fact from galex time to unix time
+GPSSECS = 315532800+432000 # conversion fact from galex time to unix time
 
 # FIXME: This looks like a vestigial test funtion. Does it still have a purpose?
 #	 It is NOT USED ANYWHERE.
@@ -259,7 +259,7 @@ def create_cnt(csvfile,imsz,cntfile,outfile,matchtimes=0,expstart=0,expend=0):
 		if cnt < chunksz:
 			cnt+=1
 			if row[0] and row[8] and row[9] and not float(row[10]):
-				if matchtimes and (((float(row[0])/1000.)+gpssecs)<expstart or ((float(row[0])/1000)+gpssecs)>expend):
+				if matchtimes and (((float(row[0])/1000.)+GPSSECS)<expstart or ((float(row[0])/1000)+GPSSECS)>expend):
 					continue
 				coo.append([np.float64(row[8]),np.float64(row[9])])
 				t.append(np.float64(row[0])/1000)
@@ -303,7 +303,7 @@ def create_cnt(csvfile,imsz,cntfile,outfile,matchtimes=0,expstart=0,expend=0):
 	#t,x,y,flags=load_txy(csvfile)
 	#exptime = compute_exptime(band,expstart,expend)#osure(t,x,y,flags,band,eclipse)
 
-	header = createheader(-1.6,1.6,imsz,racent,deccent,expstart=mint+gpssecs,expend=maxt+gpssecs,exptime=exptime,header=hdr)
+	header = createheader(-1.6,1.6,imsz,racent,deccent,expstart=mint+GPSSECS,expend=maxt+GPSSECS,exptime=exptime,header=hdr)
 	pyfits.writeto(outfile,image,header,clobber=True)
 
 	return
