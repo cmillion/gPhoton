@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
-# gPhoton specific 
+# gPhoton specific
 import gQuery
 import MCUtils as mc
 import dbasetools as dbt # fGetTimeRanges(), compute_exptime()
@@ -262,24 +262,23 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     # TODO: Add an ability to specify or exclude specific time ranges
     if verbose:
         mc.print_inline("Moving to photon level operations.")
-    lcurve = {'cps':[],'cps_bgsub':[],'cps_bgsub_cheese':[],
-              'mag':[],'mag_bgsub':[],'mag_bgsub_cheese':[],
-              'flux':[],'flux_bgsub':[],'flux_bgsub_cheese':[]}
     try:
         lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
                           stepsz=stepsz, verbose=verbose, coadd=coadd)
-    except:
-        return lcurve
-    lcurve['cps'] = lcurve['sources']/lcurve['exptime']
-    lcurve['cps_bgsub'] = (lcurve['sources']-lcurve['bg']['simple'])/lcurve['exptime']
-    lcurve['cps_bgsub_cheese'] = (lcurve['sources']-lcurve['bg']['cheese'])/lcurve['exptime']
-    lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
-    lcurve['mag_bgsub'] = gxt.counts2mag(lcurve['cps_bgsub'],band)
-    lcurve['mag_bgsub_cheese'] = gxt.counts2mag(lcurve['cps_bgsub_cheese'],band)
-    lcurve['flux'] = gxt.counts2flux(lcurve['cps'],band)
-    lcurve['flux_bgsub'] = gxt.counts2flux(lcurve['cps_bgsub'],band)
-    lcurve['flux_bgsub_cheese'] = gxt.counts2flux(lcurve['cps_bgsub_cheese'],band)
+        lcurve['cps'] = lcurve['sources']/lcurve['exptime']
+        lcurve['cps_bgsub'] = (lcurve['sources']-lcurve['bg']['simple'])/lcurve['exptime']
+        lcurve['cps_bgsub_cheese'] = (lcurve['sources']-lcurve['bg']['cheese'])/lcurve['exptime']
+        lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
+        lcurve['mag_bgsub'] = gxt.counts2mag(lcurve['cps_bgsub'],band)
+        lcurve['mag_bgsub_cheese'] = gxt.counts2mag(lcurve['cps_bgsub_cheese'],band)
+        lcurve['flux'] = gxt.counts2flux(lcurve['cps'],band)
+        lcurve['flux_bgsub'] = gxt.counts2flux(lcurve['cps_bgsub'],band)
+        lcurve['flux_bgsub_cheese'] = gxt.counts2flux(lcurve['cps_bgsub_cheese'],band)
 
+    except:
+        lcurve = {'cps':[],'cps_bgsub':[],'cps_bgsub_cheese':[],
+                 'mag':[],'mag_bgsub':[],'mag_bgsub_cheese':[],
+                 'flux':[],'flux_bgsub':[],'flux_bgsub_cheese':[]}
     if verbose:
         mc.print_inline("Done.")
         mc.print_inline("")
