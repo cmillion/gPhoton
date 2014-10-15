@@ -3,7 +3,7 @@
 import numpy as np
 import gQuery
 from MCUtils import print_inline,area,distance
-from galextools import gpssecs, zpmag
+from galextools import GPSSECS, zpmag
 
 def get_aspect(band,skypos,trange=[6e8,11e8],tscale=1000.,verbose=0):
     """Get aspect solution in a dict() for given time range."""
@@ -20,7 +20,7 @@ def get_aspect(band,skypos,trange=[6e8,11e8],tscale=1000.,verbose=0):
             'twist0':np.array(asp[:,9],dtype='float64')}
 
 def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,maxgap=1.,minexp=1.,retries=100.,predicted=False):
-    """Find the contiguous time ranges within a time range at a 
+    """Find the contiguous time ranges within a time range at a
     specific location.
 	minexp - Do not include exposure time less than this.
 	maxgap - Gaps in exposure longer than this initiate a new time range.
@@ -77,7 +77,9 @@ def exposure(band,trange,verbose=0,retries=20):
     if rawexpt<=0:
         return 0.
     shutdead = gQuery.getArray(gQuery.shutdead(band,trange[0],trange[1]),verbose=verbose,retries=retries)
-    return (rawexpt-shutdead[0][0])*(1.-shutdead[1][0])
+    deadtime = gQuery.getValue(gQuery.deadtime(band,trange[0],trange[1]))
+    #return (rawexpt-shutdead[0][0])*(1.-shutdead[1][0])
+    return (rawexpt-shutdead[0][0])*(1.-deadtime)
 
 def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,retries=20):
     """Compute the effective exposure time."""
@@ -94,7 +96,7 @@ def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,retries=20):
         # chunks <=10e6 seconds
         chunksz = 10.e6
         chunks = (np.linspace(trange[0],trange[1],
-                             num=np.ceil((trange[1]-trange[0])/chunksz)) if 
+                             num=np.ceil((trange[1]-trange[0])/chunksz)) if
                                  (trange[1]-trange[0])>chunksz else
                                  np.array(trange))
         for i,t in enumerate(chunks[:-1]):
@@ -105,7 +107,8 @@ def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,retries=20):
 def get_mcat_data(skypos,rad):
     out = np.array(gQuery.getArray(
                          gQuery.mcat_visit_sources(skypos[0],skypos[1],rad)))
-    return {'objid':np.array(out[:,0],dtype='int64'),
+    try:
+        return {'objid':np.array(out[:,0],dtype='int64'),
             'ra':np.array(out[:,1],dtype='float32'),
             'dec':np.array(out[:,2],dtype='float32'),
             'NUV':{'mag':np.array(out[:,3],dtype='float32'),
@@ -130,6 +133,8 @@ def get_mcat_data(skypos,rad):
             5:np.array(out[:,16],dtype='float32')+zpmag('FUV'),
             6:np.array(out[:,17],dtype='float32')+zpmag('FUV'),
             7:np.array(out[:,18],dtype='float32')+zpmag('FUV') } }
+    except:
+        return False
 
 def mcat_skybg(band,skypos,radius,verbose=0,retries=20):
 	"""Estimate the sky background using the MCAT skybg for nearby sources."""
@@ -177,7 +182,7 @@ def get_mags(band,ra0,dec0,radius,maglimit,mode='coadd',
 
 def exp_from_objid(objid):
     out = np.array(gQuery.getArray(gQuery.mcat_objid_search(objid)))
-    return {'NUV':{'expt':np.array(out[:,7],dtype='float')[0],'t0':np.array(out[:,9],dtype='float64')[0]-gpssecs,'t1':np.array(out[:,10],dtype='float64')[0]-gpssecs},'FUV':{'expt':np.array(out[:,8],dtype='float')[0],'t0':np.array(out[:,11],dtype='float64')[0]-gpssecs,'t1':np.array(out[:,12],dtype='float64')[0]-gpssecs}}
+    return {'NUV':{'expt':np.array(out[:,7],dtype='float')[0],'t0':np.array(out[:,9],dtype='float64')[0]-GPSSECS,'t1':np.array(out[:,10],dtype='float64')[0]-GPSSECS},'FUV':{'expt':np.array(out[:,8],dtype='float')[0],'t0':np.array(out[:,11],dtype='float64')[0]-GPSSECS,'t1':np.array(out[:,12],dtype='float64')[0]-GPSSECS}}
 
 def parse_unique_sources(ras,decs,fmags,nmags,margin=0.005):
     """Iteratively returns unique sources based upon a _margin_ within
@@ -221,7 +226,7 @@ def nearest_source(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT
 		if verbose:
 			print "No nearby MCAT source found. Using input sky position."
 		return skypos[0],skypos[1],0.01
-	
+
 	dist=np.sqrt( (out[:,0]-skypos[0])**2 + (out[:,1]-skypos[1])**2)
 	if verbose > 1:
 			print "Finding nearest among "+str(len(dist))+" nearby sources."
@@ -281,4 +286,4 @@ def suggest_parameters(band,skypos,verbose=0,retries=20):
         pos = skypos
         radius = gt.aper2deg(4)
     annulus = [3*radius, 5*radius]
-    return pos[0],pos[1],radius,annulus[0],annulus[1] 
+    return pos[0],pos[1],radius,annulus[0],annulus[1]
