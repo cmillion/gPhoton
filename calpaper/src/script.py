@@ -1,4 +1,4 @@
-%pylab # only in iPython
+%pylab
 from testutils import *
 import galextools as gt
 import MCUtils as mc
@@ -44,144 +44,99 @@ for skypos in zip(coaddlist['avaspra'],coaddlist['avaspdec']):
         print skypos, expt, False
 
 ###############################################################################
+# Jake VanderPlas was nice enough to make a clean format for us...
+from astroML.plotting import setup_text_plots
+scl = 1.8
+setup_text_plots(fontsize=8*scl, usetex=False)
 
-fuv=pd.read_csv('calrun_FUV.csv')
-nuv=pd.read_csv('calrun_NUV.csv')
-print 'FUV samples: {cnt} (blue)'.format(cnt=fuv.shape[0])
-print 'NUV samples: {cnt} (red)'.format(cnt=nuv.shape[0])
+bands = ['NUV','FUV']
+base = 'calrun_'
+data = {}
+for band in bands:
+    data[band] = pd.read_csv('{base}{band}.csv'.format(base=base,band=band))
 
-# NOTE: There is a ~15% systematic offset in FUV!
-plt.figure()
-plt.title('FUV Delta Mag vs. Mag')
-dmag = fuv['aper4']-fuv['mag_bgsub_cheese']
-# Make a cut on crazy outliers in the MCAT.
-ix = np.where((fuv['aper4']>0) & (fuv['aper4']<30))
-plt.axis([10,24,-1.3,1.3])
-plt.plot(fuv['aper4'].ix[ix],dmag.ix[ix],'.',alpha=0.1)
-plt.figure()
-plt.title('FUV Delta Mag Histogram')
-#plt.axis([-1.3,1.3,0,425])
-plt.hist(dmag.ix[ix],bins=500,range=[-1.3,1.3])
+"""dMag vs. Mag"""
+for band in bands:
+    fig = plt.figure(figsize=(8*scl,4*scl))
+    fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,bottom=0.15,top=0.9)
+    # Make a cut on crazy outliers in the MCAT. Also on det radius and expt.
+    ix = np.where((data[band]['aper4']>0) & (data[band]['aper4']<30) &
+                  (data[band]['distance']<300) & (data[band]['t_eff']<300))
+    plt.subplot(1,2,1)
+    plt.title('{band} {d}Mag vs. AB Mag (n={n})'.format(d=r'$\Delta$',
+                                            band=band,n=ix[0].shape[0]))
+    plt.xlabel('AB Magnitude (MCAT)')
+    plt.ylabel(r'{d}Magnitude (MCAT-gPhoton)'.format(d=r'$\Delta$'))
+    dmag = data[band]['aper4']-data[band]['mag_bgsub_cheese']
+    plt.axis([11,23,-1.3,1.3])
+    plt.plot(data[band]['aper4'].ix[ix],dmag.ix[ix],'.',
+                                            alpha=0.1,color='k',markersize=5)
+    plt.subplot(1,2,2,xticks=[],yticks=[],ylim=[-1.3,1.3])
+    plt.title('{d}Magnitude Histogram ({band})'.format(
+                                                    d=r'$\Delta$',band=band))
+    plt.hist(dmag.ix[ix],bins=500,range=[-1.3,1.3],
+                                            orientation='horizontal',color='k')
+    fig.savefig('../calpaper/src/dMag_v_Mag({band}).png'.format(band=band))
 
-plt.figure()
-plt.title('NUV Delta Mag vs. Mag')
-dmag = nuv['aper4']-nuv['mag_bgsub_cheese']
-# Make a cut on crazy outliers in the MCAT.
-ix = np.where((nuv['aper4']>0) & (nuv['aper4']<30))
-plt.plot(nuv['aper4'].ix[ix],dmag.ix[ix],'.',alpha=0.1)
-plt.figure()
-plt.title('NUV Delta Mag Histogram')
-#plt.axis([-1.3,1.3,0,4500])
-plt.hist(dmag.ix[ix],bins=500,range=[-1.3,1.3])
+"""Background Plots
+The gPhoton background is scaled to counts in the aperture and the
+MCAT skybg is in units of arcsec^2/s, so we'll scale the skybg to the
+aperture and put the gPhoton bg in cps.
+"""
+fig = plt.figure(figsize=(8*scl,4*scl))
+fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,bottom=0.15,top=0.9)
+for i,band in enumerate(bands):
+    gphot_bg = gt.counts2mag(data[band]['bg_cheese']/data[band]['t_eff'],band)
+    mcat_bg = gt.counts2mag(data[band]['skybg']*3600**2*mc.area(gt.aper2deg(4)),band)
+    delta = mcat_bg - gphot_bg
+    ix = np.where(np.isfinite(delta))
+    plt.subplot(1,2,i+1,yticks=[],xlim=[-3,3])
+    plt.title('{band} Background {d}Magnitude (MCAT-gPhoton)'.format(band=band,d=r'$\Delta$'))
+    plt.hist(delta.ix[ix],bins=500,range=[-3,3],color='k')
+fig.savefig('../calpaper/src/dMag_bg.png')
 
-# According to the calibration paper, the FUV deadtime correction should be
-# small (~ a few percent), but it is actually bigger than the NUV correction.
-plt.figure()
-plt.title('FUV Deadtime Ratio Histogram')
-plt.hist(fuv['t_eff']/fuv['t_raw'],bins=100,range=[0.2,1.2])
-plt.figure()
-plt.title('NUV Deadtime Ratio Histogram')
-plt.hist(nuv['t_eff']/nuv['t_raw'],bins=100,range=[0.2,1.2])
-
-# So what happens to Delta Mag if we estimate ~3% FUV deadtime?
-dtime = 0.03
-plt.figure()
-plt.title('FUV Delta Mag Histogram ({dt}% deadtime)'.format(dt=dtime*100))
-plt.hist(fuv['aper4']-gt.counts2mag(
-  gt.mag2counts(fuv['mag'],'FUV')*fuv['t_eff']/(fuv['t_raw']*(1-dtime)),'FUV'),
-                                                        range=[-1,1],bins=100)
-
-# Test different deadtime methods...
-#   This shows that the error is in the reference table at MAST.
-for i,objid in enumerate(fuv['objid']):
-  band,t0,t1='FUV',fuv['t0'][i],fuv['t1'][i]
-  shutdead = gq.getArray(gq.shutdead(band,t0,t1))
-  dead = gq.getValue(gq.deadtime(band,t0,t1))
-  print i,objid,shutdead[1][0],dead
-
-# Test NUV just for sanity... both methods are identical.
-for i,objid in enumerate(nuv['objid']):
-  band,t0,t1='NUV',fuv['t0'][i],fuv['t1'][i]
-  shutdead = gq.getArray(gq.shutdead(band,t0,t1))
-  dead = gq.getValue(gq.deadtime(band,t0,t1))
-  print i,objid,shutdead[1][0],dead
-
-# Do a sanity check of the reponse sampling
-flat_FUV = mc.get_fits_data(flat_filename('FUV','../cal/'))
-flat_NUV = mc.get_fits_data(flat_filename('NUV','../cal/'))
-plt.figure()
-plt.hist(flat_FUV.flatten(),bins=100,range=[0.2,1.2])
-plt.hist(fuv['response'],bins=100,range=[0.2,1.2])
-plt.figure()
-plt.hist(flat_NUV.flatten(),bins=100,range=[0.2,1.2])
-plt.hist(nuv['response'],bins=100,range=[0.2,1.2])
-
-
-# RA v Dec
-plt.figure()
-plt.title('Delta Dec vs. Delta RA')
-plt.plot(fuv['ra'].ix[ix]-fuv['racent'].ix[ix],fuv['dec'].ix[ix]-fuv['deccent'].ix[ix],'.')
-plt.plot(nuv['ra'].ix[ix]-nuv['racent'].ix[ix],nuv['dec'].ix[ix]-nuv['deccent'].ix[ix],'x')
-
-# Background plots
-gphot_back = gt.counts2mag(fuv['bg_cheese']/fuv['t_eff'],'FUV')
-mcat_back = gt.counts2mag(fuv['skybg']*3600**2*mc.area(gt.aper2deg(4)),'FUV')
-delta = mcat_back - gphot_back
-plt.figure()
-plt.title('gPhoton Background Histogram')
-ix = np.where(np.isfinite(gphot_back))
-plt.axis([18,26,0,300])
-plt.hist(gphot_back.ix[ix],bins=500,range=[18,26])
-plt.figure()
-plt.title('MCAT Background Histogram')
-ix = np.where(np.isfinite(mcat_back))
-plt.axis([18,26,0,300])
-plt.hist(mcat_back.ix[ix],bins=500,range=[18,26])
-plt.figure()
-plt.title('MCAT-gPhoton Background Histogram')
-ix = np.where(np.isfinite(delta))
-plt.axis([-3,3,0,350])
-plt.hist(delta.ix[ix],bins=500,range=[-3,3])
+"""Astrometry"""
+for i,band in enumerate(bands):
+    fig = plt.figure(figsize=(8*scl,8*scl))
+    fig.subplots_adjust(left=0.12,right=0.95,hspace=0.02,wspace=0.02,bottom=0.15,top=0.9)
+    dRA = data[band]['ra']-data[band]['racent']
+    dDec = data[band]['dec']-data[band]['deccent']
+    # dRA v. dDec
+    plt.subplot(2,2,1,xticks=[])
+    plt.ylabel('{d}RA'.format(d=r'$\Delta$'))
+    plt.title('{band} {d}Centroid (MCAT-gPhoton)'.format(band=band,d=r'$\Delta$'))
+    plt.axis([-0.004,0.004,-0.0015,0.0015])
+    plt.plot(dRA,dDec,'.',alpha=0.1,color='k',markersize=5)
+    # dRA
+    plt.subplot(2,2,2,yticks=[],xticks=[],ylim=[-0.0015,0.0015])
+    plt.hist(dRA,bins=500,orientation='horizontal',color='k')
+    # dDec
+    plt.subplot(2,2,3,yticks=[],xlim=[-0.004,0.004])
+    plt.xlabel('{d}Dec'.format(d=r'$\Delta$'))
+    plt.gca().invert_yaxis()
+    plt.hist(dDec,bins=500,color='k')
+    fig.savefig('../calpaper/src/dRA_v_dDec({band}).png'.format(band=band))
 
 
 
 
+"""Deadtime Sanity Checks
+According to the calibration paper, the FUV deadtime correction should be
+small (~ a few percent), but it is actually bigger than the NUV correction.
+"""
+fig = plt.figure(figsize=(8,4))
+fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,bottom=0.15,top=0.9)
+for i,band in enumerate(bands):
+    plt.subplot(1,2,i+1,yticks=[])
+    plt.title('{band} Deadtime Ratio Histogram'.format(band=band))
+    plt.hist(data[band]['t_eff']/data[band]['t_raw'],bins=100,range=[0.2,1.2])
 
-plt.plot(gt.counts2mag(fuv['skybg']*3600**2*mc.area(gt.aper2deg(4)),'FUV'),delta,'.',alpha=0.1)
-
-
-plt.plot(gt.counts2mag(nuv['skybg'].ix[ix]*3600**2*mc.area(gt.aper2deg(4)),'NUV'),
-         gt.counts2mag(nuv['skybg'].ix[ix]*3600**2*mc.area(gt.aper2deg(4)),'NUV')
-        -gt.counts2mag(nuv['bg_cheese'].ix[ix]/nuv['t_eff'].ix[ix],'NUV'),'x')
-
-
-
-#######################################
-
-
-# Set up the plot
-plt.figure()
-plt.gca().invert_yaxis()
-plt.title(str(src)+' - '+str(band))
-plt.xlabel('Exposure time (s)')
-plt.ylabel('AB Magnitude')
-# Make the y dimensions a little bigger than the data
-plt.axis([0,1600.,data['mag'].min()-0.01,data['mag'].max()+0.01])
-# Plot the reference magnitude along with upper and lower bounds vs. expt
-top,bot=gu.model_errors(refmag['FUV'],band,sigma=5)
-plt.plot(top)
-plt.plot(bot)
-plt.plot(np.ones(1600)*refmag['FUV'])
-# Plot the MCAT data
-ix = np.where(mcat['fmag']>0)
-
-
-#####################################
-# Set up the plot
-plt.figure()
-plt.gca().invert_yaxis()
-plt.title(str(src)+' - '+str(band))
-plt.xlabel('Exposure time (s)')
-plt.ylabel('AB Magnitude')
-# Make the y dimensions a little bigger than the data
-plt.axis([0,1600.,data['mag'].min()-0.01,data['mag'].max()+0.01])
+"""Response Sanity Checks"""
+fig = plt.figure(figsize=(8,4))
+fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,bottom=0.15,top=0.9)
+for i,band in enumerate(bands):
+    flat = mc.get_fits_data(flat_filename(band,'../cal/'))
+    plt.subplot(1,2,i+1,yticks=[])
+    plt.title('{band} Response Histogram'.format(band=band))
+    plt.hist(flat.flatten(),bins=100,range=[0.2,1.2])
+    plt.hist(data[band]['response'],bins=100,range=[0.2,1.2])
