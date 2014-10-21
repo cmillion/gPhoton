@@ -21,10 +21,11 @@ band = 'NUV'
 outfile = 'LDS749B_NUV.csv'
 datamaker(band,skypos['LDS749B'],outfile)
 
-# To avoid wasting a lot of time on the same tiles and also biasing the
-# result with the same few super deep tiles (LDS and CDFS, mostly), the
-# following filters on <5000s coadd depth, more or less, based upon
-# the most recent coadd level database coverage reference table.
+"""To avoid wasting a lot of time on the same tiles and also biasing the
+result with the same few super deep tiles (LDS and CDFS, mostly), the
+following filters on <5000s coadd depth, more or less, based upon
+the most recent coadd level database coverage reference table.
+"""
 coaddlist = pd.read_csv('coaddList_061714.csv')
 for skypos in zip(coaddlist['avaspra'],coaddlist['avaspdec']):
     expt = gFind.gFind(skypos=skypos,band='FUV',quiet=True)['expt'][0]
@@ -44,7 +45,7 @@ for skypos in zip(coaddlist['avaspra'],coaddlist['avaspdec']):
         print skypos, expt, False
 
 ###############################################################################
-# Jake VanderPlas was nice enough to make a clean format for us...
+# Jake VanderPlas was nice enough to make a clean looking template for us...
 from astroML.plotting import setup_text_plots
 scl = 1.8
 setup_text_plots(fontsize=8*scl, usetex=False)
@@ -117,9 +118,7 @@ for i,band in enumerate(bands):
     plt.hist(dDec,bins=500,color='k')
     fig.savefig('../calpaper/src/dRA_v_dDec({band}).png'.format(band=band))
 
-
-
-
+###############################################################################
 """Deadtime Sanity Checks
 According to the calibration paper, the FUV deadtime correction should be
 small (~ a few percent), but it is actually bigger than the NUV correction.
