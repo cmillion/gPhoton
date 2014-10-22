@@ -2,9 +2,10 @@
 import os
 import ast
 import argparse
+import numpy as np
 import curvetools as ct
-#from curvetools import 
-from imagetools import * # For JPEG preview image creation
+#from curvetools import
+from imagetools import write_jpeg # For JPEG preview image creation
 from optparse import OptionParser
 from dbasetools import fGetTimeRanges, suggest_parameters
 import sys
@@ -18,14 +19,14 @@ def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
     """
     if verbose>1:
         print "Generating a light curve with the following paramters:"
-        print " band:    "+str(band)
-        print " skypos:  "+str(skypos)
-        print " trange:  "+str(trange)
-        print " radius:  "+str(radius)
-        print " annulus: "+str(annulus)
-        print " stepsz:  "+str(stepsz)
-        print " csvfile: "+str(csvfile)
-        print " verbose: "+str(verbose)
+        print " band:    {bana}".format(band=band)
+        print " skypos:  {skypos}".format(skypos=skypos)
+        print " trange:  {trange}".format(trange=trange)
+        print " radius:  {radius}".format(radius=radius)
+        print " annulus: {annulus}".format(annulus=annulus)
+        print " stepsz:  {stepsz}".format(stepsz=stepsz)
+        print " csvfile: {csvfile}".format(csvfile=csvfile)
+        print " verbose: {verbose}".format(verbose=verbose)
     data = ct.write_curve(band, skypos[0], skypos[1], radius, csvfile=csvfile,
                           annulus=annulus, stepsz=stepsz, verbose=verbose,
                           clobber=clobber, trange=trange, coadd=coadd,
@@ -44,9 +45,10 @@ def suggest(args):
     (args.ra, args.dec, args.radius, args.annulus1,
                    args.annulus2) = suggest_parameters(args.band,args.skypos)
     if args.verbose:
-        print "Recentering on ["+str(args.ra)+", "+str(args.dec)+"]"
-        print "Setting radius to "+str(args.radius)
-        print "Setting annulus to ["+str(args.annulus1)+", "+str(args.annulus2)+"]"
+        print "Recentering on [{ra},{dec}]".format(ra=args.ra,dec=args.dec)
+        print "Setting radius to {radius}".format(radius=args.radius)
+        print "Setting annulus to [{ann1},{ann2}]".format(
+                                        ann1=args.annulus1,ann2=args.annulus2)
     return args
 
 def check_skypos(args):
@@ -91,13 +93,15 @@ def check_tranges(args):
     args.trange = [np.array(args.tranges).flatten().min(),
                    np.array(args.tranges).flatten().max()]
     if args.verbose:
-        print 'Using all exposure in ['+str(args.tmin)+','+str(args.tmax)+']'
+        print 'Using all exposure in [{tmin},{tmax}]'.format(
+                                                tmin=args.tmin,tmax=args.tmax)
     args.tranges = fGetTimeRanges(args.band,args.skypos,maxgap=args.gap,verbose=args.verbose,minexp=args.minexp,trange=args.tranges,detsize=args.detsize)
     if not len(args.tranges):
         print 'No exposure time in database.'
         exit(0)
     if args.verbose:
-        print 'Using '+str((args.tranges[:,1]-args.tranges[:,0]).sum())+' seconds (raw) in '+str(len(args.tranges))+' distinct exposures.'
+        print 'Using {t} seconds (raw) in {n} distinct exposures.'.format(
+            t=(args.tranges[:,1]-args.tranges[:,0]).sum(),n=len(args.tranges))
     # Make sure tranges is a 2D array
     if len(np.array(args.tranges).shape)==1:
         args.tranges=[args.tranges]
@@ -117,7 +121,7 @@ def check_args(args):
 def setup_parser():
     """Defines command line arguments."""
     parser = argparse.ArgumentParser(description="Generate a light curve")
-    parser.add_argument("-b", "--band", action="store", dest="band", 
+    parser.add_argument("-b", "--band", action="store", dest="band",
         help="[NF]UV band designation", choices=['NUV','FUV'], type=str.upper,
         required=True)
     parser.add_argument("-r", "--ra", action="store", dest="ra",
@@ -206,7 +210,7 @@ def setup_file(args):
     else:
     # This initiates the file.
         if not args.overwrite and os.path.exists(args.csvfile):
-            print "File "+str(args.csvfile)+" exists. Pass --overwrite to replace it."
+            print "File {csvfile} exists. Pass --overwrite to replace it.".format(csvfile=args.csvfile)
             exit(0)
         f = open(args.csvfile,args.iocode)
         if args.addhdr:
@@ -223,6 +227,8 @@ def stamp(args):
     if not args.stamp:
         return
     else:
+        if args.verbose > 1:
+            print 'Writing stamp preview to {f}'.format(f=args.stamp)
         width = 2.*(args.annulus2 if args.annulus2 else args.radius)
         args.skyrange = [width,width]
         write_jpeg(args.stamp, args.band, args.skypos, args.tranges,
@@ -230,12 +236,13 @@ def stamp(args):
                    stepsz=args.stepsz, clobber=args.overwrite,
                    verbose=args.verbose)
         return
- 
+
 if __name__ == '__main__':
     """Called when gAperture is executed through the command line."""
     args = setup_parser().parse_args()
     args = check_args(args)
     args = setup_file(args)
+    stamp(args)
     # TODO: add support for trange(s)
     data = gAperture(args.band, args.skypos, args.radius, csvfile=args.csvfile,
                      annulus=args.annulus, stepsz=args.stepsz,
