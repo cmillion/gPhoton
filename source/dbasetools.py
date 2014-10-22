@@ -140,7 +140,9 @@ def get_mcat_data(skypos,rad):
 def mcat_skybg(band,skypos,radius,verbose=0,retries=20):
 	"""Estimate the sky background using the MCAT skybg for nearby sources."""
 	# Setting maglimit to 30 so that it gets _everything_.
-	sources = gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=30),retries=retries)
+	sources = gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],
+                                                  radius,maglimit=30),
+                                                  retries=retries)
 
 	# The MCAT reports skybg in photons/sec/sq.arcsec
 	if band=='NUV':
@@ -164,14 +166,22 @@ def get_mags(band,ra0,dec0,radius,maglimit,mode='coadd',
     zpf,zpn = zpmag['FUV'],zpmag['NUV']
     if mode=='coadd':
         out =np.array(gQuery.getArray(
-                  gQuery.mcat_sources(band,ra0,dec0,radius,maglimit=maglimit),verbose=verbose))
+                  gQuery.mcat_sources(band,ra0,dec0,radius,maglimit=maglimit),
+                  verbose=verbose))
         if not len(out):
             print "Warning: No sources found!"
             return 0
-        return {'ra':out[:,0],'dec':out[:,1],'FUV':{'mag':out[:,3],1:out[:,9]+zpf,2:out[:,10]+zpf,3:out[:,11]+zpf,4:out[:,12]+zpf,5:out[:,13]+zpf,6:out[:,14],7:out[:,15]+zpf},'NUV':{'mag':out[:,2],1:out[:,16]+zpn,2:out[:,17]+zpn,3:out[:,18]+zpn,4:out[:,19]+zpn,5:out[:,20]+zpn,6:out[:,21]+zpn,7:out[:,22]+zpn}}
+        return {'ra':out[:,0],'dec':out[:,1],
+                'FUV':{'mag':out[:,3],1:out[:,9]+zpf,2:out[:,10]+zpf,
+                       3:out[:,11]+zpf,4:out[:,12]+zpf,5:out[:,13]+zpf,
+                       6:out[:,14],7:out[:,15]+zpf},
+                'NUV':{'mag':out[:,2],1:out[:,16]+zpn,2:out[:,17]+zpn,
+                       3:out[:,18]+zpn,4:out[:,19]+zpn,5:out[:,20]+zpn,
+                       6:out[:,21]+zpn,7:out[:,22]+zpn}}
     elif mode=='visit':
         out = np.array(gQuery.getArray(
-                       gQuery.mcat_visit_sources(ra0,dec0,radius),verbose=verbose))
+                       gQuery.mcat_visit_sources(ra0,dec0,radius),
+                       verbose=verbose))
         # NOTE: For runtime considerations, mcat_visit_sources() does not
         # make any slices on time or maglimit, so we need to do it here.
         ix = np.where((out[:,2 if band=='NUV' else 3]<maglimit) &
@@ -212,14 +222,16 @@ def parse_unique_sources(ras,decs,fmags,nmags,margin=0.005):
 
 def find_unique_sources(band,ra0,dec0,searchradius,maglimit=23,margin=0.001,
                                                                     verbose=0):
-    coadds = get_mags(band,ra0,dec0,searchradius,maglimit,mode='coadd',verbose=verbose)
+    coadds = get_mags(band,ra0,dec0,searchradius,maglimit,mode='coadd',
+                                                            verbose=verbose)
     return np.array(parse_unique_sources(coadds['ra'],coadds['dec'],
                     coadds['FUV']['mag'],coadds['NUV']['mag'],margin=margin))
 
 def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,
                                                     catalog='MCAT',retries=20):
 	"""Return the mean position of sources within the search radius."""
-	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
+	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],
+        skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
 	ix = np.where(out[:,-2]>0) if band=='NUV' else np.where(out[:,-1]>0)
 	fwhm = out[ix,-2].mean() if band=='NUV' else out[ix,-1].mean()
 	return out[ix,0].mean(),out[ix,1].mean(),round(fwhm,4)
