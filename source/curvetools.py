@@ -157,7 +157,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     except:
         searchradius = radius
     data = pullphotons(band, ra0, dec0, tranges, searchradius,
-                       verbose=verbose)
+                       verbose=verbose, calpath=calpath)
     if verbose:
         mc.print_inline("Isolating source from background.")
     angSep = mc.angularSeparation(ra0, dec0, data['ra'], data['dec'])
@@ -253,7 +253,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     return lcurve
 
 def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
-             trange=None, verbose=0, coadd=False,minexp=1.,maxgap=1.):
+             trange=None, verbose=0, coadd=False,minexp=1.,maxgap=1.,
+             calpath='../cal/'):
     if verbose:
         mc.print_inline("Getting exposure ranges.")
     tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
@@ -264,7 +265,8 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
         mc.print_inline("Moving to photon level operations.")
     try:
         lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
-                          stepsz=stepsz, verbose=verbose, coadd=coadd)
+                          stepsz=stepsz, verbose=verbose, coadd=coadd, 
+                          calpath=calpath)
         lcurve['cps'] = lcurve['sources']/lcurve['exptime']
         lcurve['cps_bgsub'] = (lcurve['sources']-lcurve['bg']['simple'])/lcurve['exptime']
         lcurve['cps_bgsub_cheese'] = (lcurve['sources']-lcurve['bg']['cheese'])/lcurve['exptime']
@@ -295,7 +297,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
 #        return
     data = getcurve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
                     trange=trange, verbose=verbose, coadd=coadd, minexp=minexp,
-                    maxgap=maxgap)
+                    maxgap=maxgap,calpath=calpath)
     if csvfile:
         cols = ['counts', 'sources', 'bg_counts', 'responses',
                 'detxs', 'detys', 't0_data', 't1_data', 't_mean', 'cps',
