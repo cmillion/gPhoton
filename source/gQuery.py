@@ -11,26 +11,32 @@ baseURL = 'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonL
 # Defines the standard return format and timeout
 formatURL = '&format=json&timeout={}'
 
+def hasNaN(query):
+    if 'NaN' in query:
+        raise RuntimeError("Malformed query: contains NaN values.")
+    return
+
 def getValue(query,verbose=0,retries=20):
     """Manage a database call which returns a single value."""
+    hasNaN(query)
     if verbose>2:
         print query
     try:
-        out = float(manage_requests(query,maxcnt=retries).json()['Tables'][0]['Rows'][0][0])
+        out = float(manage_requests(query,
+                            maxcnt=retries).json()['Tables'][0]['Rows'][0][0])
     except:
-        print 'CONNECTION TIMEOUT'
-        #raise
+        raise RuntimeError('Connection timeout.')
     return out
 
 def getArray(query,verbose=0,retries=20):
     """Manage a database call which returns an array of values."""
+    hasNaN(query)
     if verbose>2:
         print query
     try:
         out = manage_requests(query,maxcnt=retries).json()['Tables'][0]['Rows']
     except:
-        print 'CONNECTION TIMEOUT'
-        #raise
+        raise RuntimeError('Connection timeout.')
     return out
 
 def mcat_sources(band,ra0,dec0,radius,maglimit=20):
@@ -45,14 +51,14 @@ def mcat_sources(band,ra0,dec0,radius,maglimit=20):
     bandflag = 1 if band=='NUV' else 2
     # fGetNearbyObjEq takes radius in arcminutes
     # TODO: Add exposure time.
-    return str(baseURL)+'select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7 from Gr6plus7.Dbo.photoobjall as p inner join Gr6plus7.Dbo.photoextract as pe on p.photoextractid=pe.photoextractid inner join gr6plus7.dbo.fgetnearbyobjeq('+str(ra0)+', '+str(dec0)+', '+str(radius*60.)+') as nb on p.objid=nb.objid and (band=3 or band='+str(bandflag)+') and '+str(band)+'_mag<'+str(maglimit)+str(formatURL) 
+    return str(baseURL)+'select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7 from Gr6plus7.Dbo.photoobjall as p inner join Gr6plus7.Dbo.photoextract as pe on p.photoextractid=pe.photoextractid inner join gr6plus7.dbo.fgetnearbyobjeq('+str(ra0)+', '+str(dec0)+', '+str(radius*60.)+') as nb on p.objid=nb.objid and (band=3 or band='+str(bandflag)+') and '+str(band)+'_mag<'+str(maglimit)+str(formatURL)
 
 def mcat_visit_sources(ra0,dec0,radius):
     ''' Return the MCAT per-visit sources given sky position and search radius.
     The columns are as follows:
-    [1,objid],[2,ra],[3,dec],[4,NUV_mag],[5,FUV_mag],[6,FoV_radius],
-    [7,NUV_skybg],[8,FUV_skybg],[9,NUV_FWHM],[10,FUV_FWHM],[11,FUV_expt],
-    [12,NUV_expt],[13:19,FUV_mag_aper1:7],[20:26,NUV_mag_aper1:7]
+    [0,objid],[1,ra],[2,dec],[3,NUV_mag],[4,FUV_mag],[5,FoV_radius],
+    [6,NUV_skybg],[7,FUV_skybg],[8,NUV_FWHM],[9,FUV_FWHM],[10,FUV_expt],
+    [11,NUV_expt],[12:18,FUV_mag_aper1:7],[19:25,NUV_mag_aper1:7]
     '''
     return str(baseURL)+'select vpo.objid, ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, vpe.fexptime, vpe.nexptime, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7 from Gr6plus7.Dbo.visitphotoobjall as vpo inner join Gr6plus7.Dbo.visitphotoextract as vpe on vpo.photoextractid=vpe.photoextractid inner join gr6plus7.dbo.fGetNearbyVisitObjEq('+str(ra0)+', '+str(dec0)+', '+str(radius*60.)+') as nb on vpo.objid=nb.objid'+str(formatURL)
 
@@ -146,4 +152,3 @@ def box(band,ra0,dec0,t0,t1,radius,tscale=1000.):
 # Return data within a rectangle centered on ra0, dec0
 def rect(band,ra0,dec0,t0,t1,ra,dec,tscale=1000.):
     return str(baseURL)+'select time,ra,dec from fGetObjFromRect'+str(band)+'('+repr(ra0-ra/2.)+','+repr(ra0+ra/2.)+','+repr(dec0-dec/2.)+','+repr(dec0+dec/2.)+','+str(long(t0*tscale))+','+str(long(t1*tscale))+',0)'+str(formatURL)
-

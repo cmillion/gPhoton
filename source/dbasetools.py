@@ -19,7 +19,8 @@ def get_aspect(band,skypos,trange=[6e8,11e8],tscale=1000.,verbose=0):
             'dec0':np.array(asp[:,8],dtype='float64'),
             'twist0':np.array(asp[:,9],dtype='float64')}
 
-def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,maxgap=1.,minexp=1.,retries=100.,predicted=False):
+def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,
+                   maxgap=1.,minexp=1.,retries=100.,predicted=False):
     """Find the contiguous time ranges within a time range at a
     specific location.
 	minexp - Do not include exposure time less than this.
@@ -112,27 +113,27 @@ def get_mcat_data(skypos,rad):
             'ra':np.array(out[:,1],dtype='float32'),
             'dec':np.array(out[:,2],dtype='float32'),
             'NUV':{'mag':np.array(out[:,3],dtype='float32'),
-            'skybg':np.array(out[:,6],dtype='float32'),
-            'expt':np.array(out[:,11],dtype='float32'),
-            'fwhm':np.array(out[:,9],dtype='float32'),
-            1:np.array(out[:,19],dtype='float32')+zpmag('NUV'),
-            2:np.array(out[:,20],dtype='float32')+zpmag('NUV'),
-            3:np.array(out[:,21],dtype='float32')+zpmag('NUV'),
-            4:np.array(out[:,22],dtype='float32')+zpmag('NUV'),
-            5:np.array(out[:,23],dtype='float32')+zpmag('NUV'),
-            6:np.array(out[:,24],dtype='float32')+zpmag('NUV'),
-            7:np.array(out[:,25],dtype='float32')+zpmag('NUV')},
+                   'skybg':np.array(out[:,6],dtype='float32'),
+                   'expt':np.array(out[:,11],dtype='float32'),
+                   'fwhm':np.array(out[:,8],dtype='float32'),
+                   1:np.array(out[:,19],dtype='float32')+zpmag('NUV'),
+                   2:np.array(out[:,20],dtype='float32')+zpmag('NUV'),
+                   3:np.array(out[:,21],dtype='float32')+zpmag('NUV'),
+                   4:np.array(out[:,22],dtype='float32')+zpmag('NUV'),
+                   5:np.array(out[:,23],dtype='float32')+zpmag('NUV'),
+                   6:np.array(out[:,24],dtype='float32')+zpmag('NUV'),
+                   7:np.array(out[:,25],dtype='float32')+zpmag('NUV')},
             'FUV':{'mag':np.array(out[:,4],dtype='float32'),
-            'skybg':np.array(out[:,7],dtype='float32'),
-            'expt':np.array(out[:,10],dtype='float32'),
-            'fwhm':np.array(out[:,8],dtype='float32'),
-            1:np.array(out[:,12],dtype='float32')+zpmag('FUV'),
-            2:np.array(out[:,13],dtype='float32')+zpmag('FUV'),
-            3:np.array(out[:,14],dtype='float32')+zpmag('FUV'),
-            4:np.array(out[:,15],dtype='float32')+zpmag('FUV'),
-            5:np.array(out[:,16],dtype='float32')+zpmag('FUV'),
-            6:np.array(out[:,17],dtype='float32')+zpmag('FUV'),
-            7:np.array(out[:,18],dtype='float32')+zpmag('FUV') } }
+                   'skybg':np.array(out[:,7],dtype='float32'),
+                   'expt':np.array(out[:,10],dtype='float32'),
+                   'fwhm':np.array(out[:,9],dtype='float32'),
+                   1:np.array(out[:,12],dtype='float32')+zpmag('FUV'),
+                   2:np.array(out[:,13],dtype='float32')+zpmag('FUV'),
+                   3:np.array(out[:,14],dtype='float32')+zpmag('FUV'),
+                   4:np.array(out[:,15],dtype='float32')+zpmag('FUV'),
+                   5:np.array(out[:,16],dtype='float32')+zpmag('FUV'),
+                   6:np.array(out[:,17],dtype='float32')+zpmag('FUV'),
+                   7:np.array(out[:,18],dtype='float32')+zpmag('FUV') } }
     except:
         return False
 
@@ -175,7 +176,15 @@ def get_mags(band,ra0,dec0,radius,maglimit,mode='coadd',
         # make any slices on time or maglimit, so we need to do it here.
         ix = np.where((out[:,2 if band=='NUV' else 3]<maglimit) &
                                            (out[:,2 if band=='NUV' else 3]>0))
-        return {'ra':out[:,0][ix],'dec':out[:,1][ix],'NUV':{'mag':out[:,2][ix],'expt':out[:,8][ix],1:out[:,18][ix]+zpn,2:out[:,19][ix]+zpn,3:out[:,20][ix]+zpn,4:out[:,21][ix]+zpn,5:out[:,22][ix]+zpn,6:out[:,23][ix]+zpn,7:out[:,24][ix]+zpn},'FUV':{'mag':out[:,3][ix],'expt':out[:,9][ix],1:out[:,11][ix]+zpf,2:out[:,12][ix]+zpf,3:out[:,13][ix]+zpf,4:out[:,14][ix]+zpf,5:out[:,15][ix]+zpf,6:out[:,16][ix]+zpf,7:out[:,17][ix]+zpf}}
+        return {'ra':out[:,0][ix],'dec':out[:,1][ix],
+                'NUV':{'mag':out[:,2][ix],'expt':out[:,8][ix],
+                1:out[:,18][ix]+zpn,2:out[:,19][ix]+zpn,3:out[:,20][ix]+zpn,
+                4:out[:,21][ix]+zpn,5:out[:,22][ix]+zpn,6:out[:,23][ix]+zpn,
+                7:out[:,24][ix]+zpn},
+                'FUV':{'mag':out[:,3][ix],'expt':out[:,9][ix],
+                1:out[:,11][ix]+zpf,2:out[:,12][ix]+zpf,3:out[:,13][ix]+zpf,
+                4:out[:,14][ix]+zpf,5:out[:,15][ix]+zpf,6:out[:,16][ix]+zpf,
+                7:out[:,17][ix]+zpf}}
     else:
         print "mode must be in [coadd,visit]"
         return
@@ -201,19 +210,22 @@ def parse_unique_sources(ras,decs,fmags,nmags,margin=0.005):
             b+=[i]
     return b
 
-def find_unique_sources(band,ra0,dec0,searchradius,maglimit=23,margin=0.001,verbose=0):
+def find_unique_sources(band,ra0,dec0,searchradius,maglimit=23,margin=0.001,
+                                                                    verbose=0):
     coadds = get_mags(band,ra0,dec0,searchradius,maglimit,mode='coadd',verbose=verbose)
     return np.array(parse_unique_sources(coadds['ra'],coadds['dec'],
                     coadds['FUV']['mag'],coadds['NUV']['mag'],margin=margin))
 
-def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,catalog='MCAT',retries=20):
+def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,
+                                                    catalog='MCAT',retries=20):
 	"""Return the mean position of sources within the search radius."""
 	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
 	ix = np.where(out[:,-2]>0) if band=='NUV' else np.where(out[:,-1]>0)
 	fwhm = out[ix,-2].mean() if band=='NUV' else out[ix,-1].mean()
 	return out[ix,0].mean(),out[ix,1].mean(),round(fwhm,4)
 
-def nearest_source(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT',retries=20):
+def nearest_source(band,skypos,radius=0.01,maglimit=22.0,verbose=0,
+                                                    catalog='MCAT',retries=20):
 	"""Return targeting parameters for the nearest MCAT source to a position.
     """
 	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
@@ -236,14 +248,16 @@ def nearest_source(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT
 	return avg_sources(band,[s[0],s[1]],verbose=verbose,retries=retries)
 	#return s[0],s[1],s[2],s[3],s[7],s[8]
 
-def nearest_distinct_source(band,skypos,radius=0.1,maglimit=22.0,verbose=0,catalog='MCAT',retries=20):
+def nearest_distinct_source(band,skypos,radius=0.1,maglimit=22.0,verbose=0,
+                                                    catalog='MCAT',retries=20):
 	"""Return parameters for the nearest non-targeted source."""
 	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
 	dist=np.sqrt( (out[:,0]-skypos[0])**2 + (out[:,1]-skypos[1])**2)
 	ix = np.where(dist>0.005)
 	return np.array(out)[ix][np.where(dist[ix]==dist[ix].min())][0]
 
-def suggest_bg_radius(band,skypos,radius=0.1,maglimit=22,verbose=0,catalog='MCAT',retries=20):
+def suggest_bg_radius(band,skypos,radius=0.1,maglimit=22,verbose=0,
+                                                    catalog='MCAT',retries=20):
 	"""Returns a recommended background radius based upon the
 	positions and FWHM of nearby sources in the MCAT.
 	"""
@@ -257,20 +271,6 @@ def optimize_annulus(optrad,outann,verbose=0):
 		print "Warning: There are known sources within the background annulus."
 		print "Use --hrbg to mask these out. (Will increase run times.)"
 	return round(1.2*optrad,4),round(2*optrad,4)
-
-#def suggest_parameters(band,skypos,radius=0.01,maglimit=22.0,verbose=0,catalog='MCAT',retries=20):
-#    """Suggest an optimum aperture position and size."""
-#    print band, skypos
-#    ra,dec,fwhm=nearest_source(band,skypos,radius=radius,maglimit=maglimit,verbose=verbose,retries=retries)
-#    print ra,dec,fwhm
-#    optrad = round(2*fwhm,4)
-#    outann = suggest_bg_radius(band,skypos,maglimit=maglimit,verbose=verbose,retries=retries)
-#    annulus = optimize_annulus(optrad,outann,verbose=verbose)
-#    if verbose:
-#        print "Suggested sky position [RA,Dec]: ["+str(ra)+", "+str(dec)+"]"
-#        print "Suggested aperture radius (deg): "+str(optrad)
-#        print "Suggested background annulus:    ["+str(annulus[0])+", "+str(annulus[1])+"]"
-#    return ra,dec,optrad,annulus[0],annulus[1]
 
 def suggest_parameters(band,skypos,verbose=0,retries=20):
     mcat = get_mcat_data(skypos,0.0005)
