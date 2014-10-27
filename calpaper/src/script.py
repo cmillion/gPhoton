@@ -1,5 +1,6 @@
 %pylab
-from testutils import *
+
+from regtestutils import *
 import galextools as gt
 import MCUtils as mc
 import pandas as pd
@@ -31,7 +32,7 @@ for skypos in zip(coaddlist['avaspra'],coaddlist['avaspdec']):
     expt = gFind.gFind(skypos=skypos,band='FUV',quiet=True)['expt'][0]
     if (expt<=5000.) and (expt>0):
         print skypos, expt, True
-        datamaker('FUV',skypos,'calrun_FUV.csv')
+        datamaker('FUV',skypos,'calrun_FUV.csv',maglimit=24)
     else:
         print skypos, expt, False
 
@@ -40,7 +41,7 @@ for skypos in zip(coaddlist['avaspra'],coaddlist['avaspdec']):
     expt = gFind.gFind(skypos=skypos,band='NUV',quiet=True)['expt'][0]
     if (expt<=5000.) and (expt>0):
         print skypos, expt, True
-        datamaker('NUV',skypos,'calrun_NUV.csv')
+        datamaker('NUV',skypos,'calrun_NUV.csv',maglimit=24)
     else:
         print skypos, expt, False
 
@@ -55,29 +56,46 @@ base = 'calrun_'
 data = {}
 for band in bands:
     data[band] = pd.read_csv('{base}{band}.csv'.format(base=base,band=band))
+    print '{band} sources: {cnt}'.format(
+                                band=band,cnt=data[band]['objid'].shape[0])
 
 """dMag vs. Mag"""
 for band in bands:
     fig = plt.figure(figsize=(8*scl,4*scl))
-    fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,bottom=0.15,top=0.9)
+    fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,
+                                                        bottom=0.15,top=0.9)
     # Make a cut on crazy outliers in the MCAT. Also on det radius and expt.
-    ix = np.where((data[band]['aper4']>0) & (data[band]['aper4']<30) &
-                  (data[band]['distance']<300) & (data[band]['t_eff']<300))
+    ix = ((data[band]['aper4']>0) & (data[band]['aper4']<30) &
+              (data[band]['distance']<300) & (data[band]['t_eff']<300) &
+              (data[band]['bg_cheese']>0))
     plt.subplot(1,2,1)
-    plt.title('{band} {d}Mag vs. AB Mag (n={n})'.format(d=r'$\Delta$',
-                                            band=band,n=ix[0].shape[0]))
+    plt.title('{band} {d}Mag vs. AB Mag (n={n})'.format(
+                    d=r'$\Delta$',band=band,n=ix.shape[0]))
     plt.xlabel('AB Magnitude (MCAT)')
     plt.ylabel(r'{d}Magnitude (MCAT-gPhoton)'.format(d=r'$\Delta$'))
     dmag = data[band]['aper4']-data[band]['mag_bgsub_cheese']
-    plt.axis([11,23,-1.3,1.3])
-    plt.plot(data[band]['aper4'].ix[ix],dmag.ix[ix],'.',
-                                            alpha=0.1,color='k',markersize=5)
+    plt.axis([13,23,-1.3,1.3])
+    plt.plot(data[band]['aper4'][ix],dmag[ix],'.',
+                                            alpha=0.5,color='k',markersize=5)
+    mcat_skybg = data[band]['skybg']*3600**2*mc.area(gt.aper2deg(4))
+    dmag_skybg = data[band]['aper4']-gt.counts2mag(
+                    gt.mag2counts(data[band]['mag'],band)-mcat_skybg,band)
+    # Overplot the "best case" background using MCAT skybg
+    plt.plot(data[band]['aper4'][ix],dmag_skybg[ix],'x',
+                                        alpha=0.25,color='r',markersize=5)
     plt.subplot(1,2,2,xticks=[],yticks=[],ylim=[-1.3,1.3])
     plt.title('{d}Magnitude Histogram ({band})'.format(
                                                     d=r'$\Delta$',band=band))
-    plt.hist(dmag.ix[ix],bins=500,range=[-1.3,1.3],
+    plt.hist(dmag[ix],bins=np.floor(ix.shape[0]/10.),range=[-1.3,1.3],
                                             orientation='horizontal',color='k')
-    fig.savefig('../calpaper/src/dMag_v_Mag({band}).png'.format(band=band))
+    fig.savefig(
+            '../calpaper/src/dMag_v_Mag({band}).png'.format(band=band))
+
+"""Density Plot"""
+#cmap = plt.cm.cool
+#cmap.set_bad('w', 1.)
+#N, xedges, yedges = np.histogram2d(dmag,data['NUV']['aper4'],bins=[150,300],range=[[-1.3,1.3],[11,23]])
+#plt.imshow(N,origin='lower',extent=[11,23,-1.3,1.3],interpolation='bilinear',aspect=12/2.6,cmap=cmap)
 
 """Background Plots
 The gPhoton background is scaled to counts in the aperture and the
@@ -88,35 +106,85 @@ fig = plt.figure(figsize=(8*scl,4*scl))
 fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,bottom=0.15,top=0.9)
 for i,band in enumerate(bands):
     gphot_bg = gt.counts2mag(data[band]['bg_cheese']/data[band]['t_eff'],band)
-    mcat_bg = gt.counts2mag(data[band]['skybg']*3600**2*mc.area(gt.aper2deg(4)),band)
+    mcat_bg = gt.counts2mag(
+                    data[band]['skybg']*3600**2*mc.area(gt.aper2deg(4)),band)
     delta = mcat_bg - gphot_bg
-    ix = np.where(np.isfinite(delta))
+    ix = (np.isfinite(delta))
     plt.subplot(1,2,i+1,yticks=[],xlim=[-3,3])
     plt.title('{band} Background {d}Magnitude (MCAT-gPhoton)'.format(band=band,d=r'$\Delta$'))
-    plt.hist(delta.ix[ix],bins=500,range=[-3,3],color='k')
+    plt.hist(delta[ix],bins=500,range=[-3,3],color='k')
 fig.savefig('../calpaper/src/dMag_bg.png')
 
 """Astrometry"""
+a = 3600
 for i,band in enumerate(bands):
     fig = plt.figure(figsize=(8*scl,8*scl))
-    fig.subplots_adjust(left=0.12,right=0.95,hspace=0.02,wspace=0.02,bottom=0.15,top=0.9)
+    fig.subplots_adjust(left=0.12,right=0.95,hspace=0.02,wspace=0.02,
+                                                        bottom=0.15,top=0.9)
     dRA = data[band]['ra']-data[band]['racent']
     dDec = data[band]['dec']-data[band]['deccent']
     # dRA v. dDec
     plt.subplot(2,2,1,xticks=[])
-    plt.ylabel('{d}RA'.format(d=r'$\Delta$'))
-    plt.title('{band} {d}Centroid (MCAT-gPhoton)'.format(band=band,d=r'$\Delta$'))
-    plt.axis([-0.004,0.004,-0.0015,0.0015])
-    plt.plot(dRA,dDec,'.',alpha=0.1,color='k',markersize=5)
+    plt.ylabel('{d}RA (arcsec)'.format(d=r'$\Delta$'))
+    plt.title('{band} {d}Centroid (MCAT-gPhoton)'.format(
+                                                     band=band,d=r'$\Delta$'))
+    plt.axis([-0.004*a,0.004*a,-0.004*a,0.004*a])
+    plt.plot(dRA*np.cos(data[band]['dec'])*a,dDec*a,'.',alpha=0.1,color='k',
+                                                                 markersize=5)
     # dRA
-    plt.subplot(2,2,2,yticks=[],xticks=[],ylim=[-0.0015,0.0015])
-    plt.hist(dRA,bins=500,orientation='horizontal',color='k')
+    plt.subplot(2,2,2,yticks=[],xticks=[],ylim=[-0.004*a,0.004*a])
+    plt.hist(dRA*np.cos(data[band]['ra'])*a,bins=500,orientation='horizontal',
+                                                                    color='k')
     # dDec
-    plt.subplot(2,2,3,yticks=[],xlim=[-0.004,0.004])
-    plt.xlabel('{d}Dec'.format(d=r'$\Delta$'))
+    plt.subplot(2,2,3,yticks=[],xlim=[-0.004*a,0.004*a])
+    plt.xlabel('{d}Dec (arcsec)'.format(d=r'$\Delta$'))
     plt.gca().invert_yaxis()
-    plt.hist(dDec,bins=500,color='k')
-    fig.savefig('../calpaper/src/dRA_v_dDec({band}).png'.format(band=band))
+    plt.hist(dDec*a,bins=500,color='k')
+    fig.savefig('../calpaper/src/dRA_v_dDec({band})'.format(band=band))
+
+fig = plt.figure(figsize=(8*scl,4*scl))
+fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,bottom=0.15,top=0.9)
+for i,band in enumerate(bands):
+    delta = mc.angularSeparation(data[band]['ra'],data[band]['dec'],
+                                 data[band]['racent'],data[band]['deccent'])
+    plt.subplot(1,2,i+1,yticks=[],xlim=[0.*a,0.002*a])
+    plt.title('{band} Angular Separation (arcsec)'.format(
+                                                    band=band,d=r'$\Delta$'))
+    plt.hist(delta*a,bins=500,range=[0.*a,0.002*a],color='k')
+    fig.savefig('../calpaper/src/angSep({band}).png'.format(band=band))
+
+
+###############################################################################
+"""What happens if we use the MCAT skybg?
+dMag vs. Mag
+"""
+for band in bands:
+    fig = plt.figure(figsize=(8*scl,4*scl))
+    fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,bottom=0.15,top=0.9)
+    # Make a cut on crazy outliers in the MCAT. Also on det radius and expt.
+    ix = ((data[band]['aper4']>0) & (data[band]['aper4']<30) &
+          (data[band]['distance']<300) & (data[band]['t_eff']<300) &
+          (data[band]['bg_cheese']>0))
+    plt.subplot(1,2,1)
+    plt.title('{band} {d}Mag vs. AB Mag (w/ MCAT skybg, n={n})'.format(
+                                    d=r'$\Delta$',band=band,n=ix.shape[0]))
+    plt.xlabel('AB Magnitude (MCAT)')
+    plt.ylabel(r'{d}Magnitude (MCAT-gPhoton)'.format(d=r'$\Delta$'))
+    # skybg in the aperture in cps
+    mcat_skybg = data[band]['skybg']*3600**2*mc.area(gt.aper2deg(4))
+    dmag = data[band]['aper4']-gt.counts2mag(
+                        gt.mag2counts(data[band]['mag'],band)-mcat_skybg,band)
+    plt.axis([11,23,-1.3,1.3])
+    plt.plot(data[band]['aper4'][ix],dmag[ix],'x',
+                                            alpha=1,color='r',markersize=5)
+    plt.subplot(1,2,2,xticks=[],yticks=[],ylim=[-1.3,1.3])
+    plt.title('{d}Magnitude Histogram ({band})'.format(
+                                                    d=r'$\Delta$',band=band))
+    plt.hist(dmag[ix],bins=500,range=[-1.3,1.3],
+                                            orientation='horizontal',color='k')
+    fig.savefig('../calpaper/src/dMag_v_Mag({band})_skybg.png'.format(
+                                                                band=band))
+
 
 ###############################################################################
 """Deadtime Sanity Checks
