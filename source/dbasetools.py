@@ -2,7 +2,7 @@
 #  a number of different modules.
 import numpy as np
 import gQuery
-from MCUtils import print_inline,area,distance
+from MCUtils import print_inline,area,distance,angularSeparation
 from galextools import GPSSECS, zpmag
 
 def get_aspect(band,skypos,trange=[6e8,11e8],tscale=1000.,verbose=0):
@@ -139,7 +139,7 @@ def get_mcat_data(skypos,rad):
 
 def mcat_skybg(band,skypos,radius,verbose=0,retries=20):
 	"""Estimate the sky background using the MCAT skybg for nearby sources."""
-	# Setting maglimit to 30 so that it gets _everything_.
+	# Setting maglimit to 30 so that it gets _everything_...
 	sources = gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],
                                                   radius,maglimit=30),
                                                   retries=retries)
@@ -211,7 +211,7 @@ def parse_unique_sources(ras,decs,fmags,nmags,margin=0.005):
     """
     skypos = zip(ras,decs)
     for i,pos in enumerate(skypos):
-        ix = np.where(distance(pos[0],pos[1],ras,decs)<=margin)
+        ix = np.where(angularSeparation(pos[0],pos[1],ras,decs)<=margin)
         skypos[i]=[ras[ix].mean(),decs[ix].mean()]
         a = skypos #unique_sources(data['ra'],data['dec'])
     b = []
@@ -220,14 +220,14 @@ def parse_unique_sources(ras,decs,fmags,nmags,margin=0.005):
             b+=[i]
     return b
 
-def find_unique_sources(band,ra0,dec0,searchradius,maglimit=23,margin=0.001,
+def find_unique_sources(band,ra0,dec0,searchradius,maglimit=23.0,margin=0.001,
                                                                     verbose=0):
     coadds = get_mags(band,ra0,dec0,searchradius,maglimit,mode='coadd',
                                                             verbose=verbose)
     return np.array(parse_unique_sources(coadds['ra'],coadds['dec'],
                     coadds['FUV']['mag'],coadds['NUV']['mag'],margin=margin))
 
-def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,
+def avg_sources(band,skypos,radius=0.001,maglimit=23.0,verbose=0,
                                                     catalog='MCAT',retries=20):
 	"""Return the mean position of sources within the search radius."""
 	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],
@@ -236,46 +236,49 @@ def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,
 	fwhm = out[ix,-2].mean() if band=='NUV' else out[ix,-1].mean()
 	return out[ix,0].mean(),out[ix,1].mean(),round(fwhm,4)
 
-def nearest_source(band,skypos,radius=0.01,maglimit=22.0,verbose=0,
+def nearest_source(band,skypos,radius=0.01,maglimit=23.0,verbose=0,
                                                     catalog='MCAT',retries=20):
-	"""Return targeting parameters for the nearest MCAT source to a position.
+    """Return targeting parameters for the nearest MCAT source to a position.
     """
-	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
-	if not len(out) and band=='FUV':
-		if verbose:
-			print "No nearby MCAT source found in FUV. Trying NUV..."
-		band = 'NUV'
-		out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
-	if not len(out) and band=='NUV':
-		if verbose:
-			print "No nearby MCAT source found. Using input sky position."
-		return skypos[0],skypos[1],0.01
+    out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
+    if not len(out) and band=='FUV':
+        if verbose:
+            print "No nearby MCAT source found in FUV. Trying NUV..."
+        band = 'NUV'
+        out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
+    if not len(out) and band=='NUV':
+        if verbose:
+            print "No nearby MCAT source found. Using input sky position."
+        return skypos[0],skypos[1],0.01
 
-	dist=np.sqrt( (out[:,0]-skypos[0])**2 + (out[:,1]-skypos[1])**2)
-	if verbose > 1:
-			print "Finding nearest among "+str(len(dist))+" nearby sources."
-	# Note that this doesn't cope with multiple entries for the same source.
-	s = out[np.where(dist == dist.min())][0]
-	# RA, Dec, NUV mag, FUV mag, NUV fwhm, FUV fwhm
-	return avg_sources(band,[s[0],s[1]],verbose=verbose,retries=retries)
-	#return s[0],s[1],s[2],s[3],s[7],s[8]
+    #dist=np.sqrt( (out[:,0]-skypos[0])**2 + (out[:,1]-skypos[1])**2)
+    dist = angularSeparation(out[:,0],out[:,1],skypos[0],skypos[1])
+    if verbose > 1:
+        print "Finding nearest among "+str(len(dist))+" nearby sources."
+    # Note that this doesn't cope with multiple entries for the same source.
+    s = out[np.where(dist == dist.min())][0]
+    # RA, Dec, NUV mag, FUV mag, NUV fwhm, FUV fwhm
+    return avg_sources(band,[s[0],s[1]],verbose=verbose,retries=retries)
+    #return s[0],s[1],s[2],s[3],s[7],s[8]
 
-def nearest_distinct_source(band,skypos,radius=0.1,maglimit=22.0,verbose=0,
+def nearest_distinct_source(band,skypos,radius=0.1,maglimit=23.0,verbose=0,
                                                     catalog='MCAT',retries=20):
-	"""Return parameters for the nearest non-targeted source."""
-	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
-	dist=np.sqrt( (out[:,0]-skypos[0])**2 + (out[:,1]-skypos[1])**2)
-	ix = np.where(dist>0.005)
-	return np.array(out)[ix][np.where(dist[ix]==dist[ix].min())][0]
+    """Return parameters for the nearest non-targeted source."""
+    out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
+    #dist=np.sqrt( (out[:,0]-skypos[0])**2 + (out[:,1]-skypos[1])**2)
+    dist = angularSeparation(out[:,0],out[:,1],skypos[0],skypos[1])
+    ix = np.where(dist>0.005)
+    return np.array(out)[ix][np.where(dist[ix]==dist[ix].min())][0]
 
-def suggest_bg_radius(band,skypos,radius=0.1,maglimit=22,verbose=0,
+def suggest_bg_radius(band,skypos,radius=0.1,maglimit=23.0,verbose=0,
                                                     catalog='MCAT',retries=20):
-	"""Returns a recommended background radius based upon the
-	positions and FWHM of nearby sources in the MCAT.
-	"""
-	nearest = nearest_distinct_source(band,skypos,verbose=verbose,retries=retries)
-	dist = np.sqrt( (nearest[0]-skypos[0])**2 + (nearest[1]-skypos[1])**2 )
-	return round(dist-3*nearest[-2 if band=='NUV' else -1],4)
+    """Returns a recommended background radius based upon the
+    positions and FWHM of nearby sources in the MCAT.
+    """
+    nearest = nearest_distinct_source(band,skypos,verbose=verbose,retries=retries)
+    #dist = np.sqrt( (nearest[0]-skypos[0])**2 + (nearest[1]-skypos[1])**2 )
+    dist = angularSeparation(nearest[0],nearest[1],skypos[0],skypos[1])
+    return round(dist-3*nearest[-2 if band=='NUV' else -1],4)
 
 def optimize_annulus(optrad,outann,verbose=0):
 	"""Suggest optiumum annulus dimensions."""
