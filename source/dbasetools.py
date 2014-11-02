@@ -108,6 +108,7 @@ def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,retries=20):
 def get_mcat_data(skypos,rad):
     out = np.array(gQuery.getArray(
                          gQuery.mcat_visit_sources(skypos[0],skypos[1],rad)))
+    # FIXME: The APER entries should really be generated
     try:
         return {'objid':np.array(out[:,0],dtype='int64'),
             'ra':np.array(out[:,1],dtype='float32'),
@@ -116,26 +117,42 @@ def get_mcat_data(skypos,rad):
                    'skybg':np.array(out[:,6],dtype='float32'),
                    'expt':np.array(out[:,11],dtype='float32'),
                    'fwhm':np.array(out[:,8],dtype='float32'),
-                   1:np.array(out[:,19],dtype='float32')+zpmag('NUV'),
-                   2:np.array(out[:,20],dtype='float32')+zpmag('NUV'),
-                   3:np.array(out[:,21],dtype='float32')+zpmag('NUV'),
-                   4:np.array(out[:,22],dtype='float32')+zpmag('NUV'),
-                   5:np.array(out[:,23],dtype='float32')+zpmag('NUV'),
-                   6:np.array(out[:,24],dtype='float32')+zpmag('NUV'),
-                   7:np.array(out[:,25],dtype='float32')+zpmag('NUV')},
+                   1:{'mag':np.array(out[:,19],dtype='float32')+zpmag('NUV'),
+                      'err':np.array(out[:,33],dtype='float32')},
+                   2:{'mag':np.array(out[:,20],dtype='float32')+zpmag('NUV'),
+                      'err':np.array(out[:,34],dtype='float32')},
+                   3:{'mag':np.array(out[:,21],dtype='float32')+zpmag('NUV'),
+                      'err':np.array(out[:,35],dtype='float32')},
+                   4:{'mag':np.array(out[:,22],dtype='float32')+zpmag('NUV'),
+                      'err':np.array(out[:,36],dtype='float32')},
+                   5:{'mag':np.array(out[:,23],dtype='float32')+zpmag('NUV'),
+                      'err':np.array(out[:,37],dtype='float32')},
+                   6:{'mag':np.array(out[:,24],dtype='float32')+zpmag('NUV'),
+                      'err':np.array(out[:,38],dtype='float32')},
+                   7:{'mag':np.array(out[:,25],dtype='float32')+zpmag('NUV'),
+                      'err':np.array(out[:,39],dtype='float32')} },
             'FUV':{'mag':np.array(out[:,4],dtype='float32'),
                    'skybg':np.array(out[:,7],dtype='float32'),
                    'expt':np.array(out[:,10],dtype='float32'),
                    'fwhm':np.array(out[:,9],dtype='float32'),
-                   1:np.array(out[:,12],dtype='float32')+zpmag('FUV'),
-                   2:np.array(out[:,13],dtype='float32')+zpmag('FUV'),
-                   3:np.array(out[:,14],dtype='float32')+zpmag('FUV'),
-                   4:np.array(out[:,15],dtype='float32')+zpmag('FUV'),
-                   5:np.array(out[:,16],dtype='float32')+zpmag('FUV'),
-                   6:np.array(out[:,17],dtype='float32')+zpmag('FUV'),
-                   7:np.array(out[:,18],dtype='float32')+zpmag('FUV') } }
-    except:
+                   1:{'mag':np.array(out[:,12],dtype='float32')+zpmag('FUV'),
+                      'err':np.array(out[:,26],dtype='float32')},
+                   2:{'mag':np.array(out[:,13],dtype='float32')+zpmag('FUV'),
+                      'err':np.array(out[:,27],dtype='float32')},
+                   3:{'mag':np.array(out[:,14],dtype='float32')+zpmag('FUV'),
+                      'err':np.array(out[:,28],dtype='float32')},
+                   4:{'mag':np.array(out[:,15],dtype='float32')+zpmag('FUV'),
+                      'err':np.array(out[:,29],dtype='float32')},
+                   5:{'mag':np.array(out[:,16],dtype='float32')+zpmag('FUV'),
+                      'err':np.array(out[:,30],dtype='float32')},
+                   6:{'mag':np.array(out[:,17],dtype='float32')+zpmag('FUV'),
+                      'err':np.array(out[:,31],dtype='float32')},
+                   7:{'mag':np.array(out[:,18],dtype='float32')+zpmag('FUV'),
+                      'err':np.array(out[:,32],dtype='float32')} } }
+    except IndexError:
         return False
+    except:
+        raise
 
 def mcat_skybg(band,skypos,radius,verbose=0,retries=20):
 	"""Estimate the sky background using the MCAT skybg for nearby sources."""
@@ -220,14 +237,14 @@ def parse_unique_sources(ras,decs,fmags,nmags,margin=0.005):
             b+=[i]
     return b
 
-def find_unique_sources(band,ra0,dec0,searchradius,maglimit=23.0,margin=0.001,
+def find_unique_sources(band,ra0,dec0,searchradius,maglimit=22.0,margin=0.001,
                                                                     verbose=0):
     coadds = get_mags(band,ra0,dec0,searchradius,maglimit,mode='coadd',
                                                             verbose=verbose)
     return np.array(parse_unique_sources(coadds['ra'],coadds['dec'],
                     coadds['FUV']['mag'],coadds['NUV']['mag'],margin=margin))
 
-def avg_sources(band,skypos,radius=0.001,maglimit=23.0,verbose=0,
+def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,
                                                     catalog='MCAT',retries=20):
 	"""Return the mean position of sources within the search radius."""
 	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],
@@ -236,7 +253,7 @@ def avg_sources(band,skypos,radius=0.001,maglimit=23.0,verbose=0,
 	fwhm = out[ix,-2].mean() if band=='NUV' else out[ix,-1].mean()
 	return out[ix,0].mean(),out[ix,1].mean(),round(fwhm,4)
 
-def nearest_source(band,skypos,radius=0.01,maglimit=23.0,verbose=0,
+def nearest_source(band,skypos,radius=0.01,maglimit=22.0,verbose=0,
                                                     catalog='MCAT',retries=20):
     """Return targeting parameters for the nearest MCAT source to a position.
     """
@@ -261,7 +278,7 @@ def nearest_source(band,skypos,radius=0.01,maglimit=23.0,verbose=0,
     return avg_sources(band,[s[0],s[1]],verbose=verbose,retries=retries)
     #return s[0],s[1],s[2],s[3],s[7],s[8]
 
-def nearest_distinct_source(band,skypos,radius=0.1,maglimit=23.0,verbose=0,
+def nearest_distinct_source(band,skypos,radius=0.1,maglimit=22.0,verbose=0,
                                                     catalog='MCAT',retries=20):
     """Return parameters for the nearest non-targeted source."""
     out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
@@ -270,7 +287,7 @@ def nearest_distinct_source(band,skypos,radius=0.1,maglimit=23.0,verbose=0,
     ix = np.where(dist>0.005)
     return np.array(out)[ix][np.where(dist[ix]==dist[ix].min())][0]
 
-def suggest_bg_radius(band,skypos,radius=0.1,maglimit=23.0,verbose=0,
+def suggest_bg_radius(band,skypos,radius=0.1,maglimit=22.0,verbose=0,
                                                     catalog='MCAT',retries=20):
     """Returns a recommended background radius based upon the
     positions and FWHM of nearby sources in the MCAT.

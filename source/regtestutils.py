@@ -23,7 +23,10 @@ def file_setup(outfile):
     else:
         # Initialize the file with a header
         with open(outfile, 'wb') as csvfile:
-            cols = ['objid','t0','t1','t_raw','t_eff','ra','dec','racent','deccent','aper4','mag_bgsub_cheese','mag_bgsub','mag','distance','response','skybg','bg','bg_cheese','bg_eff_area']
+            cols = ['objid','t0','t1','t_raw','t_eff','ra','dec','racent',
+                    'deccent','aper4','aper4_err','mag_bgsub_cheese',
+                    'mag_bgsub','mag','distance','response','skybg',
+                    'bg','bg_cheese','bg_eff_area']
             spreadsheet = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             spreadsheet.writerow(cols)
     return extant_objids
@@ -35,7 +38,8 @@ def construct_row(i,band,objid,mcat,data):
             mcat[band]['expt'][i], data['exptime'][0],
             mcat['ra'][i], mcat['dec'][i],
             data['racent'][0], data['deccent'][0],
-            mcat[band][4][i], data['mag_bgsub_cheese'][0],
+            mcat[band][4]['mag'][i], mcat[band][4]['err'][i],
+            data['mag_bgsub_cheese'][0],
             data['mag_bgsub'][0], data['mag'][0],
             mc.distance(data['detxs'],data['detys'],400,400)[0],
             data['responses'][0], mcat[band]['skybg'][i],

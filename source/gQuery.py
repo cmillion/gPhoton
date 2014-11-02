@@ -49,6 +49,7 @@ def mcat_sources(band,ra0,dec0,radius,maglimit=20):
     [0,RA],[1,Dec],[2,NUV_mag],[3,FUV_mag],[4,FoV_radius],[5,NUV_skybg],
     [6,FUV_skybg],[7,NUV_FWHM_world],[8,FUV_FWHM_world],
     [9:15,FUV_mag_aper_1:7],[16:22,NUV_mag_aper_1:7]
+    [23:29,FUV_magerr_aper_1:7],[30:36,NUV_magerr_aper1:7]
     '''
     # 1=nuv, 2=fuv, 3=both
     bandflag = 1 if band=='NUV' else 2
@@ -60,6 +61,11 @@ def mcat_sources(band,ra0,dec0,radius,maglimit=20):
         ' fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6,'
         ' fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3,'
         ' nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7'
+        ' fuv_magerr_aper_1, fuv_magerr_aper_2, fuv_magerr_aper_3,'
+        ' fuv_magerr_aper_4, fuv_magerr_aper_5, fuv_magerr_aper_6,'
+        ' fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2,'
+        ' nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5,'
+        ' nuv_magerr_aper_6, nuv_magerr_aper_7'
         ' from '+str(baseDbo)+'.photoobjall as p inner join '+str(baseDbo)+
         '.photoextract as pe on p.photoextractid=pe.photoextractid inner join '+
         str(baseDbo)+'.fgetnearbyobjeq('+str(ra0)+', '+str(dec0)+', '+
@@ -72,7 +78,8 @@ def mcat_visit_sources(ra0,dec0,radius):
     The columns are as follows:
     [0,objid],[1,ra],[2,dec],[3,NUV_mag],[4,FUV_mag],[5,FoV_radius],
     [6,NUV_skybg],[7,FUV_skybg],[8,NUV_FWHM],[9,FUV_FWHM],[10,FUV_expt],
-    [11,NUV_expt],[12:18,FUV_mag_aper1:7],[19:25,NUV_mag_aper1:7]
+    [11,NUV_expt],[12:18,FUV_mag_aper_1:7],[19:25,NUV_mag_aper_1:7],
+    [26:32,FUV_magerr_aper_1:7],[33:39,NUV_magerr_aper_1:7]
     '''
     return (str(baseURL)+
         'select vpo.objid, ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg,'
@@ -80,7 +87,12 @@ def mcat_visit_sources(ra0,dec0,radius):
         ' vpe.nexptime, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3,'
         ' fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7,'
         ' nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4,'
-        ' nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7'
+        ' nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7,'
+        ' fuv_magerr_aper_1, fuv_magerr_aper_2, fuv_magerr_aper_3,'
+        ' fuv_magerr_aper_4, fuv_magerr_aper_5, fuv_magerr_aper_6,'
+        ' fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2,'
+        ' nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5,'
+        ' nuv_magerr_aper_6, nuv_magerr_aper_7'
         ' from '+str(baseDbo)+'.visitphotoobjall as vpo'
         ' inner join '+str(baseDbo)+'.visitphotoextract'
         ' as vpe on vpo.photoextractid=vpe.photoextractid inner join'

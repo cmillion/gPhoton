@@ -89,7 +89,7 @@ def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
     events = hashresponse(band, events, calpath=calpath, verbose=verbose)
     return events
 
-def bg_sources(band,ra0,dec0,radius,maglimit=23.0,margin=0.001):
+def bg_sources(band,ra0,dec0,radius,maglimit=22.0,margin=0.001):
     sources = gQuery.getArray(gQuery.mcat_sources(band,ra0,dec0,radius+margin,
                                                       maglimit=maglimit))
     return {'ra':np.float32(np.array(sources)[:,0]),
@@ -102,11 +102,11 @@ def bg_mask_annulus(band,ra0,dec0,annulus,ras,decs,responses):
                   (mc.angularSeparation(ra0,dec0,ras,decs)<=annulus[1]))
     return ras[ix],decs[ix],responses[ix]
 
-def bg_mask_sources(band,ra0,dec0,ras,decs,responses,sources,mult=2):
+def bg_mask_sources(band,ra0,dec0,ras,decs,responses,sources,mult=1.2739/2.):
     for i in range(len(sources['ra'])):
         # Slice on 1.2739*(0.5)*FWHM which should be ~3 sigma for a Gaussian
         ix = np.where(mc.angularSeparation(sources['ra'][i], sources['dec'][i],
-                      ras,decs)>=mult*sources['fwhm'][i,:].mean()*1.2739/2.)
+                      ras,decs)>=mult*sources['fwhm'][i,:].mean())
         ras, decs, responses = ras[ix], decs[ix], responses[ix]
     return ras,decs,responses
 
@@ -133,7 +133,7 @@ def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e5,ntests=10):
     return (mc.area(annulus[1])-mc.area(annulus[0]))*ratios.mean()
 
 # FIXME: This recomputes eff_area every pass at huge computational cost.
-def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maglimit=23.,
+def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maglimit=22.,
               eff_area=False,sources=False):
     """ Returns the estimate number of counts (not count rate) within the
     aperture based upon a masked background annulus.
@@ -149,7 +149,7 @@ def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maglimit=23.,
     return mc.area(radius)*bg_counts/eff_area if eff_area else 0.
 
 def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
-             stepsz=None, calpath='../cal/', verbose=0, maglimit=23.0,
+             stepsz=None, calpath='../cal/', verbose=0, maglimit=22.0,
              detsize=1.25,coadd=False):
     if verbose:
         mc.print_inline("Retrieving all of the target events.")
