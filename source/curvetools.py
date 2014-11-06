@@ -89,23 +89,28 @@ def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
     events = hashresponse(band, events, calpath=calpath, verbose=verbose)
     return events
 
-def bg_sources(band,ra0,dec0,radius,maglimit=28.):
-    sources = gQuery.getArray(gQuery.mcat_sources(band,ra0,dec0,radius,
+def bg_sources(band,ra0,dec0,radius,maglimit=20.0,margin=0.001):
+    sources = gQuery.getArray(gQuery.mcat_sources(band,ra0,dec0,radius+margin,
                                                       maglimit=maglimit))
-    return {'ra':np.float32(np.array(sources)[:,0]),
-            'dec':np.float32(np.array(sources)[:,1]),
-            'fwhm':np.float32(np.array(sources)[:,7:9]),
-            'maglimit':maglimit,'radius':radius}
+    try:
+        return {'ra':np.float32(np.array(sources)[:,0]),
+                'dec':np.float32(np.array(sources)[:,1]),
+                'fwhm':np.float32(np.array(sources)[:,7:9]),
+                'maglimit':maglimit,'radius':radius}
+    except IndexError:
+        return {'ra':np.array([]),'dec':np.array([]),
+                'fwhm':np.array([]),'maglimit':maglimit,'radius':radius}
 
 def bg_mask_annulus(band,ra0,dec0,annulus,ras,decs,responses):
     ix = np.where((mc.angularSeparation(ra0,dec0,ras,decs)>=annulus[0]) &
                   (mc.angularSeparation(ra0,dec0,ras,decs)<=annulus[1]))
     return ras[ix],decs[ix],responses[ix]
 
-def bg_mask_sources(band,ra0,dec0,ras,decs,responses,sources):
+def bg_mask_sources(band,ra0,dec0,ras,decs,responses,sources,mult=1.5/2.3548):
+    # At present, masks to 1.5 sigma where FWHM = 2.3548*sigma
     for i in range(len(sources['ra'])):
         ix = np.where(mc.angularSeparation(sources['ra'][i], sources['dec'][i],
-                      ras,decs)>=sources['fwhm'][i,:].max())
+                      ras,decs)>=mult*np.median(sources['fwhm'][i,:]))
         ras, decs, responses = ras[ix], decs[ix], responses[ix]
     return ras,decs,responses
 
@@ -114,8 +119,9 @@ def bg_mask(band,ra0,dec0,annulus,ras,decs,responses,sources):
                                          decs,responses)
     return bg_mask_sources(band,ra0,dec0,ras,decs,responses,sources)
 
-def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e4,ntests=10):
+def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e5,ntests=10):
     #mc.print_inline('Estimating area of masked background annulus.')
+    # This is just a really naive Monte Carlo
     ratios = np.zeros(ntests)
     for i in range(ntests):
         ann_events = bg_mask_annulus(band,ra0,dec0,annulus,
@@ -131,7 +137,7 @@ def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e4,ntests=10):
     return (mc.area(annulus[1])-mc.area(annulus[0]))*ratios.mean()
 
 # FIXME: This recomputes eff_area every pass at huge computational cost.
-def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maglimit=28.,
+def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maglimit=20.,
               eff_area=False,sources=False):
     """ Returns the estimate number of counts (not count rate) within the
     aperture based upon a masked background annulus.
@@ -147,7 +153,7 @@ def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maglimit=28.,
     return mc.area(radius)*bg_counts/eff_area if eff_area else 0.
 
 def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
-             stepsz=None, calpath='../cal/', verbose=0, maglimit=28.,
+             stepsz=None, calpath='../cal/', verbose=0, maglimit=20.0,
              detsize=1.25,coadd=False):
     if verbose:
         mc.print_inline("Retrieving all of the target events.")
@@ -188,7 +194,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     # Don't bother looping through anything with no data.
     lcurve['bg'] = {'simple':np.zeros(len(bins)-1),
                     'cheese':np.zeros(len(bins)-1)}
-    if annulus:
+    if not annulus==None:
         lcurve['bg']['sources'] = bg_sources(band,ra0,dec0,annulus[1],
                                              maglimit=maglimit)
         lcurve['bg']['eff_area'] = cheese_bg_area(band,ra0,dec0,annulus,
@@ -217,7 +223,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         lcurve['detys'][i-1] = data['row'][rad_ix].mean()
         lcurve['racent'][i-1] = data['ra'][rad_ix].mean()
         lcurve['deccent'][i-1] = data['dec'][rad_ix].mean()
-        if annulus:
+        if not annulus==None:
             ann_ix = np.where((angSep > annulus[0]) &
                               (angSep <= annulus[1]) & (ix == i))
             lcurve['bg_counts'][i-1] = len(ann_ix[0])
@@ -227,7 +233,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
             lcurve['bg']['cheese'][i-1] = cheese_bg(band, ra0, dec0, radius,
                 annulus, data['ra'][t_ix], data['dec'][t_ix],
                 data['response'][t_ix], maglimit=maglimit,
-                eff_area=lcurve['bg']['eff_area'],sources=lcurve['bg']['sources'])
+                eff_area=lcurve['bg']['eff_area'],
+                sources=lcurve['bg']['sources'])
         else:
             lcurve['bg_counts'][i-1]=0.
             lcurve['bg']['simple'][i-1]=0.
@@ -239,7 +246,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     lcurve['t1'] = bins[ix[0]+1]
     for col in lcurve_cols:
         lcurve[col] = lcurve[col][ix]
-    if annulus:
+    if not annulus==None:
         lcurve['bg']['simple']=lcurve['bg']['simple'][ix]
         lcurve['bg']['cheese']=lcurve['bg']['cheese'][ix]
     else:
@@ -263,6 +270,7 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     # TODO: Add an ability to specify or exclude specific time ranges
     if verbose:
         mc.print_inline("Moving to photon level operations.")
+    # FIXME: This error handling is hideous.
     try:
         lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
                           stepsz=stepsz, verbose=verbose, coadd=coadd, 
@@ -276,11 +284,19 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
         lcurve['flux'] = gxt.counts2flux(lcurve['cps'],band)
         lcurve['flux_bgsub'] = gxt.counts2flux(lcurve['cps_bgsub'],band)
         lcurve['flux_bgsub_cheese'] = gxt.counts2flux(lcurve['cps_bgsub_cheese'],band)
+        lcurve['detrad'] = mc.distance(lcurve['detxs'],lcurve['detys'],400,400)
 
-    except:
-        lcurve = {'cps':[],'cps_bgsub':[],'cps_bgsub_cheese':[],
-                 'mag':[],'mag_bgsub':[],'mag_bgsub_cheese':[],
-                 'flux':[],'flux_bgsub':[],'flux_bgsub_cheese':[]}
+    except ValueError:
+        lcurve['cps']=[]
+        lcurve['cps_bgsub']=[]
+        lcurve['cps_bugsub_cheese']=[]
+        lcurve['mag']=[]
+        lcurve['mag_bgsub']=[]
+        lcurve['mag_bgsub_cheese']=[]
+        lcurve['flux']=[]
+        lcurve['flux_bgsub']=[]
+        lcurve['flux_bgsub_cheese']=[]
+        lcurve['detrad']=[]
     if verbose:
         mc.print_inline("Done.")
         mc.print_inline("")

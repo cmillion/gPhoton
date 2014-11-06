@@ -59,7 +59,7 @@ def manage_requests(query,maxcnt=100,wait=10):
 			time.sleep(wait)
 			cnt += 1
 			print_inline('Query retry attempt '+str(int(cnt))+'.')
-            
+
 
 	print 'Query unsuccessful after '+str(int(maxcnt))+' attempts.'
 	print '		'+str(query)
@@ -150,21 +150,27 @@ def chunks(array,length=10,verbose=0):
 		out += chunk(a[0],a[1],length=length,verbose=verbose)
 	return out
 
-def angularSeparation(ra0,dec0,ra1,dec1):
+def angularSeparation(ra1,dec1,ra2,dec2):
 	"""Compute angular separation in degrees of points on the sky.
     It is important, especially for small angular separations, that the
-    values for ra[01] and dec[01] have precision of float65 or better.
+    values for ra[01] and dec[01] have precision of float64 or better.
+	Update: Now uses the haversine formula which is stable for small angles.
     """
-	dtor = np.pi/180.
-	radeg = 1./dtor
-	d0 = dec0*dtor
-	d1 = dec1*dtor
-	sep = np.sin(d0)*np.sin(d1)+np.cos(d0)*np.cos(d1)*np.cos((ra1-ra0)*dtor)
-	r = np.arccos(sep)*radeg
-	zero = (np.isfinite(r) == False)
-	if any(zero):
-		r[zero] = 0.0
-	return r
+	d2r = np.pi/180.
+	ra2deg = 1./d2r
+	d1 = dec1*d2r
+	d2 = dec2*d2r
+	r1 = ra1*d2r
+	r2 = ra2*d2r
+	#sep = np.sin(d0)*np.sin(d1)+np.cos(d0)*np.cos(d1)*np.cos((ra1-ra0)*dtor)
+	#r = np.arccos(sep)*radeg
+	a = np.sin((d2-d1)/2.)**2.+np.cos(d1)*np.cos(d2)*np.sin((r2-r1)/2.)**2.
+	r = 2*np.arcsin(np.sqrt(a))
+	#zero = (np.isfinite(r) == False)
+	#if any(zero):
+	#	r[zero] = 0.0
+	return r*ra2deg
+
 
 def intersect(r1,r2):
     #FIXME

@@ -116,9 +116,12 @@ def countmap(band,skypos,tranges,skyrange,width=False,height=False,verbose=0,tsc
 
 	return count
 
-def write_jpeg(filename,band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,clobber=False,verbose=0,tscale=1000.,retries=20):
+def write_jpeg(filename,band,skypos,tranges,skyrange,width=False,height=False,
+			   stepsz=1.,clobber=False,verbose=0,tscale=1000.,retries=20):
 	"""Write a 'preview' jpeg image from a count map."""
-	scipy.misc.imsave(filename,countmap(band,skypos,tranges,skyrange,width=width,height=height,verbose=verbose,tscale=tscale,retries=retries))
+	scipy.misc.imsave(filename,countmap(band,skypos,tranges,skyrange,
+					  width=width,height=height,verbose=verbose,tscale=tscale,
+					  retries=retries))
 	return
 
 def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,verbose=0,calpath='../cal/',tscale=1000.,response=True,hdu=False,retries=20):
@@ -173,7 +176,7 @@ def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,verbose
 
 # TODO: tranges?
 # TODO: Consolidate duplicate "reference array" code from aperture_response
-def backgroundmap(band,skypos,trange,skyrange,width=False,height=False,tscale=1000,memlight=False,verbose=0,hdu=False,NoData=-999,detsize=1.25,pixsz=0.000416666666666667,maglimit=28.,retries=20):
+def backgroundmap(band,skypos,trange,skyrange,width=False,height=False,tscale=1000,memlight=False,verbose=0,hdu=False,NoData=-999,detsize=1.25,pixsz=0.000416666666666667,maglimit=23.,retries=20):
 	"""Generate a background (bg) map by masking out MCAT sources."""
 	imsz = gxt.deg2pix(skypos,skyrange)
 

@@ -6,7 +6,7 @@ import pandas as pd
 import gQuery as gq
 import galextools as gt
 import dbasetools as dt
-import gphoton_utils as gu
+#import gphoton_utils as gu
 import MCUtils as mc
 from gAperture import gAperture
 
@@ -23,7 +23,10 @@ def file_setup(outfile):
     else:
         # Initialize the file with a header
         with open(outfile, 'wb') as csvfile:
-            cols = ['objid','t0','t1','t_raw','t_eff','ra','dec','racent','deccent','aper4','mag_bgsub_cheese','mag_bgsub','mag','distance','response','skybg','bg','bg_cheese']
+            cols = ['objid','t0','t1','t_raw','t_eff','ra','dec','racent',
+                    'deccent','aper4','aper4_err','mag_bgsub_cheese',
+                    'mag_bgsub','mag','distance','response','skybg',
+                    'bg','bg_cheese','bg_eff_area']
             spreadsheet = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             spreadsheet.writerow(cols)
     return extant_objids
@@ -35,14 +38,19 @@ def construct_row(i,band,objid,mcat,data):
             mcat[band]['expt'][i], data['exptime'][0],
             mcat['ra'][i], mcat['dec'][i],
             data['racent'][0], data['deccent'][0],
-            mcat[band][4][i], data['mag_bgsub_cheese'][0],
+            mcat[band][4]['mag'][i], mcat[band][4]['err'][i],
+            data['mag_bgsub_cheese'][0],
             data['mag_bgsub'][0], data['mag'][0],
             mc.distance(data['detxs'],data['detys'],400,400)[0],
             data['responses'][0], mcat[band]['skybg'][i],
-            data['bg']['simple'][0], data['bg']['cheese'][0])
+            data['bg']['simple'][0], data['bg']['cheese'][0],
+            data['bg']['eff_area'])
 
 def datamaker(band,skypos,outfile,maglimit=20.,detsize=0.5,
-                                radius=gt.aper2deg(4),annulus=[0.01,0.02]):
+                                radius=gt.aper2deg(4),annulus=[0.0083,0.025]):
+    """Note: If you wanted to change the default annulus, then a good starting
+    point would be [0.0083,0.025] (i.e. 30" to 90").
+    """
     extant_objids = file_setup(outfile)
     if extant_objids==False:
         print 'NOT RUNNING!!*!'
@@ -66,7 +74,8 @@ def datamaker(band,skypos,outfile,maglimit=20.,detsize=0.5,
             data = gAperture(band,[mcat['ra'][i],mcat['dec'][i]],radius,
                              annulus=annulus,verbose=0,coadd=True,
                              trange=[exp[band]['t0'],exp[band]['t1']])
-            if data['mag_bgsub_cheese'] and np.isfinite(data['mag_bgsub_cheese']):
+            if (data['mag_bgsub_cheese'] and
+                                        np.isfinite(data['mag_bgsub_cheese'])):
                 csv_construct = construct_row(i,band,objid,mcat,data)
                 print csv_construct
                 with open(outfile,'ab') as csvfile:
