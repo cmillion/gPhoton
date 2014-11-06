@@ -68,12 +68,16 @@ bands = ['NUV','FUV']
 base = 'calrun_'
 data = {}
 for band in bands:
-    data[band] = pd.read_csv('{base}{band}.csv'.format(base=base,band=band))
+    data[band] = pd.read_csv('{base}{band}.csv'.format(
+                                                        base=base,band=band))
     print '{band} sources: {cnt}'.format(
                                 band=band,cnt=data[band]['objid'].shape[0])
 
 """dMag vs. Mag"""
-dmag = {'gphot':lambda band: data[band]['aper4']-data[band]['mag_bgsub_cheese'],
+dmag = {'gphot_cheese':(lambda band:
+                        data[band]['aper4']-data[band]['mag_bgsub_cheese']),
+        'gphot_nomask':(lambda band:
+                        data[band]['aper4']-data[band]['mag_bgsub']),
         'mcat':lambda band: data[band]['aper4']-
             gt.counts2mag(gt.mag2counts(data[band]['mag'],band)-
             data[band]['skybg']*3600**2*mc.area(gt.aper2deg(4)),band)}
@@ -85,8 +89,7 @@ for bgmode in dmag.keys():
         dmag_err=gu.dmag_errors(100.,band,sigma=1.41)
         # Make a cut on crazy outliers in the MCAT. Also on det radius and expt.
         ix = ((data[band]['aper4']>0) & (data[band]['aper4']<30) &
-              (data[band]['distance']<300) & (data[band]['t_eff']<300) &
-              (data[band]['bg_cheese']>0))
+              (data[band]['distance']<300) & (data[band]['t_eff']<300))
         plt.subplot(1,2,1)
         plt.title('{band} {d}Mag vs. AB Mag (n={n},{bg}_bg)'.format(
                             d=r'$\Delta$',band=band,n=ix.shape[0],bg=bgmode))
@@ -142,6 +145,23 @@ for i,band in enumerate(bands):
     plt.title('{band} Background {d}Magnitude (MCAT-gPhoton)'.format(band=band,d=r'$\Delta$'))
     plt.hist(delta[ix],bins=500,range=[-3,3],color='k')
 fig.savefig('../calpaper/src/dMag_bg.png')
+
+for i,band in enumerate(bands):
+    fig = plt.figure(figsize=(8*scl,4*scl))
+    fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,bottom=0.15,top=0.9)
+    gphot_bg = gt.counts2mag(data[band]['bg']/data[band]['t_eff'],band)
+    mcat_bg = gt.counts2mag(
+                    data[band]['skybg']*3600**2*mc.area(gt.aper2deg(4)),band)
+    delta = mcat_bg - gphot_bg
+    ix = (np.isfinite(delta))
+    plt.subplot(1,2,1,xlim=[14,25])
+    plt.title('{band} Background vs. Magnitude (MCAT)'.format(band=band))
+    plt.plot(data[band]['aper4'][ix],mcat_bg[ix],'.',color='k',alpha=0.2)
+    plt.subplot(1,2,2,xlim=[14,25],yticks=[])
+    plt.title('{band} Background vs. Magnitude (gPhoton)'.format(band=band))
+    plt.plot(data[band]['mag_bgsub_cheese'][ix],gphot_bg[ix],'.',
+                                                        color='k',alpha=0.2)
+fig.savefig('../calpaper/src/bg_v_mag.png')
 
 """Astrometry"""
 a = 3600
