@@ -237,14 +237,14 @@ def parse_unique_sources(ras,decs,fmags,nmags,margin=0.005):
             b+=[i]
     return b
 
-def find_unique_sources(band,ra0,dec0,searchradius,maglimit=22.0,margin=0.001,
+def find_unique_sources(band,ra0,dec0,searchradius,maglimit=20.0,margin=0.001,
                                                                     verbose=0):
     coadds = get_mags(band,ra0,dec0,searchradius,maglimit,mode='coadd',
                                                             verbose=verbose)
     return np.array(parse_unique_sources(coadds['ra'],coadds['dec'],
                     coadds['FUV']['mag'],coadds['NUV']['mag'],margin=margin))
 
-def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,
+def avg_sources(band,skypos,radius=0.001,maglimit=20.0,verbose=0,
                                                     catalog='MCAT',retries=20):
 	"""Return the mean position of sources within the search radius."""
 	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],
@@ -253,7 +253,7 @@ def avg_sources(band,skypos,radius=0.001,maglimit=22.0,verbose=0,
 	fwhm = out[ix,-2].mean() if band=='NUV' else out[ix,-1].mean()
 	return out[ix,0].mean(),out[ix,1].mean(),round(fwhm,4)
 
-def nearest_source(band,skypos,radius=0.01,maglimit=22.0,verbose=0,
+def nearest_source(band,skypos,radius=0.01,maglimit=20.0,verbose=0,
                                                     catalog='MCAT',retries=20):
     """Return targeting parameters for the nearest MCAT source to a position.
     """
@@ -278,7 +278,7 @@ def nearest_source(band,skypos,radius=0.01,maglimit=22.0,verbose=0,
     return avg_sources(band,[s[0],s[1]],verbose=verbose,retries=retries)
     #return s[0],s[1],s[2],s[3],s[7],s[8]
 
-def nearest_distinct_source(band,skypos,radius=0.1,maglimit=22.0,verbose=0,
+def nearest_distinct_source(band,skypos,radius=0.1,maglimit=20.0,verbose=0,
                                                     catalog='MCAT',retries=20):
     """Return parameters for the nearest non-targeted source."""
     out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
@@ -287,7 +287,7 @@ def nearest_distinct_source(band,skypos,radius=0.1,maglimit=22.0,verbose=0,
     ix = np.where(dist>0.005)
     return np.array(out)[ix][np.where(dist[ix]==dist[ix].min())][0]
 
-def suggest_bg_radius(band,skypos,radius=0.1,maglimit=22.0,verbose=0,
+def suggest_bg_radius(band,skypos,radius=0.1,maglimit=20.0,verbose=0,
                                                     catalog='MCAT',retries=20):
     """Returns a recommended background radius based upon the
     positions and FWHM of nearby sources in the MCAT.
