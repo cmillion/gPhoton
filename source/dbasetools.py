@@ -77,7 +77,8 @@ def exposure(band,trange,verbose=0,retries=20):
     rawexpt = trange[1]-trange[0]
     if rawexpt<=0:
         return 0.
-    shutdead = gQuery.getArray(gQuery.shutdead(band,trange[0],trange[1]),verbose=verbose,retries=retries)
+    shutdead = gQuery.getArray(gQuery.shutdead(band,trange[0],trange[1]),
+                                            verbose=verbose,retries=retries)
     deadtime = gQuery.getValue(gQuery.deadtime(band,trange[0],trange[1]))
     #return (rawexpt-shutdead[0][0])*(1.-shutdead[1][0])
     return (rawexpt-shutdead[0][0])*(1.-deadtime)
