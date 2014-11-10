@@ -41,7 +41,7 @@ Because the standalone tools are written in Python, they are theoretically cross
 There are several versions of Python available which include not only the core "standard" version itself, but many common and popular modules as a single package, eliminating the ened for users to manage such dependencies themeselves. At present, the most promising of these appears to be Anaconda, which is available as a free download (with some advanced features available as paid add-ons). Anaconda contains all of the required dependencies for the gPhoton project. Advanced users and Python developers will probably want to manage their own dependencies; if you are not one of these, you can [download Anaconda here](https://store.continuum.io/cshop/anaconda/) and get started using gPhoton immediately.
 
 ####Manual Package Management
-You will need to install _python2.7_, _numpy_, _scipy_, _astropy_ and _requests_. To use some of the Python helper utilities (contained in gphoton_utils.py), you will also need to install _pandas_. The recommended commands for doing this appear below under the appropriate operating system.
+You will need to install _python2.7_, _numpy_, _scipy_, _astropy_, _requests_ and _pandas_. The recommended commands for doing this appear below under the appropriate operating system.
 
 The best specific tools for package installation and management shift rapidly. We'll try to keep this section up to date. If anything suggested here is actually _broken_, please let us know.
 
@@ -77,6 +77,8 @@ From the command line, navigate to the `gPhoton/source` directory. Run the first
 **Convenient hack:** The .csv files get updated frequently, so you can generate a "sample" .csv file by letting gPhoton run for a few minutes and then killing it.
 
 **Note:** If you don't have `PYTHONPATH` defined, then you will need to put `python` in front of all of the command line tool calls in this document. (e.g. `python ./gPhoton.py [...] [...] [...]`).
+
+**Gotcha:** If you're getting an `ImportError` for a module that you're sure you've installed (e.g., by running `import [module]`), and especially if this happens on a Mac running Anaconda, then try putting `python` in front of the commands to force it to not use the system build of python.
 
 From the command line, navigate to the `gPhoton/source` directory. Then try running the following commands.
 
