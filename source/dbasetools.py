@@ -38,9 +38,21 @@ def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,
             trange = [1,1000000000000]
         if len(np.shape(trange))==2:
             trange=trange[0]
-        times = np.array(gQuery.getArray(gQuery.exposure_ranges(band,skypos[0],skypos[1],t0=trange[0],t1=trange[1],detsize=detsize,tscale=tscale),verbose=verbose,retries=retries),dtype='float64')[:,0]/tscale if not predicted else get_aspect(band,skypos,trange,tscale=tscale,verbose=verbose)['t']
-    except:
+        times = (np.array(gQuery.getArray(gQuery.exposure_ranges(band,
+            skypos[0],skypos[1],t0=trange[0],t1=trange[1],detsize=detsize,
+            tscale=tscale),verbose=verbose,retries=retries),
+                                                dtype='float64')[:,0]/tscale
+            if not predicted else get_aspect(band,skypos,trange,
+                                        tscale=tscale,verbose=verbose)['t'])
+    except IndexError:
+        if verbose:
+            print "No exposure time available at {pos}".format(pos=skypos)
         return np.array([],dtype='float64')
+    except TypeError:
+        print "Is one of your inputs malformed?"
+        raise
+    except:
+        raise
     if verbose:
         print_inline('Parsing '+str(len(times)-1)+' seconds of exposure.: ['+str(trange[0])+', '+str(trange[1])+']')
     blah = []

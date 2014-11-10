@@ -19,7 +19,7 @@ def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
     """
     if verbose>1:
         print "Generating a light curve with the following paramters:"
-        print " band:    {bana}".format(band=band)
+        print " band:    {band}".format(band=band)
         print " skypos:  {skypos}".format(skypos=skypos)
         print " trange:  {trange}".format(trange=trange)
         print " radius:  {radius}".format(radius=radius)

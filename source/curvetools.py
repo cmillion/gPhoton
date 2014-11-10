@@ -160,7 +160,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     trange = [np.array(tranges).min(),np.array(tranges).max()]
     try:
         searchradius = annulus[1]
-    except:
+    except TypeError:
         searchradius = radius
     data = pullphotons(band, ra0, dec0, tranges, searchradius,
                        verbose=verbose, calpath=calpath)
@@ -173,7 +173,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     if coadd:
         bins = np.array(trange)
     elif stepsz:
-        bins = np.append(np.arange(min(trange), max(trange), stepsz), max(trange))
+        bins = np.append(np.arange(min(trange), max(trange), stepsz),
+                                                                max(trange))
     else:
         bins = np.unique(np.array(tranges).flatten())
     # This is equivalent in function to np.digitize(data['t'],bins) except
@@ -266,6 +267,9 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
         mc.print_inline("Getting exposure ranges.")
     tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
                                  maxgap=maxgap, minexp=minexp, verbose=verbose)
+    if not len(tranges):
+        print "No exposure time at this location: [{ra},{dec}]".format(
+                                                            ra=ra0,dec=dec0)
     # FIXME: Everything goes to hell if no exposure time is available...
     # TODO: Add an ability to specify or exclude specific time ranges
     if verbose:
@@ -273,7 +277,7 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     # FIXME: This error handling is hideous.
     try:
         lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
-                          stepsz=stepsz, verbose=verbose, coadd=coadd, 
+                          stepsz=stepsz, verbose=verbose, coadd=coadd,
                           calpath=calpath)
         lcurve['cps'] = lcurve['sources']/lcurve['exptime']
         lcurve['cps_bgsub'] = (lcurve['sources']-lcurve['bg']['simple'])/lcurve['exptime']

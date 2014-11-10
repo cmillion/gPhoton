@@ -28,7 +28,7 @@ def getValue(query,verbose=0,retries=20):
         out = float(manage_requests(query,
                             maxcnt=retries).json()['Tables'][0]['Rows'][0][0])
     except:
-        raise RuntimeError('Connection timeout.')
+        raise# RuntimeError('Connection timeout.')
     return out
 
 def getArray(query,verbose=0,retries=20):
@@ -39,7 +39,7 @@ def getArray(query,verbose=0,retries=20):
     try:
         out = manage_requests(query,maxcnt=retries).json()['Tables'][0]['Rows']
     except:
-        raise RuntimeError('Connection timeout.')
+        raise# RuntimeError('Connection timeout.')
     return out
 
 def mcat_sources(band,ra0,dec0,radius,maglimit=20):
@@ -68,7 +68,8 @@ def mcat_sources(band,ra0,dec0,radius,maglimit=20):
         ' nuv_magerr_aper_6, nuv_magerr_aper_7'
         ' from '+str(baseDbo)+'.photoobjall as p inner join '+str(baseDbo)+
         '.photoextract as pe on p.photoextractid=pe.photoextractid inner join '+
-        str(baseDbo)+'.fgetnearbyobjeq('+str(ra0)+', '+str(dec0)+', '+
+        str(baseDbo)+'.fgetnearbyobjeq('+repr(float(ra0))+', '+
+        repr(float(dec0))+', '+
         str(radius*60.)+') as nb on p.objid=nb.objid and (band=3 or band='+
         str(bandflag)+') and '+str(band)+'_mag<'+str(maglimit)+
         str(formatURL))
@@ -96,7 +97,7 @@ def mcat_visit_sources(ra0,dec0,radius):
         ' from '+str(baseDbo)+'.visitphotoobjall as vpo'
         ' inner join '+str(baseDbo)+'.visitphotoextract'
         ' as vpe on vpo.photoextractid=vpe.photoextractid inner join'
-        ' '+str(baseDbo)+'.fGetNearbyVisitObjEq('+str(ra0)+', '+str(dec0)+
+        ' '+str(baseDbo)+'.fGetNearbyVisitObjEq('+repr(float(ra0))+', '+repr(float(dec0))+
         ', '+str(radius*60.)+') as nb on vpo.objid=nb.objid'+
         str(formatURL))
 
@@ -113,7 +114,8 @@ def mcat_objid_search(objid,mode='visit'):
         ' vp.photoextractid=vpe.photoextractid where objid = '+
         str(long(objid))+str(formatURL))
 
-def exposure_ranges(band,ra0,dec0,t0=1,t1=10000000000000,tscale=1000.,detsize=1.25):
+def exposure_ranges(band,ra0,dec0,t0=1,t1=10000000000000,tscale=1000.,
+                                                                detsize=1.25):
     """Returns a list of times (in one second increments) where data exists
     with an aspect solution within detsize of [ra0,dec0].
     """
@@ -122,7 +124,7 @@ def exposure_ranges(band,ra0,dec0,t0=1,t1=10000000000000,tscale=1000.,detsize=1.
         band = 'FUV/NUV'
     return (str(baseURL)+
         'select distinct time from'
-        ' fGetNearbyAspectEq('+str(ra0)+','+str(dec0)+',(('+
+        ' fGetNearbyAspectEq('+repr(float(ra0))+','+repr(float(dec0))+',(('+
             str(detsize)+'/2.0)*60.0),'+
             str(long(t0*tscale))+','+str(long(t1*tscale))+')'
         ' where band=\''+str(band)+'\' or band=\'FUV/NUV\' order by time'+
@@ -133,14 +135,15 @@ def exposure_range(band,ra0,dec0,t0=1,t1=10000000000000):
     return (str(baseURL)+
         'select startTimeRange, endTimeRange'
         ' from fGetTimeRanges('+str(int(t0))+','+str(int(t1))+','+
-            repr(ra0)+','+repr(dec0)+') where band=\''+str(band)+'\''+
-        str(formatURL))
+            repr(float(ra0))+','+repr(float(dec0))+') where band=\''+
+            str(band)+'\''+str(formatURL))
 
 def aperture(band,ra0,dec0,t0,t1,radius,tscale=1000.):
     """Integrate counts over an aperture at a position."""
     return (str(baseURL)+
         'Select  sum(photonCount)'
-        ' from dbo.fGetNearbyObjEqCount'+str(band)+'('+repr(ra0)+','+repr(dec0)+
+        ' from dbo.fGetNearbyObjEqCount'+str(band)+'('+repr(float(ra0))+','+
+            repr(float(dec0))+
             ','+str(radius)+','+str(long(t0*tscale))+','+
             str(long(t1*tscale))+',0)'+
         str(formatURL))
@@ -230,7 +233,8 @@ def allphotons(band,ra0,dec0,t0,t1,radius,tscale=1000.):
     """Grab the major columns for all events within an aperture."""
     return (str(baseURL)+
         'select time,ra,dec,xi,eta from dbo.fGetNearbyObjEq'+str(band)+
-        'AllColumns('+repr(ra0)+','+repr(dec0)+','+repr(radius)+','+
+        'AllColumns('+repr(float(ra0))+','+repr(float(dec0))+','+
+        repr(radius)+','+
         str(long(t0*tscale))+','+str(long(t1*tscale))+',0)'+str(formatURL))
 
 # Shutter correction
