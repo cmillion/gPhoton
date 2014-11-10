@@ -333,7 +333,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                            'flux_bgsub':data['flux_bgsub'],
                            'flux_bgsub_cheese':data['flux_bgsub_cheese']})
         try:
-            test.to_csv(csvfile,index=False)
+            test.to_csv(csvfile,index=False,mode=iocode)
         except:
             print 'Failed to write to: '+str(csvfile)
     else:

@@ -6,23 +6,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import galextools as gt
 
-#def read_lc(ifile,header=False):
-#    """Reads a light curve CSV into a pandas DataFrame"""
-#    ## Read in the data as a pandas DataFrame object.
-#    try:
-#        data_frame = pd.io.parsers.read_csv(ifile, skipinitialspace=True,skiprows=(2 if header else False))
-#        ## Calculate the timestamp in JD.
-#        try:
-#            data_frame["JD"] = ( (data_frame["t1"] - data_frame["t0"]) / 2. + data_frame["t0"] + 315964800.0) / 86400. + 2440587.5
-#
-#        ## Replace the default index with the timestamp in JD.
-#        #data_frame.set_index("JD", drop=True, inplace=True,verify_integrity=True)
-#
-#        ## Return the pandas objects.
-#        return data_frame
-#    except IOError:
-#        print "*** Error:  Could not find the file " + ifile + "."
-#	return
+def read_lc(csvfile,comment='|'):
+	return pd.io.parsers.read_csv(csvfile,comment=comment)
 
 def plot_lc(data_frame):
 	"""Plots a lightcurve from a CSV file

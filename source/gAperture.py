@@ -30,7 +30,7 @@ def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
     data = ct.write_curve(band, skypos[0], skypos[1], radius, csvfile=csvfile,
                           annulus=annulus, stepsz=stepsz, verbose=verbose,
                           clobber=clobber, trange=trange, coadd=coadd,
-                          minexp=minexp, maxgap=maxgap)
+                          minexp=minexp, maxgap=maxgap, iocode = args.iocode)
     return data
 
 def check_radius(args):
@@ -210,16 +210,18 @@ def setup_file(args):
     else:
     # This initiates the file.
         if not args.overwrite and os.path.exists(args.csvfile):
-            print "File {csvfile} exists. Pass --overwrite to replace it.".format(csvfile=args.csvfile)
+            print "{csvfile} exists. Pass --overwrite to replace it.".format(
+                                                          csvfile=args.csvfile)
             exit(0)
         f = open(args.csvfile,args.iocode)
         if args.addhdr:
-            # Write the command line to the outfile; should be optional
+            if args.verbose:
+                print 'Recording command line construction to {f}'.format(
+                                                                f=args.csvfile)
+            # Write the command line to the top of the output file
             f.write('| '+reconstruct_command(args)+'\n')
-            # FIXME: These are no longer the correct column names.
-            f.write('| tstart, tstop, radius, exptime, cps, error, flux, flux_error, magnitude, mag_error, inner annulus, outer annulus, background, response, counts, aperture correction 1, aperture correction 2\n')
         f.close()
-        # Setting this will now append to the file we just created
+        # Setting iocode to append to the file we just created
         args.iocode = 'ab'
     return args
 
@@ -227,7 +229,7 @@ def stamp(args):
     if not args.stamp:
         return
     else:
-        if args.verbose > 1:
+        if args.verbose:
             print 'Writing stamp preview to {f}'.format(f=args.stamp)
         width = 2.*(args.annulus2 if args.annulus2 else args.radius)
         args.skyrange = [width,width]
