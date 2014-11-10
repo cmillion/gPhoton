@@ -10,10 +10,9 @@ from optparse import OptionParser
 from dbasetools import fGetTimeRanges, suggest_parameters
 import sys
 
-#def gAperture(args):
 def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
               stepsz=False,verbose=0,clobber=False,trange=None,minexp=1.,
-              maxgap=1.):
+              maxgap=1.,maskdepth=20.,maskradius=1.5,iocode='wb'):
     """Runs gAperture and returns the data in a python dict() and as
     a CSV file if outfile is specified. Can be called from the interpreter.
     """
@@ -30,7 +29,8 @@ def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
     data = ct.write_curve(band, skypos[0], skypos[1], radius, csvfile=csvfile,
                           annulus=annulus, stepsz=stepsz, verbose=verbose,
                           clobber=clobber, trange=trange, coadd=coadd,
-                          minexp=minexp, maxgap=maxgap, iocode = args.iocode)
+                          minexp=minexp, maxgap=maxgap, iocode = iocode,
+                          maskdepth=maskdepth, maskradius=maskradius)
     return data
 
 def check_radius(args):
@@ -188,10 +188,15 @@ def setup_parser():
     parser.add_argument("--overwrite", "--ow", "--clobber",
         action="store_true", dest="overwrite", default=False,
         help="Overwrite any preexisting files. Will supress warnings.")
-    parser.add_argument("--iocode", action="store", dest="iocode",
-        default="wb",
+    parser.add_argument("--iocode", action="store", dest="iocode", default="wb",
         help="The iocode to be past to the cvs writer. Don't much with this.",
         type=str)
+    parser.add_argument("--maskdepth", action="store", dest="maskdepth",
+        help="Depth of the background mask in AB Magnitudes.",
+        type=float, default=20.0)
+    parser.add_argument("--maskradius", action="store", dest="maskradius",
+        help="Radius of background mask in n sigmas (assuming Gaussians)",
+        type=float, default=1.5)
     return parser
 
 def reconstruct_command(args):
@@ -250,4 +255,5 @@ if __name__ == '__main__':
                      annulus=args.annulus, stepsz=args.stepsz,
                      verbose=args.verbose, clobber=args.overwrite,
                      trange=args.trange, coadd=args.coadd, minexp=args.minexp,
-                     maxgap=args.gap)
+                     maxgap=args.gap,iocode=args.iocode,
+                     maskdepth=args.maskdepth,maskradius=args.maskradius)
