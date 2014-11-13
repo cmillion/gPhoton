@@ -256,7 +256,9 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         lcurve['bg']['simple']=0.
         lcurve['bg']['cheese']=0.
 
-    lcurve['exptime'] = np.array([dbt.compute_exptime(band,trange,verbose=verbose) for trange in zip(lcurve['t0_data'],lcurve['t1_data'])])
+    lcurve['exptime'] = np.array(
+        [dbt.compute_exptime(band,trange,verbose=verbose)
+            for trange in zip(lcurve['t0_data'],lcurve['t1_data'])])
     if verbose:
         mc.print_inline("Returning curve data.")
     lcurve['photons'] = data

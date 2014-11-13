@@ -49,7 +49,7 @@ def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,
             print "No exposure time available at {pos}".format(pos=skypos)
         return np.array([],dtype='float64')
     except TypeError:
-        print "Is one of your inputs malformed?"
+        print "Is one of the inputs malformed?"
         raise
     except:
         raise
@@ -89,13 +89,18 @@ def exposure(band,trange,verbose=0,retries=20):
     rawexpt = trange[1]-trange[0]
     if rawexpt<=0:
         return 0.
+    print 'Getting exposure in {t0} to {t1}'.format(t0=trange[0],t1=trange[1])
     shutdead = gQuery.getArray(gQuery.shutdead(band,trange[0],trange[1]),
                                             verbose=verbose,retries=retries)
-    deadtime = gQuery.getValue(gQuery.deadtime(band,trange[0],trange[1]))
+    # NOTE: The deadtime correction in shutdead does not work properly in FUV
+    # so we're doing it separately for now.
+    deadtime = gQuery.getValue(gQuery.deadtime(band,trange[0],trange[1]),
+                                            verbose=verbose,retries=retries)
     #return (rawexpt-shutdead[0][0])*(1.-shutdead[1][0])
     return (rawexpt-shutdead[0][0])*(1.-deadtime)
 
-def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,retries=20):
+def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,
+                    retries=20,chunksz=10.e6):
     """Compute the effective exposure time."""
     # FIXME: This skypos[] check appears to not work properly and leads
     #  to dramatic _underestimates_ of the exposure time.
@@ -104,11 +109,12 @@ def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,retries=20):
                                  retries=retries)
     else:
         tranges=[trange]
+    print 'Computing exposure within {tr}'.format(tr=tranges)
+    print 'Based on skypos {sp}'.format(sp=skypos)
     exptime = 0.
     for trange in tranges:
-        # To create manageable queries, only compute exposure time in
-        # chunks <=10e6 seconds
-        chunksz = 10.e6
+        # Traverse the exposure ranges in manageable chunks to hopefully keep
+        # the query response time below the HTTP timeout...
         chunks = (np.linspace(trange[0],trange[1],
                              num=np.ceil((trange[1]-trange[0])/chunksz)) if
                                  (trange[1]-trange[0])>chunksz else

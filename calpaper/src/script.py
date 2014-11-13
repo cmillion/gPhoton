@@ -33,7 +33,7 @@ for skypos in zip(coaddlist['avaspra'],coaddlist['avaspdec']):
     expt = gFind.gFind(skypos=skypos,band='FUV',quiet=True)['expt'][0]
     if (expt<=5000.) and (expt>0):
         print skypos, expt, True
-        datamaker('FUV',skypos,'calrun_FUV.csv',maglimit=24)
+        datamaker('FUV',skypos,'calrun_FUV-foo.csv',maglimit=24)
     else:
         print skypos, expt, False
 

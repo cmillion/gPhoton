@@ -1,14 +1,14 @@
 #!/usr/bin/python
 import os
 import ast
+import sys
 import argparse
 import numpy as np
 import curvetools as ct
+import gphoton_args as gargs
 #from curvetools import
 from imagetools import write_jpeg # For JPEG preview image creation
-from optparse import OptionParser
 from dbasetools import fGetTimeRanges, suggest_parameters
-import sys
 
 def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
               stepsz=False,verbose=0,clobber=False,trange=None,minexp=1.,
@@ -38,46 +38,12 @@ def check_radius(args):
     if not args.radius and not args.suggest:
         print "Must specify an aperture radius."
         exit(0)
-    return
-
-def suggest(args):
-    """Generates suggested lightcurve parameters with suggest_parameters()"""
-    (args.ra, args.dec, args.radius, args.annulus1,
-                   args.annulus2) = suggest_parameters(args.band,args.skypos)
-    if args.verbose:
-        print "Recentering on [{ra},{dec}]".format(ra=args.ra,dec=args.dec)
-        print "Setting radius to {radius}".format(radius=args.radius)
-        print "Setting annulus to [{ann1},{ann2}]".format(
-                                        ann1=args.annulus1,ann2=args.annulus2)
     return args
-
-def check_skypos(args):
-    """Checks and formats the skypos values."""
-    if not (args.ra and args.dec) and not args.skypos:
-        print "Must specify either RA/Dec or skypos."
-        exit(0)
-    elif (args.ra and args.dec) and args.skypos:
-        print "Must specify either RA/Dec or skypos. Not both."
-        exit(0)
-    elif (args.ra and args.dec):
-        args.skypos = [args.ra,args.dec]
-    else:
-        args.skypos = list(args.skypos)
-    if args.suggest:
-        args = suggest(args)
-    return args
-
-def check_stepsz(args):
-    """Checks the stepsz value."""
-    if args.stepsz and args.coadd:
-        print "Cannot specify both --stepsz and --coadd."
-        exit(0)
-    return
 
 def check_annulus(args):
     """Checks and formats the annulus values."""
     if not (args.annulus1 and args.annulus2) and not args.annulus:
-        args.annulus = False
+        args.annulus = None
     elif args.annulus1 and args.annulus2:
         args.annulus = [args.annulus1,args.annulus2]
     else:
@@ -107,31 +73,10 @@ def check_tranges(args):
         args.tranges=[args.tranges]
     return args
 
-def check_args(args):
-    """Checks validity of command line arguments and, in some cases
-    massages them a little bit.
-    """
-    check_radius(args)
-    check_stepsz(args)
-    args = check_skypos(args)
-    args = check_annulus(args)
-    args = check_tranges(args)
-    return args
-
-def setup_parser():
+def setup_parser(iam='gaperture'):
     """Defines command line arguments."""
     parser = argparse.ArgumentParser(description="Generate a light curve")
-    parser.add_argument("-b", "--band", action="store", dest="band",
-        help="[NF]UV band designation", choices=['NUV','FUV'], type=str.upper,
-        required=True)
-    parser.add_argument("-r", "--ra", action="store", dest="ra",
-        help="Center Right Ascension position in decimal degrees",
-        type=np.float64)
-    parser.add_argument("-d", "--dec", action="store", dest="dec",
-        help="Center Declination position in decimal degrees", type=np.float64)
-    parser.add_argument("--skypos", action="store", dest="skypos",
-        help="Alternate method for specifying sky position as '[RA,Dec]'",
-        type=ast.literal_eval)
+    parser = gargs.common_args(parser,iam)
     parser.add_argument("-a", "--aperture", action="store", dest="radius",
         help="Aperture radius in decimal degrees",
         type=float)
@@ -142,62 +87,36 @@ def setup_parser():
     parser.add_argument("--annulus", action="store", type=ast.literal_eval,
         dest="annulus",
         help="Annulus inner and outer radius definition as '[inner,outer]'")
-    parser.add_argument("--t0", "--tmin", action="store", dest="tmin",
-        help="Minimum time to consider.",default=1.,type=np.float64)
-    parser.add_argument("--t1", "--tmax", action="store", dest="tmax",
-        help="Maxium time to consider.",default=1000000000000.,type=np.float64)
-    parser.add_argument("--tranges", "--trange", action="store",
-        type=ast.literal_eval, dest="tranges",
-        help="List of time ranges with format '[[t0,t1],[t2,t3],...]'")
-    parser.add_argument("-s", "--step", "--frame", action="store", type=float,
-        dest="stepsz", help="Step size in seconds",default=0)
     parser.add_argument("-f", "--file", "--outfile", "--csvfile",
         action="store", type=str, dest="csvfile", help="CSV output file")
-    parser.add_argument("-v", "--verbose", action="store", type=int,
-        dest="verbose", help="Display more output. Set to 0-2.", default=0,
-        choices=[0,1,2,3])
     parser.add_argument("--stamp", action="store", type=str, dest="stamp",
         help="Filename for a JPEG preview stamp of the targeted region.")
-    parser.add_argument("--calpath", action="store", type=str, dest="calpath",
-        help="Path to the directory that contains the calibration files.",
-        default='../cal/')
     parser.add_argument("--addhdr", action="store_true", dest="addhdr",
         help="Add command line and column names to the top of the .csv file.")
-    parser.add_argument("--coadd", action="store_true", dest="coadd",
-        help="Return the coadded flux over all requested time ranges.")
-    parser.add_argument("-g", "--gap", "--maxgap", action="store",
-        type=float, dest="gap",
-        help="Max gap size in seconds to be considered contiguous.",
-        default=1)
-    parser.add_argument("--minexp", action="store", type=float,
-        dest="minexp",
-        help="Minimum contiguous exposure in seconds for data to be reported.",
-        default=1)
-    parser.add_argument("--detsize", action="store", type=float,
-        dest="detsize",
-        help="Set the FOVdiameter in degrees for the exposure search.",
-        default=1.25)
     parser.add_argument("--bestparams", "--best", action="store_true",
         dest="best",
         help="Auto set params to produce the highest quality lightcurve.",
         default=False)
-    parser.add_argument("--suggest", "--optimize", action="store_true",
-        dest="suggest",
-        help="Suggest optimum parameters for aperture photometry.",
-        default=False)
-    parser.add_argument("--overwrite", "--ow", "--clobber",
-        action="store_true", dest="overwrite", default=False,
-        help="Overwrite any preexisting files. Will supress warnings.")
     parser.add_argument("--iocode", action="store", dest="iocode", default="wb",
         help="The iocode to be past to the cvs writer. Don't much with this.",
         type=str)
-    parser.add_argument("--maskdepth", action="store", dest="maskdepth",
+    parser.add_argument("--bgmaskdepth", action="store", dest="maskdepth",
         help="Depth of the background mask in AB Magnitudes.",
         type=float, default=20.0)
-    parser.add_argument("--maskradius", action="store", dest="maskradius",
+    parser.add_argument("--bgmaskradius", action="store", dest="maskradius",
         help="Radius of background mask in n sigmas (assuming Gaussians)",
         type=float, default=1.5)
     return parser
+
+def check_args(args,iam='gaperture'):
+    """Checks validity of command line arguments and, in some cases
+    massages them a little bit.
+    """
+    args = gargs.check_common_args(args,iam)
+    args = check_radius(args)
+    args = check_annulus(args)
+    #args = check_tranges(args)
+    return args
 
 def reconstruct_command(args):
     """Reconstruct the command line."""
@@ -255,5 +174,5 @@ if __name__ == '__main__':
                      annulus=args.annulus, stepsz=args.stepsz,
                      verbose=args.verbose, clobber=args.overwrite,
                      trange=args.trange, coadd=args.coadd, minexp=args.minexp,
-                     maxgap=args.gap,iocode=args.iocode,
-                     maskdepth=args.maskdepth,maskradius=args.maskradius)
+                     maxgap=args.maxgap, iocode=args.iocode,
+                     maskdepth=args.maskdepth, maskradius=args.maskradius)
