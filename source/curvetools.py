@@ -257,7 +257,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         lcurve['bg']['cheese']=0.
 
     lcurve['exptime'] = np.array(
-        [dbt.compute_exptime(band,trange,verbose=verbose)
+        [dbt.compute_exptime(band,trange,skypos=[ra0,dec0],
+                             verbose=verbose,coadd=coadd)
             for trange in zip(lcurve['t0_data'],lcurve['t1_data'])])
     if verbose:
         mc.print_inline("Returning curve data.")
@@ -315,11 +316,6 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                 stepsz=None, trange=None, verbose=0, coadd=False,
                 iocode='wb',calpath='../cal/',detsize=1.25,clobber=False,
                 minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5):
-#   This gets confused when gAperture.py initializes the file
-#    if os.path.exists(str(csvfile)) and not clobber:
-#        print "Error: {csvfile} already exists.".format(csvfile=csvfile)
-#        print "Specify clobber=True to overwrite."
-#        return
     data = getcurve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
                     trange=trange, verbose=verbose, coadd=coadd, minexp=minexp,
                     maxgap=maxgap,calpath=calpath,maskdepth=maskdepth,
@@ -345,7 +341,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
     else:
         if verbose>2:
             print "No CSV file requested."
-        if verbose:
-            print "AB Magnitudes:"
+        if verbose or (not verbose and not csvfile):
+            print "AB Magnitudes:               "
             print data['mag']
     return data

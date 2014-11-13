@@ -89,7 +89,6 @@ def exposure(band,trange,verbose=0,retries=20):
     rawexpt = trange[1]-trange[0]
     if rawexpt<=0:
         return 0.
-    print 'Getting exposure in {t0} to {t1}'.format(t0=trange[0],t1=trange[1])
     shutdead = gQuery.getArray(gQuery.shutdead(band,trange[0],trange[1]),
                                             verbose=verbose,retries=retries)
     # NOTE: The deadtime correction in shutdead does not work properly in FUV
@@ -100,17 +99,19 @@ def exposure(band,trange,verbose=0,retries=20):
     return (rawexpt-shutdead[0][0])*(1.-deadtime)
 
 def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,
-                    retries=20,chunksz=10.e6):
+                    retries=20,chunksz=10.e6,coadd=False):
     """Compute the effective exposure time."""
     # FIXME: This skypos[] check appears to not work properly and leads
     #  to dramatic _underestimates_ of the exposure time.
-    if skypos:
+    if skypos and coadd:
         tranges = fGetTimeRanges(band,skypos,verbose=verbose,trange=trange,
                                  retries=retries)
     else:
         tranges=[trange]
-    print 'Computing exposure within {tr}'.format(tr=tranges)
-    print 'Based on skypos {sp}'.format(sp=skypos)
+    if verbose>1:
+        print 'Computing exposure within {tr}'.format(tr=tranges)
+        if skypos and coadd:
+            print 'Based on skypos {sp}'.format(sp=skypos)
     exptime = 0.
     for trange in tranges:
         # Traverse the exposure ranges in manageable chunks to hopefully keep
