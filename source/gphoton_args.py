@@ -76,7 +76,7 @@ def common_args(parser,function_name,
     parser.add_argument("-v", "--verbose", action="store", type=int,
         dest="verbose", help="Prints extra information to STDOUT (higher "+
         "number = more output). Choices are {0,1,2,3}, default = 0.",
-        default=0., choices=[0,1,2,3])
+        default=0, choices=[0,1,2,3])
 
     if function_name in ['gaperture','gmap']:
         parser.add_argument("--calpath", action="store", type=str,

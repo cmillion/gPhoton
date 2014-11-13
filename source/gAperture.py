@@ -37,7 +37,7 @@ def check_radius(args):
     """Checks the radius value."""
     if not args.radius and not args.suggest:
         print "Must specify an aperture radius."
-        exit(0)
+        raise SystemExit
     return args
 
 def check_annulus(args):
@@ -64,7 +64,7 @@ def check_tranges(args):
     args.tranges = fGetTimeRanges(args.band,args.skypos,maxgap=args.gap,verbose=args.verbose,minexp=args.minexp,trange=args.tranges,detsize=args.detsize)
     if not len(args.tranges):
         print 'No exposure time in database.'
-        exit(0)
+        raise SystemExit
     if args.verbose:
         print 'Using {t} seconds (raw) in {n} distinct exposures.'.format(
             t=(args.tranges[:,1]-args.tranges[:,0]).sum(),n=len(args.tranges))
@@ -93,10 +93,6 @@ def setup_parser(iam='gaperture'):
         help="Filename for a JPEG preview stamp of the targeted region.")
     parser.add_argument("--addhdr", action="store_true", dest="addhdr",
         help="Add command line and column names to the top of the .csv file.")
-    parser.add_argument("--bestparams", "--best", action="store_true",
-        dest="best",
-        help="Auto set params to produce the highest quality lightcurve.",
-        default=False)
     parser.add_argument("--iocode", action="store", dest="iocode", default="wb",
         help="The iocode to be past to the cvs writer. Don't much with this.",
         type=str)
@@ -136,7 +132,7 @@ def setup_file(args):
         if not args.overwrite and os.path.exists(args.csvfile):
             print "{csvfile} exists. Pass --overwrite to replace it.".format(
                                                           csvfile=args.csvfile)
-            exit(0)
+            raise SystemExit
         f = open(args.csvfile,args.iocode)
         if args.addhdr:
             if args.verbose:
