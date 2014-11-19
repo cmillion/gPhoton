@@ -3,7 +3,6 @@ import ast
 import argparse
 import dbasetools as dbt
 import gphoton_args as gargs
-#from gphoton_args import common_args, check_args
 
 def gFind(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1.0,
 		  minexp=1.0, quiet=False, retries=20, skypos=None, trange=None,
@@ -58,8 +57,7 @@ def setup_parser(iam='gfind'):
 		dest="exponly", default=False, help="Report only the total raw "+
 		"exposure time available in the database.")
 	parser.add_argument("--quiet", action="store_true", dest="quiet",
-		help="Suppress all information to STDOUT? Default = False.",
-		default=False)
+		help="Suppress all information to STDOUT.", default=False)
 	return parser
 
 def check_args(args,iam='gfind'):

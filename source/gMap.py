@@ -4,9 +4,7 @@ import ast
 import argparse
 from imagetools import *
 import dbasetools as dbt
-#from dbasetools import fGetTimeRanges
 import gphoton_args as gargs
-#from gphoton_args import common_args, check_args
 import numpy as np
 
 def gMap(band=None,calpath=os.pardir+os.sep+"cal"+os.sep,cntfile=False,
@@ -75,10 +73,17 @@ def setup_parser(iam='gmap'):
 
 def check_args(args,iam='gmap'):
 	args = gargs.check_common_args(args,iam)
+
+	# Check that either skypos _or_ (raangle _and_ decangle) are defined.
+	if not args.skyrange and not (args.raangle and args.decangle):
+		raise SystemExit('Must specify either skyrange or ra/dec angle.')
+	if (args.raangle and not args.decangle) or (not args.raangle and args.decangle):
+		raise SystemExit('Must specify both raangle and deangle or neither.')
+
 	# --skryange overwrites everything
 	if args.skyrange:
 		if np.array(args.skyrange).shape==(2,):
-			args.ra, args.dec = args.skyrange
+			args.raangle, args.decangle = args.skyrange
 		else:
 			gPhotonArgsError("Invalid --skyrange: {s}".format(s=args.skyrange))
 
@@ -93,19 +98,19 @@ def check_args(args,iam='gmap'):
 		if not a:
 			continue
 		if a<=0:
-			raise gPhotonArgsError("Subtended angles must be > 0 degrees.")
+			raise SystemExit("Subtended angles must be > 0 degrees.")
 
 	args.skyrange = [args.raangle,args.decangle]
 
 	if args.detsize and args.detsize <= 0.:
-		raise gPhotonArgsError("Mask radius must be > 0 degrees.")
+		raise SystemExit("Mask radius must be > 0 degrees.")
 	if args.memlight and args.memlight <= 0.:
-		raise gPhotonArgsError("Maximum data chunk per must be > 0 seconds.")
+		raise SystemExit("Maximum data chunk per must be > 0 seconds.")
 
 	for image in [args.cntfile, args.intfile, args.rrfile]:
 		# Check for overwriting existing images.
 		if image and os.path.exists(image) and not args.overwrite:
-			raise gPhotonArgsError("{f} already exists.".format(f=image))
+			raise SystemExit("{f} already exists.".format(f=image))
 		# Check if you need to create a new directory and create it
 		if image and os.path.isdir(os.path.dirname(image)):
 			print 'Creating directory: {d}'.format(

@@ -25,7 +25,7 @@ def common_args(parser,function_name,
     try:
         function_name = function_name.strip().lower()
     except AttributeError:
-        raise gPhotonArgsError("Invalid function name specified")
+        raise gPhotonArgsError("Invalid function: {f}".format(f=function_name))
 
     if not function_name in valid_functions:
         raise gPhotonArgsError("{f} not in {vf}".format(
@@ -77,6 +77,10 @@ def common_args(parser,function_name,
         dest="verbose", help="Prints extra information to STDOUT (higher "+
         "number = more output). Choices are {0,1,2,3}, default = 0.",
         default=0, choices=[0,1,2,3])
+    parser.add_argument("--suggest", action="store_true", dest="suggest",
+        help="Suggest reasonable parameters for aperture photometry. "+
+             "The includes recenting on the nearest MCAT source.",
+        default=False)
 
     if function_name in ['gaperture','gmap']:
         parser.add_argument("--calpath", action="store", type=str,
@@ -92,11 +96,6 @@ def common_args(parser,function_name,
         parser.add_argument("-s", "--step", "--frame", action="store",
             type=float, dest="stepsz", help="Step size for lightcurve or "+
             "movie in seconds.  Default = 0. (no binning).", default=0.)
-
-    if function_name in ['gfind','gaperture']:
-        parser.add_argument("--suggest", action="store_true", dest="suggest",
-            help="Suggest reasonable parameters for aperture photometry.",
-            default=False)
 
     return parser
 
@@ -117,12 +116,13 @@ def check_common_args(args,function_name,
     try:
         args.band = args.band.strip().upper()
     except AttributeError:
-        raise gPhotonArgsError("Invalid band: {b}".format(b=args.band))
+        raise SystemExit("Invalid band: {b}".format(b=args.band))
 
     if not (args.ra or args.dec) and not args.skypos:
-        raise gPhotonArgsError("Must specify either RA/DEC or SKYPOS.")
+        raise SystemExit("Must specify either RA/DEC or SKYPOS.")
     elif (args.ra and args.dec) and args.skypos:
-        raise gPhotonArgsError("Must specify either RA/DEC or SKYPOS, not both.")
+        if not (args.ra==args.skypos[0] and args.dec==args.skypos[1]):
+            raise SystemExit("Must specify either RA/DEC or SKYPOS, not both.")
     elif (args.ra and args.dec) and not args.skypos:
         args.skypos = [args.ra,args.dec]
     elif not (args.ra and args.dec) and args.skypos:
@@ -146,11 +146,11 @@ def check_common_args(args,function_name,
         args.ra, args.dec = args.skypos
 
     if args.ra and not (0. <= args.ra <= 360.):
-        raise gPhotonArgsError(
+        raise SystemExit(
             "RA of {ra} does not satisfy 0 <= RA <= 360".format(ra=args.ra))
 
     if args.dec and not (-90 <= args.dec <= 90):
-        raise gPhotonArgsError(
+        raise SystemExit(
             "Dec of {dec} does not satisfy -90 <= DEC <= 90".format(
                                                                 dec=args.dec))
 
@@ -171,7 +171,7 @@ def check_common_args(args,function_name,
 
     # FIXME: This should accept a list of ranges...
     if args.trange:
-        if len(args.trange) != 2:
+        if np.array(args.trange).shape != (2,):
             raise gPhotonArgsError(
                 "trange (--trange) must be a 2-element list.")
         elif args.trange[0] <= 0. or args.trange[1] <= 0.:

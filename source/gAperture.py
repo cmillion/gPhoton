@@ -6,7 +6,6 @@ import argparse
 import numpy as np
 import curvetools as ct
 import gphoton_args as gargs
-#from curvetools import
 from imagetools import write_jpeg # For JPEG preview image creation
 from dbasetools import fGetTimeRanges, suggest_parameters
 
@@ -48,30 +47,32 @@ def check_annulus(args):
         args.annulus = [args.annulus1,args.annulus2]
     else:
         args.annulus = list(args.annulus)
+        if not (args.annulus1 and args.annulus2):
+            args.annulus1 = args.annulus[0]
+            args.annulus2 = args.annulus[1]
     return args
 
-# TODO: fGetTimeRanges is probalby not actually necessary. What we want
-# instead is for a way to specifically include or exclude time ranges.
-def check_tranges(args):
-    """Checks and formats the tranges values."""
-    args.tranges = (list(args.tranges) if
-                                    args.tranges else [args.tmin,args.tmax])
-    args.trange = [np.array(args.tranges).flatten().min(),
-                   np.array(args.tranges).flatten().max()]
-    if args.verbose:
-        print 'Using all exposure in [{tmin},{tmax}]'.format(
-                                                tmin=args.tmin,tmax=args.tmax)
-    args.tranges = fGetTimeRanges(args.band,args.skypos,maxgap=args.gap,verbose=args.verbose,minexp=args.minexp,trange=args.tranges,detsize=args.detsize)
-    if not len(args.tranges):
-        print 'No exposure time in database.'
-        raise SystemExit
-    if args.verbose:
-        print 'Using {t} seconds (raw) in {n} distinct exposures.'.format(
-            t=(args.tranges[:,1]-args.tranges[:,0]).sum(),n=len(args.tranges))
-    # Make sure tranges is a 2D array
-    if len(np.array(args.tranges).shape)==1:
-        args.tranges=[args.tranges]
-    return args
+# This is now handled in gphoton_args.py
+#def check_tranges(args):
+#    """Checks and formats the tranges values."""
+#    args.tranges = (list(args.tranges) if
+#                                    args.tranges else [args.tmin,args.tmax])
+#    args.trange = [np.array(args.tranges).flatten().min(),
+#                   np.array(args.tranges).flatten().max()]
+#    if args.verbose:
+#        print 'Using all exposure in [{tmin},{tmax}]'.format(
+#                                                tmin=args.tmin,tmax=args.tmax)
+#    args.tranges = fGetTimeRanges(args.band,args.skypos,maxgap=args.gap,verbose=args.verbose,minexp=args.minexp,trange=args.tranges,detsize=args.detsize)
+#    if not len(args.tranges):
+#        print 'No exposure time in database.'
+#        raise SystemExit
+#    if args.verbose:
+#        print 'Using {t} seconds (raw) in {n} distinct exposures.'.format(
+#            t=(args.tranges[:,1]-args.tranges[:,0]).sum(),n=len(args.tranges))
+#    # Make sure tranges is a 2D array
+#    if len(np.array(args.tranges).shape)==1:
+#        args.tranges=[args.tranges]
+#    return args
 
 def setup_parser(iam='gaperture'):
     """Defines command line arguments."""

@@ -212,7 +212,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         if i-1<0 or i==len(bins):
             continue
         if verbose:
-            mc.print_inline('Binning '+str(i)+' of '+str(len(ix))+'.')
+            mc.print_inline('Binning {c} of {l}.'.format(
+                                                    c=cnt,l=len(np.unique(ix))))
         t_ix = np.where(ix==i)
         lcurve['t0_data'][i-1] = data['t'][t_ix].min()
         lcurve['t1_data'][i-1] = data['t'][t_ix].max()
