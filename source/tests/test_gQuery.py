@@ -85,12 +85,5 @@ class TestGQueryFunctions(unittest.TestCase):
     def test_rect(self):
         self.assertEqual(gq.rect(self.NUV,self.ra0,self.dec0,self.t0,self.t1,self.radius,self.radius),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select time,ra,dec from fGetObjFromRectNUV(176.917525856,176.92152585600002,0.253696872807,0.257696872807,766525332995,866526576995,0)&format=json&timeout={}')
 
-#if __name__ == '__main__':
-#    suite = unittest.TestSuite()
-#    loader = unittest.TestLoader()
-#    for testcase in [TestGQueryFunctions]:
- #       tests = loader.loadTestsFromTestCase(testcase)
-  #      suite.addTests(tests)
-   # unittest.TextTestRunner(verbosity=2).run(suite)
 suite = unittest.TestLoader().loadTestsFromTestCase(TestGQueryFunctions)
 unittest.TextTestRunner(verbosity=2).run(suite)
