@@ -295,12 +295,13 @@ class TestArguments(unittest.TestCase):
             gm.check_args(gm.check_args(gm.setup_parser().parse_args(
                 ['--skypos',str(self.skypos),'--raangle','0.1'])))
 
-#    def test_angle_notall(self):
-#        """Check that you can't specify both skypos and raangle/decangle. (gMap)"""
-#        with self.assertRaises(SystemExit):
-#            gm.check_args(gm.check_args(gm.setup_parser().parse_args(
-#                ['--skypos',str(self.skypos),'--raangle','0.1'
-#                 '--raangle','0.1','--decangle','0.2'])))
+    def test_tmin_tmax_propagate_defaults(self):
+        """If trange is not given, sub in tmin/tmax."""
+        args = self.parser.parse_args(['--skypos',str(self.skypos),
+            '-a',str(self.radius)])
+        args = ga.check_args(args)
+        self.assertAlmostEqual(args.tmin,args.trange[0][0])
+        self.assertAlmostEqual(args.tmax,args.trange[0][1])
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestArguments)
 unittest.TextTestRunner(verbosity=2).run(suite)

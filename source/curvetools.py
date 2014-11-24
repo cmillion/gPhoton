@@ -212,7 +212,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
             continue
         if verbose:
             mc.print_inline('Binning {i} of {l}.'.format(
-                                                    c=i,l=len(np.unique(ix))))
+                                                    i=i,l=len(np.unique(ix))))
         t_ix = np.where(ix==i)
         lcurve['t0_data'][i-1] = data['t'][t_ix].min()
         lcurve['t1_data'][i-1] = data['t'][t_ix].max()
@@ -266,11 +266,12 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     return lcurve
 
 def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
-             trange=None, verbose=0, coadd=False,minexp=1.,maxgap=1.,
-             calpath='../cal/',maskdepth=20,maskradius=1.5):
+             trange=None, tranges=None, verbose=0, coadd=False, minexp=1.,
+             maxgap=1., calpath='../cal/', maskdepth=20, maskradius=1.5):
     if verbose:
         mc.print_inline("Getting exposure ranges.")
-    tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
+    if not tranges:
+        tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
                                  maxgap=maxgap, minexp=minexp, verbose=verbose)
     if not len(tranges):
         print "No exposure time at this location: [{ra},{dec}]".format(
@@ -313,13 +314,13 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     return lcurve
 
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
-                stepsz=None, trange=None, verbose=0, coadd=False,
+                stepsz=None, trange=None, tranges=None, verbose=0, coadd=False,
                 iocode='wb',calpath='../cal/',detsize=1.25,clobber=False,
                 minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5):
     data = getcurve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
-                    trange=trange, verbose=verbose, coadd=coadd, minexp=minexp,
-                    maxgap=maxgap,calpath=calpath,maskdepth=maskdepth,
-                    maskradius=maskradius)
+                    trange=trange, tranges=tranges, verbose=verbose,
+                    coadd=coadd, minexp=minexp, maxgap=maxgap, calpath=calpath,
+                    maskdepth=maskdepth, maskradius=maskradius)
     if csvfile:
         cols = ['counts', 'sources', 'bg_counts', 'responses',
                 'detxs', 'detys', 't0_data', 't1_data', 't_mean', 'cps',

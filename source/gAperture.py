@@ -10,8 +10,8 @@ from imagetools import write_jpeg # For JPEG preview image creation
 from dbasetools import fGetTimeRanges, suggest_parameters
 
 def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
-              stepsz=False,verbose=0,clobber=False,trange=None,minexp=1.,
-              maxgap=1.,maskdepth=20.,maskradius=1.5,iocode='wb'):
+              stepsz=False,verbose=0,clobber=False,trange=None,tranges=None,
+              minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,iocode='wb'):
     """Runs gAperture and returns the data in a python dict() and as
     a CSV file if outfile is specified. Can be called from the interpreter.
     """
@@ -19,7 +19,7 @@ def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
         print "Generating a light curve with the following paramters:"
         print " band:    {band}".format(band=band)
         print " skypos:  {skypos}".format(skypos=skypos)
-        print " trange:  {trange}".format(trange=trange)
+        print " tranges: {trange}".format(trange=trange if trange else tranges)
         print " radius:  {radius}".format(radius=radius)
         print " annulus: {annulus}".format(annulus=annulus)
         print " stepsz:  {stepsz}".format(stepsz=stepsz)
@@ -27,9 +27,10 @@ def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
         print " verbose: {verbose}".format(verbose=verbose)
     data = ct.write_curve(band, skypos[0], skypos[1], radius, csvfile=csvfile,
                           annulus=annulus, stepsz=stepsz, verbose=verbose,
-                          clobber=clobber, trange=trange, coadd=coadd,
-                          minexp=minexp, maxgap=maxgap, iocode = iocode,
-                          maskdepth=maskdepth, maskradius=maskradius)
+                          clobber=clobber, trange=trange, tranges=tranges,
+                          coadd=coadd, minexp=minexp, maxgap=maxgap,
+                          iocode = iocode, maskdepth=maskdepth,
+                          maskradius=maskradius)
     return data
 
 def check_radius(args):
@@ -51,28 +52,6 @@ def check_annulus(args):
             args.annulus1 = args.annulus[0]
             args.annulus2 = args.annulus[1]
     return args
-
-# This is now handled in gphoton_args.py
-#def check_tranges(args):
-#    """Checks and formats the tranges values."""
-#    args.tranges = (list(args.tranges) if
-#                                    args.tranges else [args.tmin,args.tmax])
-#    args.trange = [np.array(args.tranges).flatten().min(),
-#                   np.array(args.tranges).flatten().max()]
-#    if args.verbose:
-#        print 'Using all exposure in [{tmin},{tmax}]'.format(
-#                                                tmin=args.tmin,tmax=args.tmax)
-#    args.tranges = fGetTimeRanges(args.band,args.skypos,maxgap=args.gap,verbose=args.verbose,minexp=args.minexp,trange=args.tranges,detsize=args.detsize)
-#    if not len(args.tranges):
-#        print 'No exposure time in database.'
-#        raise SystemExit
-#    if args.verbose:
-#        print 'Using {t} seconds (raw) in {n} distinct exposures.'.format(
-#            t=(args.tranges[:,1]-args.tranges[:,0]).sum(),n=len(args.tranges))
-#    # Make sure tranges is a 2D array
-#    if len(np.array(args.tranges).shape)==1:
-#        args.tranges=[args.tranges]
-#    return args
 
 def setup_parser(iam='gaperture'):
     """Defines command line arguments."""
@@ -112,7 +91,6 @@ def check_args(args,iam='gaperture'):
     args = gargs.check_common_args(args,iam)
     args = check_radius(args)
     args = check_annulus(args)
-    #args = check_tranges(args)
     return args
 
 def reconstruct_command(args):
@@ -154,7 +132,7 @@ def stamp(args):
             print 'Writing stamp preview to {f}'.format(f=args.stamp)
         width = 2.*(args.annulus2 if args.annulus2 else args.radius)
         args.skyrange = [width,width]
-        write_jpeg(args.stamp, args.band, args.skypos, args.tranges,
+        write_jpeg(args.stamp, args.band, args.skypos, args.trange,
                    args.skyrange, width=False, height=False,
                    stepsz=args.stepsz, clobber=args.overwrite,
                    verbose=args.verbose)
@@ -170,6 +148,7 @@ if __name__ == '__main__':
     data = gAperture(args.band, args.skypos, args.radius, csvfile=args.csvfile,
                      annulus=args.annulus, stepsz=args.stepsz,
                      verbose=args.verbose, clobber=args.overwrite,
-                     trange=args.trange, coadd=args.coadd, minexp=args.minexp,
-                     maxgap=args.maxgap, iocode=args.iocode,
-                     maskdepth=args.maskdepth, maskradius=args.maskradius)
+                     trange=[args.tmin,args.tmax], tranges=args.trange,
+                     coadd=args.coadd, minexp=args.minexp, maxgap=args.maxgap,
+                     iocode=args.iocode, maskdepth=args.maskdepth,
+                     maskradius=args.maskradius)

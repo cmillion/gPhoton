@@ -71,8 +71,9 @@ def common_args(parser,function_name,
         "in GALEX time standard).  Default = 1000000000000.",
         default=1000000000000.)
     parser.add_argument("--trange", "--tranges", action="store", dest="trange",
-        help="Time range in which to limit the search, in the format "+
-        "'[t0,t1]' (specify in GALEX time standard).", type=ast.literal_eval)
+        help="Time range(s) in which to limit the search, in the format "+
+        "'[t0,t1]' or '[[t0_a,t1_a],[t0_b,t1_b]]' (format in GALEX time).",
+        type=ast.literal_eval)
     parser.add_argument("-v", "--verbose", action="store", type=int,
         dest="verbose", help="Prints extra information to STDOUT (higher "+
         "number = more output). Choices are {0,1,2,3}, default = 0.",
@@ -155,43 +156,42 @@ def check_common_args(args,function_name,
                                                                 dec=args.dec))
 
     if args.detsize and args.detsize <= 0.:
-        raise gPhotonArgsError(
+        raise SystemExit(
             "Effective field diameter (--detsize) must be > 0")
 
     if args.maxgap and args.maxgap <= 0.:
-        raise gPhotonArgsError(
+        raise SystemExit(
             "Maximum gap length (--maxgap) must be > 0 seconds.")
-
     if args.minexp and args.minexp <= 0.:
-        raise gPhotonArgsError(
+        raise SystemExit(
             "Minimum valid exposure depth (--minexp) must be > 0 seconds.")
 
     if args.retries and args.retries <= 0.:
-        raise gPhotonArgsError("Number of retries (--retries) must be > 0.")
+        raise SystemExit("Number of retries (--retries) must be > 0.")
 
-    # FIXME: This should accept a list of ranges...
-    if args.trange:
-        if np.array(args.trange).shape != (2,):
-            raise gPhotonArgsError(
-                "trange (--trange) must be a 2-element list.")
-        elif args.trange[0] <= 0. or args.trange[1] <= 0.:
-            raise gPhotonArgsError(
-                "trange (--trange) elements must both be > 0.")
-        elif args.trange[0] >= args.trange[1]:
-            raise gPhotonArgsError(
-                "Maximum time must be greater than minimum time "+
-                "in trange(--trange)")
-    elif args.tmin and args.tmax:
-        args.trange = [args.tmin,args.tmax]
-
-    if args.tmin and args.tmin <= 0.:
-        raise gPhotonArgsError("T0 (--t0) must be > 0.")
-
-    if args.tmax and args.tmax <= 0.:
-        raise gPhotonArgsError("T1 (--t1) must be > 0.")
-
+    # tmin / tmax must be defined and reasonable
+    if not args.tmin or args.tmin <= 0.:
+        raise SystemExit("T0 (--t0) must be > 0.")
+    if not args.tmax or args.tmax <= 0.:
+        raise SystemExit("T1 (--t1) must be > 0.")
     if args.tmin >= args.tmax:
-        raise gPhotonArgsError(
+        raise SystemExit(
             "Minimum time (--t0) must be < maximum time (--t1).")
+
+    if args.trange:
+        if np.array(args.trange).shape==(2,):
+            args.trange=[args.trange]
+        if not (len(np.array(args.trange).shape)==2 and
+                                            np.array(args.trange).shape[1]==2):
+            raise SystemExit(
+                "trange (--trange) must be a pairwise list.")
+        # Individually check the entries for sanity
+        for t in args.trange:
+            if t[0]<=0 or t[1]<=0:
+                raise SystemExit('Times must be positive: {t}'.format(t=t))
+            if t[1]<=t[0]:
+                raise SystemExit('Start time ({t0}) must preceed end time ({t1})'.format(t0=t[0],t1=t[1]))
+    else:
+        args.trange=[[args.tmin,args.tmax]]
 
     return args
