@@ -11,22 +11,22 @@ def gMap(band=None,calpath=os.pardir+os.sep+"cal"+os.sep,cntfile=False,
 		 coadd=False,detsize=1.25,intfile=False,rrfile=False,skypos=None,
 		 maxgap=1500.,memlight=100.,minexp=1.,overwrite=False,retries=20,
 		 skyrange=None,stepsz=0.,trange=None,verbose=0):
-	if verbose:
-		print 'Using all exposure in [{t0},{t1}]'.format(
-													t0=trange[0],t1=trange[1])
-	trange = dbt.fGetTimeRanges(band,skypos,maxgap=maxgap,verbose=verbose,
-							minexp=minexp,trange=trange,detsize=detsize,
-							retries=retries)
-	if not len(trange):
-		print 'No exposure time in database.'
-		exit(0)
-	if verbose:
-		print 'Using {traw} seconds (raw) in {n} distinct exposures.'.format(
-							traw=(trange[:,1]-trange[:,0]).sum(), n=len(trange))
-
-	# Make sure trange is a 2D array
-	if len(np.array(trange).shape)==1:
-		trange=[trange]
+#	if verbose:
+#		print 'Using all exposure in [{t0},{t1}]'.format(
+#													t0=trange[0],t1=trange[1])
+#	trange = dbt.fGetTimeRanges(band,skypos,maxgap=maxgap,verbose=verbose,
+#							minexp=minexp,trange=trange,detsize=detsize,
+#							retries=retries)
+#	if not len(trange):
+#		print 'No exposure time in database.'
+#		exit(0)
+#	if verbose:
+#		print 'Using {traw} seconds (raw) in {n} distinct exposures.'.format(
+#							traw=(trange[:,1]-trange[:,0]).sum(), n=len(trange))
+#
+#	# Make sure trange is a 2D array
+#	if len(np.array(trange).shape)==1:
+#		trange=[trange]
 
 	# Use a mix of strings (if we want to make an output file) and Booleans
 	# (False if we do not). I don't think this is the best way (I'd rather
@@ -75,12 +75,17 @@ def check_args(args,iam='gmap'):
 	args = gargs.check_common_args(args,iam)
 
 	# Check that either skypos _or_ (raangle _and_ decangle) are defined.
-	if not args.skyrange and not (args.raangle and args.decangle):
+	if (not args.skyrange and not (args.raangle and args.decangle)
+															and not args.angle):
 		raise SystemExit('Must specify either skyrange or ra/dec angle.')
 	if (args.raangle and not args.decangle) or (not args.raangle and args.decangle):
 		raise SystemExit('Must specify both raangle and deangle or neither.')
 
-	# --skryange overwrites everything
+	# --angle overwrites everything
+	if args.angle:
+		args.skyrange = [args.angle,args.angle]
+
+	# --skryange overwrites everything else
 	if args.skyrange:
 		if np.array(args.skyrange).shape==(2,):
 			args.raangle, args.decangle = args.skyrange
@@ -123,6 +128,12 @@ if __name__ == '__main__':
 	"""Called when gMap is executed directly through command line."""
 	args = setup_parser().parse_args()
 	args = check_args(args)
+	if args.verbose:
+		print '{a} image(s) at {pos}'.format(
+				a='Writing' if not args.coadd else 'Coadding', pos=args.skypos)
+		print '		of dimensions {w}x{h} degrees'.format(w=args.skyrange[0],
+														  h=args.skyrange[1])
+		print '		in time range(s): {t}'.format(t=args.trange)
 	gMap(band=args.band, calpath=args.calpath, cntfile=args.cntfile,
 		coadd=args.coadd, detsize=args.detsize, intfile=args.intfile,
 		rrfile=args.rrfile, skypos=args.skypos, maxgap=args.maxgap,

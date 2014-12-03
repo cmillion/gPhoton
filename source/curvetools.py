@@ -270,10 +270,10 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
              maxgap=1., calpath='../cal/', maskdepth=20, maskradius=1.5):
     if verbose:
         mc.print_inline("Getting exposure ranges.")
-    if not tranges:
+    if tranges==None:
         tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
                                  maxgap=maxgap, minexp=minexp, verbose=verbose)
-    if not len(tranges):
+    elif not np.array(tranges).shape:
         print "No exposure time at this location: [{ra},{dec}]".format(
                                                             ra=ra0,dec=dec0)
     # FIXME: Everything goes to hell if no exposure time is available...

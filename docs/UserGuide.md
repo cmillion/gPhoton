@@ -8,17 +8,17 @@ Myron Smith<sup>2</sup>
 
 ###Summary
 
-The MAST/GALEX photon database and tools exist in an effort to maximize the flexibility and utility of the GALEX data set. The GALEX detectors were microchannel plates which recorded detector position and time-of-arrival information for every detected photon event with a time resolution of five thousandths of a second, composing a huge and rich short time domain survey of the UV. Due to digital storage space and processing limitations, the data was only formally released by the mission team as integrated images. The photon list files--internally known as _x-files_--were only available by special request, and there was little to no additional support for their calibration or use.
+The MAST/GALEX photon database and tools exist in an effort to maximize the flexibility and utility of the GALEX data set. The GALEX detectors were microchannel plates which recorded detector position and time-of-arrival information for every detected photon event with a time resolution of five thousandths of a second, composing a huge and rich short time domain survey of the UV. Due to digital storage space and processing limitations, the data was only formally released by the mission team as integrated images. The photon list files--internally known as _x-files_--were only provided by special request and with little to no additional support for their calibration or use.
 
 The official GALEX calibration pipeline software ("the canonical pipeline")--written in about half a dozen languages with a sprawling network of complex dependencies--has also never been successfully ported to any system outside of the GALEX internal network at Caltech. Even though the source code for this pipeline will be made publicly available through the Mikulski Archive at Space Telescope (MAST) in the future, the end of the GALEX project would have effectively marked the end of the capability to generate photon level data specifically and revisit the GALEX calibration more generally. A software tool known as _gPhoton_ ("the standalone pipeline") has been developed by the authors with support of MAST and Space Telescope Science Institute (STScI) which reproduces a large portion of the official GALEX pipeline in Python and makes it possible for individual researchers to generate the photon level data and calibrated lightcurves or integrated images. It also opens the possibility of modifying or improving upon the astrometric and photometric calibrations.
 
-Additionally, the authors and MAST have undertaken to process all of the GALEX data with gPhoton and store the photon level data in a database. Once the database is fully populated (_est. 2015_), it will comprise ~180 terabytes and contain approximately 1.5 trillion rows (at one event per row). In addition to the standalone calibration pipeline, _gPhoton_, the authors have created tools ("the database tools") for querying and working with output from the photon database. These include
+Additionally, the authors and MAST have undertaken to process all of the GALEX data with gPhoton and store the photon level data in a database. Once the database is fully populated (_est. 2015_), it will comprise over 180 terabytes and contain approximately 1.5 trillion rows (at one event per row). In addition to the standalone calibration pipeline, _gPhoton_, the authors have created tools ("the database tools") for querying and working with output from the photon database. These include
 * _gFind_, for searching the database for specific coverage.
 * _gAperture_, for extracting photon lists and generating calibrated lightcurves of specific targets.
 * _gMap_, for creating calibrated images and movies.
 
 ##Getting Started
-If you are a new user of the GALEX data or have not familiarized yourself with the quirks and intricacies of the GALEX detectors and calibration, please read the official [Technical Documentation](http://www.galex.caltech.edu/researcher/techdocs.html). Please pay particular attention to [Chapter 3 - Pipeline Overview - Imaging](http://www.galex.caltech.edu/researcher/techdoc-ch3.html). This will answer many common questions of new users such as
+If you are a new user of the GALEX data or have not familiarized yourself with the quirks and intricacies of the GALEX detectors and calibration, please read the official [Technical Documentation](http://www.galex.caltech.edu/researcher/techdocs.html) with particular attention paid to [Chapter 3 - Pipeline Overview - Imaging](http://www.galex.caltech.edu/researcher/techdoc-ch3.html). This will answer many common questions of new users such as
 * What is the difference between an observation, a visit, and an eclipse?
 * What is a "dither correction?"
 * How is a _relative response map_ different from a _flat field_?
@@ -160,9 +160,9 @@ _gFind_ is the data location tool. Given a target sky position (and, optionally,
 _For the curious:_ The estimates returned by _gFind_ are computed by finding the boresight pointings (in the aspect database) which fall within a detector radius (~0.625 degrees) of the desired sky position and comparing the associated time stamps against the time stamps of data that has actually been loaded into the photon database.
 
 ####Tweaking Search Parameters
-The default allowable gap between two time stamps for them to be considered contiguous for the purposes of a _gFind_ estimate is one second. This is a reasonable minimum gap because it is the default spacing between adjacent entries in the aspect table. This parameter is adjustable, however, with the `-g` or `--gap` parameter. To consider data with gaps of as much as 100 seconds to be contiguous--a reasonable value if you want to treat all data in the same eclipse as part of the same observation--try the following command.
+The default allowable gap between two time stamps for them to be considered contiguous for the purposes of a _gFind_ estimate is one second. This is a reasonable minimum gap because it is the default spacing between adjacent entries in the aspect table. This parameter is adjustable, however, with the --maxgap` parameter. To consider data with gaps of as much as 100 seconds to be contiguous--a reasonable value if you want to treat all data in the same eclipse as part of the same observation--try the following command.
 
-    ./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --gap 100
+    ./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --maxgap 100
 
 If, additionally, you want to exclude contiguous time ranges below some minimum raw exposure time, pass that time to the `--minexp` parameter.
 
@@ -170,7 +170,7 @@ If, additionally, you want to exclude contiguous time ranges below some minimum 
 
 And, naturally, the `--gap` and `--minexp` parameters can be used in conjunction.
 
-    ./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --gap 100 --minexp 100
+    ./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --maxgap 100 --minexp 100
 
 If you want to exclude times when the source is on the edge of the detector, you can adjust the `--detsize` parameter to the desired effective detector _width_ (default = 1.25 degrees).
 
@@ -254,6 +254,8 @@ For any command, you can always request more information be printed to the termi
 ####Lightcurve File Column Definitions
 **TBD:** The column definitions for the .csv output from _gAperture_ are in flux following the recent v1.10 feature update. Please see the .csv headers.
 
+**Note:** The _bgsub suffix in a column definition means that the value is background subtracted using an estimate based on an unmasked annulus. The _bgsub_cheese suffix means that the value is background subtracted using an estimate based on a "swiss cheese" style mask of the annulus.
+
 ####Calling from within the Python Interpreter
 You can also import and work with _gAperture_ and its modules from within the Python interpeter.
 
@@ -289,12 +291,12 @@ Note that the most recent command created an image with two planes corresonding 
 
     ./gMap.py -b 'FUV' --skypos '[176.919525856024,0.255696872807351]' --angle 0.5 --tranges '[[766525332.995, 766526576.995], [919755500.995, 919755916.995]]' --count 'count.fits' --coadd
 
-However, if you do not specify any time range, _gMap_ will automatically use all available exposure. (And uses the same underlying function as _gFind_ to locate said exposure time, so therefore will also accept the `--gap` and `--minexp` and `--detsize` keywords if desired.)
+However, if you do not specify any time range, _gMap_ will automatically use all available exposure. (And uses the same underlying function as _gFind_ to locate said exposure time, so therefore will also accept the `--maxgap` and `--minexp` and `--detsize` keywords if desired.)
 
     ./gMap.py -b 'FUV' --skypos '[176.919525856024,0.255696872807351]' --angle 0.5 --count 'count.fits' --coadd
 
 ####Response Maps
-Relative response maps (_rrhr_) can be thought of as the detector flat field as projected onto the sky as a function of the detector boresight over time. Because the creation of relative response maps requires multiple computationally intensive interpolations, they take a long time to run. Intensity maps require response maps and therefore also take a long time to run. So, therefore, **WARNING: Making a response map will take longer than you expect. Do it sparingly.** If you want to create a response map, pass a FITS filename to the `--reponse` flag.
+Relative response maps (_rrhr_) can be thought of as the detector flat field as projected onto the sky as a function of the detector boresight over time. Because the creation of relative response maps requires multiple computationally intensive interpolations, they take a long time to run. Intensity maps require response maps and therefore also take a long time to run. So, therefore, **WARNING: Making a response map will take longer than you expect. Do it sparingly.** If you want to create a response map, pass a FITS filename to the `--response` flag.
 
     ./gMap.py -b 'FUV' --skypos '[176.919525856024,0.255696872807351]' --angle 0.5 --response 'response.fits' --coadd
 

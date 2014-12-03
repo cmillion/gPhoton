@@ -118,11 +118,11 @@ class TestArguments(unittest.TestCase):
 
     def test_tmax_default(self):
         """Check the default value of --tmax"""
-        self.assertAlmostEqual(self.args.tmax,1000000000000.0)
+        self.assertAlmostEqual(self.args.tmax,11.e8)
 
     def test_tmin_default(self):
         """Check the default value of --tmin"""
-        self.assertAlmostEqual(self.args.tmin,1.0)
+        self.assertAlmostEqual(self.args.tmin,6.e8)
 
     def test_trange_default(self):
         """Check the default value of --trange"""
@@ -295,13 +295,14 @@ class TestArguments(unittest.TestCase):
             gm.check_args(gm.check_args(gm.setup_parser().parse_args(
                 ['--skypos',str(self.skypos),'--raangle','0.1'])))
 
-    def test_tmin_tmax_propagate_defaults(self):
-        """If trange is not given, sub in tmin/tmax."""
-        args = self.parser.parse_args(['--skypos',str(self.skypos),
-            '-a',str(self.radius)])
-        args = ga.check_args(args)
-        self.assertAlmostEqual(args.tmin,args.trange[0][0])
-        self.assertAlmostEqual(args.tmax,args.trange[0][1])
+    # This is no longer the behavior
+    #def test_tmin_tmax_propagate_defaults(self):
+    #    """If trange is not given, sub in tmin/tmax."""
+    #    args = self.parser.parse_args(['--skypos',str(self.skypos),
+    #        '-a',str(self.radius)])
+    #    args = ga.check_args(args)
+    #    self.assertAlmostEqual(args.tmin,args.trange[0][0])
+    #    self.assertAlmostEqual(args.tmax,args.trange[0][1])
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestArguments)
 unittest.TextTestRunner(verbosity=2).run(suite)

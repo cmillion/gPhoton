@@ -65,11 +65,11 @@ def common_args(parser,function_name,
         "'[RA,Dec]'",type=ast.literal_eval)
     parser.add_argument("--t0", "--tmin", action="store", type=float,
         dest="tmin", help="Minimum date of observation to consider (specify "+
-        "in GALEX time standard).  Default = 1.",default=1.)
+        "in GALEX time standard).  Default = 6e8",default=6.e8)
     parser.add_argument("--t1", "--tmax", action="store", type=float,
         dest="tmax", help="Maxium date of observation to consider (specify "+
-        "in GALEX time standard).  Default = 1000000000000.",
-        default=1000000000000.)
+        "in GALEX time standard).  Default = 11e8",
+        default=11.e8)
     parser.add_argument("--trange", "--tranges", action="store", dest="trange",
         help="Time range(s) in which to limit the search, in the format "+
         "'[t0,t1]' or '[[t0_a,t1_a],[t0_b,t1_b]]' (format in GALEX time).",
@@ -119,8 +119,8 @@ def check_common_args(args,function_name,
     except AttributeError:
         raise SystemExit("Invalid band: {b}".format(b=args.band))
 
-    if not (args.ra or args.dec) and not args.skypos:
-        raise SystemExit("Must specify either RA/DEC or SKYPOS.")
+    if not (args.ra and args.dec) and not args.skypos:
+        raise SystemExit("Must specify either both RA/DEC or SKYPOS.")
     elif (args.ra and args.dec) and args.skypos:
         if not (args.ra==args.skypos[0] and args.dec==args.skypos[1]):
             raise SystemExit("Must specify either RA/DEC or SKYPOS, not both.")
@@ -192,6 +192,7 @@ def check_common_args(args,function_name,
             if t[1]<=t[0]:
                 raise SystemExit('Start time ({t0}) must preceed end time ({t1})'.format(t0=t[0],t1=t[1]))
     else:
-        args.trange=[[args.tmin,args.tmax]]
+        args.trange=dbt.fGetTimeRanges(args.band,args.skypos,
+                                                trange=[args.tmin,args.tmax])
 
     return args

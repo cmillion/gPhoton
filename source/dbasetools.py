@@ -31,10 +31,7 @@ def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,
     available once the database is fully populated.
 	"""
     try:
-        #FIXME: t[01] appears to have no impact on this
-        # if trange is not set, set it to an arbitrary large range in order
-        # to capture the whole mission
-        if not trange:
+        if not np.array(trange).tolist():
             trange = [1,1000000000000]
         if len(np.shape(trange))==2:
             trange=trange[0]
