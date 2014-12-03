@@ -1,16 +1,17 @@
 import gQuery
 import numpy as np
-from MCUtils import *
+from MCUtils import * # FIXME: dangerous import
 from astropy import wcs as pywcs
 from astropy.io import fits as pyfits
 import scipy.misc
 import scipy.ndimage
 from FileUtils import flat_filename
-from gnomonic import *
+import gnomonic
 import dbasetools as dbt
 import galextools as gxt
 
-def define_wcs(skypos,skyrange,width=False,height=False,verbose=0,pixsz=0.000416666666666667):
+def define_wcs(skypos,skyrange,width=False,height=False,verbose=0,
+			   pixsz=0.000416666666666667):
 	"""Define the world coordinate system (WCS)."""
 	if verbose:
 		print_inline('Defining World Coordinate System (WCS).')
@@ -34,7 +35,8 @@ def movie_tbl(band,tranges,verbose=0,framesz=0,retries=20):
 			t1 = trange[1] if i==steps else t0+stepsz
 			tstarts.append(t0)
 			tstops.append(t1)
-			exptimes.append(dbt.compute_exptime(band,[t0,t1],verbose=verbose,retries=retries))
+			exptimes.append(dbt.compute_exptime(band,[t0,t1],
+							verbose=verbose,retries=retries))
 	col1 = pyfits.Column(name='tstart',format='E',array=np.array(tstarts))
 	col2 = pyfits.Column(name='tstop',format='E',array=np.array(tstops))
 	col3 = pyfits.Column(name='exptime',format='E',array=np.array(exptimes))
@@ -43,7 +45,8 @@ def movie_tbl(band,tranges,verbose=0,framesz=0,retries=20):
 
 	return tbl
 
-def fits_header(band,skypos,tranges,skyrange,width=False,height=False,verbose=0,tscale=1000.,hdu=False,retries=20):
+def fits_header(band,skypos,tranges,skyrange,width=False,height=False,
+				verbose=0,tscale=1000.,hdu=False,retries=20):
 	"""Populate a FITS header."""
 	if verbose:
 		print_inline('Populating FITS header.')
@@ -65,7 +68,8 @@ def fits_header(band,skypos,tranges,skyrange,width=False,height=False,verbose=0,
 	# Put the total exposure time into the primary header
 	hdu.header['EXPTIME'] = 0.
 	for trange in tranges:
-		hdu.header['EXPTIME'] += dbt.compute_exptime(band,trange,verbose=verbose,retries=retries)
+		hdu.header['EXPTIME'] += dbt.compute_exptime(band,trange,
+												verbose=verbose,retries=retries)
 
 	if len(tranges)==1:
 	# Put the time range into the primary header for a single frame image
@@ -75,7 +79,8 @@ def fits_header(band,skypos,tranges,skyrange,width=False,height=False,verbose=0,
 
 	return hdu
 
-def countmap(band,skypos,tranges,skyrange,width=False,height=False,verbose=0,tscale=1000.,memlight=False,hdu=False,retries=20):
+def countmap(band,skypos,tranges,skyrange,width=False,height=False,
+			 verbose=0,tscale=1000.,memlight=False,hdu=False,retries=20):
 	"""Create a count (cnt) map."""
 	imsz = gxt.deg2pix(skypos,skyrange)
 	count = np.zeros(imsz)
@@ -87,7 +92,9 @@ def countmap(band,skypos,tranges,skyrange,width=False,height=False,verbose=0,tsc
 			t0,t1=i,i+step
 			if verbose:
 				print_inline('Coadding '+str(t0)+' to '+str(t1))
-			events = gQuery.getArray(gQuery.rect(band,skypos[0],skypos[1],t0,t1,skyrange[0],skyrange[1]),verbose=verbose,retries=retries)
+			events = gQuery.getArray(gQuery.rect(band,skypos[0],skypos[1],t0,t1,
+												 skyrange[0],skyrange[1]),
+									 verbose=verbose,retries=retries)
 
 			# Check that there is actually data here.
 			if not events:
@@ -111,17 +118,23 @@ def countmap(band,skypos,tranges,skyrange,width=False,height=False,verbose=0,tsc
 			foc = wcs.sip_pix2foc(wcs.wcs_world2pix(coo,1),1)
 
 			# Bin the events into actual image pixels
-			H,xedges,yedges=np.histogram2d(foc[:,1]-0.5,foc[:,0]-0.5,bins=imsz,range=([ [0,imsz[0]],[0,imsz[1]] ]))
+			H,xedges,yedges=np.histogram2d(foc[:,1]-0.5,foc[:,0]-0.5,
+								bins=imsz,range=([ [0,imsz[0]],[0,imsz[1]] ]))
 			count += H
 
 	return count
 
-def write_jpeg(filename,band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,clobber=False,verbose=0,tscale=1000.,retries=20):
+def write_jpeg(filename,band,skypos,tranges,skyrange,width=False,height=False,
+			   stepsz=1.,clobber=False,verbose=0,tscale=1000.,retries=20):
 	"""Write a 'preview' jpeg image from a count map."""
-	scipy.misc.imsave(filename,countmap(band,skypos,tranges,skyrange,width=width,height=height,verbose=verbose,tscale=tscale,retries=retries))
+	scipy.misc.imsave(filename,countmap(band,skypos,tranges,skyrange,
+					  width=width,height=height,verbose=verbose,tscale=tscale,
+					  retries=retries))
 	return
 
-def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,verbose=0,calpath='../cal/',tscale=1000.,response=True,hdu=False,retries=20):
+def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,
+		 verbose=0,calpath='../cal/',tscale=1000.,response=True,hdu=False,
+		 retries=20):
 	"""Generate a high resolution relative response (rrhr) map."""
 	imsz = gxt.deg2pix(skypos,skyrange)
 	# TODO the if width / height
@@ -141,7 +154,9 @@ def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,verbose
 	# 	The interpolation function is "congrid" in the same file.
 	# TODO: Should this be first order interpolation? (i.e. bilinear)
 	hrflat = scipy.ndimage.interpolation.zoom(flat,4.,order=0,prefilter=False)
-	img = np.zeros(hrflat.shape)[hrflat.shape[0]/2.-imsz[0]/2.:hrflat.shape[0]/2.+imsz[0]/2.,hrflat.shape[1]/2.-imsz[1]/2.:hrflat.shape[1]/2+imsz[1]/2.]
+	img = np.zeros(hrflat.shape)[
+				hrflat.shape[0]/2.-imsz[0]/2.:hrflat.shape[0]/2.+imsz[0]/2.,
+				hrflat.shape[1]/2.-imsz[1]/2.:hrflat.shape[1]/2+imsz[1]/2.]
 
 	for trange in tranges:
 		t0,t1=trange
@@ -157,7 +172,8 @@ def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,verbose
 		aspra0  = np.zeros(n)+skypos[0]
 		aspdec0 = np.zeros(n)+skypos[1]
 
-		xi_vec, eta_vec = gnomfwd_simple(aspra,aspdec,aspra0,aspdec0,-asptwist,1.0/36000.,0.)
+		xi_vec, eta_vec = gnomonic.gnomfwd_simple(
+							aspra,aspdec,aspra0,aspdec0,-asptwist,1.0/36000.,0.)
 
 		col = 4.*( ((( xi_vec/36000.)/(detsize/2.)*(detsize/(fltsz[0]*pixsz)) + 1.)/2. * fltsz[0]) - (fltsz[0]/2.) )
 		row = 4.*( (((eta_vec/36000.)/(detsize/2.)*(detsize/(fltsz[1]*pixsz)) + 1.)/2. * fltsz[1]) - (fltsz[1]/2.) )
@@ -167,51 +183,58 @@ def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,verbose
 		for i in range(n):
 			if verbose>1:
 				print_inline('Stamping '+str(asptime[i]))
+				# FIXME: Clean this mess up a little just for clarity.
 	        	img += scipy.ndimage.interpolation.shift(scipy.ndimage.interpolation.rotate(hrflat,-asptwist[i],reshape=False,order=0,prefilter=False),[vectors[1,i],vectors[0,i]],order=0,prefilter=False)[hrflat.shape[0]/2.-imsz[0]/2.:hrflat.shape[0]/2.+imsz[0]/2.,hrflat.shape[1]/2.-imsz[1]/2.:hrflat.shape[1]/2+imsz[1]/2.]*dbt.compute_exptime(band,[asptime[i],asptime[i]+1],verbose=verbose,retries=retries)*gxt.compute_flat_scale(asptime[i]+0.5,band,verbose=0)
 
 	return img
 
 # TODO: tranges?
 # TODO: Consolidate duplicate "reference array" code from aperture_response
-def backgroundmap(band,skypos,trange,skyrange,width=False,height=False,tscale=1000,memlight=False,verbose=0,hdu=False,NoData=-999,detsize=1.25,pixsz=0.000416666666666667,maglimit=28.,retries=20):
-	"""Generate a background (bg) map by masking out MCAT sources."""
-	imsz = gxt.deg2pix(skypos,skyrange)
+# FIXME: DEPRECATED!!*!
+#def backgroundmap(band,skypos,trange,skyrange,width=False,height=False,
+#				  tscale=1000,memlight=False,verbose=0,hdu=False,NoData=-999,
+#				  detsize=1.25,pixsz=0.000416666666666667,
+#				  maglimit=23.,retries=20):
+#	"""Generate a background (bg) map by masking out MCAT sources."""
+#	imsz = gxt.deg2pix(skypos,skyrange)
+#
+#	if verbose:
+#		print 'Integrating count map.'
+#	img = countmap(band,skypos,[trange],skyrange,width=width,height=height,verbose=verbose,memlight=memlight,retries=retries)
+#
+#	# Build a reference array
+#	xind =          np.array([range(int(imsz[1]))]*int(imsz[0]))-(imsz[0]/2.)+0.5
+#	yind = np.rot90(np.array([range(int(imsz[0]))]*int(imsz[1]))-(imsz[1]/2.))+0.5
+#	# This returns too many sources so
+#	# TODO: add some kind of crossmatch to filter duplicate sources
+#	#	or just use GCAT
+#	sources = gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],skrange[0]/2. if skyrange[0]>skyrange[1] else skyrange[1]/2.,maglimit=maglimit),retries=retries)
+#
+#	if verbose:
+#		print 'Masking '+str(len(sources))+' sources.                '
+#
+#	source_ra   = np.float32(np.array(sources)[:,0])
+#	source_dec  = np.float32(np.array(sources)[:,1])
+#	source_fwhm = np.float32(np.array(sources)[:,7:9])
+#	ra0	= np.zeros(len(sources))+skypos[0]
+#	dec0	= np.zeros(len(sources))+skypos[1]
+#
+#	xi_vec, eta_vec = gnomfwd_simple(ra0,dec0,source_ra,source_dec,np.zeros(len(sources)),1.0/36000.,0.)
+#	col  = (((( xi_vec/36000.)/(detsize/2.)*(detsize/(3840.*pixsz))+1.)/2.*3840.)-(3840./2.)+0.5)
+#	row  = ((((eta_vec/36000.)/(detsize/2.)*(detsize/(3840.*pixsz))+1.)/2.*3840.)-(3840./2.)+0.5)
+#
+#	vectors = rotvec(np.array([col,row]),np.zeros(len(sources)))
+#
+#	for i in range(len(sources)):
+#		distarray = np.sqrt(((-vectors[0,i]-xind)**2.)+((vectors[1,i]-yind)**2.))
+#		ix = np.where(distarray<=(source_fwhm[i,0] if source_fwhm[i,0]>source_fwhm[i,1] else source_fwhm[i,1])/pixsz)
+#		img[ix] = NoData
+#
+#	return img
 
-	if verbose:
-		print 'Integrating count map.'
-	img = countmap(band,skypos,[trange],skyrange,width=width,height=height,verbose=verbose,memlight=memlight,retries=retries)
-
-	# Build a reference array
-	xind =          np.array([range(int(imsz[1]))]*int(imsz[0]))-(imsz[0]/2.)+0.5
-	yind = np.rot90(np.array([range(int(imsz[0]))]*int(imsz[1]))-(imsz[1]/2.))+0.5
-	# This returns too many sources so
-	# TODO: add some kind of crossmatch to filter duplicate sources
-	#	or just use GCAT
-	sources = gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],skrange[0]/2. if skyrange[0]>skyrange[1] else skyrange[1]/2.,maglimit=maglimit),retries=retries)
-
-	if verbose:
-		print 'Masking '+str(len(sources))+' sources.                '
-
-	source_ra   = np.float32(np.array(sources)[:,0])
-	source_dec  = np.float32(np.array(sources)[:,1])
-	source_fwhm = np.float32(np.array(sources)[:,7:9])
-	ra0	= np.zeros(len(sources))+skypos[0]
-	dec0	= np.zeros(len(sources))+skypos[1]
-
-	xi_vec, eta_vec = gnomfwd_simple(ra0,dec0,source_ra,source_dec,np.zeros(len(sources)),1.0/36000.,0.)
-	col  = (((( xi_vec/36000.)/(detsize/2.)*(detsize/(3840.*pixsz))+1.)/2.*3840.)-(3840./2.)+0.5)
-	row  = ((((eta_vec/36000.)/(detsize/2.)*(detsize/(3840.*pixsz))+1.)/2.*3840.)-(3840./2.)+0.5)
-
-	vectors = rotvec(np.array([col,row]),np.zeros(len(sources)))
-
-	for i in range(len(sources)):
-		distarray = np.sqrt(((-vectors[0,i]-xind)**2.)+((vectors[1,i]-yind)**2.))
-		ix = np.where(distarray<=(source_fwhm[i,0] if source_fwhm[i,0]>source_fwhm[i,1] else source_fwhm[i,1])/pixsz)
-		img[ix] = NoData
-
-	return img
-
-def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,verbose=0,tscale=1000.,memlight=False,coadd=False,response=False,calpath='../cal/',hdu=False,retries=20):
+def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,
+		  verbose=0,tscale=1000.,memlight=False,coadd=False,
+		  response=False,calpath='../cal/',hdu=False,retries=20):
 	"""Generate a movie (mov)."""
 	# Not defining stepsz effectively creates a count map.
 	mv = []
@@ -219,7 +242,9 @@ def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,verbos
 	if coadd:
 		if verbose>2:
 			print 'Coadding across '+str(tranges)
-		mv.append(countmap(band,skypos,tranges,skyrange,width=width,height=height,verbose=verbose,tscale=tscale,memlight=memlight,hdu=hdu,retries=retries))
+		mv.append(countmap(band,skypos,tranges,skyrange,width=width,
+				  height=height,verbose=verbose,tscale=tscale,memlight=memlight,
+				  hdu=hdu,retries=retries))
 		rr.append(rrhr(band,skypos,tranges,skyrange,response=response,width=width,height=height,stepsz=1.,verbose=verbose,calpath=calpath,tscale=tscale,hdu=hdu,retries=retries)) if response else rr.append(np.ones(np.shape(mv)[1:]))
 	else:
 		for trange in tranges:

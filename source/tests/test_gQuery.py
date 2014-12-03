@@ -26,7 +26,7 @@ class TestGQueryFunctions(unittest.TestCase):
         self.assertEqual(gq.formatURL,self.formatURL)
 
     def test_mcat_sources(self):
-        self.assertEqual(gq.mcat_sources(self.NUV,self.ra0,self.dec0,self.radius,maglimit=self.maglimit),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7 from Gr6plus7.Dbo.photoobjall as p inner join Gr6plus7.Dbo.photoextract as pe on p.photoextractid=pe.photoextractid inner join gr6plus7.dbo.fgetnearbyobjeq(176.919525856, 0.255696872807, 0.24) as nb on p.objid=nb.objid and (band=3 or band=1) and NUV_mag<30.0&format=json&timeout={}')
+        self.assertEqual(gq.mcat_sources(self.NUV,self.ra0,self.dec0,self.radius,maglimit=self.maglimit),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7 fuv_magerr_aper_1, fuv_magerr_aper_2, fuv_magerr_aper_3, fuv_magerr_aper_4, fuv_magerr_aper_5, fuv_magerr_aper_6, fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2, nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5, nuv_magerr_aper_6, nuv_magerr_aper_7 from Gr6plus7.dbo.photoobjall as p inner join Gr6plus7.dbo.photoextract as pe on p.photoextractid=pe.photoextractid inner join Gr6plus7.dbo.fgetnearbyobjeq(176.919525856, 0.255696872807, 0.24) as nb on p.objid=nb.objid and (band=3 or band=1) and NUV_mag<30.0&format=json&timeout={}')
 
     def test_exposure_ranges(self):
         self.assertEqual(gq.exposure_ranges(self.NUV,self.ra0,self.dec0,t0=self.t0,t1=self.t1,detsize=self.detsize),"http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select distinct time from fGetNearbyAspectEq(176.919525856,0.255696872807,((1.25/2.0)*60.0),766525332995,866526576995) where band='NUV' or band='FUV/NUV' order by time&format=json&timeout={}")
@@ -44,7 +44,7 @@ class TestGQueryFunctions(unittest.TestCase):
         self.assertEqual(gq.deadtime2(self.NUV,self.t0,self.t1),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select count(*) from NUVPhotonsNULLV where time between 766525332995 and 866526576995&format=json&timeout={}')
 
     def test_deadtime(self):
-        self.assertEqual(gq.deadtime(self.NUV,self.t0,self.t1),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select sum(dt) * 0.0000057142857142857145 / (866526576.995-766525332.995) from(select count(*) as dt from NUVPhotonsNULLV where time between 766525332995 and 866526576995 union all select count(*) as dt from NUVPhotonsV where time between 766525332995 and 866526576995) x&format=json&timeout={}')
+        self.assertEqual(gq.deadtime(self.NUV,self.t0,self.t1),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select sum(dt)*0.0000057142857142857145 / (866526576.995-766525332.995) from(select count(*) as dt from NUVPhotonsNULLV where time between 766525332995 and 866526576995 union all select count(*) as dt from NUVPhotonsV where time between 766525332995 and 866526576995) x&format=json&timeout={}')
 
     def test_boxcount(self):
         self.assertEqual(gq.boxcount(self.NUV,self.t0,self.t1,self.xr,self.yr),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select count(*) from NUVPhotonsNULLV where time between 766525332995 and 866526576995 and x between 200 and 400 and y between 300 and 500&format=json&timeout={}')
@@ -72,26 +72,18 @@ class TestGQueryFunctions(unittest.TestCase):
 
     def test_exptime(self):
         self.assertEqual(gq.exptime(self.NUV,self.t0,self.t1),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select * from fGetNUVEffectiveExposureTime(766525332995,866526576995,1.0)&format=json&timeout={}')
-       
+
     def test_aspect(self):
         self.assertEqual(gq.aspect(self.t0,self.t1),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select eclipse, filename, time, ra, dec, twist, flag, ra0, dec0, twist0 from aspect where time between 766525332995 and 866526576995 order by time&format=json&timeout={}')
-       
+
     def test_aspect_ecl(self):
         self.assertEqual(gq.aspect_ecl(self.eclipse),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select eclipse, filename, time, ra, dec, twist, flag, ra0, dec0, twist0 from aspect where eclipse=23456 order by time&format=json&timeout={}')
-        
+
     def test_box(self):
         self.assertEqual(gq.box(self.NUV,self.ra0,self.dec0,self.t0,self.t1,self.radius),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select time,ra,dec from NUVPhotonsV where time between 766525332995 and 866526576995 and ra between 176.91552585600002 and 176.923525856 and dec between 0.251696872807 and 0.259696872807 and flag=0&format=json&timeout={}')
-           
+
     def test_rect(self):
         self.assertEqual(gq.rect(self.NUV,self.ra0,self.dec0,self.t0,self.t1,self.radius,self.radius),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select time,ra,dec from fGetObjFromRectNUV(176.917525856,176.92152585600002,0.253696872807,0.257696872807,766525332995,866526576995,0)&format=json&timeout={}')
 
-#if __name__ == '__main__':
-#    suite = unittest.TestSuite()
-#    loader = unittest.TestLoader()
-#    for testcase in [TestGQueryFunctions]:
- #       tests = loader.loadTestsFromTestCase(testcase)
-  #      suite.addTests(tests)
-   # unittest.TextTestRunner(verbosity=2).run(suite)
 suite = unittest.TestLoader().loadTestsFromTestCase(TestGQueryFunctions)
 unittest.TextTestRunner(verbosity=2).run(suite)
-

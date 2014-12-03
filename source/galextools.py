@@ -53,7 +53,7 @@ def apcorrect1(radius,band):
 def apcorrect2(radius,band):
     """Compute an aperture correction. 2nd way.
     radius - in degrees
-	Uses the data in Table 1 from 
+	Uses the data in Table 1 from
     www.galex.caltech.edu/research/techdoch-ch5.html
     """
     if not band in ['NUV','FUV']:
@@ -83,9 +83,10 @@ def apcorrect2(radius,band):
 #
 
 def photometric_repeatability(cps,expt,band):
-	"""Estimate the photometric repeatability vs. magnitude."""
-	scale = 0.050 if band=='FUV' else 0.027
-	return -2.5 * (np.log10(cps) - np.log10(cps + np.sqrt(cps * expt + (scale * cps * expt)**2.)/expt))
+    """Estimate the photometric repeatability vs. magnitude."""
+    scale = 0.050 if band=='FUV' else 0.027
+    return -2.5*(np.log10(cps)-
+                 np.log10(cps+np.sqrt(cps*expt+(scale*cps*expt)**2.)/expt))
 
 def detbg(area, band):
 	"""Nominal background in counts per second per 1.5" pixel"""
@@ -183,4 +184,3 @@ def compute_flat_scale(t,band,verbose=0):
         print "         flat scale = ",flat_scale
 
     return flat_scale
-
