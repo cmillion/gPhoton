@@ -54,17 +54,17 @@ class TestRegression(unittest.TestCase):
         for binsize in (out['t1']-out['t0'])[:-1]:
             self.assertAlmostEqual(binsize,self.stepsz)
         # Check the magnitudes (no bg subtraction)
-        for i,mag in enumerate([ 17.19841479,  17.09919236,  17.00233571,
-                                 16.86784918,  16.58430949,  15.63895192,
-                                 12.89357513,  12.61903232,  12.64400935,
+        for i,mag in enumerate([ 17.19836281,  17.09897678,  17.00228114,
+                                 16.86768186,  16.58436345,  15.63889791,
+                                 12.88250218,  12.61903232,  12.64400935,
                                  11.96701482,  12.27271088,  12.56295656,
                                  12.7914485 ]):
             self.assertAlmostEqual(out['mag'][i],mag)
         # w/ background subtraction: What this might really be testing is the
         #  efficiency of the Monte Carlo annulus area estimate...
-        for i,bgsubmag in enumerate([ 17.58547049,  17.44205476,  17.30132051,
-                                      17.12370517,  16.78253582,  15.71813784,
-                                      12.90024444,  12.62460547,  12.64943953,
+        for i,bgsubmag in enumerate([ 17.58541851,  17.44183919,  17.30126593,
+                                      17.12353785,  16.78258979,  15.71808383,
+                                      12.88917149,  12.62460547,  12.64943953,
                                       11.9710767 ,  12.27723637,  12.56842635,
                                       12.79805813]):
             self.assertAlmostEqual(out['mag_bgsub_cheese'][i],bgsubmag)
@@ -79,18 +79,18 @@ class TestRegression(unittest.TestCase):
         for binsize in (out['t1']-out['t0'])[:-1]:
             self.assertAlmostEqual(binsize,self.stepsz)
         # Check the magnitudes (no bg subtraction)
-        for i,mag in enumerate([ 18.87932829,  18.50234969,  18.57950219,
-                                 18.49660729,  18.075215  ,  16.8611657 ,
+        for i,mag in enumerate([ 18.87932679,  18.48008581,  18.55708448,
+                                 18.47418146,  18.07477455,  16.8611657 ,
                                  13.17292039,  13.05277282,  13.06770171,
-                                 12.10430201,  12.65757588,  13.24457888,
+                                 12.10430201,  12.65757588,  13.23356214,
                                  13.55337665]):
             self.assertAlmostEqual(out['mag'][i],mag)
         # w/ background subtraction: What this might really be testing is the
         #  efficiency of the Monte Carlo annulus area estimate...
-        for i,bgsubmag in enumerate([ 19.22893351,  18.72267317,  18.84746486,
-                                      18.73284177,  18.24935528,  16.92506023,
+        for i,bgsubmag in enumerate([ 19.22893201,  18.70040929,  18.82504715,
+                                      18.71041594,  18.24891483,  16.92506023,
                                       13.1785874 ,  13.05737169,  13.07264662,
-                                      12.11070168,  12.66165582,  13.24924074,
+                                      12.11070168,  12.66165582,  13.238224  ,
                                       13.55910122]):
             self.assertAlmostEqual(out['mag_bgsub_cheese'][i],bgsubmag)
 

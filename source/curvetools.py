@@ -214,11 +214,11 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
             mc.print_inline('Binning {i} of {l}.'.format(
                                                     i=i,l=len(np.unique(ix))))
         t_ix = np.where(ix==i)
-        lcurve['t0_data'][i-1] = data['t'][t_ix].min()
-        lcurve['t1_data'][i-1] = data['t'][t_ix].max()
-        lcurve['t_mean'][i-1] = data['t'][t_ix].mean()
         # TODO: Optionally limit data to specific parts of detector.
         rad_ix = np.where((angSep <= radius) & (ix == i))
+        lcurve['t0_data'][i-1] = data['t'][t_ix and rad_ix].min()
+        lcurve['t1_data'][i-1] = data['t'][t_ix and rad_ix].max()
+        lcurve['t_mean'][i-1] = data['t'][t_ix and rad_ix].mean()
         lcurve['counts'][i-1] = len(rad_ix[0])
         lcurve['sources'][i-1] = (1./data['response'][rad_ix]).sum()
         lcurve['responses'][i-1] = data['response'][rad_ix].mean()
