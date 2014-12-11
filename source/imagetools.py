@@ -1,9 +1,10 @@
 import gQuery
 import numpy as np
-from MCUtils import * # FIXME: dangerous import
+import MCUtils as mc
 from astropy import wcs as pywcs
 from astropy.io import fits as pyfits
 import scipy.misc
+import scipy.special # erfc
 import scipy.ndimage
 from FileUtils import flat_filename
 import gnomonic
@@ -14,7 +15,7 @@ def define_wcs(skypos,skyrange,width=False,height=False,verbose=0,
 			   pixsz=0.000416666666666667):
 	"""Define the world coordinate system (WCS)."""
 	if verbose:
-		print_inline('Defining World Coordinate System (WCS).')
+		mc.print_inline('Defining World Coordinate System (WCS).')
 	wcs = pywcs.WCS(naxis=2) # NAXIS = 2
 	imsz = gxt.deg2pix(skypos,skyrange)
 	wcs.wcs.cdelt = np.array([-pixsz,pixsz])
@@ -26,7 +27,7 @@ def define_wcs(skypos,skyrange,width=False,height=False,verbose=0,
 def movie_tbl(band,tranges,verbose=0,framesz=0,retries=20):
 	"""Initialize a FITS table to contain movie frame information."""
 	if verbose:
-		print_inline('Populating exposure time table.')
+		mc.print_inline('Populating exposure time table.')
 	tstarts,tstops,exptimes=[],[],[]
 	for trange in tranges:
 		stepsz = framesz if framesz else trange[1]-trange[0]
@@ -49,7 +50,7 @@ def fits_header(band,skypos,tranges,skyrange,width=False,height=False,
 				verbose=0,tscale=1000.,hdu=False,retries=20):
 	"""Populate a FITS header."""
 	if verbose:
-		print_inline('Populating FITS header.')
+		mc.print_inline('Populating FITS header.')
 	hdu = hdu if hdu else pyfits.PrimaryHDU()
 	wcs = define_wcs(skypos,skyrange,width=width,height=height)
 	hdu.header['CDELT1'],hdu.header['CDELT2'] = wcs.wcs.cdelt
@@ -79,6 +80,65 @@ def fits_header(band,skypos,tranges,skyrange,width=False,height=False,
 
 	return hdu
 
+def sigmaclip_bg(data,radius,annulus,skypos,maxiter=10,sigmaclip=3.,
+				 gausslim=50.,verbose=0,pixsz=0.000416666666666667):
+	"""Produce an estimate of background counts within an aperture (radius)
+	using a sigma clipping method for extracting the background from an
+	annulus.
+	This attempts to reproduce the calcuations of the backcalc() function in
+	mapaps/poissonbg.c of the mission pipeline. (Probably written by Ted Wyder.)
+	"""
+	# FIXME: Does not apply response!
+	d = mc.angularSeparation(
+		skypos[0],skypos[1],data['ra'],data['dec'])
+	# This cut is now handled by the ugly loop below, which barely dodges a
+	# conceptula issue about fractional pixels...
+	#ix = np.where((d>annulus[0]) & (d<annulus[1]))
+	coo=zip(data['ra'],data['dec'])
+
+	imsz=gxt.deg2pix(skypos,[annulus[1]*2,annulus[1]*2])
+	wcs=define_wcs(skypos,[annulus[1]*2,annulus[1]*2])
+	foc=wcs.sip_pix2foc(wcs.wcs_world2pix(coo,1),1)
+	H,xedges,yedges=np.histogram2d(foc[:,1]-0.5,foc[:,0]-0.5,bins=imsz,
+										range=([ [0,imsz[0]],[0,imsz[1]] ]))
+
+	# Convert Gaussian sigma to a probability
+	problim = 0.5*scipy.special.erfc(sigmaclip/np.sqrt(2.0));
+
+	# Mask out non-annulus regions... there's probalby a more pythonic way
+	bgimg=np.copy(H)
+	for i in range(H.shape[0]):
+		for j in range(H.shape[1]):
+			# Add a little buffer to account for pixel widths?
+			if (mc.distance(H.shape[0]/2.,H.shape[1]/2.,i,j)<annulus[0]/pixsz or
+				mc.distance(H.shape[0]/2.,H.shape[1]/2.,i,j)>annulus[1]/pixsz):
+				bgimg[i,j]=-1
+
+	ix=np.where(bgimg>0)
+	m,s=bgimg[ix].mean(),bgimg[ix].std()
+	d = 1.
+	for i in range(maxiter):
+		if d<=10e-5 or m<2:
+			continue
+		if m>=gausslim:
+			# Mask anything outside of 3 sigma from the mean (of unmasked data)
+			klim=m+sigmaclip*np.sqrt(m)#s
+			klo=m-sigmaclip*np.sqrt(m)#s
+			if verbose:
+				print 'Gaussian cut: {klo} to {klim}'.format(klo=klo,klim=klim)
+		else:
+			klim = scipy.special.gammainccinv(m,problim)
+			klo = -1 # None
+			if verbose:
+				print 'Poisson cut: {klo} to {klim}'.format(klo=klo,klim=klim)
+		ix = np.where((bgimg>=klim) | (bgimg<=klo))
+		bgimg[ix]=-1
+		ix=np.where(bgimg>0)
+		d = np.abs((bgimg[ix].mean()-m)/m)# - 1)
+		m,s=bgimg[ix].mean(),bgimg[ix].std()
+	ix = np.where(bgimg>0)
+	return mc.area(radius)*bgimg[ix].mean()/mc.area(pixsz)
+
 def countmap(band,skypos,tranges,skyrange,width=False,height=False,
 			 verbose=0,tscale=1000.,memlight=False,hdu=False,retries=20):
 	"""Create a count (cnt) map."""
@@ -91,7 +151,7 @@ def countmap(band,skypos,tranges,skyrange,width=False,height=False,
 		for i in np.arange(trange[0],trange[1],step):
 			t0,t1=i,i+step
 			if verbose:
-				print_inline('Coadding '+str(t0)+' to '+str(t1))
+				mc.print_inline('Coadding '+str(t0)+' to '+str(t1))
 			events = gQuery.getArray(gQuery.rect(band,skypos[0],skypos[1],t0,t1,
 												 skyrange[0],skyrange[1]),
 									 verbose=verbose,retries=retries)
@@ -182,7 +242,7 @@ def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,
 
 		for i in range(n):
 			if verbose>1:
-				print_inline('Stamping '+str(asptime[i]))
+				mc.print_inline('Stamping '+str(asptime[i]))
 				# FIXME: Clean this mess up a little just for clarity.
 	        	img += scipy.ndimage.interpolation.shift(scipy.ndimage.interpolation.rotate(hrflat,-asptwist[i],reshape=False,order=0,prefilter=False),[vectors[1,i],vectors[0,i]],order=0,prefilter=False)[hrflat.shape[0]/2.-imsz[0]/2.:hrflat.shape[0]/2.+imsz[0]/2.,hrflat.shape[1]/2.-imsz[1]/2.:hrflat.shape[1]/2+imsz[1]/2.]*dbt.compute_exptime(band,[asptime[i],asptime[i]+1],verbose=verbose,retries=retries)*gxt.compute_flat_scale(asptime[i]+0.5,band,verbose=0)
 
@@ -252,7 +312,7 @@ def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,
 			steps = np.ceil((trange[1]-trange[0])/stepsz)
 			for i,t0 in enumerate(np.arange(trange[0],trange[1],stepsz)):
 				if verbose>1:
-					print_inline('Movie frame '+str(i+1)+' of '+str(int(steps)))
+					mc.print_inline('Movie frame '+str(i+1)+' of '+str(int(steps)))
 				t1 = trange[1] if i==steps else t0+stepsz
 				mv.append(countmap(band,skypos,[[t0,t1]],skyrange,width=width,height=height,verbose=verbose,tscale=tscale,memlight=memlight,hdu=hdu,retries=retries))
 	# FIXME: This should not create an rr unless it's requested...

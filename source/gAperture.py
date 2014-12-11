@@ -11,7 +11,8 @@ from dbasetools import fGetTimeRanges, suggest_parameters
 
 def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
               stepsz=False,verbose=0,clobber=False,trange=None,tranges=None,
-              minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,iocode='wb'):
+              minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,iocode='wb',
+              sigmaclip=3.):
     """Runs gAperture and returns the data in a python dict() and as
     a CSV file if outfile is specified. Can be called from the interpreter.
     """
@@ -30,7 +31,7 @@ def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
                           clobber=clobber, trange=trange, tranges=tranges,
                           coadd=coadd, minexp=minexp, maxgap=maxgap,
                           iocode = iocode, maskdepth=maskdepth,
-                          maskradius=maskradius)
+                          maskradius=maskradius, sigmaclip=sigmaclip)
     return data
 
 def check_radius(args):
@@ -82,6 +83,9 @@ def setup_parser(iam='gaperture'):
     parser.add_argument("--bgmaskradius", action="store", dest="maskradius",
         help="Radius of background mask in n sigmas (assuming Gaussians)",
         type=float, default=1.5)
+    parser.add_argument("--sigmaclip", "--sigma", action="store",
+        dest="sigmaclip", help="Gaussian sigma at which to clip background.",
+        type=float, default=3.0)
     return parser
 
 def check_args(args,iam='gaperture'):
@@ -151,4 +155,4 @@ if __name__ == '__main__':
                      trange=[args.tmin,args.tmax], tranges=args.trange,
                      coadd=args.coadd, minexp=args.minexp, maxgap=args.maxgap,
                      iocode=args.iocode, maskdepth=args.maskdepth,
-                     maskradius=args.maskradius)
+                     maskradius=args.maskradius,sigmaclip=args.sigmaclip)

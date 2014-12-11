@@ -1,3 +1,5 @@
+# see also source/regtestutils.py
+
 %pylab
 
 from regtestutils import *
