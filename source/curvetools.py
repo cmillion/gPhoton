@@ -102,10 +102,10 @@ def bg_mask_annulus(band,ra0,dec0,annulus,ras,decs,responses):
                   (mc.angularSeparation(ra0,dec0,ras,decs)<=annulus[1]))
     return ras[ix],decs[ix],responses[ix]
 
-def bg_mask_sources(band,ra0,dec0,ras,decs,responses,sources):
+def bg_mask_sources(band,ra0,dec0,ras,decs,responses,sources,mult=2):
     for i in range(len(sources['ra'])):
         ix = np.where(mc.angularSeparation(sources['ra'][i], sources['dec'][i],
-                      ras,decs)>=sources['fwhm'][i,:].max())
+                      ras,decs)>=mult*sources['fwhm'][i,:].max())
         ras, decs, responses = ras[ix], decs[ix], responses[ix]
     return ras,decs,responses
 
@@ -116,6 +116,7 @@ def bg_mask(band,ra0,dec0,annulus,ras,decs,responses,sources):
 
 def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e4,ntests=10):
     #mc.print_inline('Estimating area of masked background annulus.')
+    # This is just a really naive Monte Carlo
     ratios = np.zeros(ntests)
     for i in range(ntests):
         ann_events = bg_mask_annulus(band,ra0,dec0,annulus,
@@ -227,7 +228,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
             lcurve['bg']['cheese'][i-1] = cheese_bg(band, ra0, dec0, radius,
                 annulus, data['ra'][t_ix], data['dec'][t_ix],
                 data['response'][t_ix], maglimit=maglimit,
-                eff_area=lcurve['bg']['eff_area'],sources=lcurve['bg']['sources'])
+                eff_area=lcurve['bg']['eff_area'],
+                sources=lcurve['bg']['sources'])
         else:
             lcurve['bg_counts'][i-1]=0.
             lcurve['bg']['simple'][i-1]=0.

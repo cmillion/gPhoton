@@ -59,7 +59,7 @@ def manage_requests(query,maxcnt=100,wait=10):
 			time.sleep(wait)
 			cnt += 1
 			print_inline('Query retry attempt '+str(int(cnt))+'.')
-            
+
 
 	print 'Query unsuccessful after '+str(int(maxcnt))+' attempts.'
 	print '		'+str(query)
@@ -153,7 +153,7 @@ def chunks(array,length=10,verbose=0):
 def angularSeparation(ra0,dec0,ra1,dec1):
 	"""Compute angular separation in degrees of points on the sky.
     It is important, especially for small angular separations, that the
-    values for ra[01] and dec[01] have precision of float65 or better.
+    values for ra[01] and dec[01] have precision of float64 or better.
     """
 	dtor = np.pi/180.
 	radeg = 1./dtor
