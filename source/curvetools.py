@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import os
 # gPhoton specific
 import gQuery
@@ -11,12 +10,12 @@ from FileUtils import flat_filename
 
 def gphot_params(band,skypos,radius,annulus=None,calpath='../cal/',
                  verbose=0.,detsize=1.25,stepsz=None,
-                 trange=None,maglimit=None):
+                 trange=None,maskdepth=None,maskradius=None):
     """Populate a dict() with parameters that are constant over all bins."""
     return {'band':band,'ra0':skypos[0],'dec0':skypos[1],'skypos':skypos,
             'trange':trange,'radius':radius,'annulus':annulus,
             'stepsz':stepsz,'calpath':calpath,'verbose':verbose,
-            'maglimit':maglimit,'detsize':detsize,
+            'maskdepth':maskdepth,'maskradius':maskradius,'detsize':detsize,
             'apcorrect1':gxt.apcorrect1(radius,band),
             'apcorrect2':gxt.apcorrect2(radius,band),
             'detbg':gxt.detbg(mc.area(radius),band)}
@@ -89,23 +88,29 @@ def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
     events = hashresponse(band, events, calpath=calpath, verbose=verbose)
     return events
 
-def bg_sources(band,ra0,dec0,radius,maglimit=28.):
-    sources = gQuery.getArray(gQuery.mcat_sources(band,ra0,dec0,radius,
-                                                      maglimit=maglimit))
-    return {'ra':np.float32(np.array(sources)[:,0]),
-            'dec':np.float32(np.array(sources)[:,1]),
-            'fwhm':np.float32(np.array(sources)[:,7:9]),
-            'maglimit':maglimit,'radius':radius}
+def bg_sources(band,ra0,dec0,radius,maskdepth=20.0,maskradius=1.5,margin=0.001):
+    sources = gQuery.getArray(gQuery.mcat_sources(band,ra0,dec0,radius+margin,
+                                                      maglimit=maskdepth))
+    try:
+        return {'ra':np.float32(np.array(sources)[:,0]),
+                'dec':np.float32(np.array(sources)[:,1]),
+                'fwhm':np.float32(np.array(sources)[:,7:9]),
+                'maskdepth':maskdepth,'maskradius':maskradius,
+                'radius':radius}
+    except IndexError:
+        return {'ra':np.array([]),'dec':np.array([]),
+                'fwhm':np.array([]),'maglimit':maglimit,'radius':radius}
 
 def bg_mask_annulus(band,ra0,dec0,annulus,ras,decs,responses):
     ix = np.where((mc.angularSeparation(ra0,dec0,ras,decs)>=annulus[0]) &
                   (mc.angularSeparation(ra0,dec0,ras,decs)<=annulus[1]))
     return ras[ix],decs[ix],responses[ix]
 
-def bg_mask_sources(band,ra0,dec0,ras,decs,responses,sources,mult=2):
+def bg_mask_sources(band,ra0,dec0,ras,decs,responses,sources,maskradius=1.5):
+    # At present, masks to 1.5 sigma where FWHM = 2.3548*sigma
     for i in range(len(sources['ra'])):
         ix = np.where(mc.angularSeparation(sources['ra'][i], sources['dec'][i],
-                      ras,decs)>=mult*sources['fwhm'][i,:].max())
+                ras,decs)>=(maskradius/2.3548)*np.median(sources['fwhm'][i,:]))
         ras, decs, responses = ras[ix], decs[ix], responses[ix]
     return ras,decs,responses
 
@@ -114,7 +119,7 @@ def bg_mask(band,ra0,dec0,annulus,ras,decs,responses,sources):
                                          decs,responses)
     return bg_mask_sources(band,ra0,dec0,ras,decs,responses,sources)
 
-def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e4,ntests=10):
+def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e5,ntests=10):
     #mc.print_inline('Estimating area of masked background annulus.')
     # This is just a really naive Monte Carlo
     ratios = np.zeros(ntests)
@@ -132,14 +137,14 @@ def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e4,ntests=10):
     return (mc.area(annulus[1])-mc.area(annulus[0]))*ratios.mean()
 
 # FIXME: This recomputes eff_area every pass at huge computational cost.
-def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maglimit=28.,
-              eff_area=False,sources=False):
+def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maskdepth=20.,
+              maskradius=1.5,eff_area=False,sources=False):
     """ Returns the estimate number of counts (not count rate) within the
     aperture based upon a masked background annulus.
     """
     #mc.print_inline('Swiss cheesing the background annulus.')
     if not sources:
-        sources = bg_sources(band,ra0,dec0,annulus[1],maglimit=maglimit)
+        sources = bg_sources(band,ra0,dec0,annulus[1],maskdepth=maskdepth)
     bg_counts = bg_mask(band,ra0,dec0,annulus,ras,decs,responses,
                         sources)[2].sum()
     #mc.print_inline('Numerically integrating area of masked annulus.')
@@ -148,14 +153,14 @@ def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maglimit=28.,
     return mc.area(radius)*bg_counts/eff_area if eff_area else 0.
 
 def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
-             stepsz=None, calpath='../cal/', verbose=0, maglimit=28.,
-             detsize=1.25,coadd=False):
+             stepsz=None, calpath='../cal/', verbose=0, maskdepth=20.0,
+             maskradius=1.5,detsize=1.25,coadd=False):
     if verbose:
         mc.print_inline("Retrieving all of the target events.")
     trange = [np.array(tranges).min(),np.array(tranges).max()]
     try:
         searchradius = annulus[1]
-    except:
+    except TypeError:
         searchradius = radius
     data = pullphotons(band, ra0, dec0, tranges, searchradius,
                        verbose=verbose, calpath=calpath)
@@ -168,7 +173,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     if coadd:
         bins = np.array(trange)
     elif stepsz:
-        bins = np.append(np.arange(min(trange), max(trange), stepsz), max(trange))
+        bins = np.append(np.arange(min(trange), max(trange), stepsz),
+                                                                max(trange))
     else:
         bins = np.unique(np.array(tranges).flatten())
     # This is equivalent in function to np.digitize(data['t'],bins) except
@@ -182,16 +188,17 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     lcurve = {'params':gphot_params(band,[ra0,dec0],radius,annulus=annulus,
                                     calpath=calpath,verbose=verbose,
                                     detsize=detsize,stepsz=stepsz,
-                                    trange=trange,maglimit=maglimit)}
+                                    trange=trange,maskdepth=maskdepth,
+                                    maskradius=maskradius)}
     for col in lcurve_cols:
         lcurve[col] = np.zeros(len(bins)-1)
     # FIXME: Bottleneck. There's probably a way to do this without looping.
     # Don't bother looping through anything with no data.
     lcurve['bg'] = {'simple':np.zeros(len(bins)-1),
                     'cheese':np.zeros(len(bins)-1)}
-    if annulus:
+    if not annulus==None:
         lcurve['bg']['sources'] = bg_sources(band,ra0,dec0,annulus[1],
-                                             maglimit=maglimit)
+                                             maskdepth=maskdepth)
         lcurve['bg']['eff_area'] = cheese_bg_area(band,ra0,dec0,annulus,
                                                   lcurve['bg']['sources'])
     else:
@@ -204,13 +211,14 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         if i-1<0 or i==len(bins):
             continue
         if verbose:
-            mc.print_inline('Binning '+str(i)+' of '+str(len(ix))+'.')
+            mc.print_inline('Binning {i} of {l}.'.format(
+                                                    i=i,l=len(np.unique(ix))))
         t_ix = np.where(ix==i)
-        lcurve['t0_data'][i-1] = data['t'][t_ix].min()
-        lcurve['t1_data'][i-1] = data['t'][t_ix].max()
-        lcurve['t_mean'][i-1] = data['t'][t_ix].mean()
         # TODO: Optionally limit data to specific parts of detector.
         rad_ix = np.where((angSep <= radius) & (ix == i))
+        lcurve['t0_data'][i-1] = data['t'][t_ix and rad_ix].min()
+        lcurve['t1_data'][i-1] = data['t'][t_ix and rad_ix].max()
+        lcurve['t_mean'][i-1] = data['t'][t_ix and rad_ix].mean()
         lcurve['counts'][i-1] = len(rad_ix[0])
         lcurve['sources'][i-1] = (1./data['response'][rad_ix]).sum()
         lcurve['responses'][i-1] = data['response'][rad_ix].mean()
@@ -218,7 +226,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         lcurve['detys'][i-1] = data['row'][rad_ix].mean()
         lcurve['racent'][i-1] = data['ra'][rad_ix].mean()
         lcurve['deccent'][i-1] = data['dec'][rad_ix].mean()
-        if annulus:
+        if not annulus==None:
             ann_ix = np.where((angSep > annulus[0]) &
                               (angSep <= annulus[1]) & (ix == i))
             lcurve['bg_counts'][i-1] = len(ann_ix[0])
@@ -227,7 +235,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
                 (mc.area(annulus[1])-mc.area(annulus[0])))
             lcurve['bg']['cheese'][i-1] = cheese_bg(band, ra0, dec0, radius,
                 annulus, data['ra'][t_ix], data['dec'][t_ix],
-                data['response'][t_ix], maglimit=maglimit,
+                data['response'][t_ix], maskdepth=maskdepth,
                 eff_area=lcurve['bg']['eff_area'],
                 sources=lcurve['bg']['sources'])
         else:
@@ -241,34 +249,42 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     lcurve['t1'] = bins[ix[0]+1]
     for col in lcurve_cols:
         lcurve[col] = lcurve[col][ix]
-    if annulus:
+    if not annulus==None:
         lcurve['bg']['simple']=lcurve['bg']['simple'][ix]
         lcurve['bg']['cheese']=lcurve['bg']['cheese'][ix]
     else:
         lcurve['bg']['simple']=0.
         lcurve['bg']['cheese']=0.
 
-    lcurve['exptime'] = np.array([dbt.compute_exptime(band,trange,verbose=verbose) for trange in zip(lcurve['t0_data'],lcurve['t1_data'])])
+    lcurve['exptime'] = np.array(
+        [dbt.compute_exptime(band,trange,skypos=[ra0,dec0],
+                             verbose=verbose,coadd=coadd)
+            for trange in zip(lcurve['t0_data'],lcurve['t1_data'])])
     if verbose:
         mc.print_inline("Returning curve data.")
     lcurve['photons'] = data
     return lcurve
 
 def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
-             trange=None, verbose=0, coadd=False,minexp=1.,maxgap=1.,
-             calpath='../cal/'):
+             trange=None, tranges=None, verbose=0, coadd=False, minexp=1.,
+             maxgap=1., calpath='../cal/', maskdepth=20, maskradius=1.5):
     if verbose:
         mc.print_inline("Getting exposure ranges.")
-    tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
+    if tranges==None:
+        tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
                                  maxgap=maxgap, minexp=minexp, verbose=verbose)
+    elif not np.array(tranges).shape:
+        print "No exposure time at this location: [{ra},{dec}]".format(
+                                                            ra=ra0,dec=dec0)
     # FIXME: Everything goes to hell if no exposure time is available...
     # TODO: Add an ability to specify or exclude specific time ranges
     if verbose:
         mc.print_inline("Moving to photon level operations.")
-        
+
     lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
-                      stepsz=stepsz, verbose=verbose, coadd=coadd, 
-                      calpath=calpath)
+                          stepsz=stepsz, verbose=verbose, coadd=coadd,
+                          calpath=calpath, maskdepth=maskdepth,
+                          maskradius=maskradius)
     lcurve['cps'] = lcurve['sources']/lcurve['exptime']
     lcurve['cps_bgsub'] = (lcurve['sources']-lcurve['bg']['simple'])/lcurve['exptime']
     lcurve['cps_bgsub_cheese'] = (lcurve['sources']-lcurve['bg']['cheese'])/lcurve['exptime']
@@ -278,6 +294,7 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     lcurve['flux'] = gxt.counts2flux(lcurve['cps'],band)
     lcurve['flux_bgsub'] = gxt.counts2flux(lcurve['cps_bgsub'],band)
     lcurve['flux_bgsub_cheese'] = gxt.counts2flux(lcurve['cps_bgsub_cheese'],band)
+    lcurve['detrad'] = mc.distance(lcurve['detxs'],lcurve['detys'],400,400)
 
     if verbose:
         mc.print_inline("Done.")
@@ -285,17 +302,13 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     return lcurve
 
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
-                stepsz=None, trange=None, verbose=0, coadd=False,
+                stepsz=None, trange=None, tranges=None, verbose=0, coadd=False,
                 iocode='wb',calpath='../cal/',detsize=1.25,clobber=False,
-                minexp=1.,maxgap=1.):
-#   This gets confused when gAperture.py initializes the file
-#    if os.path.exists(str(csvfile)) and not clobber:
-#        print "Error: {csvfile} already exists.".format(csvfile=csvfile)
-#        print "Specify clobber=True to overwrite."
-#        return
+                minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5):
     data = getcurve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
-                    trange=trange, verbose=verbose, coadd=coadd, minexp=minexp,
-                    maxgap=maxgap,calpath=calpath)
+                    trange=trange, tranges=tranges, verbose=verbose,
+                    coadd=coadd, minexp=minexp, maxgap=maxgap, calpath=calpath,
+                    maskdepth=maskdepth, maskradius=maskradius)
     if csvfile:
         cols = ['counts', 'sources', 'bg_counts', 'responses',
                 'detxs', 'detys', 't0_data', 't1_data', 't_mean', 'cps',
@@ -311,14 +324,14 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                            'flux_bgsub':data['flux_bgsub'],
                            'flux_bgsub_cheese':data['flux_bgsub_cheese']})
         try:
-            test.to_csv(csvfile,index=False)
+            test.to_csv(csvfile,index=False,mode=iocode)
         except:
             print 'Failed to write to: '+str(csvfile)
             raise
     else:
         if verbose>2:
             print "No CSV file requested."
-        if verbose:
-            print "AB Magnitudes:"
+        if verbose or (not verbose and not csvfile):
+            print "AB Magnitudes:               "
             print data['mag']
     return data
