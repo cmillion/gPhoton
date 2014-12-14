@@ -57,34 +57,26 @@ def hashresponse(band,events,calpath='../cal/',verbose=0):
 def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
                 tscale=1000., calpath='../cal/', chunksz=10e6):
     """Retrieve photons within an aperture from the database."""
-    events = {'t':[],'ra':[],'dec':[],'xi':[],'eta':[]}
+    #FIXME: chunksz keyword is unused --Parke 2014-12-14
+    stream = []
     if verbose:
         print "Retrieving photons at ["+str(ra0)+", "+str(dec0)+"] within a radius of "+str(radius)
     for trange in tranges:
         if verbose:
             mc.print_inline(" and between "+str(trange[0])+" and "+
                             str(trange[1])+".")
-        stream = gQuery.getArray(
+        thisstream = gQuery.getArray(
             gQuery.allphotons(band, ra0, dec0, trange[0], trange[1], radius),
                               verbose=verbose,retries=100)
         if not stream:
             continue
-        events['t'] = events['t']+np.array(np.array(stream,
-                                        dtype='float64')[:,0]/tscale).tolist()
-        # The float64 precision _is_ significant for RA / Dec.
-        events['ra'] = events['ra']+np.array(np.array(stream,
-                                        dtype='float64')[:,1]).tolist()
-        events['dec'] = events['dec']+np.array(np.array(stream,
-                                        dtype='float64')[:,2]).tolist()
-        events['xi'] = events['xi']+np.array(np.array(stream,
-                                        dtype='float32')[:,3]).tolist()
-        events['eta'] = events['eta']+np.array(np.array(stream,
-                                        dtype='float32')[:,4]).tolist()
-    events['t'] = np.array(events['t'],dtype='float64')
-    events['ra'] = np.array(events['ra'],dtype='float64')
-    events['dec'] = np.array(events['dec'],dtype='float64')
-    events['xi'] = np.array(events['xi'],dtype='float32')
-    events['eta'] = np.array(events['eta'],dtype='float32')
+        stream.extend(thisstream)
+        
+    stream = np.array(stream, 'f8').T
+    colnames = ['t', 'ra', 'dec', 'xi', 'eta']
+    dtypes = ['f8', 'f8', 'f8', 'f4', 'f4']
+    cols = map(np.asarray, stream, dtypes)
+    events = dict(zip(colnames, cols))
     events = hashresponse(band, events, calpath=calpath, verbose=verbose)
     return events
 
@@ -280,34 +272,22 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     # TODO: Add an ability to specify or exclude specific time ranges
     if verbose:
         mc.print_inline("Moving to photon level operations.")
-    # FIXME: This error handling is hideous.
-    try:
-        lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
+
+    lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
                           stepsz=stepsz, verbose=verbose, coadd=coadd,
                           calpath=calpath, maskdepth=maskdepth,
                           maskradius=maskradius)
-        lcurve['cps'] = lcurve['sources']/lcurve['exptime']
-        lcurve['cps_bgsub'] = (lcurve['sources']-lcurve['bg']['simple'])/lcurve['exptime']
-        lcurve['cps_bgsub_cheese'] = (lcurve['sources']-lcurve['bg']['cheese'])/lcurve['exptime']
-        lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
-        lcurve['mag_bgsub'] = gxt.counts2mag(lcurve['cps_bgsub'],band)
-        lcurve['mag_bgsub_cheese'] = gxt.counts2mag(lcurve['cps_bgsub_cheese'],band)
-        lcurve['flux'] = gxt.counts2flux(lcurve['cps'],band)
-        lcurve['flux_bgsub'] = gxt.counts2flux(lcurve['cps_bgsub'],band)
-        lcurve['flux_bgsub_cheese'] = gxt.counts2flux(lcurve['cps_bgsub_cheese'],band)
-        lcurve['detrad'] = mc.distance(lcurve['detxs'],lcurve['detys'],400,400)
+    lcurve['cps'] = lcurve['sources']/lcurve['exptime']
+    lcurve['cps_bgsub'] = (lcurve['sources']-lcurve['bg']['simple'])/lcurve['exptime']
+    lcurve['cps_bgsub_cheese'] = (lcurve['sources']-lcurve['bg']['cheese'])/lcurve['exptime']
+    lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
+    lcurve['mag_bgsub'] = gxt.counts2mag(lcurve['cps_bgsub'],band)
+    lcurve['mag_bgsub_cheese'] = gxt.counts2mag(lcurve['cps_bgsub_cheese'],band)
+    lcurve['flux'] = gxt.counts2flux(lcurve['cps'],band)
+    lcurve['flux_bgsub'] = gxt.counts2flux(lcurve['cps_bgsub'],band)
+    lcurve['flux_bgsub_cheese'] = gxt.counts2flux(lcurve['cps_bgsub_cheese'],band)
+    lcurve['detrad'] = mc.distance(lcurve['detxs'],lcurve['detys'],400,400)
 
-    except ValueError:
-        lcurve['cps']=[]
-        lcurve['cps_bgsub']=[]
-        lcurve['cps_bugsub_cheese']=[]
-        lcurve['mag']=[]
-        lcurve['mag_bgsub']=[]
-        lcurve['mag_bgsub_cheese']=[]
-        lcurve['flux']=[]
-        lcurve['flux_bgsub']=[]
-        lcurve['flux_bgsub_cheese']=[]
-        lcurve['detrad']=[]
     if verbose:
         mc.print_inline("Done.")
         mc.print_inline("")
@@ -339,6 +319,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
             test.to_csv(csvfile,index=False,mode=iocode)
         except:
             print 'Failed to write to: '+str(csvfile)
+            raise
     else:
         if verbose>2:
             print "No CSV file requested."
