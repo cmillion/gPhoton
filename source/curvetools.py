@@ -211,8 +211,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         if i-1<0 or i==len(bins):
             continue
         if verbose:
-            mc.print_inline('Binning {i} of {l}.'.format(
-                                                    i=i,l=len(np.unique(ix))))
+            mc.print_inline('Binning {i} of {l}.'.format(i=cnt, 
+                                                         l=len(np.unique(ix))))
         t_ix = np.where(ix==i)
         # TODO: Optionally limit data to specific parts of detector.
         rad_ix = np.where((angSep <= radius) & (ix == i))
