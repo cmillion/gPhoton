@@ -312,6 +312,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                     trange=trange, tranges=tranges, verbose=verbose,
                     coadd=coadd, minexp=minexp, maxgap=maxgap, calpath=calpath,
                     maskdepth=maskdepth, maskradius=maskradius)
+
     if csvfile:
         cols = ['counts', 'sources', 'bg_counts', 'responses',
                 'detxs', 'detys', 't0_data', 't1_data', 't_mean', 'cps',
