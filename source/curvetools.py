@@ -100,7 +100,7 @@ def bg_sources(band,ra0,dec0,radius,maskdepth=20.0,maskradius=1.5,margin=0.001):
                 'radius':radius}
     except IndexError:
         return {'ra':np.array([]),'dec':np.array([]),
-                'fwhm':np.array([]),'maglimit':maglimit,'radius':radius}
+                'fwhm':np.array([]),'maglimit':maskdepth,'radius':radius}
 
 def bg_mask_annulus(band,ra0,dec0,annulus,ras,decs,responses):
     ix = np.where((mc.angularSeparation(ra0,dec0,ras,decs)>=annulus[0]) &

@@ -32,16 +32,16 @@ the most recent coadd level database coverage reference table.
 """
 coaddlist = pd.read_csv('coaddList_061714.csv')
 for skypos in zip(coaddlist['avaspra'],coaddlist['avaspdec']):
-    expt = gFind.gFind(skypos=skypos,band='FUV',quiet=True)['expt'][0]
+    expt = gFind.gFind(skypos=skypos,band='FUV',quiet=True)['FUV']['expt']
     if (expt<=5000.) and (expt>0):
         print skypos, expt, True
-        datamaker('FUV',skypos,'calrun_FUV-foo.csv',maglimit=24)
+        datamaker('FUV',skypos,'calrun_FUV.csv',maglimit=24)
     else:
         print skypos, expt, False
 
 coaddlist = pd.read_csv('coaddList_061714.csv')
 for skypos in zip(coaddlist['avaspra'],coaddlist['avaspdec']):
-    expt = gFind.gFind(skypos=skypos,band='NUV',quiet=True)['expt'][0]
+    expt = gFind.gFind(skypos=skypos,band='NUV',quiet=True)['NUV']['expt']
     if (expt<=5000.) and (expt>0):
         print skypos, expt, True
         datamaker('NUV',skypos,'calrun_NUV.csv',maglimit=24)
@@ -80,6 +80,8 @@ dmag = {'gphot_cheese':(lambda band:
                         data[band]['aper4']-data[band]['mag_bgsub_cheese']),
         'gphot_nomask':(lambda band:
                         data[band]['aper4']-data[band]['mag_bgsub']),
+        'gphot_sigma':(lambda band:
+                        data[band]['aper4']-data[band]['mag_bgsub_sigmaclip']),
         'mcat':lambda band: data[band]['aper4']-
             gt.counts2mag(gt.mag2counts(data[band]['mag'],band)-
             data[band]['skybg']*3600**2*mc.area(gt.aper2deg(4)),band)}
@@ -138,7 +140,9 @@ aperture and put the gPhoton bg in cps.
 fig = plt.figure(figsize=(8*scl,4*scl))
 fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,bottom=0.15,top=0.9)
 for i,band in enumerate(bands):
-    gphot_bg = gt.counts2mag(data[band]['bg_cheese']/data[band]['t_eff'],band)
+    gphot_bg = gt.counts2mag(
+                        data[band]['bg_sigmaclip']/data[band]['t_eff'],band)
+    #gphot_bg = gt.counts2mag(data[band]['bg_cheese']/data[band]['t_eff'],band)
     mcat_bg = gt.counts2mag(
                     data[band]['skybg']*3600**2*mc.area(gt.aper2deg(4)),band)
     delta = mcat_bg - gphot_bg

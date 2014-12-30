@@ -110,11 +110,13 @@ def sigmaclip_bg(data,radius,annulus,skypos,maxiter=10,sigmaclip=3.,
 	for i in range(H.shape[0]):
 		for j in range(H.shape[1]):
 			# Add a little buffer to account for pixel widths?
-			if (mc.distance(H.shape[0]/2.,H.shape[1]/2.,i,j)<annulus[0]/pixsz or
-				mc.distance(H.shape[0]/2.,H.shape[1]/2.,i,j)>annulus[1]/pixsz):
+			# FIXME? including everything within the annulus...
+#			if (mc.distance(H.shape[0]/2.,H.shape[1]/2.,i,j)<annulus[0]/pixsz or
+			if	mc.distance(H.shape[0]/2.,H.shape[1]/2.,i,j)>annulus[1]/pixsz:#):
+
 				bgimg[i,j]=-1
 
-	ix=np.where(bgimg>0)
+	ix=np.where(bgimg>=0)
 	m,s=bgimg[ix].mean(),bgimg[ix].std()
 	d = 1.
 	for i in range(maxiter):
@@ -133,10 +135,10 @@ def sigmaclip_bg(data,radius,annulus,skypos,maxiter=10,sigmaclip=3.,
 				print 'Poisson cut: {klo} to {klim}'.format(klo=klo,klim=klim)
 		ix = np.where((bgimg>=klim) | (bgimg<=klo))
 		bgimg[ix]=-1
-		ix=np.where(bgimg>0)
+		ix=np.where(bgimg>=0)
 		d = np.abs((bgimg[ix].mean()-m)/m)# - 1)
 		m,s=bgimg[ix].mean(),bgimg[ix].std()
-	ix = np.where(bgimg>0)
+	ix = np.where(bgimg>=0)
 	return mc.area(radius)*bgimg[ix].mean()/mc.area(pixsz)
 
 def countmap(band,skypos,tranges,skyrange,width=False,height=False,
