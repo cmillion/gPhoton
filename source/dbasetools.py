@@ -335,4 +335,6 @@ def suggest_parameters(band,skypos,verbose=0,retries=20):
         pos = skypos
         radius = gt.aper2deg(4)
     annulus = [3*radius, 5*radius]
+    import ipdb; ipdb.set_trace()
+
     return pos[0],pos[1],radius,annulus[0],annulus[1]

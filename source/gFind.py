@@ -18,7 +18,6 @@ def gFind(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1.0,
 	else:
 		raise SystemExit('Invalid band: {b}'.format(b=band))
 	all_expt = []
-
 	for this_band in output.keys():
 		## Get valid time ranges.
 	       	ranges = dbt.fGetTimeRanges(this_band,skypos,maxgap=maxgap,
@@ -29,6 +28,7 @@ def gFind(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1.0,
 			if not quiet:
 				print 'No {band} exposure time in database.'.format(
 																band=this_band)
+			output[this_band]={'expt':0,'t0':None,'t1':None}
 		else:
 			expt = (ranges[:,1]-ranges[:,0]).sum()
 			if not quiet:
@@ -44,7 +44,7 @@ def gFind(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1.0,
 					for r in ranges:
 						if not quiet:
 							print '    [ %.3f' % r[0] + ', %.3f' % r[1] + ' ], %.3f' % (r[1]-r[0]) + ' seconds'
-		output[this_band]={'expt':expt,'t0':ranges[:,0],'t1':ranges[:,1]}
+			output[this_band]={'expt':expt,'t0':ranges[:,0],'t1':ranges[:,1]}
 #			all_expt.append(expt)
 	return output #{this_band:{'t0':ranges[:,0],'t1':ranges[:,1],'expt':all_expt}}
 

@@ -156,3 +156,4 @@ if __name__ == '__main__':
                      coadd=args.coadd, minexp=args.minexp, maxgap=args.maxgap,
                      iocode=args.iocode, maskdepth=args.maskdepth,
                      maskradius=args.maskradius,sigmaclip=args.sigmaclip)
+

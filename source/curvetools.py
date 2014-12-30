@@ -58,34 +58,24 @@ def hashresponse(band,events,calpath='../cal/',verbose=0):
 def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
                 tscale=1000., calpath='../cal/', chunksz=10e6):
     """Retrieve photons within an aperture from the database."""
-    events = {'t':[],'ra':[],'dec':[],'xi':[],'eta':[]}
+    stream = []
     if verbose:
         print "Retrieving photons at ["+str(ra0)+", "+str(dec0)+"] within a radius of "+str(radius)
     for trange in tranges:
         if verbose:
             mc.print_inline(" and between "+str(trange[0])+" and "+
                             str(trange[1])+".")
-        stream = gQuery.getArray(
+        thisstream = gQuery.getArray(
             gQuery.allphotons(band, ra0, dec0, trange[0], trange[1], radius),
                               verbose=verbose,retries=100)
         if not stream:
             continue
-        events['t'] = events['t']+np.array(np.array(stream,
-                                        dtype='float64')[:,0]/tscale).tolist()
-        # The float64 precision _is_ significant for RA / Dec.
-        events['ra'] = events['ra']+np.array(np.array(stream,
-                                        dtype='float64')[:,1]).tolist()
-        events['dec'] = events['dec']+np.array(np.array(stream,
-                                        dtype='float64')[:,2]).tolist()
-        events['xi'] = events['xi']+np.array(np.array(stream,
-                                        dtype='float32')[:,3]).tolist()
-        events['eta'] = events['eta']+np.array(np.array(stream,
-                                        dtype='float32')[:,4]).tolist()
-    events['t'] = np.array(events['t'],dtype='float64')
-    events['ra'] = np.array(events['ra'],dtype='float64')
-    events['dec'] = np.array(events['dec'],dtype='float64')
-    events['xi'] = np.array(events['xi'],dtype='float32')
-    events['eta'] = np.array(events['eta'],dtype='float32')
+        stream.extend(thisstream)
+    stream = np.array(stream, 'f8').T
+    colnames = ['t', 'ra', 'dec', 'xi', 'eta']
+    dtypes = ['f8', 'f8', 'f8', 'f4', 'f4']
+    cols = map(np.asarray, stream, dtypes)
+    events = dict(zip(colnames, cols))
     events = hashresponse(band, events, calpath=calpath, verbose=verbose)
     return events
 
@@ -228,7 +218,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         lcurve['detys'][i-1] = data['row'][rad_ix].mean()
         lcurve['racent'][i-1] = data['ra'][rad_ix].mean()
         lcurve['deccent'][i-1] = data['dec'][rad_ix].mean()
-        if not annulus==None:
+        if annulus is not None:
             ann_ix = np.where((angSep > annulus[0]) &
                               (angSep <= annulus[1]) & (ix == i))
             lcurve['bg_counts'][i-1] = len(ann_ix[0])
@@ -255,7 +245,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     lcurve['t1'] = bins[ix[0]+1]
     for col in lcurve_cols:
         lcurve[col] = lcurve[col][ix]
-    if not annulus==None:
+    if annulus is not None:
         lcurve['bg']['simple']=lcurve['bg']['simple'][ix]
         lcurve['bg']['cheese']=lcurve['bg']['cheese'][ix]
         lcurve['bg']['sigmaclip']=lcurve['bg']['sigmaclip'][ix]
@@ -279,7 +269,7 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
              sigmaclip=3.):
     if verbose:
         mc.print_inline("Getting exposure ranges.")
-    if tranges==None:
+    if tranges is None:
         tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
                                  maxgap=maxgap, minexp=minexp, verbose=verbose)
     elif not np.array(tranges).shape:
