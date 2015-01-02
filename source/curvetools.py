@@ -60,7 +60,8 @@ def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
     """Retrieve photons within an aperture from the database."""
     stream = []
     if verbose:
-        print "Retrieving photons at ["+str(ra0)+", "+str(dec0)+"] within a radius of "+str(radius)
+        print "Retrieving photons within {rad} degrees of [{r}, {d}]".format(
+                                                        rad=radius,r=ra0,d=dec0)
     for trange in tranges:
         if verbose:
             mc.print_inline(" and between "+str(trange[0])+" and "+
@@ -68,14 +69,15 @@ def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
         thisstream = gQuery.getArray(
             gQuery.allphotons(band, ra0, dec0, trange[0], trange[1], radius),
                               verbose=verbose,retries=100)
-        if not stream:
-            continue
+#        if not stream:
+#            continue
         stream.extend(thisstream)
     stream = np.array(stream, 'f8').T
     colnames = ['t', 'ra', 'dec', 'xi', 'eta']
     dtypes = ['f8', 'f8', 'f8', 'f4', 'f4']
     cols = map(np.asarray, stream, dtypes)
     events = dict(zip(colnames, cols))
+    events['t']/=tscale # Adjust the timestamp by tscale
     events = hashresponse(band, events, calpath=calpath, verbose=verbose)
     return events
 
