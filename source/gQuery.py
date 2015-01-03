@@ -247,17 +247,26 @@ def shutter(band,t0,t1,tscale=1000.):
         str(long(t0*tscale))+','+str(long(t1*tscale))+')'+str(formatURL))
 
 def shutdead(band,t0,t1,tscale=1000.):
-	return (str(baseURL)+
-        'SELECT shutter*0.05 FROM fGetNUVShutter('+str(long(t0*tscale))+','+
-        str(long(t1*tscale))+
-        ') AS time UNION ALL SELECT SUM(dt) * 0.0000057142857142857145 / ('+
-        repr(t1)+'-'+repr(t0)+
-        ') AS dead FROM(SELECT count(*) AS dt FROM NUVPhotonsNULLV'
-        ' WHERE time BETWEEN '+str(long(t0*tscale))+' AND '+
-        str(long(t1*tscale))+' UNION ALL SELECT count(*) AS dt'
-        ' FROM NUVPhotonsV WHERE time BETWEEN '+str(long(t0*tscale))+' AND '+
-        str(long(t1*tscale))+') x'+
-        str(formatURL))
+#	return (str(baseURL)+
+#        'SELECT shutter*0.05 FROM fGetNUVShutter('+str(long(t0*tscale))+','+
+#        str(long(t1*tscale))+
+#        ') AS time UNION ALL SELECT SUM(dt) * 0.0000057142857142857145 / ('+
+#        repr(t1)+'-'+repr(t0)+
+#        ') AS dead FROM(SELECT count(*) AS dt FROM NUVPhotonsNULLV'
+#        ' WHERE time BETWEEN '+str(long(t0*tscale))+' AND '+
+#        str(long(t1*tscale))+' UNION ALL SELECT count(*) AS dt'
+#        ' FROM NUVPhotonsV WHERE time BETWEEN '+str(long(t0*tscale))+' AND '+
+#        str(long(t1*tscale))+') x'+
+#        str(formatURL))
+    tt0, tt1 = [long(t*tscale) for t in [t0, t1]]
+    return ('{base}SELECT shutter*0.05 FROM fGet{band}Shutter({tt0},{tt1}) AS '
+            'time UNION ALL SELECT SUM(dt) * 0.0000057142857142857145 / '
+            '({t1}-{t0}) AS dead FROM(SELECT count(*) AS dt FROM '
+            '{band}PhotonsNULLV WHERE time BETWEEN {tt0} AND {tt1} UNION ALL '
+            'SELECT count(*) AS dt FROM NUVPhotonsV WHERE time BETWEEN {tt0} '
+            'AND {tt1}) x{fmt}'.format(base=baseURL, band=band.upper(), tt0=tt0,
+                                       tt1=tt1, t0=t0, t1=t1, fmt=formatURL))
+
 
 def exptime(band,t0,t1,stepsz=1.,tscale=1000.):
     return (str(baseURL)+

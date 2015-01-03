@@ -115,7 +115,7 @@ class TestRegression(unittest.TestCase):
         """Regtest a coadded magnitude. (FUV)"""
         out = ga.gAperture(band='FUV',skypos=self.skypos,radius=self.radius,
                            tranges=self.tranges,coadd=True)
-        self.assertAlmostEqual(out['mag'][0],13.855242986154447)
+        self.assertAlmostEqual(out['mag'][0],13.855867417553458)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestRegression)
 unittest.TextTestRunner(verbosity=2).run(suite)
