@@ -42,7 +42,7 @@ def movie_tbl(band,tranges,verbose=0,framesz=0,retries=20):
 	col2 = pyfits.Column(name='tstop',format='E',array=np.array(tstops))
 	col3 = pyfits.Column(name='exptime',format='E',array=np.array(exptimes))
 	cols = pyfits.ColDefs([col1,col2,col3])
-	tbl  = pyfits.new_table(cols)
+	tbl  = pyfits.BinTableHDU.from_columns(cols)
 
 	return tbl
 
