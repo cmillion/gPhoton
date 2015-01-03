@@ -8,7 +8,10 @@ formatted query to the MAST database. Don't change them unless you know what
 you're doing.
 """
 baseURL = 'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
-baseDbo = 'Gr6plus7.dbo'
+#baseDB = 'GPFDB10.dbo'
+baseDB = 'GPLAdmin.dbo'
+MCATDB = 'GR6Plus7.dbo'
+#baseDbo = 'Gr6plus7.dbo'
 formatURL = '&format=json&timeout={}'
 
 def hasNaN(query):
@@ -66,9 +69,9 @@ def mcat_sources(band,ra0,dec0,radius,maglimit=20):
         ' fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2,'
         ' nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5,'
         ' nuv_magerr_aper_6, nuv_magerr_aper_7'
-        ' from '+str(baseDbo)+'.photoobjall as p inner join '+str(baseDbo)+
+        ' from '+str(MCATDB)+'.photoobjall as p inner join '+str(MCATDB)+
         '.photoextract as pe on p.photoextractid=pe.photoextractid inner join '+
-        str(baseDbo)+'.fgetnearbyobjeq('+repr(float(ra0))+', '+
+        str(MCATDB)+'.fgetnearbyobjeq('+repr(float(ra0))+', '+
         repr(float(dec0))+', '+
         str(radius*60.)+') as nb on p.objid=nb.objid and (band=3 or band='+
         str(bandflag)+') and '+str(band)+'_mag<'+str(maglimit)+
@@ -94,10 +97,10 @@ def mcat_visit_sources(ra0,dec0,radius):
         ' fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2,'
         ' nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5,'
         ' nuv_magerr_aper_6, nuv_magerr_aper_7'
-        ' from '+str(baseDbo)+'.visitphotoobjall as vpo'
-        ' inner join '+str(baseDbo)+'.visitphotoextract'
+        ' from '+str(MCATDB)+'.visitphotoobjall as vpo'
+        ' inner join '+str(MCATDB)+'.visitphotoextract'
         ' as vpe on vpo.photoextractid=vpe.photoextractid inner join'
-        ' '+str(baseDbo)+'.fGetNearbyVisitObjEq('+repr(float(ra0))+', '+repr(float(dec0))+
+        ' '+str(MCATDB)+'.fGetNearbyVisitObjEq('+repr(float(ra0))+', '+repr(float(dec0))+
         ', '+str(radius*60.)+') as nb on vpo.objid=nb.objid'+
         str(formatURL))
 
@@ -108,9 +111,9 @@ def mcat_objid_search(objid,mode='visit'):
     return (str(baseURL)+
         'select objid, minPhotoObsDate, maxPhotoObsDate, obs_date, obsdatim,'
         ' nobssecs, fobssecs, nexptime, fexptime, nexpstar, nexpend, fexpstar,'
-        ' fexpend from '+str(baseDbo)+'.visitphotoobjall as vp inner join '+
-        str(baseDbo)+'.imgrun as ir on vp.photoextractid=ir.imgrunid'
-        ' inner join '+str(baseDbo)+'.visitphotoextract as vpe on'
+        ' fexpend from '+str(MCATDB)+'.visitphotoobjall as vp inner join '+
+        str(MCATDB)+'.imgrun as ir on vp.photoextractid=ir.imgrunid'
+        ' inner join '+str(MCATDB)+'.visitphotoextract as vpe on'
         ' vp.photoextractid=vpe.photoextractid where objid = '+
         str(long(objid))+str(formatURL))
 
@@ -142,11 +145,10 @@ def aperture(band,ra0,dec0,t0,t1,radius,tscale=1000.):
     """Integrate counts over an aperture at a position."""
     return (str(baseURL)+
         'Select  sum(photonCount)'
-        ' from dbo.fGetNearbyObjEqCount'+str(band)+'('+repr(float(ra0))+','+
-            repr(float(dec0))+
-            ','+str(radius)+','+str(long(t0*tscale))+','+
-            str(long(t1*tscale))+',0)'+
-        str(formatURL))
+        ' from '+str(baseDB)+'.fGetNearbyObjEqCount'+str(band)+
+        '('+repr(float(ra0))+','+repr(float(dec0))+
+        ','+str(radius)+','+str(long(t0*tscale))+','+
+        str(long(t1*tscale))+',0)'+str(formatURL))
 
 def deadtime1(band,t0,t1,tscale=1000.):
     """Return the global counts of non-NULL data."""
@@ -232,7 +234,7 @@ def centroid(band,ra0,dec0,t0,t1,radius,tscale=1000.):
 def allphotons(band,ra0,dec0,t0,t1,radius,tscale=1000.):
     """Grab the major columns for all events within an aperture."""
     return (str(baseURL)+
-        'select time,ra,dec,xi,eta from dbo.fGetNearbyObjEq'+str(band)+
+        'select time,ra,dec,xi,eta from '+str(baseDB)+'.fGetNearbyObjEq'+str(band)+
         'AllColumns('+repr(float(ra0))+','+repr(float(dec0))+','+
         repr(radius)+','+
         str(long(t0*tscale))+','+str(long(t1*tscale))+',0)'+str(formatURL))
