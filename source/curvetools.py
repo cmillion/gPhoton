@@ -127,6 +127,7 @@ def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e5,ntests=10):
             ratios[i] = float(mask_events[2].sum())/float(ann_events[2].sum())
         except ZeroDivisionError:
             ratios[i] = 0.
+
     return (mc.area(annulus[1])-mc.area(annulus[0]))*ratios.mean()
 
 # FIXME: This recomputes eff_area every pass at huge computational cost.

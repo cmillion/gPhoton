@@ -176,7 +176,7 @@ def compute_flat_scale(t,band,verbose=0):
     if len(ix[0]):
         try:
             flat_scale[ix] *= 1.018
-        except:
+        except TypeError:
             # if it does not have '__getitem__' (because it's a scalar)
             flat_scale *= 1.018 if t>=881881215.995 else 1.
 
