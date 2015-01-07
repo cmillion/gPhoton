@@ -80,7 +80,8 @@ def common_args(parser,function_name,
         default=0, choices=[0,1,2,3])
     parser.add_argument("--suggest", action="store_true", dest="suggest",
         help="Suggest reasonable parameters for aperture photometry. "+
-             "The includes recenting on the nearest MCAT source.",
+             "The includes recenting on the nearest MCAT source. This flag"+
+             "will clobber other annuli and aperture radii parameters.",
         default=False)
 
     if function_name in ['gaperture','gmap']:
