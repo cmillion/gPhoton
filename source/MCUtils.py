@@ -55,8 +55,10 @@ def manage_requests(query,maxcnt=100,wait=10):
 			#  not a good general test condition.
 			test = r.json()['Tables'][0]['Rows']
 			return r
-		# This naked except that doesn't raise gets a pass
-		except (MissingSchema, JSONDecodeError, KeyError):
+		# This naked except that doesn't raise gets a pass because I really
+        # do want it to catch every possible exception, and it will raise
+        # eventually below with the unsuccessful query print statements.
+		except:
 			time.sleep(wait)
 			cnt += 1
 			print_inline('Query retry attempt '+str(int(cnt))+'.')

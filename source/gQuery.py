@@ -283,10 +283,19 @@ def aspect(t0,t1,tscale=1000.):
 
 # Return the aspect information based on eclipse
 def aspect_ecl(eclipse):
+    """Return the aspect information based upon an eclipse number."""
     return (str(baseURL)+
         'select eclipse, filename, time, ra, dec, twist, flag, ra0, dec0,'
         ' twist0 from aspect where eclipse='+str(eclipse)+' order by time'+
         str(formatURL))
+
+def aspect_skypos(ra,dec,detsize=1.25):
+    """Return the aspect information based upon sky position and det radius."""
+    return (str(baseURL)+
+        "select eclipse, filename, time, ra, dec, twist, flag, ra0, dec0,"
+        " twist0 from aspect where ra between "+repr(ra-detsize/2.)+
+        " and "+repr(ra+detsize/2.)+" and dec between "+repr(dec-detsize/2.)+
+        " and "+repr(dec+detsize/2.)+" order by time"+str(formatURL))
 
 # Return data within a box centered on ra0, dec0 with sides of length 2*radius
 def box(band,ra0,dec0,t0,t1,radius,tscale=1000.):

@@ -5,11 +5,12 @@ import gQuery
 from MCUtils import print_inline,area,distance,angularSeparation
 from galextools import GPSSECS, zpmag
 
-def get_aspect(band,skypos,trange=[6e8,11e8],tscale=1000.,verbose=0):
+def get_aspect(band,skypos,trange=[6e8,11e8],tscale=1000.,verbose=0,
+               detsize=1.25):
     """Get aspect solution in a dict() for given time range."""
-    asp = np.array(gQuery.getArray(gQuery.aspect(trange[0],trange[1]),
-                   verbose=verbose))
-    return {'eclipse':np.array(asp[:,0],dtype='int16'),'filename':asp[:,1],
+    asp = np.array(gQuery.getArray(gQuery.aspect_skypos(skypos[0],skypos[1],
+                   detsize=detsize),verbose=verbose))
+    data = {'eclipse':np.array(asp[:,0],dtype='int16'),'filename':asp[:,1],
             't':np.array(asp[:,2],dtype='float64')/tscale,
             'ra':np.array(asp[:,3],dtype='float64'),
             'dec':np.array(asp[:,4],dtype='float64'),
@@ -18,6 +19,12 @@ def get_aspect(band,skypos,trange=[6e8,11e8],tscale=1000.,verbose=0):
             'ra0':np.array(asp[:,7],dtype='float64'),
             'dec0':np.array(asp[:,8],dtype='float64'),
             'twist0':np.array(asp[:,9],dtype='float64')}
+    ix = np.where((data['t']>trange[0]) & (data['t']<trange[1]) &
+                  (angularSeparation(skypos[0],skypos[1],
+                                     data['ra'],data['dec'])<=detsize/2.))
+    for key in data.keys():
+        data[key] = data[key][ix]
+    return data
 
 def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,
                    maxgap=1.,minexp=1.,retries=100.,predicted=False):
@@ -35,11 +42,13 @@ def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,
             trange = [1,1000000000000]
         if len(np.shape(trange))==2:
             trange=trange[0]
+        if verbose and predicted:
+            print "Querying coverage of GR6/7. (Not current database.)"
         times = (np.array(gQuery.getArray(gQuery.exposure_ranges(band,
             skypos[0],skypos[1],t0=trange[0],t1=trange[1],detsize=detsize,
             tscale=tscale),verbose=verbose,retries=retries),
                                                 dtype='float64')[:,0]/tscale
-            if not predicted else get_aspect(band,skypos,trange,
+            if not predicted else get_aspect(band,skypos,trange,detsize=detsize,
                                         tscale=tscale,verbose=verbose)['t'])
     except IndexError:
         if verbose:
