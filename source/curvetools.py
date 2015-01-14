@@ -338,25 +338,26 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                     maskdepth=maskdepth, maskradius=maskradius,
                     sigmaclip=sigmaclip)
     if csvfile:
-        cols = ['counts', 'sources', 'bg_counts', 'responses',
-                'detxs', 'detys', 't0_data', 't1_data', 't_mean', 'cps',
-                'mag', 'exptime']
+        columns = ['t0','t1','exptime','mag_bgsub_cheese','t_mean','t0_data',
+                   't1_data','cps','counts','bg','mag','mag_bgsub',
+                   'flux','flux_bgsub','flux_bgsub_cheese','bg_cheese']
         test=pd.DataFrame({'t0':data['t0'],'t1':data['t1'],
                            't_mean':data['t_mean'],'t0_data':data['t0_data'],
                            't1_data':data['t1_data'],'exptime':data['exptime'],
                            'cps':data['cps'],'counts':data['counts'],
-                           'bg':data['bg']['cheese'],'mag':data['mag'],
+                           'bg':data['bg']['simple'],'mag':data['mag'],
                            'mag_bgsub':data['mag_bgsub'],
                            'mag_bgsub_cheese':data['mag_bgsub_cheese'],
                            'flux':data['flux'],
                            'flux_bgsub':data['flux_bgsub'],
                            'flux_bgsub_cheese':data['flux_bgsub_cheese'],
-                           'bg_sigmaclip':data['bg']['sigmaclip'],
-                           'cps_bgsub_sigmaclip':data['cps_bgsub_sigmaclip'],
-                           'mag_bgsub_sigmaclip':data['mag_bgsub_sigmaclip'],
-                           'flux_bgsub_sigmaclip':data['flux_bgsub_sigmaclip']})
+                           'bg_cheese':data['bg']['cheese']})#,
+                          #'bg_sigmaclip':data['bg']['sigmaclip'],
+                          #'cps_bgsub_sigmaclip':data['cps_bgsub_sigmaclip'],
+                          #'mag_bgsub_sigmaclip':data['mag_bgsub_sigmaclip'],
+                          #'flux_bgsub_sigmaclip':data['flux_bgsub_sigmaclip']})
         try:
-            test.to_csv(csvfile,index=False,mode=iocode)
+            test.to_csv(csvfile,index=False,mode=iocode,columns=columns)
         except:
             print 'Failed to write to: '+str(csvfile)
     else:
