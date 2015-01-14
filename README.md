@@ -2,6 +2,8 @@
 
 To get started, please read the [User Guide](https://github.com/cmillion/gPhoton/blob/master/docs/UserGuide.md).
 
+The database is still being populated with GALEX data. It currently contains ~5% of the GR6/7 corpus. The tile-by-tile coverage of the current database can be found [here]() and [here](). Future database updates will be by sky region, which the next one expected to cover all data from above 52.5 degrees in declination.
+
 If you use gPhoton software in your research, please cite:
 Million, C., Fleming, S. W., Shiao, B. (2014) gPhoton. Software available at https://github.com/cmillion/gPhoton
 
