@@ -270,19 +270,28 @@ def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,
 			steps = np.ceil((trange[1]-trange[0])/stepsz)
 			for i,t0 in enumerate(np.arange(trange[0],trange[1],stepsz)):
 				if verbose>1:
-					mc.print_inline('Movie frame '+str(i+1)+' of '+str(int(steps)))
+					mc.print_inline('Movie frame '+str(i+1)+' of '+
+																str(int(steps)))
 				t1 = trange[1] if i==steps else t0+stepsz
-				mv.append(countmap(band,skypos,[[t0,t1]],skyrange,width=width,height=height,verbose=verbose,tscale=tscale,memlight=memlight,hdu=hdu,retries=retries))
+				mv.append(countmap(band,skypos,[[t0,t1]],skyrange,width=width,
+								   height=height,verbose=verbose,tscale=tscale,
+								   memlight=memlight,hdu=hdu,retries=retries))
 	# FIXME: This should not create an rr unless it's requested...
 				rr.append(rrhr(band,skypos,[[t0,t1]],skyrange,response=response,width=width,height=height,stepsz=1.,verbose=verbose,calpath=calpath,tscale=tscale,retries=retries)) if response else rr.append(np.ones(np.shape(mv)[1:]))
 
 	return np.array(mv),np.array(rr)
 
-def create_images(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,verbose=0,tscale=1000.,memlight=False,coadd=False,response=False,calpath='../cal/',hdu=False,retries=20):
-	count,rr=movie(band,skypos,tranges,skyrange,framesz=framesz,width=width,height=height,verbose=verbose,tscale=tscale,memlight=memlight,coadd=coadd,response=response,calpath=calpath,hdu=hdu,retries=retries)
+def create_images(band,skypos,tranges,skyrange,framesz=0,width=False,
+				  height=False,verbose=0,tscale=1000.,memlight=False,
+				  coadd=False,response=False,calpath='../cal/',hdu=False,
+				  retries=20):
+	count,rr = movie(band,skypos,tranges,skyrange,framesz=framesz,
+					 width=width,height=height,verbose=verbose,tscale=tscale,
+					 memlight=memlight,coadd=coadd,response=response,
+					 calpath=calpath,hdu=hdu,retries=retries)
 	intensity = []
 	for i in range(count.shape[0]):
-		int_temp = count[i]/rr[i]
+		int_temp = count[i]/rr[i] # Might divide by zero in rare cases...
 		cut = np.where(np.isfinite(int_temp))
 		int_clean = np.zeros(int_temp.shape)
 		int_clean[cut]=int_temp[cut]
@@ -290,33 +299,46 @@ def create_images(band,skypos,tranges,skyrange,framesz=0,width=False,height=Fals
 
 	return np.array(count),np.array(rr),np.array(intensity)
 
-def write_images(band,skypos,tranges,skyrange,write_cnt=False,write_int=False,write_rr=False,framesz=0,width=False,height=False,verbose=0,tscale=1000.,memlight=False,coadd=False,response=False,calpath='../cal/',clobber=False,retries=20):
+def write_images(band,skypos,tranges,skyrange,write_cnt=False,write_int=False,
+				 write_rr=False,framesz=0,width=False,height=False,verbose=0,
+				 tscale=1000.,memlight=False,coadd=False,response=False,
+				 calpath='../cal/',clobber=False,retries=20):
 	"""Generate a write various maps to files."""
 	# No files were requested, so don't bother doing anything.
 	if not (write_cnt or write_int or write_rr):
 		return
-	count,rr,intensity=create_images(band,skypos,tranges,skyrange,framesz=framesz,width=width,height=height,verbose=verbose,tscale=tscale,memlight=memlight,coadd=coadd,response=response,calpath=calpath,retries=retries)
-
+	count,rr,intensity = create_images(band,skypos,tranges,skyrange,
+									   framesz=framesz,width=width,
+									   height=height,verbose=verbose,
+									   tscale=tscale,memlight=memlight,
+									   coadd=coadd,response=response,
+									   calpath=calpath,retries=retries)
 	# Add a conditional so that this is only created for multi-frame images
-	tbl = movie_tbl(band,tranges,framesz=framesz,verbose=verbose,retries=retries)
-
+	tbl = movie_tbl(band,tranges,framesz=framesz,verbose=verbose,
+															retries=retries)
 	if write_cnt:
 		hdu = pyfits.PrimaryHDU(count)
-		hdu = fits_header(band,skypos,tranges,skyrange,width=width,height=height,verbose=verbose,tscale=tscale,hdu=hdu,retries=retries)
+		hdu = fits_header(band,skypos,tranges,skyrange,width=width,
+						  height=height,verbose=verbose,tscale=tscale,hdu=hdu,
+						  retries=retries)
 		hdulist = pyfits.HDUList([hdu,tbl])
 		if verbose:
 			print 'Writing count image to '+str(write_cnt)
 		hdulist.writeto(write_cnt,clobber=clobber)
 	if write_rr:
 		hdu = pyfits.PrimaryHDU(rr)
-		hdu = fits_header(band,skypos,tranges,skyrange,width=width,height=height,verbose=verbose,tscale=tscale,hdu=hdu,retries=retries)
+		hdu = fits_header(band,skypos,tranges,skyrange,width=width,
+						  height=height,verbose=verbose,tscale=tscale,
+						  hdu=hdu,retries=retries)
 		hdulist = pyfits.HDUList([hdu,tbl])
 		if verbose:
 			print 'Writing response image to '+str(write_rr)
                 hdulist.writeto(write_rr,clobber=clobber)
 	if write_int:
 		hdu = pyfits.PrimaryHDU(intensity)
-		hdu = fits_header(band,skypos,tranges,skyrange,width=width,height=height,verbose=verbose,tscale=tscale,hdu=hdu,retries=retries)
+		hdu = fits_header(band,skypos,tranges,skyrange,width=width,
+						  height=height,verbose=verbose,tscale=tscale,hdu=hdu,
+						  retries=retries)
 		hdulist = pyfits.HDUList([hdu,tbl])
 		if verbose:
 			print 'Writing intensity image to '+str(write_int)
