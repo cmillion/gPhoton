@@ -13,7 +13,7 @@ from galextools import aper2deg
 def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
               stepsz=False,verbose=0,clobber=False,trange=None,tranges=None,
               minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,iocode='wb',
-              sigmaclip=3.):
+              sigmaclip=3.,calpath='../cal/'):
     """Runs gAperture and returns the data in a python dict() and as
     a CSV file if outfile is specified. Can be called from the interpreter.
     """
@@ -32,7 +32,7 @@ def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
                           clobber=clobber, trange=trange, tranges=tranges,
                           coadd=coadd, minexp=minexp, maxgap=maxgap,
                           iocode = iocode, maskdepth=maskdepth,
-                          maskradius=maskradius, sigmaclip=sigmaclip)
+                          maskradius=maskradius, sigmaclip=sigmaclip, calpath=calpath)
     return data
 
 def check_radius(args):
@@ -166,4 +166,4 @@ if __name__ == '__main__':
                      trange=[args.tmin,args.tmax], tranges=args.trange,
                      coadd=args.coadd, minexp=args.minexp, maxgap=args.maxgap,
                      iocode=args.iocode, maskdepth=args.maskdepth,
-                     maskradius=args.maskradius,sigmaclip=args.sigmaclip)
+                     maskradius=args.maskradius,sigmaclip=args.sigmaclip,calpath=args.calpath)

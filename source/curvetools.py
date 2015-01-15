@@ -191,7 +191,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     lcurve['bg'] = {'simple':np.zeros(len(bins)-1),
                     'cheese':np.zeros(len(bins)-1),
                     'sigmaclip':np.zeros(len(bins)-1)}
-    if not annulus==None:
+    if annulus is not None:
         lcurve['bg']['sources'] = bg_sources(band,ra0,dec0,annulus[1],
                                              maskdepth=maskdepth)
         lcurve['bg']['eff_area'] = cheese_bg_area(band,ra0,dec0,annulus,
