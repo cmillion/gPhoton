@@ -275,7 +275,6 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     if tranges is None:
         tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
                                  maxgap=maxgap, minexp=minexp, verbose=verbose)
-        print "getcurve: TIME RANGES:"+str(tranges)
     elif not np.array(tranges).shape:
         print "No exposure time at this location: [{ra},{dec}]".format(
                                                             ra=ra0,dec=dec0)

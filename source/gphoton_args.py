@@ -202,6 +202,5 @@ def check_common_args(args,function_name,
         args.trange=dbt.fGetTimeRanges(args.band,args.skypos,
                                        trange=[args.tmin,args.tmax],
                                        maxgap=args.maxgap,minexp=args.minexp)
-        print 'TIME RANGE:'+str(args.trange)
 
     return args
