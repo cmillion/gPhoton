@@ -200,6 +200,8 @@ def check_common_args(args,function_name,
                 raise SystemExit('Start time ({t0}) must preceed end time ({t1})'.format(t0=t[0],t1=t[1]))
     else:
         args.trange=dbt.fGetTimeRanges(args.band,args.skypos,
-                                                trange=[args.tmin,args.tmax])
+                                       trange=[args.tmin,args.tmax],
+                                       maxgap=args.maxgap,minexp=args.minexp)
+        print 'TIME RANGE:'+str(args.trange)
 
     return args
