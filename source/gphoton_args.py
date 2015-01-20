@@ -80,7 +80,8 @@ def common_args(parser,function_name,
         default=0, choices=[0,1,2,3])
     parser.add_argument("--suggest", action="store_true", dest="suggest",
         help="Suggest reasonable parameters for aperture photometry. "+
-             "The includes recenting on the nearest MCAT source.",
+             "The includes recenting on the nearest MCAT source. This flag"+
+             "will clobber other annuli and aperture radii parameters.",
         default=False)
 
     if function_name in ['gaperture','gmap']:
@@ -119,6 +120,12 @@ def check_common_args(args,function_name,
     except AttributeError:
         raise SystemExit("Invalid band: {b}".format(b=args.band))
 
+    """ This will ensure calpath has a trailing '/'. """
+    if function_name in ['gaperture','gmap']:
+        args.calpath = os.path.join(args.calpath,'')
+        if not os.path.isdir(args.calpath):
+            raise SystemExit("Calibration path not found: " + args.calpath)
+
     if not (args.ra and args.dec) and not args.skypos:
         raise SystemExit("Must specify either both RA/DEC or SKYPOS.")
     elif (args.ra and args.dec) and args.skypos:
@@ -136,9 +143,9 @@ def check_common_args(args,function_name,
                                                     verbose=0)
         args.skypos = [args.ra, args.dec]
         if args.verbose:
-            print "Recentering on ["+str(ra)+", "+str(dec)+"]"
-            print "Setting radius to "+str(radius)
-            print "Setting annulus to ["+str(annulus1)+", "+str(annulus2)+"]"
+            print "Recentering on ["+str(args.ra)+", "+str(args.dec)+"]"
+            print "Setting radius to "+str(args.radius)
+            print "Setting annulus to ["+str(args.annulus1)+", "+str(args.annulus2)+"]"
 
     if args.skypos:
         if np.array(args.skypos).shape != (2,):
@@ -193,6 +200,9 @@ def check_common_args(args,function_name,
                 raise SystemExit('Start time ({t0}) must preceed end time ({t1})'.format(t0=t[0],t1=t[1]))
     else:
         args.trange=dbt.fGetTimeRanges(args.band,args.skypos,
-                                                trange=[args.tmin,args.tmax])
+                                       trange=[args.tmin,args.tmax],
+                                       maxgap=args.maxgap,minexp=args.minexp,
+                                       detsize=args.detsize,
+                                       retries=args.retries)
 
     return args

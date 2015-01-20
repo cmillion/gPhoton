@@ -140,11 +140,11 @@ def find_FUV_offset(scstfile,calpath):
 	try:
         	eclipse = int(scsthead['eclipse'])
         	fdttdc = float(scsthead['fdttdc'])
-	except:
+	except KeyError:
 		print "ERROR: FUV header values missing from SCST."
 		return 0.,0.
 
-        print "         Offsetting FUV image using eclipse of "+str(eclipse)+" and fdttdc of "+str(fdttdc) 
+        print "         Offsetting FUV image using eclipse of "+str(eclipse)+" and fdttdc of "+str(fdttdc)
 
         file_x = offset_filenames(calpath)['x']
         file_y = offset_filenames(calpath)['y']
@@ -243,7 +243,7 @@ def rtaph_yac2(q,xb,yb,ya,y,calpath,aspum,wig2, wig2data, wlk2, wlk2data, clk2, 
 
         ii = (np.array(y_as,dtype='int64') - wig2data['start']) / wig2data['inc']
         yac_as[ix] = wig2[ii[ix],yb[ix],ya[ix],xb[ix]]
-        
+
         ii = (np.array(y_as,dtype='int64') - wlk2data['start']) / wlk2data['inc']
         yac_as[ix] = wlk2[ii[ix],yb[ix],q[ix]]
 
@@ -572,4 +572,3 @@ def create_SSD(raw6file,band,eclipse,ssdfile=0):
 
         #return np.array(avt), np.array(sep), np.array(num), np.array(fit)
 	return C, m
-
