@@ -6,7 +6,6 @@ import pandas as pd
 import gQuery as gq
 import galextools as gt
 import dbasetools as dt
-#import gphoton_utils as gu
 import MCUtils as mc
 from gAperture import gAperture
 
@@ -26,7 +25,8 @@ def file_setup(outfile):
             cols = ['objid','t0','t1','t_raw','t_eff','ra','dec','racent',
                     'deccent','aper4','aper4_err','mag_bgsub_cheese',
                     'mag_bgsub','mag','distance','response','skybg',
-                    'bg','bg_cheese','bg_eff_area']
+                    'bg','bg_cheese','bg_eff_area', 'bg_sigmaclip',
+                    'mag_bgsub_sigmaclip']
             spreadsheet = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             spreadsheet.writerow(cols)
     return extant_objids
@@ -44,7 +44,8 @@ def construct_row(i,band,objid,mcat,data):
             mc.distance(data['detxs'],data['detys'],400,400)[0],
             data['responses'][0], mcat[band]['skybg'][i],
             data['bg']['simple'][0], data['bg']['cheese'][0],
-            data['bg']['eff_area'])
+            data['bg']['eff_area'], data['bg']['sigmaclip'][0],
+            data['mag_bgsub_sigmaclip'][0])
 
 def datamaker(band,skypos,outfile,maglimit=20.,detsize=0.5,
                                 radius=gt.aper2deg(4),annulus=[0.0083,0.025]):

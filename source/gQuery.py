@@ -8,7 +8,10 @@ formatted query to the MAST database. Don't change them unless you know what
 you're doing.
 """
 baseURL = 'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
-baseDbo = 'Gr6plus7.dbo'
+#baseDB = 'GPFDB10.dbo'
+baseDB = 'GPLAdmin.dbo'
+MCATDB = 'GR6Plus7.dbo'
+#baseDbo = 'Gr6plus7.dbo'
 formatURL = '&format=json&timeout={}'
 
 def hasNaN(query):
@@ -66,9 +69,9 @@ def mcat_sources(band,ra0,dec0,radius,maglimit=20):
         ' fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2,'
         ' nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5,'
         ' nuv_magerr_aper_6, nuv_magerr_aper_7'
-        ' from '+str(baseDbo)+'.photoobjall as p inner join '+str(baseDbo)+
+        ' from '+str(MCATDB)+'.photoobjall as p inner join '+str(MCATDB)+
         '.photoextract as pe on p.photoextractid=pe.photoextractid inner join '+
-        str(baseDbo)+'.fgetnearbyobjeq('+repr(float(ra0))+', '+
+        str(MCATDB)+'.fgetnearbyobjeq('+repr(float(ra0))+', '+
         repr(float(dec0))+', '+
         str(radius*60.)+') as nb on p.objid=nb.objid and (band=3 or band='+
         str(bandflag)+') and '+str(band)+'_mag<'+str(maglimit)+
@@ -94,10 +97,10 @@ def mcat_visit_sources(ra0,dec0,radius):
         ' fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2,'
         ' nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5,'
         ' nuv_magerr_aper_6, nuv_magerr_aper_7'
-        ' from '+str(baseDbo)+'.visitphotoobjall as vpo'
-        ' inner join '+str(baseDbo)+'.visitphotoextract'
+        ' from '+str(MCATDB)+'.visitphotoobjall as vpo'
+        ' inner join '+str(MCATDB)+'.visitphotoextract'
         ' as vpe on vpo.photoextractid=vpe.photoextractid inner join'
-        ' '+str(baseDbo)+'.fGetNearbyVisitObjEq('+repr(float(ra0))+', '+repr(float(dec0))+
+        ' '+str(MCATDB)+'.fGetNearbyVisitObjEq('+repr(float(ra0))+', '+repr(float(dec0))+
         ', '+str(radius*60.)+') as nb on vpo.objid=nb.objid'+
         str(formatURL))
 
@@ -108,9 +111,9 @@ def mcat_objid_search(objid,mode='visit'):
     return (str(baseURL)+
         'select objid, minPhotoObsDate, maxPhotoObsDate, obs_date, obsdatim,'
         ' nobssecs, fobssecs, nexptime, fexptime, nexpstar, nexpend, fexpstar,'
-        ' fexpend from '+str(baseDbo)+'.visitphotoobjall as vp inner join '+
-        str(baseDbo)+'.imgrun as ir on vp.photoextractid=ir.imgrunid'
-        ' inner join '+str(baseDbo)+'.visitphotoextract as vpe on'
+        ' fexpend from '+str(MCATDB)+'.visitphotoobjall as vp inner join '+
+        str(MCATDB)+'.imgrun as ir on vp.photoextractid=ir.imgrunid'
+        ' inner join '+str(MCATDB)+'.visitphotoextract as vpe on'
         ' vp.photoextractid=vpe.photoextractid where objid = '+
         str(long(objid))+str(formatURL))
 
@@ -142,11 +145,10 @@ def aperture(band,ra0,dec0,t0,t1,radius,tscale=1000.):
     """Integrate counts over an aperture at a position."""
     return (str(baseURL)+
         'Select  sum(photonCount)'
-        ' from dbo.fGetNearbyObjEqCount'+str(band)+'('+repr(float(ra0))+','+
-            repr(float(dec0))+
-            ','+str(radius)+','+str(long(t0*tscale))+','+
-            str(long(t1*tscale))+',0)'+
-        str(formatURL))
+        ' from '+str(baseDB)+'.fGetNearbyObjEqCount'+str(band)+
+        '('+repr(float(ra0))+','+repr(float(dec0))+
+        ','+str(radius)+','+str(long(t0*tscale))+','+
+        str(long(t1*tscale))+',0)'+str(formatURL))
 
 def deadtime1(band,t0,t1,tscale=1000.):
     """Return the global counts of non-NULL data."""
@@ -232,7 +234,7 @@ def centroid(band,ra0,dec0,t0,t1,radius,tscale=1000.):
 def allphotons(band,ra0,dec0,t0,t1,radius,tscale=1000.):
     """Grab the major columns for all events within an aperture."""
     return (str(baseURL)+
-        'select time,ra,dec,xi,eta from dbo.fGetNearbyObjEq'+str(band)+
+        'select time,ra,dec,xi,eta from '+str(baseDB)+'.fGetNearbyObjEq'+str(band)+
         'AllColumns('+repr(float(ra0))+','+repr(float(dec0))+','+
         repr(radius)+','+
         str(long(t0*tscale))+','+str(long(t1*tscale))+',0)'+str(formatURL))
@@ -245,17 +247,26 @@ def shutter(band,t0,t1,tscale=1000.):
         str(long(t0*tscale))+','+str(long(t1*tscale))+')'+str(formatURL))
 
 def shutdead(band,t0,t1,tscale=1000.):
-	return (str(baseURL)+
-        'SELECT shutter*0.05 FROM fGetNUVShutter('+str(long(t0*tscale))+','+
-        str(long(t1*tscale))+
-        ') AS time UNION ALL SELECT SUM(dt) * 0.0000057142857142857145 / ('+
-        repr(t1)+'-'+repr(t0)+
-        ') AS dead FROM(SELECT count(*) AS dt FROM NUVPhotonsNULLV'
-        ' WHERE time BETWEEN '+str(long(t0*tscale))+' AND '+
-        str(long(t1*tscale))+' UNION ALL SELECT count(*) AS dt'
-        ' FROM NUVPhotonsV WHERE time BETWEEN '+str(long(t0*tscale))+' AND '+
-        str(long(t1*tscale))+') x'+
-        str(formatURL))
+#	return (str(baseURL)+
+#        'SELECT shutter*0.05 FROM fGetNUVShutter('+str(long(t0*tscale))+','+
+#        str(long(t1*tscale))+
+#        ') AS time UNION ALL SELECT SUM(dt) * 0.0000057142857142857145 / ('+
+#        repr(t1)+'-'+repr(t0)+
+#        ') AS dead FROM(SELECT count(*) AS dt FROM NUVPhotonsNULLV'
+#        ' WHERE time BETWEEN '+str(long(t0*tscale))+' AND '+
+#        str(long(t1*tscale))+' UNION ALL SELECT count(*) AS dt'
+#        ' FROM NUVPhotonsV WHERE time BETWEEN '+str(long(t0*tscale))+' AND '+
+#        str(long(t1*tscale))+') x'+
+#        str(formatURL))
+    tt0, tt1 = [long(t*tscale) for t in [t0, t1]]
+    return ('{base}SELECT shutter*0.05 FROM fGet{band}Shutter({tt0},{tt1}) AS '
+            'time UNION ALL SELECT SUM(dt) * 0.0000057142857142857145 / '
+            '({t1}-{t0}) AS dead FROM(SELECT count(*) AS dt FROM '
+            '{band}PhotonsNULLV WHERE time BETWEEN {tt0} AND {tt1} UNION ALL '
+            'SELECT count(*) AS dt FROM NUVPhotonsV WHERE time BETWEEN {tt0} '
+            'AND {tt1}) x{fmt}'.format(base=baseURL, band=band.upper(), tt0=tt0,
+                                       tt1=tt1, t0=t0, t1=t1, fmt=formatURL))
+
 
 def exptime(band,t0,t1,stepsz=1.,tscale=1000.):
     return (str(baseURL)+
@@ -272,10 +283,19 @@ def aspect(t0,t1,tscale=1000.):
 
 # Return the aspect information based on eclipse
 def aspect_ecl(eclipse):
+    """Return the aspect information based upon an eclipse number."""
     return (str(baseURL)+
         'select eclipse, filename, time, ra, dec, twist, flag, ra0, dec0,'
         ' twist0 from aspect where eclipse='+str(eclipse)+' order by time'+
         str(formatURL))
+
+def aspect_skypos(ra,dec,detsize=1.25):
+    """Return the aspect information based upon sky position and det radius."""
+    return (str(baseURL)+
+        "select eclipse, filename, time, ra, dec, twist, flag, ra0, dec0,"
+        " twist0 from aspect where ra between "+repr(ra-detsize/2.)+
+        " and "+repr(ra+detsize/2.)+" and dec between "+repr(dec-detsize/2.)+
+        " and "+repr(dec+detsize/2.)+" order by time"+str(formatURL))
 
 # Return data within a box centered on ra0, dec0 with sides of length 2*radius
 def box(band,ra0,dec0,t0,t1,radius,tscale=1000.):

@@ -7,11 +7,13 @@ import numpy as np
 import curvetools as ct
 import gphoton_args as gargs
 from imagetools import write_jpeg # For JPEG preview image creation
-from dbasetools import fGetTimeRanges, suggest_parameters
+from dbasetools import suggest_parameters
+from galextools import aper2deg
 
 def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
               stepsz=False,verbose=0,clobber=False,trange=None,tranges=None,
-              minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,iocode='wb'):
+              minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,iocode='wb',
+              sigmaclip=3.):
     """Runs gAperture and returns the data in a python dict() and as
     a CSV file if outfile is specified. Can be called from the interpreter.
     """
@@ -30,14 +32,19 @@ def gAperture(band,skypos,radius,csvfile=False,annulus=None, coadd=False,
                           clobber=clobber, trange=trange, tranges=tranges,
                           coadd=coadd, minexp=minexp, maxgap=maxgap,
                           iocode = iocode, maskdepth=maskdepth,
-                          maskradius=maskradius)
+                          maskradius=maskradius, sigmaclip=sigmaclip)
     return data
 
 def check_radius(args):
     """Checks the radius value."""
-    if not args.radius and not args.suggest:
+    if not (args.radius or args.suggest or args.aperradius):
         print "Must specify an aperture radius."
         raise SystemExit
+    if args.radius and args.aperradius:
+        print "Must not specify both --aperture and --mcataper."
+        raise SystemExit
+    if args.aperradius and not args.radius:
+        args.radius=aper2deg(args.aperradius)
     return args
 
 def check_annulus(args):
@@ -60,6 +67,8 @@ def setup_parser(iam='gaperture'):
     parser.add_argument("-a", "--aperture", action="store", dest="radius",
         help="Aperture radius in decimal degrees",
         type=float)
+    parser.add_argument("--mcataper", "--apercode", action="store",
+        dest="aperradius", type=int)
     parser.add_argument("-i", "--inner", action="store", dest="annulus1",
         help="Inner annulus radius for background subtraction", type=float)
     parser.add_argument("-o", "--outer", action="store", dest="annulus2",
@@ -82,6 +91,9 @@ def setup_parser(iam='gaperture'):
     parser.add_argument("--bgmaskradius", action="store", dest="maskradius",
         help="Radius of background mask in n sigmas (assuming Gaussians)",
         type=float, default=1.5)
+    parser.add_argument("--sigmaclip", "--sigma", action="store",
+        dest="sigmaclip", help="Gaussian sigma at which to clip background.",
+        type=float, default=3.0)
     return parser
 
 def check_args(args,iam='gaperture'):
@@ -96,6 +108,9 @@ def check_args(args,iam='gaperture'):
 def reconstruct_command(args):
     """Reconstruct the command line."""
     cmd = " ".join(sys.argv)
+    if args.suggest:
+        cmd = "{cmd} --annulus [{i},{o}] --aperture {a}".format(
+                        cmd=cmd,i=args.annulus1,o=args.annulus2,a=args.radius)
     if args.verbose > 1:
         print cmd
     return cmd
@@ -151,4 +166,4 @@ if __name__ == '__main__':
                      trange=[args.tmin,args.tmax], tranges=args.trange,
                      coadd=args.coadd, minexp=args.minexp, maxgap=args.maxgap,
                      iocode=args.iocode, maskdepth=args.maskdepth,
-                     maskradius=args.maskradius)
+                     maskradius=args.maskradius,sigmaclip=args.sigmaclip)

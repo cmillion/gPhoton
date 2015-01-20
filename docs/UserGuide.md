@@ -74,7 +74,7 @@ If you want to test your build or run any of the `gPhoton` commands below, you w
 
 From the command line, navigate to the `gPhoton/source` directory. Run the first two example gPhoton commands below. These will either generate errors (if a package is missing or wrong) or they will generate all of the aspect corrected FUV and NUV photons for eclipse 31000 as comma separate value (CSV for .csv) files. While gPhoton is running, the terminal will update with the photon chunk and current processing rate, mostly just so you know that something is happening. The photons will be dumped into files named [NF]UVPhotons.csv which will be quite large (several Gb), so make sure that you have enough disk space available. If a few chunks are processed without errors, your installation is likely fine. You can kill gPhoton at any time with `Ctrl+C` New runs will overwrite .csv output from previous runs.
 
-**Convenient hack:** The .csv files get updated frequently, so you can generate a "sample" .csv file by letting gPhoton run for a few minutes and then killing it.
+**Convenient hack:** The .csv files get updated frequently, so you can generate a "sample" .csv file by letting gPhoton run for a few minutes and then killing it (e.g., with Ctrl+C).
 
 **Note:** If you don't have `PYTHONPATH` defined, then you will need to put `python` in front of all of the command line tool calls in this document. (e.g. `python ./gPhoton.py [...] [...] [...]`).
 
@@ -157,8 +157,6 @@ _gFind_ is the data location tool. Given a target sky position (and, optionally,
 
     ./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351
 
-_For the curious:_ The estimates returned by _gFind_ are computed by finding the boresight pointings (in the aspect database) which fall within a detector radius (~0.625 degrees) of the desired sky position and comparing the associated time stamps against the time stamps of data that has actually been loaded into the photon database.
-
 ####Tweaking Search Parameters
 The default allowable gap between two time stamps for them to be considered contiguous for the purposes of a _gFind_ estimate is one second. This is a reasonable minimum gap because it is the default spacing between adjacent entries in the aspect table. This parameter is adjustable, however, with the --maxgap` parameter. To consider data with gaps of as much as 100 seconds to be contiguous--a reasonable value if you want to treat all data in the same eclipse as part of the same observation--try the following command.
 
@@ -176,7 +174,9 @@ If you want to exclude times when the source is on the edge of the detector, you
 
     ./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --detsize 1
 
-_For the curious:_ The estimates returned by _gFind_ are computed by finding the boresight pointings (in the aspect database) which fall within a detector _radius_ (nominally 0.625 degrees) of the desired sky position and comparing the associated time stamps against the time stamps of data that has actually been loaded into the photon database.
+At present, only about 5% of the GALEX GR6/7 data is available in the database. We expect to achieve full coverage within the next year. In the meantime, for planning purposes, you can get an estimate of how much exposure we expect will be available in the fully populated database by using the `--predicted` flag.
+
+_For the curious:_ The estimates returned by _gFind_ are computed by finding the boresight pointings (in the aspect database) which fall within a detector _radius_ (nominally 0.625 degrees) of the desired sky position and comparing the associated time stamps against the time stamps of data that has actually been loaded into the photon database. The _predicted_ keyword performs this same search on the aspect solutions only without comparing it against the database.
 
 ####Alternative I/O Formats
 Rather than passing RA (`-r`) and Dec (`-d`) separately, you can pass them to `--skypos` as follows.
@@ -252,9 +252,26 @@ If you want to generate a light curve rather than an integrated value, pass the 
 For any command, you can always request more information be printed to the terminal by setting the `--verbose` or `-v` flag to a number between 1-3 (defualt is 0) where larger numbers indicate increasing levels of output. Setting `-v 3` will print out complete SQL commands and should really only be used for debugging.
 
 ####Lightcurve File Column Definitions
-**TBD:** The column definitions for the .csv output from _gAperture_ are in flux following the recent v1.10 feature update. Please see the .csv headers.
+**NOTE:** The column definitions for the .csv output from _gAperture_ are in flux. These are the column definitions in the v1.20 build.
 
-**Note:** The _bgsub suffix in a column definition means that the value is background subtracted using an estimate based on an unmasked annulus. The _bgsub_cheese suffix means that the value is background subtracted using an estimate based on a "swiss cheese" style mask of the annulus.
+1. t0 - Start time of observation bin in GALEX seconds.
+2. t1 - End time of observation bin in GALEX seconds.
+3. exptime - Effect exposure time in seconds. (Note: This is corrected for dead time and shutter effects and so is not equal to t0-t1.)
+4. mag_bgsub_cheese - The calibrated AB magnitude within the bin using the best implemented background subtracted method ("swiss cheese").
+5. t_mean - The mean time of data within the bin in GALEX seconds.
+6. t0_data - The minimum time of data within the bin in GALEX seconds.
+7. t1_data - The maximum time of data within the bin in GALEX seconds.
+8. cps - The counts per second with no background subtraction.
+9. counts - The number of counts within the aperture. (Not background subtracted.)
+10. bg - The estimated number of counts within the aperture based upon the measured rates of counts within an unmasked annulus.
+11. mag - The AB magnitude of the source with no background subtraction.
+12. mag_bgsub - The AB magnitude of the source using the unmasked background subtraction.
+13. flux - The flux of the source with no background subtraction.
+14. flux_bgsub - The flux of the source using the unmasked annulus background subtraction.
+15. flux_bgsub_cheese - The flux of the source using the swiss cheese background subtraction.
+16. bg_cheese - The estimated number of background counts in the aperture based upon the background measured using the swiss cheese method.
+
+**Note on the column naming convention:** The _bgsub suffix in a column definition means that the value is background subtracted using an estimate based on an unmasked annulus. The _bgsub_cheese suffix means that the value is background subtracted using an estimate based on a "swiss cheese" style mask of the annulus. Column names which don't have these suffixes do not contain background corrected.
 
 ####Calling from within the Python Interpreter
 You can also import and work with _gAperture_ and its modules from within the Python interpeter.
@@ -274,7 +291,7 @@ _gMap_ is the image creation tool. It can generate integrated count, intensity, 
 
 _gMap_ writes all image files in the Flexible Image Transport System (FITS) standard, which is an uncompressed archival data format favored by many astronomy applications (and was used by the GALEX mission for archival products). FITS images generated by _gMap_ have headers which describe the World Coordinate System (WCS) information defining their orientation on the sky as well as effective exposure time and other metadata for the observation as a whole. For multi-frame images (movies), the per-plane information is described in a table in the FITS secondary HDU; this table describes start time, stop time, and effective exposure for each frame (within appropriately labelled columns).ß
 
-<sup>+</sup>Caveat emptor. Arbitrariness is limited by your available RAM.
+<sup>+</sup>Caveat emptor. "Arbitrariness" is limited by your available patience and RAM.
 
 ####Count Maps
 Count (_cnt_) maps are integrated, aspect corrected but uncalibrated (that is, not adjusted for resonse or exposure time) images of the sky. Count images are good for "quick looks" at the data, to ensure that you are pointing in the location that you expected and that you are seeing the sources or features desired. But because they are not calibrated by either the relative response or the effective exposure time, you should not use them for photometric analyses of any kind.

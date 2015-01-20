@@ -11,13 +11,13 @@ def zpmag(band):
     """Define the zero point magnitude offset for the APER MCAT values."""
     return {'NUV':20.08238,'FUV':18.81707}[band]
 
-def aper2deg(aper):
+def aper2deg(apercode):
     """Convert SExtractor APER numbers to decimal degrees radii."""
-    if not aper==int(aper) or aper < 1 or aper > 7:
-        print "APER must be an integer in interval [1,7]."
-        return -1
+    if not apercode==int(apercode) or apercode < 1 or apercode > 7:
+        print "Error: `apercode` must be an integer in interval [1,7]."
+        return None
     apers = np.array([1.5,2.3,3.8,6.0,9.0,12.8,17.3,30.,60.,90.])/3600.
-    return apers[int(aper)-1]
+    return apers[int(apercode)-1]
 
 # TODO: handle arrays
 def apcorrect1(radius,band):
@@ -176,7 +176,7 @@ def compute_flat_scale(t,band,verbose=0):
     if len(ix[0]):
         try:
             flat_scale[ix] *= 1.018
-        except:
+        except (TypeError, IndexError):
             # if it does not have '__getitem__' (because it's a scalar)
             flat_scale *= 1.018 if t>=881881215.995 else 1.
 
