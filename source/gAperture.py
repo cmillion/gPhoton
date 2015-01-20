@@ -83,7 +83,7 @@ def setup_parser(iam='gaperture'):
     parser.add_argument("--addhdr", action="store_true", dest="addhdr",
         help="Add command line and column names to the top of the .csv file.")
     parser.add_argument("--iocode", action="store", dest="iocode", default="wb",
-        help="The iocode to be past to the cvs writer. Don't much with this.",
+        help="The iocode to be passed to the cvs writer. Don't mess with this.",
         type=str)
     parser.add_argument("--bgmaskdepth", action="store", dest="maskdepth",
         help="Depth of the background mask in AB Magnitudes.",
