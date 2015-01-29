@@ -8,8 +8,8 @@ formatted query to the MAST database. Don't change them unless you know what
 you're doing.
 """
 baseURL = 'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
-#baseDB = 'GPFDB10.dbo'
-baseDB = 'GPLAdmin.dbo'
+baseDB = 'GPFDB10.dbo' # >52.5 deg declination
+#baseDB = 'GPLAdmin.dbo'
 MCATDB = 'GR6Plus7.dbo'
 #baseDbo = 'Gr6plus7.dbo'
 formatURL = '&format=json&timeout={}'
@@ -126,8 +126,8 @@ def exposure_ranges(band,ra0,dec0,t0=1,t1=10000000000000,tscale=1000.,
     if not band:
         band = 'FUV/NUV'
     return (str(baseURL)+
-        'select distinct time from'
-        ' fGetNearbyAspectEq('+repr(float(ra0))+','+repr(float(dec0))+',(('+
+        'select distinct time from '+str(baseDB)+
+        '.fGetNearbyAspectEq('+repr(float(ra0))+','+repr(float(dec0))+',(('+
             str(detsize)+'/2.0)*60.0),'+
             str(long(t0*tscale))+','+str(long(t1*tscale))+')'
         ' where band=\''+str(band)+'\' or band=\'FUV/NUV\' order by time'+
@@ -137,7 +137,8 @@ def exposure_range(band,ra0,dec0,t0=1,t1=10000000000000):
     """Find time ranges for which data exists at a given position."""
     return (str(baseURL)+
         'select startTimeRange, endTimeRange'
-        ' from fGetTimeRanges('+str(int(t0))+','+str(int(t1))+','+
+        ' from '+str(baseDB)+
+            '.fGetTimeRanges('+str(int(t0))+','+str(int(t1))+','+
             repr(float(ra0))+','+repr(float(dec0))+') where band=\''+
             str(band)+'\''+str(formatURL))
 
@@ -178,7 +179,7 @@ def boxcount(band,t0,t1,xr,yr,tscale=1000.):
     """Find the number of events inside of a box defined by [xy] range in
     detector space coordinates. This is useful for pulling out stim events.
     """
-    return (str(baseURL)+'select count(*) from '+str(band)+
+    return (str(baseURL)+'select count(*) from '+str(baseDB)+'.'+str(band)+
         'PhotonsNULLV where time between '+str(long(t0*tscale))+' and '+
         str(long(t1*tscale))+' and x between '+str(xr[0])+' and '+str(xr[1])+
         ' and y between '+str(yr[0])+' and '+str(yr[1])+str(formatURL))
@@ -211,7 +212,8 @@ def stimcount(band,t0,t1,margin=90.01,aspum=68.754932/1000.,tscale=1000,eclipse=
 def boxcentroid(band,t0,t1,xr,yr,tscale=1000.):
     """Find the mean position of events inside of a box in detector space."""
     return (str(baseURL)+
-        'select avg(x), avg(y) from NUVPhotonsNULLV where time between '+
+        'select avg(x), avg(y) from '+str(baseDB)+
+        '.NUVPhotonsNULLV where time between '+
         str(long(t0*tscale))+' and '+str(long(t1*tscale))+
         ' and x between '+str(xr[0])+' and '+str(xr[1])+' and y between '+
         str(yr[0])+' and '+str(yr[1])+str(formatURL))
@@ -234,8 +236,8 @@ def centroid(band,ra0,dec0,t0,t1,radius,tscale=1000.):
 def allphotons(band,ra0,dec0,t0,t1,radius,tscale=1000.):
     """Grab the major columns for all events within an aperture."""
     return (str(baseURL)+
-        'select time,ra,dec,xi,eta from '+str(baseDB)+'.fGetNearbyObjEq'+str(band)+
-        'AllColumns('+repr(float(ra0))+','+repr(float(dec0))+','+
+        'select time,ra,dec,xi,eta from '+str(baseDB)+'.fGetNearbyObjEq'+
+        str(band)+'AllColumns('+repr(float(ra0))+','+repr(float(dec0))+','+
         repr(radius)+','+
         str(long(t0*tscale))+','+str(long(t1*tscale))+',0)'+str(formatURL))
 
@@ -243,7 +245,7 @@ def allphotons(band,ra0,dec0,t0,t1,radius,tscale=1000.):
 #  i.e. number of 0.05s gaps in data
 def shutter(band,t0,t1,tscale=1000.):
     return (str(baseURL)+
-        'select shutter*0.05 from fGet'+str(band)+'Shutter('+
+        'select shutter*0.05 from '+str(baseDB)+'.fGet'+str(band)+'Shutter('+
         str(long(t0*tscale))+','+str(long(t1*tscale))+')'+str(formatURL))
 
 def shutdead(band,t0,t1,tscale=1000.):
@@ -270,7 +272,7 @@ def shutdead(band,t0,t1,tscale=1000.):
 
 def exptime(band,t0,t1,stepsz=1.,tscale=1000.):
     return (str(baseURL)+
-        'select * from fGet'+str(band)+'EffectiveExposureTime('+
+        'select * from '+str(baseDB)+'.fGet'+str(band)+'EffectiveExposureTime('+
         str(long(t0*tscale))+','+str(long(t1*tscale))+','+str(stepsz)+')'+
         str(formatURL))
 
@@ -300,7 +302,8 @@ def aspect_skypos(ra,dec,detsize=1.25):
 # Return data within a box centered on ra0, dec0 with sides of length 2*radius
 def box(band,ra0,dec0,t0,t1,radius,tscale=1000.):
     return (str(baseURL)+
-        'select time,ra,dec from '+str(band)+'PhotonsV where time between '+
+        'select time,ra,dec from '+str(baseDB)+'.'+str(band)+
+        'PhotonsV where time between '+
         str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and ra between '+
         repr(ra0-radius)+' and '+repr(ra0+radius)+' and dec between '+
         repr(dec0-radius)+' and '+repr(dec0+radius)+' and flag=0'+
@@ -309,7 +312,7 @@ def box(band,ra0,dec0,t0,t1,radius,tscale=1000.):
 # Return data within a rectangle centered on ra0, dec0
 def rect(band,ra0,dec0,t0,t1,ra,dec,tscale=1000.):
     return (str(baseURL)+
-        'select time,ra,dec from fGetObjFromRect'+str(band)+'('+
+        'select time,ra,dec from '+str(baseDB)+'.fGetObjFromRect'+str(band)+'('+
         repr(ra0-ra/2.)+','+repr(ra0+ra/2.)+','+repr(dec0-dec/2.)+','+
         repr(dec0+dec/2.)+','+str(long(t0*tscale))+','+
         str(long(t1*tscale))+',0)'+str(formatURL))
