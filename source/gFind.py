@@ -20,8 +20,8 @@ def gFind(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1.0,
 	all_expt = []
 	for this_band in output.keys():
 		## Get valid time ranges.
-	       	ranges = dbt.fGetTimeRanges(this_band,skypos,maxgap=maxgap,
-									minexp=minexp,trange=trange,verbose=verbose,
+		ranges = dbt.fGetTimeRanges(this_band,skypos,maxgap=maxgap,
+									minexp=minexp,verbose=verbose,
 									detsize=detsize,retries=retries,
 									predicted=predicted)
 
