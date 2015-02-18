@@ -118,9 +118,9 @@ def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e5,ntests=10):
     ratios = np.zeros(ntests)
     for i in range(ntests):
         ann_events = bg_mask_annulus(band,ra0,dec0,annulus,
-                 np.random.uniform(ra0-annulus[1],ra0+annulus[1],nsamples),
-                 np.random.uniform(dec0-annulus[1],dec0+annulus[1],nsamples),
-                 np.ones(nsamples))
+             np.random.uniform(ra0-annulus[1],ra0+annulus[1],int(nsamples)),
+             np.random.uniform(dec0-annulus[1],dec0+annulus[1],int(nsamples)),
+             np.ones(nsamples))
         mask_events= bg_mask_sources(band,ra0,dec0,
                  ann_events[0],ann_events[1],ann_events[2],sources)
         try:
