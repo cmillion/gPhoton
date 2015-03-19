@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="./img/favicon.ico">
+
+        <title>My Docs</title>
+
+        <link href="./css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="./css/font-awesome-4.0.3.css" rel="stylesheet">
+        <link href="./css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="./css/highlight.css">
+
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        
+    </head>
+
+    <body class="homepage">
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+
+        <!-- Collapsed navigation -->
+        <div class="navbar-header">
+            
+
+            <!-- Main title -->
+            <a class="navbar-brand" href=".">My Docs</a>
+        </div>
+
+        <!-- Expanded navigation -->
+        <div class="navbar-collapse collapse">
+            
+
+            
+        </div>
+    </div>
+</div>
+
+        <div class="container">
+            
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+    
+        <li class="main active"><a href="#summary">Summary</a></li>
+        
+    
+        <li class="main "><a href="#getting-started">Getting Started</a></li>
+        
+            <li><a href="#high-level-description-of-the-software">High Level Description of the Software</a></li>
+        
+            <li><a href="#obtaining-the-source-code">Obtaining the Source Code</a></li>
+        
+            <li><a href="#installation-instructions">Installation Instructions</a></li>
+        
+            <li><a href="#testing-your-build">Testing Your Build</a></li>
+        
+    
+        <li class="main "><a href="#gphotonpy-the-standalone-calibration-pipeline">gPhoton.py - The Standalone Calibration Pipeline</a></li>
+        
+            <li><a href="#optional-parameters">Optional parameters</a></li>
+        
+            <li><a href="#null-vs-non-null-data">NULL vs. non-NULL data</a></li>
+        
+            <li><a href="#multi-visit-eclipses">Multi-visit Eclipses</a></li>
+        
+            <li><a href="#other-notes">Other Notes</a></li>
+        
+    
+        <li class="main "><a href="#the-database-tools">The Database Tools</a></li>
+        
+            <li><a href="#gfindpy">gFind.py</a></li>
+        
+            <li><a href="#gaperturepy">gAperture.py</a></li>
+        
+            <li><a href="#gmappy">gMap.py</a></li>
+        
+    
+        <li class="main "><a href="#common-questions-issues-and-gotchas">Common Questions, Issues, and Gotchas</a></li>
+        
+    
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<p><strong>User Documentation for the MAST/GALEX Photon Database and Tools</strong></p>
+<p>Chase Million<sup>1</sup>, Bernie Shiao<sup>2</sup>, Scott Fleming<sup>2</sup>,
+Myron Smith<sup>2</sup></p>
+<p><sup>1</sup>Million Concepts (chase.million@gmail.com),
+<sup>2</sup>Space Telescope Science Institute</p>
+<h3 id="summary">Summary</h3>
+<p>The MAST/GALEX photon database and tools exist in an effort to maximize the flexibility and utility of the GALEX data set. The GALEX detectors were microchannel plates which recorded detector position and time-of-arrival information for every detected photon event with a time resolution of five thousandths of a second, composing a huge and rich short time domain survey of the UV. Due to digital storage space and processing limitations, the data was only formally released by the mission team as integrated images. The photon list files--internally known as <em>x-files</em>--were only provided by special request and with little to no additional support for their calibration or use.</p>
+<p>The official GALEX calibration pipeline software ("the canonical pipeline")--written in about half a dozen languages with a sprawling network of complex dependencies--has also never been successfully ported to any system outside of the GALEX internal network at Caltech. Even though the source code for this pipeline will be made publicly available through the Mikulski Archive at Space Telescope (MAST) in the future, the end of the GALEX project would have effectively marked the end of the capability to generate photon level data specifically and revisit the GALEX calibration more generally. A software tool known as <em>gPhoton</em> ("the standalone pipeline") has been developed by the authors with support of MAST and Space Telescope Science Institute (STScI) which reproduces a large portion of the official GALEX pipeline in Python and makes it possible for individual researchers to generate the photon level data and calibrated lightcurves or integrated images. It also opens the possibility of modifying or improving upon the astrometric and photometric calibrations.</p>
+<p>Additionally, the authors and MAST have undertaken to process all of the GALEX data with gPhoton and store the photon level data in a database. Once the database is fully populated (<em>est. 2015</em>), it will comprise over 180 terabytes and contain approximately 1.5 trillion rows (at one event per row). In addition to the standalone calibration pipeline, <em>gPhoton</em>, the authors have created tools ("the database tools") for querying and working with output from the photon database. These include
+<em> <em>gFind</em>, for searching the database for specific coverage.</em> <em>gAperture</em>, for extracting photon lists and generating calibrated lightcurves of specific targets.
+* <em>gMap</em>, for creating calibrated images and movies.</p>
+<h2 id="getting-started">Getting Started</h2>
+<p>If you are a new user of the GALEX data or have not familiarized yourself with the quirks and intricacies of the GALEX detectors and calibration, please read the official <a href="http://www.galex.caltech.edu/researcher/techdocs.html">Technical Documentation</a> with particular attention paid to <a href="http://www.galex.caltech.edu/researcher/techdoc-ch3.html">Chapter 3 - Pipeline Overview - Imaging</a>. This will answer many common questions of new users such as
+<em> What is the difference between an observation, a visit, and an eclipse?
+</em> What is a "dither correction?"
+<em> How is a <em>relative response map</em> different from a <em>flat field</em>?</em> What is a "stim?"</p>
+<h3 id="high-level-description-of-the-software">High Level Description of the Software</h3>
+<p><strong>[PLACEHOLDER TEXT]</strong></p>
+<h3 id="obtaining-the-source-code">Obtaining the Source Code</h3>
+<p><strong>Preferred method:</strong> Obtain the source code by cloning the master branch of the <a href="https://github.com/cmillion/gPhoton">gPhoton repository on Github</a>. Instructions for getting started using Github can be found <a href="https://help.github.com/categories/54/articles">here</a>, and instructions specifically for cloning repositories can be found <a href="https://help.github.com/articles/which-remote-url-should-i-use#cloning-with-ssh">here</a>. Once you've cloned the repository, it will be straightforward for your to update your local version when we make updates to the master version.</p>
+<p><strong>Alternative method:</strong> If you can't set up Github on your machine for some reason (such as permissions issues), you can download the master branch with the <a href="https://github.com/cmillion/gPhoton/archive/master.zip"><strong>Download Zip</strong></a> button on Github. This will initiate a large (~200Mb) download of a file called <code>master.zip</code> which will contain the source code. Note that in order to obtain software updates, you will need to re-download and re-extract this file.</p>
+<h3 id="installation-instructions">Installation Instructions</h3>
+<p>The standalone tools are written exclusively in Python which is a flexible and powerful interpreted programming and data exploration language that is being increasingly adopted in many fields of research and especially astronomy. The "installation" in this case refers to installing the required version of Python and the non-standard Python modules ("dependencies") called by the gPhoton software. For naive Python users, we suggest simply <a href="https://store.continuum.io/cshop/anaconda/">downloading the Anaconda distribution</a> of Python which contains all of the required dependencies built-in; Anaconda is described in greater detail under <strong>Prebuilt Distributions</strong> below. For advanced users and developers, we suggest that you manage the dependencies yourself; the complete dependency list and suggested installation instructions are given under <strong>Manual Package Management</strong> below.</p>
+<p>Because the standalone tools are written in Python, they are theoretically cross platform. The software has only been thoroughly used and tested on Ubuntu Linux, however. At last attempt, we were not able to run the tools on Debian Linux because some of the required libraries are not yet supported.</p>
+<h4 id="prebuilt-distributions">Prebuilt Distributions</h4>
+<p>There are several versions of Python available which include not only the core "standard" version itself, but many common and popular modules as a single package, eliminating the ened for users to manage such dependencies themeselves. At present, the most promising of these appears to be Anaconda, which is available as a free download (with some advanced features available as paid add-ons). Anaconda contains all of the required dependencies for the gPhoton project. Advanced users and Python developers will probably want to manage their own dependencies; if you are not one of these, you can <a href="https://store.continuum.io/cshop/anaconda/">download Anaconda here</a> and get started using gPhoton immediately.</p>
+<h4 id="manual-package-management">Manual Package Management</h4>
+<p>You will need to install <em>python2.7</em>, <em>numpy</em>, <em>scipy</em>, <em>astropy</em>, <em>requests</em> and <em>pandas</em>. The recommended commands for doing this appear below under the appropriate operating system.</p>
+<p>The best specific tools for package installation and management shift rapidly. We'll try to keep this section up to date. If anything suggested here is actually <em>broken</em>, please let us know.</p>
+<h5 id="linux">Linux</h5>
+<p>Here are the recommended commands for Ubuntu. If you are using Fedora, substitute <code>yum</code> for <code>apt-get</code> everywhere.</p>
+<pre><code>sudo apt-get install python-setuptools
+sudo apt-get install python-numpy python-scipy
+</code></pre>
+<p>You should use <code>pip</code> to get the latest versions of <em>requests</em> and <em>astropy</em>. If <em>requests</em> or <em>astropy</em> is already installed, upgrade it by appending the <code>--upgrade</code> flag to the following calls.</p>
+<pre><code>sudo pip install requests
+sudo pip install astropy
+sudo pip install pandas
+</code></pre>
+<h5 id="mac-osx">Mac (OSX)</h5>
+<p><strong>Draft.</strong> For installing and managing your custom python build in Mac OSX, we suggest using the <a href="https://www.macports.org/">MacPorts package</a>. There is also a tutorial for installing Python on Mac with MacPorts <a href="https://astrofrog.github.io/macports-python/">here</a>.</p>
+<pre><code>sudo port install py27-numpy
+sudo port install py27-scipy
+sudo port install py27-astropy
+sudo port install py27-requests
+sudo port install py27-pandas
+</code></pre>
+<h5 id="windows">Windows</h5>
+<p><strong>Draft.</strong> We haven't actually tried to do any of this on Windows. We suggest trying the <a href="https://www.enthought.com/products/epd/">Enthought Python Distribution (EPD)</a> or the aforementioned <a href="https://store.continuum.io/cshop/anaconda/">Anaconda</a> distribution.</p>
+<h3 id="testing-your-build">Testing Your Build</h3>
+<p>If you want to test your build or run any of the <code>gPhoton</code> commands below, you will need to download the sample eclipse directory from <a href="https://www.dropbox.com/s/2c26jafccqz5ahh/e31000.tar.gz">here</a>. This directory contains the raw science (raw6), spacecraft state (scst), and refined aspect (asprta) files for eclipse e31000. Unzip this test eclipse into the same directory as gPhoton (i.e. the directory <code>e31000</code> should be on the same level and in the same directory as <code>source</code> and <code>cal</code>).</p>
+<p>From the command line, navigate to the <code>gPhoton/source</code> directory. Run the first two example gPhoton commands below. These will either generate errors (if a package is missing or wrong) or they will generate all of the aspect corrected FUV and NUV photons for eclipse 31000 as comma separate value (CSV for .csv) files. While gPhoton is running, the terminal will update with the photon chunk and current processing rate, mostly just so you know that something is happening. The photons will be dumped into files named [NF]UVPhotons.csv which will be quite large (several Gb), so make sure that you have enough disk space available. If a few chunks are processed without errors, your installation is likely fine. You can kill gPhoton at any time with <code>Ctrl+C</code> New runs will overwrite .csv output from previous runs.</p>
+<p><strong>Convenient hack:</strong> The .csv files get updated frequently, so you can generate a "sample" .csv file by letting gPhoton run for a few minutes and then killing it (e.g., with Ctrl+C).</p>
+<p><strong>Note:</strong> If you don't have <code>PYTHONPATH</code> defined, then you will need to put <code>python</code> in front of all of the command line tool calls in this document. (e.g. <code>python ./gPhoton.py [...] [...] [...]</code>).</p>
+<p><strong>Gotcha:</strong> If you're getting an <code>ImportError</code> for a module that you're sure you've installed (e.g., by running <code>import [module]</code>), and especially if this happens on a Mac running Anaconda, then try putting <code>python</code> in front of the commands to force it to not use the system build of python.</p>
+<p>From the command line, navigate to the <code>gPhoton/source</code> directory. Then try running the following commands.</p>
+<p>This generates the aspect corrected FUV photons for eclipse 31000 and writes them to <code>FUVphotons.csv</code>.</p>
+<pre><code>./gPhoton.py -r '../e31000/MISWZN11_12494_0315_0002-fd-raw6.fits' -a '../e31000/MISWZN11_12494_0315_0002-asprta.fits' -c '../cal/' -o '../e31000/FUVphotons' -s '../e31000/MISWZN11_12494_0315_0002-scst.fits' -d '../e31000/SSD_fuv_31000.tbl'
+</code></pre>
+<p>This generates the aspect corrected NUV photons for eclipse 31000 and writes them to <code>NUVphotons.csv</code>. Note that because GALEX countrates are much higher in the NUV, this will take ~10x longer to run than the previous command.</p>
+<pre><code>./gPhoton.py -r '../e31000/MISWZN11_12494_0315_0002-nd-raw6.fits' -a '../e31000/MISWZN11_12494_0315_0002-asprta.fits' -c '../cal/' -o '../e31000/NUVphotons' -s '../e31000/MISWZN11_12494_0315_0002-scst.fits' -d '../e31000/SSD_nuv_31000.tbl'
+</code></pre>
+<h2 id="gphotonpy-the-standalone-calibration-pipeline">gPhoton.py - The Standalone Calibration Pipeline</h2>
+<p><em>Syntax Note:</em> The name <em>gPhoton</em> can refer to both the standalone calibration pipeline  <code>gPhoton.py</code> and the MAST/GALEX photon database project as a whole. We know that this is confusing. For this reason, we try to refer to <code>gPhoton.py</code> as "the standalone calibration pipeline" and reserve "gPhoton" to refer to the project as a whole.</p>
+<h3 id="optional-parameters">Optional parameters</h3>
+<p>A number of the command line parameters given above are actually option. If (and only if) you have a working internet connection, then the aspect file (<code>-a</code>) parameter can be omitted; the software will instead query the aspect database table at MAST for the appropriate values. The Stime Separation Data (SSD) file parameter (<code>-d</code>) is <em>always optional</em> because the values in this reference table can be generated directly from the raw data (at a very small cost in terms of total run time). Try the following command, which omits both of these parameters.</p>
+<pre><code>./gPhoton.py -r '../e31000/MISWZN11_12494_0315_0002-fd-raw6.fits' -c '../cal/' -o '../e31000/FUVphotons' -s '../e31000/MISWZN11_12494_0315_0002-scst.fits'
+</code></pre>
+<h3 id="null-vs-non-null-data">NULL vs. non-NULL data</h3>
+<p>A large number of events cannot be aspect corrected either because they fall in a time range for which noa spect solution is available (for a variety of possible reasons) or because they don't actually fall on the detector proper (e.g. stims). Such events appear in the .csv output file with <em>NULL</em> entries for RA and Dec and are referred to as "null data." You can optionally write null data to a separate file from non-null data by passign the <code>-u</code> flag. This will create a second .csv file for null data with "_NULL.csv" appended to the filname.</p>
+<pre><code>./gPhoton.py -r '../e31000/MISWZN11_12494_0315_0002-fd-raw6.fits' -a '../e31000/MISWZN11_12494_0315_0002-asprta.fits' -c '../cal/' -o '../e31000/FUVphotons' -s '../e31000/MISWZN11_12494_0315_0002-scst.fits' -u
+</code></pre>
+<h3 id="multi-visit-eclipses">Multi-visit Eclipses</h3>
+<p>For multi-visit eclipses (e.g. AIS), you can specify more than one aspect file for a single raw6 file using the following syntax.</p>
+<pre><code>-a '../FOO_sv01-asprta.fits,../FOO_sv02-asprta.fits,../FOO_sv03-asprta.fits'
+</code></pre>
+<p>Again, if you do not specify <code>-a</code> at all, then the software will query the aspect database at MAST for the appropriate values, even for multi-visit eclipses.</p>
+<h3 id="other-notes">Other Notes</h3>
+<h4 id="photon-file-column-definitions">Photon File Column Definitions</h4>
+<p>The column definitions for the .csv file output by gPhoton.py are as follows.</p>
+<ol>
+<li><em>t</em> - time of the event (in "GALEX Time" = "UNIX Time" - 315964800)</li>
+<li><em>x</em> - detector x position</li>
+<li><em>y</em> - detector y position</li>
+<li><em>xa</em> - (if you don't already know, it's not important)</li>
+<li><em>ya</em> - (ditto)</li>
+<li><em>q</em> - (also ditto)</li>
+<li><em>xi</em> - aspect corrected detector position</li>
+<li><em>eta</em> - aspect corrected detector position</li>
+<li><em>ra</em> - aspect corrected right ascension of the event (decimal degrees)</li>
+<li><em>dec</em> - aspect corrected declination of the event (decimal degrees)</li>
+<li><em>flags</em> - status information (see below)</li>
+</ol>
+<h4 id="flag-column-definitions">Flag Column Definitions</h4>
+<p>These are the definitions of various values of the <em>flag</em> column in the gPhoton .csv output file. Note that these are not identical to any flag column definitions for output created by the canonical pipeline. In general, end users will be most interested in events for which <em>flag = 1</em>, and this is the default search criterion for all queries performed by the Photon Tools.</p>
+<ol>
+<li>successfully calibrated (no errors)</li>
+<li><em>N/A</em></li>
+<li>event skipped</li>
+<li><em>N/A</em></li>
+<li><em>N/A</em></li>
+<li>classified as stim</li>
+<li>hotspot (covered by hotspot mask)</li>
+<li>bad aspect (unkown aspect solution)</li>
+<li>out of range (off of detector prior to the wiggle correction)</li>
+<li>bad walk (off of detector prior to the walk correction)</li>
+<li>bad linearity (off of the detector prior to the linearity correction)</li>
+<li>bad distortion (off of the detector prior to the distortion correction)</li>
+<li>aspect jump (questionable aspect due to occuring during a jump or gap in the aspect solution or bracketed by one or more flagged aspect values)</li>
+<li><em>N/A</em></li>
+<li><em>N/A</em></li>
+<li><em>N/A</em></li>
+</ol>
+<h2 id="the-database-tools">The Database Tools</h2>
+<p>The "database tools" or "photon tools" are the command line programs that provide basic functionality for interacting with he photon database at MAST to produce scientifically useful data products.</p>
+<p><em>Note:</em> For the rest of this User Guide, we will use the M dwarf flare star GJ 3685A as our standard example target. The GALEX observation of this flare was described in <em>Robinson, et al. "GALEX observations of an energetic ultraviolet flare on the dM4e star GJ 3685A." The Astrophysical Journal 633.1 (2005): 447.</em> It's a good test because it has an obvious and dramatic light curve; you'll know it when you see it.</p>
+<h3 id="gfindpy">gFind.py</h3>
+<p><em>gFind</em> is the data location tool. Given a target sky position (and, optionally, bands and time ranges), it will return the estimated raw exposure time and approximate time ranges of data that are currently available in the photon database. That is, <em>gFind</em> is your convenient utility for assessing what data is currently available for use by <em>gAperture</em> and <em>gMap</em>. Attempt the following command.</p>
+<pre><code>./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351
+</code></pre>
+<h4 id="tweaking-search-parameters">Tweaking Search Parameters</h4>
+<p>The default allowable gap between two time stamps for them to be considered contiguous for the purposes of a <em>gFind</em> estimate is one second. This is a reasonable minimum gap because it is the default spacing between adjacent entries in the aspect table. This parameter is adjustable, however, with the --maxgap` parameter. To consider data with gaps of as much as 100 seconds to be contiguous--a reasonable value if you want to treat all data in the same eclipse as part of the same observation--try the following command.</p>
+<pre><code>./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --maxgap 100
+</code></pre>
+<p>If, additionally, you want to exclude contiguous time ranges below some minimum raw exposure time, pass that time to the <code>--minexp</code> parameter.</p>
+<pre><code>./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --minexp 100
+</code></pre>
+<p>And, naturally, the <code>--gap</code> and <code>--minexp</code> parameters can be used in conjunction.</p>
+<pre><code>./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --maxgap 100 --minexp 100
+</code></pre>
+<p>If you want to exclude times when the source is on the edge of the detector, you can adjust the <code>--detsize</code> parameter to the desired effective detector <em>width</em> (default = 1.25 degrees).</p>
+<pre><code>./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --detsize 1
+</code></pre>
+<p>At present, only about 5% of the GALEX GR6/7 data is available in the database. We expect to achieve full coverage within the next year. In the meantime, for planning purposes, you can get an estimate of how much exposure we expect will be available in the fully populated database by using the <code>--predicted</code> flag.</p>
+<p><em>For the curious:</em> The estimates returned by <em>gFind</em> are computed by finding the boresight pointings (in the aspect database) which fall within a detector <em>radius</em> (nominally 0.625 degrees) of the desired sky position and comparing the associated time stamps against the time stamps of data that has actually been loaded into the photon database. The <em>predicted</em> keyword performs this same search on the aspect solutions only without comparing it against the database.</p>
+<h4 id="alternative-io-formats">Alternative I/O Formats</h4>
+<p>Rather than passing RA (<code>-r</code>) and Dec (<code>-d</code>) separately, you can pass them to <code>--skypos</code> as follows.</p>
+<pre><code>./gFind.py -b 'NUV' --skypos '[176.919525856024,0.255696872807351]'
+</code></pre>
+<p>If you are interested only in the available raw exposure times and not the individual time ranges, pass the <code>--exponly</code> flag.</p>
+<pre><code>./gFind.py -b 'NUV' --skypos '[176.919525856024,0.255696872807351]' --exponly
+</code></pre>
+<h4 id="calling-from-within-the-python-interpreter">Calling from within the Python Interpreter</h4>
+<p>If you prefer to work from within the Python interpreter, <em>gFind</em> can be imported like any other module. The two functions of the most interest to most users will be <code>gFind.gFind</code> and <code>gFind.fGetTimeRanges</code>.</p>
+<pre><code>import gFind
+help(gFind.gFind)
+</code></pre>
+<blockquote>
+<p>Help on function gFind in module gFind:</p>
+<p><strong>gFind</strong>(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1.0, minexp=1.0, quiet=False, retries=20, skypos=None, trange=None, verbose=0)</p>
+<p>Primary program in the module. Prints time ranges to the screen and returns the total exposure time as a float.</p>
+</blockquote>
+<pre><code>help(gFind.fGetTimeRanges)
+</code></pre>
+<blockquote>
+<p>Help on function fGetTimeRanges in module dbasetools:</p>
+<p><strong>fGetTimeRanges</strong>(band, skypos, trange=[1, 1000000000000], tscale=1000.0, detsize=1.25, verbose=0, maxgap=1.0, minexp=1.0, retries=100.0)</p>
+<p>Find the contiguous time ranges within a time range at a specific location.</p>
+<p>minexp - Do not include exposure time less than this.</p>
+<p>maxgap - Gaps in exposure longer than this initiate a new time range.</p>
+<p>detsize - Fiddle with this if you want to exlude the edges of the detector.</p>
+</blockquote>
+<p>For example, an equivalent call to</p>
+<pre><code>./gFind.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --gap 100 --minexp 100
+</code></pre>
+<p>within the interpreter would be the following.</p>
+<pre><code>import gFind
+gFind.gFind(band='NUV',skypos=[176.919525856024,0.255696872807351],maxgap=100.,minexp=100.)
+</code></pre>
+<h3 id="gaperturepy">gAperture.py</h3>
+<p><em>gAperture</em> is the photometry tool which computes source fluxes or light curves for specified targets and time ranges with customizable apertures and background annuli. If an output filename is provided, the light curve data will be written to a .csv file.</p>
+<p>The minimum required parameters are RA (<code>-r</code> or <code>--ra</code>), Dec (<code>-d</code> or <code>--dec</code>), and aperture radius (<code>-a</code>), all in decimal degrees. This will compute the integrated flux over all available data with no background subtraction. For our flare star example and an aperture with radius of 0.03 degrees, that command looks like this.</p>
+<pre><code>./gAperture.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 -a 0.03
+</code></pre>
+<p>You can also limit the computation to specific time ranges with <code>--t0</code> and <code>--t1</code> or <code>--trange</code> (or <code>--tranges</code>). You can also perform a background correction by specifying the inner and outer radii of a background annulus (in decimal degrees) centered on the target with the <code>-i</code>/<code>--inner</code> and <code>-o</code>/<code>--outer</code> or <code>--annulus</code> flags.</p>
+<p>Let's limit further analysis to the time range in which flare occurs in this data, <code>[766525332.995,766526576.995]</code>. Let's also extract the background from an annulus with an inner radius of 0.03 degrees and an outer radius of 0.04 degrees.</p>
+<pre><code>./gAperture.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 -a 0.03 -i 0.03 -o 0.04 --t0 766525332.995 --t1 766526576.995
+</code></pre>
+<p>which is equivalent to</p>
+<pre><code>./gAperture.py -b 'NUV' --skypos [176.919525856024,0.255696872807351] -a 0.03 --annulus [0.03,0.04] --trange [766525332.995,766526576.995]
+</code></pre>
+<p>Because you didn't specify an output file, the previous commands simply printed the AB Magnitude values. You can write all of the data to a .csv file by passing a filename to <code>-f</code> or <code>--filename</code>.</p>
+<pre><code>./gAperture.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 -a 0.03 -i 0.03 -o 0.04 --t0 766525332.995 --t1 766526576.995 -f 'lightcurve.csv'
+</code></pre>
+<p>Note that if you try to run that command a second time, it won't let you because the software detects that the file already exists and suggests that you use <code>--clobber</code> (or <code>--overwrite</code>) to force it to overwrite <em>lightcurve.csv</em>. Therefore, <code>--clobber</code> is appended to all of the following commands to avoid this error. (But you should use it with caution. It's there for a reason.)</p>
+<p>If you want to generate a light curve rather than an integrated value, pass the desired (raw) bin depth in seconds to the step size flag (<code>-s</code>). For example, to generate a light curve with 100 second bins, try the following.</p>
+<pre><code>./gAperture.py -b 'NUV' -r 176.919525856024 -d 0.255696872807351 -a 0.03 -i 0.03 -o 0.04 --t0 766525332.995 --t1 766526576.995 -f 'lightcurve.csv' -s 100. --overwrite
+</code></pre>
+<p>For any command, you can always request more information be printed to the terminal by setting the <code>--verbose</code> or <code>-v</code> flag to a number between 1-3 (defualt is 0) where larger numbers indicate increasing levels of output. Setting <code>-v 3</code> will print out complete SQL commands and should really only be used for debugging.</p>
+<h4 id="lightcurve-file-column-definitions">Lightcurve File Column Definitions</h4>
+<p><strong>NOTE:</strong> The column definitions for the .csv output from <em>gAperture</em> are in flux. These are the column definitions in the v1.20 build.</p>
+<ol>
+<li>t0 - Start time of observation bin in GALEX seconds.</li>
+<li>t1 - End time of observation bin in GALEX seconds.</li>
+<li>exptime - Effect exposure time in seconds. (Note: This is corrected for dead time and shutter effects and so is not equal to t0-t1.)</li>
+<li>mag_bgsub_cheese - The calibrated AB magnitude within the bin using the best implemented background subtracted method ("swiss cheese").</li>
+<li>t_mean - The mean time of data within the bin in GALEX seconds.</li>
+<li>t0_data - The minimum time of data within the bin in GALEX seconds.</li>
+<li>t1_data - The maximum time of data within the bin in GALEX seconds.</li>
+<li>cps - The counts per second with no background subtraction.</li>
+<li>counts - The number of counts within the aperture. (Not background subtracted.)</li>
+<li>bg - The estimated number of counts within the aperture based upon the measured rates of counts within an unmasked annulus.</li>
+<li>mag - The AB magnitude of the source with no background subtraction.</li>
+<li>mag_bgsub - The AB magnitude of the source using the unmasked background subtraction.</li>
+<li>flux - The flux of the source with no background subtraction.</li>
+<li>flux_bgsub - The flux of the source using the unmasked annulus background subtraction.</li>
+<li>flux_bgsub_cheese - The flux of the source using the swiss cheese background subtraction.</li>
+<li>bg_cheese - The estimated number of background counts in the aperture based upon the background measured using the swiss cheese method.</li>
+</ol>
+<p><strong>Note on the column naming convention:</strong> The _bgsub suffix in a column definition means that the value is background subtracted using an estimate based on an unmasked annulus. The _bgsub_cheese suffix means that the value is background subtracted using an estimate based on a "swiss cheese" style mask of the annulus. Column names which don't have these suffixes do not contain background corrected.</p>
+<h4 id="calling-from-within-the-python-interpreter_1">Calling from within the Python Interpreter</h4>
+<p>You can also import and work with <em>gAperture</em> and its modules from within the Python interpeter.</p>
+<pre><code>import gAperture
+help(gAperture.gAperture)
+</code></pre>
+<blockquote>
+<p>Help on function gAperture in module gAperture:</p>
+<p><strong>gAperture</strong>(band, skypos, radius, csvfile=False, annulus=[False, False], stepsz=False, verbose=0, clobber=False, trange=[1, 1000000000000])</p>
+<p>Runs gAperture and returns the data in a python dict() and as
+   a CSV file if outfile is specified. Can be called from the interpreter.</p>
+</blockquote>
+<h3 id="gmappy">gMap.py</h3>
+<p><em>gMap</em> is the image creation tool. It can generate integrated count, intensity, and response (equivalent to GALEX <em>cnt</em>, <em>int</em> and <em>rrhr</em>) maps of arbitrary size<sup>+</sup>, shape and depth, including coadds across epochs and survey designation. It can also create "movie" (time-binned, multi-plane) versions of such maps.</p>
+<p><em>gMap</em> writes all image files in the Flexible Image Transport System (FITS) standard, which is an uncompressed archival data format favored by many astronomy applications (and was used by the GALEX mission for archival products). FITS images generated by <em>gMap</em> have headers which describe the World Coordinate System (WCS) information defining their orientation on the sky as well as effective exposure time and other metadata for the observation as a whole. For multi-frame images (movies), the per-plane information is described in a table in the FITS secondary HDU; this table describes start time, stop time, and effective exposure for each frame (within appropriately labelled columns).ß</p>
+<p><sup>+</sup>Caveat emptor. "Arbitrariness" is limited by your available patience and RAM.</p>
+<h4 id="count-maps">Count Maps</h4>
+<p>Count (<em>cnt</em>) maps are integrated, aspect corrected but uncalibrated (that is, not adjusted for resonse or exposure time) images of the sky. Count images are good for "quick looks" at the data, to ensure that you are pointing in the location that you expected and that you are seeing the sources or features desired. But because they are not calibrated by either the relative response or the effective exposure time, you should not use them for photometric analyses of any kind.</p>
+<p>You can create a count image from the command line by specifying the band (<code>-b</code>), sky position (<code>-r</code> and <code>-d</code> or just <code>--skypos</code>), the angular extent of the desired image in degrees (<code>--angle</code>), an output FITS filename (<code>--count</code>), and optionally a time range (<code>--t0</code> and <code>--t1</code> or just <code>--trange</code> or <code>--tranges</code>). Try the following simple command.</p>
+<pre><code>./gMap.py -b 'FUV' -r 176.919525856024 -d 0.255696872807351 --angle 0.5 --t0 766525332.995 --t1 766526576.995 --count 'count.fits'
+</code></pre>
+<p>Or, using the alternative formats for specifying sky position and time range, try the following.</p>
+<pre><code>./gMap.py -b 'FUV' --skypos '[176.919525856024,0.255696872807351]' --angle 0.5 --tranges '[[766525332.995, 766526576.995], [919755500.995, 919755916.995]]' --count 'count.fits'
+</code></pre>
+<p>Note that the most recent command created an image with two planes corresonding to the time ranges <code>[766525332.995, 766526576.995]</code> and <code>[919755500.995, 919755916.995]</code>, respectively. This behavior can be used to specify custom time ranges for a movie (see <strong>Movies</strong> below), or you can force <em>gMap</em> to coadd these two time ranges with the <code>--coadd</code> flag.</p>
+<pre><code>./gMap.py -b 'FUV' --skypos '[176.919525856024,0.255696872807351]' --angle 0.5 --tranges '[[766525332.995, 766526576.995], [919755500.995, 919755916.995]]' --count 'count.fits' --coadd
+</code></pre>
+<p>However, if you do not specify any time range, <em>gMap</em> will automatically use all available exposure. (And uses the same underlying function as <em>gFind</em> to locate said exposure time, so therefore will also accept the <code>--maxgap</code> and <code>--minexp</code> and <code>--detsize</code> keywords if desired.)</p>
+<pre><code>./gMap.py -b 'FUV' --skypos '[176.919525856024,0.255696872807351]' --angle 0.5 --count 'count.fits' --coadd
+</code></pre>
+<h4 id="response-maps">Response Maps</h4>
+<p>Relative response maps (<em>rrhr</em>) can be thought of as the detector flat field as projected onto the sky as a function of the detector boresight over time. Because the creation of relative response maps requires multiple computationally intensive interpolations, they take a long time to run. Intensity maps require response maps and therefore also take a long time to run. So, therefore, <strong>WARNING: Making a response map will take longer than you expect. Do it sparingly.</strong> If you want to create a response map, pass a FITS filename to the <code>--response</code> flag.</p>
+<pre><code>./gMap.py -b 'FUV' --skypos '[176.919525856024,0.255696872807351]' --angle 0.5 --response 'response.fits' --coadd
+</code></pre>
+<h4 id="intensity-maps">Intensity Maps</h4>
+<p>Intensity maps (<em>int</em>) are integrated, aspect corrected images which have been corrected for both relative response as well as effective exposure time. If you need to perform photometric analysis on an image, you need an intensity map. Note the warning above about long run times for generating the <em>response</em> for this. If you want to create an intensity map, pass a FITS filename to the <code>--intensity</code> flag.</p>
+<pre><code>./gMap.py -b 'FUV' --skypos '[176.919525856024,0.255696872807351]' --angle 0.5 --intensity 'intensity.fits' --coadd
+</code></pre>
+<h4 id="movies">Movies</h4>
+<p>You can turn any of the above map types into a <em>movie</em> (that is, a time-binned, multi-plane image), by passing the desired (raw) bin depth in seconds to the <code>--frame</code> parameter. For example, to create a count image with 100 second depth image planes, try the following.</p>
+<pre><code>./gMap.py -b 'FUV' -r 176.919525856024 -d 0.255696872807351 --angle 0.5 --t0 766525332.995 --t1 766526576.995 --count 'count.fits' --frame 100
+</code></pre>
+<h2 id="common-questions-issues-and-gotchas">Common Questions, Issues, and Gotchas</h2>
+<ol>
+<li><strong>"My data is not available!"</strong> You can verify that data for your desired target does or does not exist in the database and present by using the <code>gFind</code> commands described above. If data for your target is not available, there are two possible explanations: (1) we have not yet loaded those observations into the photon database, or (2) that target was never observed by the GALEX mission. As of this writing, we have only loaded about 5% of the total GALEX corpus into the photon database. You can confirm that your target was, indeed, observed by GALEX by searching for it in the <a href="http://galex.stsci.edu/GR6/?page=mastform">GALEX Catalog</a>. If your target was, indeed, observed by GALEX but has not yet been loaded into the gPhoton database, please contact Chase Million (chase.million@gmail.com) and Bernie Shiao (shiao@stsci.edu) with your target coordinates, and we will try to prioritize the associated data.</li>
+<li><strong>Exposure Time.</strong> (Or <strong>"Why isn't the exposure time equal to the bin width?"</strong>) When calculating the exposure time of a GALEX observation, one cannot simply subtract the end time from the start time. This <em>raw exposure time</em> (t<sub>raw</sub>) must be adjusted into an <em>effective exposure time</em> (t<sub>eff</sub>) which takes into account certain microchannel plate detector properties. In particular, the raw exposure time must be adjusted by both the <em>shutter</em> (t<sub>shut</sub>) and the <em>deadtime ratio</em> such that: t<sub>eff</sub> = (t<sub>raw</sub> - t<sub>shut</sub>) x deadtime. In general, you can expect t<sub>eff</sub> ~= 0.8 * t<sub>raw</sub>, though the actual ratio varies wildly as a function of field brightness and the intersection of bin boundary times with observation time ranges.<ul>
+<li><strong>Shutter Correction.</strong> GALEX did not observe all parts of the sky at all times. Even when GALEX was observing a particular part of the sky, there were times when little or no usable data was actually recorded. Data for specific targets or time ranges might exist but still be (practically) unusable for a variety for a variety of reasons which may include (1) that the spacecraft was not observing at nominal high voltage ("HVNOM"), (2) the spacecraft was observing a different part of the sky or in spectroscopic ("grism") mode, (3) a valid aspect solution could not be reconstructed from the available data (perhaps due to too few detectable reference stars), or (4) there was a temporary gap in the data due to a spacecraft or data transmission
+anomaly. The <em>shutter correction</em> accounts for these gaps by conceptualizing a "virtual shutter" that is considered closed whenever a gap of 0.05 seconds occurs in the data covering a particular source (as determined by boresight center and detector width) and within a particular time range. The integrated time of all such 0.05 second gaps in any given time range (t<sub>shut</sub>) is subtracted from t<sub>raw</sub>.</li>
+<li><strong>Deadtime Correction</strong> The GALEX microchannel plates could only detect a single event at a time; that is, when one photon event was being read into the electronics, any othe rincident photon events were missed entirely. This effectively reduced the exposure time of any observation by a ratio known as the "deadtime correction" which scaled as a function of field brightness (i.e. global count rate). Formally, the deadtime correction is the estimated fraction of the raw exposure time that the detector is not properly observing because it is engaged in readout. The deadtime changes from observation to observation and even moment to moment and, so, is ideally calculated continuously. There are two ways to estimate the deadtime.<ol>
+<li><strong>Direct Measurement.</strong></li>
+<li><strong>Empirical Estimate.</strong></li>
+</ol>
+</li>
+</ul>
+</li>
+<li><strong>Relative Response.</strong> Microchannel plates do not have true "pixels" in the same sense as CCD or CMOS detectors. Microchannel plates are also prone to "burn in" or <em>local gain sag</em> where regions of the detector exposured to high countrate sources can be local depleted of charge and suffer either temporary or permanent loss of sensitivity. To avoid this local gain sag, the telescope boresight did not stare fixedly at a point on the sky over the course of any observation, and this relatively motion was then accounted for in the <em>aspect correction</em> stage of the calibration pipeline. As such, to apply the detector flat field in sky-coordinates, it must be interpolated along the effective field of view during the observation to form a <em>relative response</em> map. <strong>[...]</strong></li>
+<li><strong>Gain Sag.</strong> [COMING SOON]</li>
+<li><strong>What are the photometric errors of the data?</strong> To good approximation, the photometric errors are equal to sqrt(counts)/t<sub>eff</sub>, which is just the Gaussian error on the point source. Technically, one should include the background error in quadrature, but if the sky background is large enough that it's contributing significantly to your error, then something has gone wrong with the background correction or your source has a low enough signal-to-noise that you should be performing some more careful error analysis. Note that developing a more thorough end-to-end error model is on our todo list, but near the bottom.</li>
+<li><strong>How is background estimation performed?</strong> The counts per second per unit area are computed for the background annulus after masking out known catalog sources (down to mag 22 as the default) and then scaling that to the area of the source aperture. In the future, we may support use of the catalog background values, but this won't correct for the residual zodiacal light which can change over the course of an observation and potentially produce a false signal of variability.</li>
+<li><strong>Why are there negative counts per second or NaN magnitudes?</strong> This happens when the measured background (in counts per second per area) is larger than the measured source (in counts per second per area) such that <code>cps&lt;sub&gt;source&lt;/sub&gt;-cps&lt;sub&gt;background&lt;/sub&gt;&lt;0</code>. In most cases, this is for the obvious reason that the signal is near or has dropped below the background. It could also be due to a failure of the background estimation algorithm to mask out sources in the annulus.</li>
+<li><strong>How do I convert GALEX time stamps to something meaningful?</strong> The GALEX time stamps are in "GALEX Time" which is is defined UNIX Time less 315964800 seconds. (t<sub>GALEX</sub> = t<sub>UNIX</sub> - 315964800) UNIX Time is a standard defined as the number of seconds that have elapsed since January 1, 1970. A number of utilities exist online for converting UNIX time to something meaningful (like Julian Date).</li>
+<li><strong>The tools are failing with "ImportError: No module named _foo".</strong> Are you positive that the module is installed? Open python on the command line and try <code>import foo</code>. If so, then the tools are probably trying to use the system Python which is different from whatever Python you invoke on the command line. This is especially likely if you are on a Mac. Force the tools to use the correct version of Python by invoking the tools like <code>python gPhoton.py [blah] [blah] [blah]</code> instead of like <code>./gPhoton.py [blah] [blah] [blah]</code>.</li>
+</ol>
+</div>
+            
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            
+            <p>Documentation built with <a href="http://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+
+        
+
+        <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+        <script src="./js/bootstrap-3.0.3.min.js"></script>
+        <script src="./js/prettify-1.0.min.js"></script>
+        <script src="./js/highlight.pack.js"></script>
+        <script src="./js/base.js"></script>
+    </body>
+</html>
