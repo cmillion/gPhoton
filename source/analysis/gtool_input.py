@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 from astropy import units
 from astropy.coordinates import SkyCoord
+from gtool_write import write as gt_write
 
 """ These module-level variables ensure both the ArgumentParser and 
 module use the same defaults. """
@@ -61,7 +62,40 @@ class gToolInputError(Exception, object):
 
 #--------------------
 class gTarget(object):
-    pass
+    """
+    This class defines a single target within gPhoton/gTool.  It keeps
+    track of the target identifier, coordinates, locations of gPhoton
+    output files, location of diagnostic plots, lightcurve parameters,
+    aperture sizes, etc.
+    """
+
+    def __init__(self, targetid, ra, dec, glon, glat):
+        """
+        :param targetid: ID/name of the target.
+
+        :type targetid: str
+        
+        :param ra: Right Ascension of the target in degrees.
+        
+        :type ra: numpy.float64
+
+        :param dec: Declination of the target in degrees.
+        
+        :type dec: numpy.float64
+
+        :param glon: Galactic longitude of the target in degrees.
+
+        :type glon: numpy.float64
+
+        :param glat: Galactic lattitude of the target in degrees.
+        
+        :type glat: numpy.float64
+        """
+        self.id = targetid
+        self.ra = ra
+        self.dec = dec
+        self.glon = glon
+        self.glat = glat
 #--------------------
 
 #--------------------
@@ -237,7 +271,9 @@ def input_targets(ifile=ifile_default, coordtype=coordtype_default,
 
         if n_cols == 2:
             """ Then we need to add our own target IDs. """
-            file_contents.insert(0, "ID", ["Target_{0:02d}".format(x+1)
+            file_contents.insert(0, "ID", [("Target_{0:0" +
+                                            str(len(str(n_rows))) + 
+                                            "d}").format(x+1)
                                            for x in xrange(n_rows)])
         """ Now there are three columns.  Make sure the headers are set
         in order. """
@@ -252,6 +288,8 @@ def input_targets(ifile=ifile_default, coordtype=coordtype_default,
         file_contents = pd.DataFrame([{"ID":target_id,
                                        "COORD1":radeccoords[0],
                                        "COORD2":radeccoords[1]}])
+        n_rows = 1
+        n_cols = 3
     elif galcoords is not None:
         """ Make the coordtype "galactic". """
         coordtype = "galactic"
@@ -259,6 +297,8 @@ def input_targets(ifile=ifile_default, coordtype=coordtype_default,
         file_contents = pd.DataFrame([{"ID":target_id,
                                        "COORD1":galcoords[0],
                                        "COORD2":galcoords[1]}])
+        n_rows = 1
+        n_cols = 3
 
     """ Make sure the COORD columns are 64-bit floats and not strings 
     (they can be strings if given from the command line. """
@@ -289,7 +329,17 @@ def input_targets(ifile=ifile_default, coordtype=coordtype_default,
                              [x.ra.deg for x in radec_coords])
         file_contents.insert(len(file_contents.columns), "DEC", 
                              [x.dec.deg for x in radec_coords])
-    print file_contents
+
+    """ Create a list of gTarget objects. """
+    gtargets_list = [gTarget(file_contents["ID"][i],
+                             file_contents["RA"][i],
+                             file_contents["DEC"][i],
+                             file_contents["GLON"][i],
+                             file_contents["GLAT"][i]
+                             ) for i in xrange(n_rows)]
+
+    """ Write each gTarget object to disk. """
+    gt_write(gtargets_list, output_dir)
 #--------------------
 
 #--------------------
