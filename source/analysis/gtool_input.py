@@ -1,13 +1,11 @@
-#!/usr/bin/env python
-
 __version__ = '1.0'
 
 """
-.. module:: gtools_input
+.. module:: gtool_input
 
    :synopsis: Given one or more coordinates and optional identifiers, 
    creates a list of gTarget class objects; the object class that is 
-   used throughout gTools to send and store results.  Includes gTarget 
+   used throughout gTool to send and store results.  Includes gTarget 
    read and write modules to save states to disk.
 
 .. moduleauthor:: Scott W. Fleming <fleming@stsci.edu>
@@ -15,13 +13,16 @@ __version__ = '1.0'
 
 import argparse
 import os
+import numpy as np
 import pandas as pd
+from astropy import units
+from astropy.coordinates import SkyCoord
 
 """ These module-level variables ensure both the ArgumentParser and 
 module use the same defaults. """
 #--------------------
 ifile_default = None
-coordtype_default = "radec"
+coordtype_default = None
 galcoords_default = None
 radeccoords_default = None
 target_id_default = "Target_1"
@@ -29,14 +30,16 @@ output_dir_default = "StateFiles"
 #--------------------
 
 #--------------------
-class gToolsInputError(Exception, object):
+class gToolInputError(Exception, object):
     """
-    This class defines a generic Exception to use for errors raised in the gTools "input" module.  It simply prints the given string when raising the exception. e.g.,
+    This class defines a generic Exception to use for errors raised in 
+    the gTool "input" module.  It simply prints the given string when 
+    raising the exception. e.g.,
 
     .. code-block:: python
      
-         raise gToolsInputError("Print this string")
-         gToolsInputError: *** gTools Input Error: 'Print this string'
+         raise gToolInputError("Print this string")
+         gToolInputError: *** gTool Input Error: 'Print this string'
     """
 
     def __init__(self, value):
@@ -53,21 +56,11 @@ class gToolsInputError(Exception, object):
         """
         Overrides the str function for this class.
         """
-        return "*** gTools Input Error: "+repr(self.value)
+        return "*** gTool Input Error: "+repr(self.value)
 #--------------------
 
 #--------------------
 class gTarget(object):
-    pass
-#--------------------
-
-#--------------------
-def read_gTarget():
-    pass
-#--------------------
-
-#--------------------
-def write_gTarget():
     pass
 #--------------------
 
@@ -79,43 +72,47 @@ def setup_args():
     :returns: ArgumentParser -- Stores arguments and options.
     """
     parser = argparse.ArgumentParser(description="""Read in targets 
-                                     for use with gTools.""")
+                                     for use with gTool.""")
 
     parser.add_argument("-f", action="store", type=str, dest="ifile", 
                         default=ifile_default, 
                         help="""Full path to input file containing 
                         coordinates (and optional identifiers) of 
-                        targets to use.  Format of the file should be:
+                        targets to use.  Format of the file should be: 
                         (ID), RA or GLON, DEC or GLAT, separated by 
                         commas.  Lines that begin with a pound sign (#) 
                         are considered comments and ignored.  Include 
                         the file name in the path.  If an input file 
                         is specified, the command-line coordinates and 
-                        identifier are ignored.""")
+                        identifier are ignored.  RA/DEC coordinates are 
+                        assumed to be in the ICRS frame.""")
     parser.add_argument("--coordtype", action="store", 
                         default=coordtype_default, 
                         choices=["radec", "galactic"], 
                         help="""What type of coordinates are supplied 
-                        in the target list?  Default="%(default)s".""")
+                        in the target list?  RA/DEC are assumed to be 
+                        in the ICRS frame.""")
 
     coordinate_group = parser.add_mutually_exclusive_group()
     coordinate_group.add_argument("--galcoords", action="store", 
                                   nargs=2, default=galcoords_default, 
                                   help="""Galactic longitude and 
-                                  lattitude of target, if not 
+                                  lattitude of the target, if not 
                                   supplying a list of targets.  
                                   Specify both in decimal degrees.  
-                                  Ignored if a list of targets is 
-                                  specified with the -f option.  
+                                  Ignored if a list of targets 
+                                  is specified with the -f option.  
                                   Example: --galcoords 123.45 67.89""")
     coordinate_group.add_argument("--radeccoords", action="store", 
                                   nargs=2, default=radeccoords_default, 
-                                  help="""RA and DEC of target, if not 
-                                  supplying a list of targets.  
+                                  help="""RA and DEC of the target, if 
+                                  not supplying a list of targets.  
                                   Specify both in decimal degrees.  
+                                  The ICRS frame is used.  
                                   Ignored if a list of targets is 
                                   specified with the -f option.  
-                                  Example: --radeccoords 123.45 67.89""")
+                                  Example: --radeccoords 123.45 67.89"""
+                                  )
 
     parser.add_argument("-i", action="store", dest="target_id", 
                         default=target_id_default, 
@@ -144,14 +141,14 @@ def check_input_options(args):
 
     :type args: argparse.Namespace object.
 
-    :raises: gToolsInputError, IOError
+    :raises: gToolInputError, IOError
     """
 
     """ Either an input file OR one of the coordinates must have been 
     specified. """
     if (args.ifile is None and args.galcoords is None and 
         args.radeccoords is None):
-        raise gToolsInputError("Must specify either an input file or "
+        raise gToolInputError("Must specify either an input file or "
                                "set of coordinates.")
 
     """ If an input file is specified, ignore the other parameters by 
@@ -161,9 +158,10 @@ def check_input_options(args):
         args.radeccoords = [None, None]
 
     """ Make sure the input file exists. """
-    if not os.path.isfile(args.ifile):
-        raise IOError("File containing list of targets not found.  "
-                      "Looking for " + args.ifile)
+    if args.ifile is not None:
+        if not os.path.isfile(args.ifile):
+            raise IOError("File containing list of targets not found.  "
+                          "Looking for " + args.ifile)
 #--------------------
 
 #--------------------
@@ -184,7 +182,7 @@ def input_targets(ifile=ifile_default, coordtype=coordtype_default,
 
     :param coordtype:  Does the input file contain galactic coordinates 
     (glon, glat) or equitorial coordinates (RA, DEC)?  Should be either 
-    "galactic" or "radec".  Default is """ + coordtype_default + """.
+    "galactic" or "radec".
     
     :type coordtype: str
 
@@ -201,7 +199,7 @@ def input_targets(ifile=ifile_default, coordtype=coordtype_default,
 
     :param target_id:  Optional identifier for the target, in the 
     absence of an input list of targets.  If not supplied, a default 
-    value of """ + taregt_id_default + """ will be used.
+    value of """ + target_id_default + """ will be used.
 
     :type target_id: str
 
@@ -214,12 +212,17 @@ def input_targets(ifile=ifile_default, coordtype=coordtype_default,
 
     :returns: list -- A list of gTarget objects for each target.
 
-    :raises: gToolsInputError
+    :raises: gToolInputError
     """
 
     """ Read in list of targets, or, create a one-row data frame from
     the input coordinates. """
     if ifile is not None:
+        """ The user must specify a coordinate type. """
+        if coordtype is None:
+            raise gToolInputError('You must specify a coordinate '
+                                   'type when supplying a target list.')
+
         file_contents = pd.io.parsers.read_csv(ifile, skipinitialspace=
                                                True, header=None, 
                                                comment='#', 
@@ -227,7 +230,7 @@ def input_targets(ifile=ifile_default, coordtype=coordtype_default,
         n_cols = len(file_contents.columns)
         n_rows = len(file_contents.index)
         if n_cols != 2 and n_cols !=3:
-            raise gToolsInputError('Input file must have exactly 2 or '
+            raise gToolInputError('Input file must have exactly 2 or '
                                    '3 columns: (ID), RA/GLON, DEC/GLAT.'
                                    '  Found ' + str(n_cols) + 
                                    ' colunns.')
@@ -243,11 +246,50 @@ def input_targets(ifile=ifile_default, coordtype=coordtype_default,
                                       file_contents.columns[2]:"COORD2"
                                       }, inplace=True)
     elif radeccoords is not None:
+        """ Make the coordtype "radec". """
+        coordtype = "radec"
         """ Create one-row data frame, don't convert coordinats yet. """
-        pass
+        file_contents = pd.DataFrame([{"ID":target_id,
+                                       "COORD1":radeccoords[0],
+                                       "COORD2":radeccoords[1]}])
     elif galcoords is not None:
+        """ Make the coordtype "galactic". """
+        coordtype = "galactic"
         """ Create one-row data frame, don't convert coordinats yet. """
-        pass
+        file_contents = pd.DataFrame([{"ID":target_id,
+                                       "COORD1":galcoords[0],
+                                       "COORD2":galcoords[1]}])
+
+    """ Make sure the COORD columns are 64-bit floats and not strings 
+    (they can be strings if given from the command line. """
+    file_contents["COORD1"] = file_contents["COORD1"].astype('float64')
+    file_contents["COORD2"] = file_contents["COORD2"].astype('float64')
+
+    """ Now assign the Coordinate columns in the DataFrame to the 
+    appropriate column name (RA, GLON, etc.), and add the other set of 
+    coordinates. """
+    if coordtype == "radec":
+        file_contents.rename(columns={"COORD1":"RA",
+                                      "COORD2":"DEC"}, inplace=True)
+        """ Add the galactic coordinates. """
+        gal_coords = SkyCoord(ra=file_contents["RA"]*units.degree,
+                              dec=file_contents["DEC"]*units.degree,
+                              frame="icrs").galactic
+        file_contents.insert(len(file_contents.columns), "GLON", 
+                             [x.l.deg for x in gal_coords])
+        file_contents.insert(len(file_contents.columns), "GLAT", 
+                             [x.b.deg for x in gal_coords])
+    elif coordtype == "galactic":
+        file_contents.rename(columns={"COORD1":"GLON",
+                                      "COORD2":"GLAT"}, inplace=True)
+        radec_coords = SkyCoord(l=file_contents["GLON"]*units.degree,
+                              b=file_contents["GLAT"]*units.degree,
+                              frame="galactic").icrs
+        file_contents.insert(len(file_contents.columns), "RA", 
+                             [x.ra.deg for x in radec_coords])
+        file_contents.insert(len(file_contents.columns), "DEC", 
+                             [x.dec.deg for x in radec_coords])
+    print file_contents
 #--------------------
 
 #--------------------
