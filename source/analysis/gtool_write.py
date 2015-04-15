@@ -14,15 +14,15 @@ import json
 import os
 
 #--------------------
-def json_default(obj):
+def json_encoder(obj):
     """
-    Defines a default method to use when serializing into JSON.
+    Defines a method to use when serializing into JSON.
     """
     return obj.__dict__
 #--------------------
 
 #--------------------
-def write(gt, odir):
+def write(gt, odir, prefix):
     """
     Writes the gTarget (or list of gTarget) object(s) to a JSON file in
     the specified output directory.
@@ -36,6 +36,12 @@ def write(gt, odir):
     If the directory does not exist, it will be created.
 
     :type odir: str
+
+    :param prefix: Prefix string to prepend to output state files.
+
+    :type prefix: str
+
+    :returns: list -- A list of the output files written to disk.
     """
 
     """ Create the output directory if it does not yet exists. """
@@ -49,9 +55,15 @@ def write(gt, odir):
     if not isinstance(gt, list):
         gt = [gt]
 
+    """ Create a list of output files. """
+    output_files = [odir+prefix+"_"+t.id+".json" for t in gt]
+
     """ For each object in the list, output to a JSON file. """
-    for t in gt:
-        with open(odir+"gTool_"+t.id+".json", 'wb') as of:
-            json.dump(t,of,default=json_default,indent=4)
+    for t,ofile in zip(gt,output_files):
+        with open(ofile, 'wb') as of:
+            json.dump(t,of,default=json_encoder,indent=4)
+
+    """ Return the list of output files. """
+    return output_files
 #--------------------
 

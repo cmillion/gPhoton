@@ -28,6 +28,7 @@ galcoords_default = None
 radeccoords_default = None
 target_id_default = "Target_1"
 output_dir_default = "StateFiles"
+output_prefix_default = "gTool"
 #--------------------
 
 #--------------------
@@ -96,6 +97,32 @@ class gTarget(object):
         self.dec = dec
         self.glon = glon
         self.glat = glat
+        self.fuv_tot_exptime = None
+        self.nuv_tot_exptime = None
+        self.fuv_timerange_start = None
+        self.fuv_timerange_end = None
+        self.nuv_timerange_start = None
+        self.nuv_timerange_end = None
+
+    @classmethod
+    def from_json(self, idict):
+        """
+        Create a gTarget object from a dictionary of values.
+
+        :param idict: Dictionary containing values to populate the 
+        gTarget object with.
+
+        :type idict: dict
+        """
+        
+        """ Make sure the dict contains all the expected keywords. """
+        if set(idict.keys()) == set([u'id', u'ra', u'dec', u'glon', 
+                                 u'glat']):
+            return gTarget(idict[u"id"], idict[u"ra"], idict[u"dec"], 
+                           idict[u"glon"], idict[u"glat"])
+        else:
+            raise gToolInputError("Input dict does not have expected "
+                                  "set of keys.")            
 #--------------------
 
 #--------------------
@@ -156,6 +183,11 @@ def setup_args():
                         "%(default)s".  Ignored if a list of targets 
                         is specified with the -f option.""")
 
+    parser.add_argument("-n", action="store", dest="output_prefix", 
+                        default=output_prefix_default, 
+                        help="""[Optional] Prefix to use for the output
+                        state file.  Default is "%(default)s".""")
+
     parser.add_argument("-o", action="store", dest="output_dir", 
                         default=output_dir_default, 
                         help="""[Optional] Full path where state files 
@@ -203,7 +235,8 @@ def input_targets(ifile=ifile_default, coordtype=coordtype_default,
                   galcoords=galcoords_default, 
                   radeccoords=radeccoords_default, 
                   target_id=target_id_default, 
-                  output_dir=output_dir_default):
+                  output_dir=output_dir_default,
+                  output_prefix=output_prefix_default):
     """
     Parses the input file or command line for target identifiers and 
     coordinates.  Creates gTarget object classes for each one, does
@@ -243,6 +276,11 @@ def input_targets(ifile=ifile_default, coordtype=coordtype_default,
     directory.
 
     :type output_dir: str
+
+    :param output_prefix: Prefix to use on the output state files.  
+    Default is """ + output_prefix_default + """.
+
+    :type output_prefix: str
 
     :returns: list -- A list of gTarget objects for each target.
 
@@ -339,7 +377,7 @@ def input_targets(ifile=ifile_default, coordtype=coordtype_default,
                              ) for i in xrange(n_rows)]
 
     """ Write each gTarget object to disk. """
-    gt_write(gtargets_list, output_dir)
+    return gt_write(gtargets_list, output_dir, output_prefix)
 #--------------------
 
 #--------------------
@@ -352,8 +390,11 @@ if __name__ == "__main__":
     check_input_options(args)
 
     """ Call primary method. """
-    input_targets(ifile=args.ifile, coordtype=args.coordtype, 
-                  galcoords=args.galcoords, 
-                  radeccoords=args.radeccoords, 
-                  target_id=args.target_id, output_dir=args.output_dir)
+    output_files = input_targets(ifile=args.ifile, 
+                                 coordtype=args.coordtype, 
+                                 galcoords=args.galcoords, 
+                                 radeccoords=args.radeccoords, 
+                                 target_id=args.target_id, 
+                                 output_dir=args.output_dir,
+                                 output_prefix=args.output_prefix)
 #--------------------
