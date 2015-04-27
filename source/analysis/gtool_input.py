@@ -116,8 +116,8 @@ class gTarget(object):
         """
         
         """ Make sure the dict contains all the expected keywords. """
-        if set(idict.keys()) == set([u'id', u'ra', u'dec', u'glon', 
-                                 u'glat']):
+        if (set([u'id', u'ra', u'dec', u'glon', u'glat']) <= 
+            set(idict.keys())):
             return gTarget(idict[u"id"], idict[u"ra"], idict[u"dec"], 
                            idict[u"glon"], idict[u"glat"])
         else:

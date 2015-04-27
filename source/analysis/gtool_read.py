@@ -23,7 +23,7 @@ def json_decoder(obj):
 #--------------------
 
 #--------------------
-def read_gTarget(ifile):
+def read(ifile):
     """
     Reads in the gTarget information contained in the JSON input file 
     and returns the object.
