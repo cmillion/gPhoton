@@ -16,6 +16,16 @@ import argparse
 import os
 from gtool_read import read as gt_read
 
+""" <DEVEL> Note that this hack to make it so that the user can import `stitch_components` directly as a module or run it from the command line as __main__ has the side effect of importing this module twice, despite my best efforts to work around it.  I don't think it will be a major issue, but worth thinking about in the future. </DEVEL> """
+if __package__ is None:
+    import sys, os
+    gtfind_dir = os.path.dirname(os.path.abspath(__file__))
+    gtfind_pardir = os.path.dirname(gtfind_dir)
+    sys.path.insert(1, gtfind_pardir)
+    from gFind import gFind
+#    __package__ = str("source")
+#    __name__ = str(__package__+"."+__name__)
+
 """ These module-level variables ensure both the ArgumentParser and 
 module use the same defaults. """
 #--------------------
@@ -74,6 +84,10 @@ def gtool_find(ifile=ifile_default):
 
     """ Read in the state file. """
     state_file_content = gt_read(ifile)
+
+    """ Test call of gFind. """
+    exptime = gFind(band="both", exponly=True, skypos=[state_file_content.ra, state_file_content.dec])
+    print exptime["NUV"]["expt"]
 #--------------------
 
 #--------------------
