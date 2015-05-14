@@ -67,3 +67,23 @@ def write(gt, odir, prefix):
     return output_files
 #--------------------
 
+#--------------------
+def update(gt, gt_path):
+    """
+    Updates (overwrites) the gTarget object to the specified JSON file.
+
+    :param gt: A single gTarget object.
+
+    :type gt: gTarget object
+
+    :param gt_path: Full path and file name of the output file to 
+    update.
+
+    :type gt_path: str
+    """
+
+    """ Update the JSON file with the gTarget object. """
+    with open(gt_path, 'wb') as of:
+        json.dump(gt,of,default=json_encoder,indent=4)
+#--------------------
+

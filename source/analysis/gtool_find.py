@@ -13,18 +13,24 @@ __version__ = '1.0'
 """
 
 import argparse
+import numpy as np
 import os
 from gtool_read import read as gt_read
+from gtool_write import update as gt_update
+from gtool_utils import (calculate_jd as calc_jd, 
+                         calculate_caldat as calc_caldat)
 
-""" <DEVEL> Note that this hack to make it so that the user can import `stitch_components` directly as a module or run it from the command line as __main__ has the side effect of importing this module twice, despite my best efforts to work around it.  I don't think it will be a major issue, but worth thinking about in the future. </DEVEL> """
+""" <DEVEL> Note that this hack to make it so that the user can import 
+`stitch_components` directly as a module or run it from the command line
+ as __main__ has the side effect of importing this module twice, despite
+ my best efforts to work around it.  I don't think it will be a major 
+issue, but worth thinking about in the future. </DEVEL> """
 if __package__ is None:
     import sys, os
     gtfind_dir = os.path.dirname(os.path.abspath(__file__))
     gtfind_pardir = os.path.dirname(gtfind_dir)
     sys.path.insert(1, gtfind_pardir)
     from gFind import gFind
-#    __package__ = str("source")
-#    __name__ = str(__package__+"."+__name__)
 
 """ These module-level variables ensure both the ArgumentParser and 
 module use the same defaults. """
@@ -86,8 +92,42 @@ def gtool_find(ifile=ifile_default):
     state_file_content = gt_read(ifile)
 
     """ Test call of gFind. """
-    exptime = gFind(band="both", exponly=True, skypos=[state_file_content.ra, state_file_content.dec])
-    print exptime["NUV"]["expt"]
+    exptime_data = gFind(band="both", skypos=[state_file_content.ra, 
+                                              state_file_content.dec],
+                         quiet=True)
+
+    """ Update the total exposure time in the file. """
+    state_file_content.fuv_tot_exptime = exptime_data["FUV"]["expt"]
+    state_file_content.nuv_tot_exptime = exptime_data["NUV"]["expt"]
+
+    """ Update the start and end times of the entire range. """
+    state_file_content.fuv_timerange_start = np.nanmin(
+        exptime_data["FUV"]["t0"])
+    state_file_content.fuv_timerange_end = np.nanmax(
+        exptime_data["FUV"]["t1"])
+    state_file_content.nuv_timerange_start = np.nanmin(
+        exptime_data["NUV"]["t0"])
+    state_file_content.nuv_timerange_end = np.nanmax(
+        exptime_data["NUV"]["t1"])
+
+    """ Add an array of (start,stop) times. """
+    fuv_start_stop = [(x,y,calc_jd(x),calc_jd(y),calc_caldat(x),
+                       calc_caldat(y),y-x) 
+                      for x,y in zip(
+            exptime_data["FUV"]["t0"], 
+            exptime_data["FUV"]["t1"],
+            )]
+    nuv_start_stop = [(x,y,calc_jd(x),calc_jd(y),calc_caldat(x),
+                       calc_caldat(y),y-x) 
+                      for x,y in zip(
+            exptime_data["NUV"]["t0"], 
+            exptime_data["NUV"]["t1"],
+            )]
+    state_file_content.fuv_start_stop = fuv_start_stop
+    state_file_content.nuv_start_stop = nuv_start_stop
+    
+    """ Update the JSON file on disk. """
+    gt_update(state_file_content, ifile)
 #--------------------
 
 #--------------------

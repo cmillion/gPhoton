@@ -1,4 +1,6 @@
 {
+    "fuv_start_stop": null, 
+    "nuv_start_stop": null, 
     "fuv_timerange_start": null, 
     "glon": 84.902693690000007, 
     "nuv_tot_exptime": null, 

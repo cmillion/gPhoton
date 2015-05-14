@@ -103,6 +103,8 @@ class gTarget(object):
         self.fuv_timerange_end = None
         self.nuv_timerange_start = None
         self.nuv_timerange_end = None
+        self.fuv_start_stop = None
+        self.nuv_start_stop = None
 
     @classmethod
     def from_json(self, idict):
