@@ -30,7 +30,8 @@ if __package__ is None:
     gtfind_dir = os.path.dirname(os.path.abspath(__file__))
     gtfind_pardir = os.path.dirname(gtfind_dir)
     sys.path.insert(1, gtfind_pardir)
-    from gFind import gFind
+    from gFind import (gFind, setup_parser as gf_setup_parser, 
+                       check_args as gf_check_args)
 
 """ These module-level variables ensure both the ArgumentParser and 
 module use the same defaults. """
@@ -52,6 +53,10 @@ def setup_args():
                         default=ifile_default, 
                         help="""Full path and file name of the input 
                         state file.""")
+
+    parser.add_argument("--no_overwrite", action="store_true", 
+                        help="Only update gFind results if no previous "
+                        "results are in the StateFile.")
     return parser
 #--------------------
 
@@ -75,11 +80,15 @@ def check_input_options(args):
 #--------------------
 
 #--------------------
-def gtool_find(ifile=ifile_default):
+def gtool_find(args, ifile=ifile_default):
     """
     Reads in the state file and executes a gFind command to obtain
     exposure time information.  Updates the state file with this 
     information.
+
+    :param args: Command-line input options.
+
+    :type args: argparse.Namespace
     
     :param ifile: Input state file, it will also be the file that is
     updated with the results of the gFind query.
@@ -92,39 +101,66 @@ def gtool_find(ifile=ifile_default):
     state_file_content = gt_read(ifile)
 
     """ Test call of gFind. """
-    exptime_data = gFind(band="both", skypos=[state_file_content.ra, 
+    exptime_data = gFind(band=args.band, detsize=args.detsize, 
+                         exponly=False, gaper=args.gaper, 
+                         maxgap=args.maxgap, minexp=args.minexp,
+                         quiet=True, retries=args.retries, 
+                         skypos=[state_file_content.ra, 
                                               state_file_content.dec],
-                         quiet=True)
+                         trange=args.trange, verbose=args.verbose, 
+                         predicted=False)
 
     """ Update the total exposure time in the file. """
-    state_file_content.fuv_tot_exptime = exptime_data["FUV"]["expt"]
-    state_file_content.nuv_tot_exptime = exptime_data["NUV"]["expt"]
+    if "FUV" in exptime_data and (not args.no_overwrite or 
+                                  state_file_content.fuv_tot_exptime 
+                                  is None):
+        state_file_content.fuv_tot_exptime = exptime_data["FUV"]["expt"]
+    if "NUV" in exptime_data and (not args.no_overwrite or 
+                                  state_file_content.nuv_tot_exptime 
+                                  is None):
+        state_file_content.nuv_tot_exptime = exptime_data["NUV"]["expt"]
 
     """ Update the start and end times of the entire range. """
-    state_file_content.fuv_timerange_start = np.nanmin(
-        exptime_data["FUV"]["t0"])
-    state_file_content.fuv_timerange_end = np.nanmax(
-        exptime_data["FUV"]["t1"])
-    state_file_content.nuv_timerange_start = np.nanmin(
-        exptime_data["NUV"]["t0"])
-    state_file_content.nuv_timerange_end = np.nanmax(
-        exptime_data["NUV"]["t1"])
+    if "FUV" in exptime_data and (not args.no_overwrite or
+                                  state_file_content.fuv_timerange_start
+                                  is None or 
+                                  state_file_content.fuv_timerange_end 
+                                  is None):
+        state_file_content.fuv_timerange_start = np.nanmin(
+            exptime_data["FUV"]["t0"])
+        state_file_content.fuv_timerange_end = np.nanmax(
+            exptime_data["FUV"]["t1"])
+    if "NUV" in exptime_data and (not args.no_overwrite or
+                                  state_file_content.nuv_timerange_start
+                                  is None or 
+                                  state_file_content.nuv_timerange_end 
+                                  is None):
+        state_file_content.nuv_timerange_start = np.nanmin(
+            exptime_data["NUV"]["t0"])
+        state_file_content.nuv_timerange_end = np.nanmax(
+            exptime_data["NUV"]["t1"])
 
     """ Add an array of (start,stop) times. """
-    fuv_start_stop = [(x,y,calc_jd(x),calc_jd(y),calc_caldat(x),
-                       calc_caldat(y),y-x) 
-                      for x,y in zip(
-            exptime_data["FUV"]["t0"], 
-            exptime_data["FUV"]["t1"],
-            )]
-    nuv_start_stop = [(x,y,calc_jd(x),calc_jd(y),calc_caldat(x),
-                       calc_caldat(y),y-x) 
-                      for x,y in zip(
-            exptime_data["NUV"]["t0"], 
-            exptime_data["NUV"]["t1"],
-            )]
-    state_file_content.fuv_start_stop = fuv_start_stop
-    state_file_content.nuv_start_stop = nuv_start_stop
+    if "FUV" in exptime_data and (not args.no_overwrite or 
+                                  state_file_content.fuv_start_stop 
+                                  is None):
+        fuv_start_stop = [(x,y,calc_jd(x),calc_jd(y),calc_caldat(x),
+                           calc_caldat(y),y-x) 
+                          for x,y in zip(
+                exptime_data["FUV"]["t0"], 
+                exptime_data["FUV"]["t1"],
+                )]
+        state_file_content.fuv_start_stop = fuv_start_stop
+    if "NUV" in exptime_data and (not args.no_overwrite or 
+                                  state_file_content.nuv_start_stop 
+                                  is None):
+        nuv_start_stop = [(x,y,calc_jd(x),calc_jd(y),calc_caldat(x),
+                           calc_caldat(y),y-x) 
+                          for x,y in zip(
+                exptime_data["NUV"]["t0"], 
+                exptime_data["NUV"]["t1"],
+                )]
+        state_file_content.nuv_start_stop = nuv_start_stop
     
     """ Update the JSON file on disk. """
     gt_update(state_file_content, ifile)
@@ -134,13 +170,21 @@ def gtool_find(ifile=ifile_default):
 if __name__ == "__main__":
     """ Create ArgumentParser object that holds arguments and 
     options. """
-    args = setup_args().parse_args()
+    parser = setup_args()
 
-    """ Check arguments and options. """
+    """ Add the keywords from the main gFind method. """
+    parser = gf_setup_parser(parser=parser)
+
+    """ Parse all the input arguments. """
+    args = parser.parse_args()
+
+    """ Check arguments and options.  Use both this module's checker 
+    and the main gFind method. """
     check_input_options(args)
+    args = gf_check_args(args, allow_no_coords=True)
 
     """ Call primary method. """
-    gtool_find(args.ifile)
+    gtool_find(args, args.ifile)
 #--------------------
 
 

@@ -70,7 +70,11 @@ class gTarget(object):
     aperture sizes, etc.
     """
 
-    def __init__(self, targetid, ra, dec, glon, glat):
+    def __init__(self, targetid, ra, dec, glon, glat, 
+                 fuv_tot_exptime=None, nuv_tot_exptime=None,
+                 fuv_timerange_start=None, fuv_timerange_end=None,
+                 nuv_timerange_start=None, nuv_timerange_end=None,
+                 fuv_start_stop=None, nuv_start_stop=None):
         """
         :param targetid: ID/name of the target.
 
@@ -97,14 +101,14 @@ class gTarget(object):
         self.dec = dec
         self.glon = glon
         self.glat = glat
-        self.fuv_tot_exptime = None
-        self.nuv_tot_exptime = None
-        self.fuv_timerange_start = None
-        self.fuv_timerange_end = None
-        self.nuv_timerange_start = None
-        self.nuv_timerange_end = None
-        self.fuv_start_stop = None
-        self.nuv_start_stop = None
+        self.fuv_tot_exptime = fuv_tot_exptime
+        self.nuv_tot_exptime = nuv_tot_exptime
+        self.fuv_timerange_start = fuv_timerange_start
+        self.fuv_timerange_end = fuv_timerange_end
+        self.nuv_timerange_start = nuv_timerange_start
+        self.nuv_timerange_end = nuv_timerange_end
+        self.fuv_start_stop = fuv_start_stop
+        self.nuv_start_stop = nuv_start_stop
 
     @classmethod
     def from_json(self, idict):
@@ -118,10 +122,26 @@ class gTarget(object):
         """
         
         """ Make sure the dict contains all the expected keywords. """
-        if (set([u'id', u'ra', u'dec', u'glon', u'glat']) <= 
+        if (set([u'id', u'ra', u'dec', u'glon', u'glat', 
+                 u'fuv_tot_exptime', u'nuv_tot_exptime', 
+                 u'fuv_timerange_start', u'nuv_timerange_start', 
+                 u'fuv_timerange_end', u'nuv_timerange_end', 
+                 u'fuv_start_stop', u'nuv_start_stop']) <= 
             set(idict.keys())):
             return gTarget(idict[u"id"], idict[u"ra"], idict[u"dec"], 
-                           idict[u"glon"], idict[u"glat"])
+                           idict[u"glon"], idict[u"glat"], 
+                           fuv_tot_exptime = idict[u"fuv_tot_exptime"], 
+                           nuv_tot_exptime = idict[u"nuv_tot_exptime"], 
+                           fuv_timerange_start = 
+                           idict[u"fuv_timerange_start"], 
+                           fuv_timerange_end = 
+                           idict[u"fuv_timerange_end"], 
+                           nuv_timerange_start = 
+                           idict[u"nuv_timerange_start"],
+                           nuv_timerange_end = 
+                           idict[u"nuv_timerange_end"], 
+                           fuv_start_stop = idict[u"fuv_start_stop"], 
+                           nuv_start_stop = idict[u"nuv_start_stop"])
         else:
             raise gToolInputError("Input dict does not have expected "
                                   "set of keys.")            
