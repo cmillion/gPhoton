@@ -18,7 +18,7 @@ class TestgToolInput(unittest.TestCase):
     command-line usage. """
 
     reference_file_path = ("test_files/StateFiles/"
-                           "UnitTestReferenceFiles/")
+                           "UnitTestReferenceFiles/gtool_input/")
     def testCase01(self):
         output_files = gtool_input.input_targets(ifile = 
                                   "test_files/cr_dra.radec_noid.txt",
