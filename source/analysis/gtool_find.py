@@ -49,7 +49,7 @@ def setup_args():
     parser = argparse.ArgumentParser(description="""Read in state files 
                                      for use with gtool_find.""")
 
-    parser.add_argument("ifile", action="store", type=str, 
+    parser.add_argument("ifile", action="store", type=str, nargs='?',
                         default=ifile_default, 
                         help="""Full path and file name of the input 
                         state file.""")
@@ -88,40 +88,44 @@ def gtool_find(args, ifile=ifile_default):
 
     :param args: Command-line input options.
 
-    :type args: argparse.Namespace
+    :type args: dict
     
     :param ifile: Input state file, it will also be the file that is
     updated with the results of the gFind query.
 
     :type ifile: str
 
+    :raises: IOError
     """
 
     """ Read in the state file. """
-    state_file_content = gt_read(ifile)
+    if ifile is not None:
+        state_file_content = gt_read(ifile)
+    else:
+        raise IOError("You must specify an input file.")
 
     """ Test call of gFind. """
-    exptime_data = gFind(band=args.band, detsize=args.detsize, 
-                         exponly=False, gaper=args.gaper, 
-                         maxgap=args.maxgap, minexp=args.minexp,
-                         quiet=True, retries=args.retries, 
+    exptime_data = gFind(band=args["band"], detsize=args["detsize"], 
+                         exponly=False, gaper=args["gaper"], 
+                         maxgap=args["maxgap"], minexp=args["minexp"],
+                         quiet=True, retries=args["retries"], 
                          skypos=[state_file_content.ra, 
                                               state_file_content.dec],
-                         trange=args.trange, verbose=args.verbose, 
+                         trange=args["trange"], verbose=args["verbose"],
                          predicted=False)
 
     """ Update the total exposure time in the file. """
-    if "FUV" in exptime_data and (not args.no_overwrite or 
+    if "FUV" in exptime_data and (not args["no_overwrite"] or 
                                   state_file_content.fuv_tot_exptime 
                                   is None):
         state_file_content.fuv_tot_exptime = exptime_data["FUV"]["expt"]
-    if "NUV" in exptime_data and (not args.no_overwrite or 
+    if "NUV" in exptime_data and (not args["no_overwrite"] or 
                                   state_file_content.nuv_tot_exptime 
                                   is None):
         state_file_content.nuv_tot_exptime = exptime_data["NUV"]["expt"]
 
     """ Update the start and end times of the entire range. """
-    if "FUV" in exptime_data and (not args.no_overwrite or
+    if "FUV" in exptime_data and (not args["no_overwrite"] or
                                   state_file_content.fuv_timerange_start
                                   is None or 
                                   state_file_content.fuv_timerange_end 
@@ -130,7 +134,7 @@ def gtool_find(args, ifile=ifile_default):
             exptime_data["FUV"]["t0"])
         state_file_content.fuv_timerange_end = np.nanmax(
             exptime_data["FUV"]["t1"])
-    if "NUV" in exptime_data and (not args.no_overwrite or
+    if "NUV" in exptime_data and (not args["no_overwrite"] or
                                   state_file_content.nuv_timerange_start
                                   is None or 
                                   state_file_content.nuv_timerange_end 
@@ -141,7 +145,7 @@ def gtool_find(args, ifile=ifile_default):
             exptime_data["NUV"]["t1"])
 
     """ Add an array of (start,stop) times. """
-    if "FUV" in exptime_data and (not args.no_overwrite or 
+    if "FUV" in exptime_data and (not args["no_overwrite"] or 
                                   state_file_content.fuv_start_stop 
                                   is None):
         fuv_start_stop = [(x,y,calc_jd(x),calc_jd(y),calc_caldat(x),
@@ -151,7 +155,7 @@ def gtool_find(args, ifile=ifile_default):
                 exptime_data["FUV"]["t1"],
                 )]
         state_file_content.fuv_start_stop = fuv_start_stop
-    if "NUV" in exptime_data and (not args.no_overwrite or 
+    if "NUV" in exptime_data and (not args["no_overwrite"] or 
                                   state_file_content.nuv_start_stop 
                                   is None):
         nuv_start_stop = [(x,y,calc_jd(x),calc_jd(y),calc_caldat(x),
@@ -184,7 +188,7 @@ if __name__ == "__main__":
     args = gf_check_args(args, allow_no_coords=True)
 
     """ Call primary method. """
-    gtool_find(args, args.ifile)
+    gtool_find(vars(args), args.ifile)
 #--------------------
 
 
