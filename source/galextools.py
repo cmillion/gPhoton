@@ -7,6 +7,16 @@ from astropy import wcs as pywcs
 
 GPSSECS = 315532800+432000
 
+def isPostCSP(t,switch=961986575.):
+    """Given a GALEX time stamp, return TRUE if it corresponds to a "post-CSP"
+    eclipse. The actual CSP was on eclipse 37423, but the clock change (which
+    matters more for calibration purposes) occured on 38268 (t~=961986575.)
+    """
+    # Check that the tscale has been applied properly
+    if not (switch/100.<t<switch*100.):
+        raise ValueError('Did you apply tscale wrong?')
+    return t>=switch
+
 def zpmag(band):
     """Define the zero point magnitude offset for the APER MCAT values."""
     return {'NUV':20.08238,'FUV':18.81707}[band]

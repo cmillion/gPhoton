@@ -55,8 +55,33 @@ def hashresponse(band,events,calpath='../cal/',verbose=0):
     events['response'] = (events['flat']*events['scale'])
     return events
 
-def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
-                tscale=1000., calpath='../cal/', chunksz=10e6):
+# Thould this be moved to dbasetools?
+def read_photons(photonfile,ra0,dec0,tranges,radius,verbose=0,tscale=1000.,
+        colnames=['t','x','y','xa','ya','q','xi','eta','ra','dec','flags']):
+    """Read a photon list file and return a python dict() with the expected
+    format.
+    """
+    if verbose:
+        print 'Reading photon list file: {f}'.format(f=photonfile)
+    data = pd.io.parsers.read_csv(photonfile,names=colnames)
+    ra,dec = np.array(data['ra']),np.array(data['dec'])
+    angsep = mc.angularSeparation(ra0,dec0,ra,dec)
+    ix = np.array([])
+    for trange in tranges:
+        print trange
+        cut = np.where((angsep<=radius) & (np.isfinite(angsep)))[0]
+        ix = np.concatenate((ix,cut),axis=0)
+    events = {'t':np.array(data['t'][ix])/tscale,
+              'ra':np.array(data['ra'][ix]),
+              'dec':np.array(data['dec'][ix]),
+              'xi':np.array(data['xi'][ix]),
+              'eta':np.array(data['eta'][ix]),
+              'x':np.array(data['x'][ix]),
+              'y':np.array(data['y'][ix])}
+    return events
+
+# This should be moved to dbasetools.
+def query_photons(band,ra0,dec0,tranges,radius,verbose=0,tscale=1000.):
     """Retrieve photons within an aperture from the database."""
     stream = []
     if verbose:
@@ -69,15 +94,24 @@ def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
         thisstream = gQuery.getArray(
             gQuery.allphotons(band, ra0, dec0, trange[0], trange[1], radius),
                               verbose=verbose,retries=100)
-#        if not stream:
-#            continue
         stream.extend(thisstream)
     stream = np.array(stream, 'f8').T
-    colnames = ['t', 'ra', 'dec', 'xi', 'eta']
-    dtypes = ['f8', 'f8', 'f8', 'f4', 'f4']
+    colnames = ['t', 'ra', 'dec', 'xi', 'eta', 'x', 'y']
+    dtypes = ['f8', 'f8', 'f8', 'f4', 'f4', 'f4', 'f4']
     cols = map(np.asarray, stream, dtypes)
     events = dict(zip(colnames, cols))
     events['t']/=tscale # Adjust the timestamp by tscale
+    return events
+
+def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
+                tscale=1000., calpath='../cal/',photonfile=None):
+    if photonfile:
+        events = read_photons(photonfile, ra0, dec0, tranges, radius,
+                              verbose=verbose, tscale=tscale)
+    else:
+        events = query_photons(band, ra0, dec0, tranges, radius,
+                               verbose=verbose, tscale=tscale)
+
     events = hashresponse(band, events, calpath=calpath, verbose=verbose)
     return events
 
@@ -148,7 +182,8 @@ def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maskdepth=20.,
 
 def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
              stepsz=None, calpath='../cal/', verbose=0, maskdepth=20.0,
-             maskradius=1.5,detsize=1.25,coadd=False,sigmaclip=3.):
+             maskradius=1.5,detsize=1.25,coadd=False,sigmaclip=3.,
+             photonfile=None):
     if verbose:
         mc.print_inline("Retrieving all of the target events.")
     trange = [np.array(tranges).min(),np.array(tranges).max()]
@@ -157,7 +192,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     except TypeError:
         searchradius = radius
     data = pullphotons(band, ra0, dec0, tranges, searchradius,
-                       verbose=verbose, calpath=calpath)
+                       verbose=verbose, calpath=calpath, photonfile=photonfile)
     if verbose:
         mc.print_inline("Isolating source from background.")
     angSep = mc.angularSeparation(ra0, dec0, data['ra'], data['dec'])
@@ -269,7 +304,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
 def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
              trange=None, tranges=None, verbose=0, coadd=False, minexp=1.,
              maxgap=1., calpath='../cal/', maskdepth=20, maskradius=1.5,
-             sigmaclip=3.):
+             sigmaclip=3.,photonfile=None):
     if verbose:
         mc.print_inline("Getting exposure ranges.")
     if tranges is None:
@@ -287,7 +322,8 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
         lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
                           stepsz=stepsz, verbose=verbose, coadd=coadd,
                           calpath=calpath, maskdepth=maskdepth,
-                          maskradius=maskradius,sigmaclip=sigmaclip)
+                          maskradius=maskradius,sigmaclip=sigmaclip,
+                          photonfile=photonfile)
         lcurve['cps'] = lcurve['sources']/lcurve['exptime']
         lcurve['cps_bgsub'] = (lcurve['sources']-
                                lcurve['bg']['simple'])/lcurve['exptime']
@@ -331,12 +367,13 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                 stepsz=None, trange=None, tranges=None, verbose=0, coadd=False,
                 iocode='wb',calpath='../cal/',detsize=1.25,clobber=False,
-                minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,sigmaclip=3.):
+                minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,sigmaclip=3.,
+                photonfile=None):
     data = getcurve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
                     trange=trange, tranges=tranges, verbose=verbose,
                     coadd=coadd, minexp=minexp, maxgap=maxgap, calpath=calpath,
                     maskdepth=maskdepth, maskradius=maskradius,
-                    sigmaclip=sigmaclip)
+                    sigmaclip=sigmaclip,photonfile=photonfile)
     print tranges
     if csvfile:
         columns = ['t0','t1','exptime','mag_bgsub_cheese','t_mean','t0_data',

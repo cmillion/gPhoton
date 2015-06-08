@@ -2,13 +2,15 @@
 
 %pylab
 
-from regtestutils import *
+from regtestutils import datamaker
 import galextools as gt
 import MCUtils as mc
 import pandas as pd
 import gphoton_utils as gu
 import gFind
 from FileUtils import flat_filename
+import numpy as np
+import matplotlib.pyplot as plt
 
 skypos = {'LDS749B':[323.06766667,0.25400000],
           'PS_CDFS_MOS00':[53.1032558472, -27.7963826072],
@@ -30,23 +32,14 @@ result with the same few super deep tiles (LDS and CDFS, mostly), the
 following filters on <5000s coadd depth, more or less, based upon
 the most recent coadd level database coverage reference table.
 """
-coaddlist = pd.read_csv('coaddList_061714.csv')
-for skypos in zip(coaddlist['avaspra'],coaddlist['avaspdec']):
-    expt = gFind.gFind(skypos=skypos,band='FUV',quiet=True)['FUV']['expt']
-    if (expt<=5000.) and (expt>0):
-        print skypos, expt, True
-        datamaker('FUV',skypos,'calrun_FUV.csv',maglimit=24)
-    else:
-        print skypos, expt, False
 
-coaddlist = pd.read_csv('coaddList_061714.csv')
-for skypos in zip(coaddlist['avaspra'],coaddlist['avaspdec']):
-    expt = gFind.gFind(skypos=skypos,band='NUV',quiet=True)['NUV']['expt']
-    if (expt<=5000.) and (expt>0):
-        print skypos, expt, True
-        datamaker('NUV',skypos,'calrun_NUV.csv',maglimit=24)
-    else:
-        print skypos, expt, False
+nsamples = 10
+rarange=[0,360]
+decrange=[53,90]
+
+./gCalrun.py -f 'DB10_calrun_FUV.csv' -b 'FUV' --rarange [0,360] --decrange [53,90] -n 100 --seed 323 -v 1
+
+./gCalrun.py -f 'DB10_calrun_NUV.csv' -b 'NUV' --rarange [0,360] --decrange [53,90] -n 100 --seed 323 -v 1
 
 ###############################################################################
 def error(data,band,radius,annulus):
@@ -67,7 +60,7 @@ scl = 1.8
 setup_text_plots(fontsize=8*scl, usetex=False)
 
 bands = ['NUV','FUV']
-base = 'calrun_'
+base = 'DB10_calrun_'
 data = {}
 for band in bands:
     data[band] = pd.read_csv('{base}{band}.csv'.format(
@@ -76,15 +69,21 @@ for band in bands:
                                 band=band,cnt=data[band]['objid'].shape[0])
 
 """dMag vs. Mag"""
-dmag = {'gphot_cheese':(lambda band:
+for band in bands:
+    dmag = {'gphot_cheese':(lambda band:
                         data[band]['aper4']-data[band]['mag_bgsub_cheese']),
-        'gphot_nomask':(lambda band:
+                 'gphot_nomask':(lambda band:
                         data[band]['aper4']-data[band]['mag_bgsub']),
-        'gphot_sigma':(lambda band:
+                 'gphot_sigma':(lambda band:
                         data[band]['aper4']-data[band]['mag_bgsub_sigmaclip']),
-        'mcat':lambda band: data[band]['aper4']-
-            gt.counts2mag(gt.mag2counts(data[band]['mag'],band)-
-            data[band]['skybg']*3600**2*mc.area(gt.aper2deg(4)),band)}
+                 'mcat':lambda band: data[band]['aper4']-
+                        gt.counts2mag(gt.mag2counts(data[band]['mag'],band)-
+                        data[band]['skybg']*3600**2*mc.area(gt.aper2deg(4)),
+                        band)}
+bgmodekeys={'gphot_cheese':'mag_bgsub_cheese',
+            'gphot_nomask':'mag_bgsub',
+            'gphot_sigma':'mag_bgsub_sigmaclip',
+            'mcat':'skybg'}
 for bgmode in dmag.keys():
     for band in bands:
         fig = plt.figure(figsize=(8*scl,4*scl))
@@ -93,7 +92,8 @@ for bgmode in dmag.keys():
         dmag_err=gu.dmag_errors(100.,band,sigma=1.41)
         # Make a cut on crazy outliers in the MCAT. Also on det radius and expt.
         ix = ((data[band]['aper4']>0) & (data[band]['aper4']<30) &
-              (data[band]['distance']<300) & (data[band]['t_eff']<300))
+              (data[band]['distance']<300) & (data[band]['t_eff']<300) &
+              (np.isfinite(np.array(data[band][bgmodekeys[bgmode]]))))
         plt.subplot(1,2,1)
         plt.title('{band} {d}Mag vs. AB Mag (n={n},{bg}_bg)'.format(
                             d=r'$\Delta$',band=band,n=ix.shape[0],bg=bgmode))
@@ -109,65 +109,69 @@ for bgmode in dmag.keys():
         plt.subplot(1,2,2,xticks=[],yticks=[],ylim=[-1.3,1.3])
         plt.title('{d}Magnitude Histogram ({band})'.format(
                                                     d=r'$\Delta$',band=band))
-        plt.hist(dmag[bgmode](band)[ix],bins=np.floor(ix.shape[0]/10.),
-                        range=[-1.3,1.3],orientation='horizontal',color='k')
+        plt.hist(np.array(dmag[bgmode](band)[ix]),
+                        bins=np.floor(ix.shape[0]/10.),range=[-1.3,1.3],
+                        orientation='horizontal',color='k')
         fig.savefig(
             '../calpaper/src/dMag_v_Mag({band},{bg}_bg).png'.format(
                                                         band=band,bg=bgmode))
 
-"""Compare Errors"""
-fig = plt.figure(figsize=(4*scl,8*scl))
-fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,bottom=0.05,top=0.95)
-for i,band in enumerate(bands):
-    s2 = error(data,band,gt.aper2deg(4),[0.0083,0.025])
-    dflux = np.sqrt(s2['bg_cheese_err'])/data[band]['t_eff'] # \Delta cps
-    flux = gt.mag2counts(data[band]['mag'],band) # cps
-    dmag = 2.5*np.log10((flux+dflux)/flux)
-    plt.subplot(2,1,i+1,yticks=[],xlim=[0,1])
-    plt.title('{band} Magnitude Errors'.format(band=band))
-    plt.hist(dmag,bins=100,range=[0,1],color='r',label='gPhoton')
-    plt.hist(data[band]['aper4_err'],bins=100,range=[0,1],color='k',
-                                                                label='MCAT')
-    plt.legend()
-fig.savefig('../calpaper/src/mag_err.png')
-
+#"""Compare Errors"""
+#fig = plt.figure(figsize=(4*scl,8*scl))
+#fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,bottom=0.05,top=0.95)
+#for i,band in enumerate(bands):
+#    s2 = error(data,band,gt.aper2deg(4),[0.0083,0.025])
+#    dflux = np.sqrt(s2['bg_cheese_err'])/data[band]['t_eff'] # \Delta cps
+#    flux = gt.mag2counts(data[band]['mag'],band) # cps
+#    dmag = 2.5*np.log10((flux+dflux)/flux)
+#    plt.subplot(2,1,i+1,yticks=[],xlim=[0,1])
+#    plt.title('{band} Magnitude Errors'.format(band=band))
+#    plt.hist(dmag,bins=100,range=[0,1],color='r',label='gPhoton')
+#    plt.hist(data[band]['aper4_err'],bins=100,range=[0,1],color='k',
+#                                                                label='MCAT')
+#    plt.legend()
+#fig.savefig('../calpaper/src/mag_err.png')
 
 """Background Plots
 The gPhoton background is scaled to counts in the aperture and the
 MCAT skybg is in units of arcsec^2/s, so we'll scale the skybg to the
 aperture and put the gPhoton bg in cps.
 """
-fig = plt.figure(figsize=(8*scl,4*scl))
-fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,bottom=0.15,top=0.9)
-for i,band in enumerate(bands):
-    gphot_bg = gt.counts2mag(
-                        data[band]['bg_sigmaclip']/data[band]['t_eff'],band)
-    #gphot_bg = gt.counts2mag(data[band]['bg_cheese']/data[band]['t_eff'],band)
-    mcat_bg = gt.counts2mag(
-                    data[band]['skybg']*3600**2*mc.area(gt.aper2deg(4)),band)
-    delta = mcat_bg - gphot_bg
-    ix = (np.isfinite(delta))
-    plt.subplot(1,2,i+1,yticks=[],xlim=[-3,3])
-    plt.title('{band} Background {d}Magnitude (MCAT-gPhoton)'.format(band=band,d=r'$\Delta$'))
-    plt.hist(delta[ix],bins=500,range=[-3,3],color='k')
-fig.savefig('../calpaper/src/dMag_bg.png')
-
-for i,band in enumerate(bands):
+bgmodes=['bg_cheese','bg','bg_sigmaclip']
+for mode in bgmodes:
     fig = plt.figure(figsize=(8*scl,4*scl))
     fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,bottom=0.15,top=0.9)
-    gphot_bg = gt.counts2mag(data[band]['bg']/data[band]['t_eff'],band)
-    mcat_bg = gt.counts2mag(
+    for i,band in enumerate(bands):
+        gphot_bg = gt.counts2mag(
+                        data[band][mode]/data[band]['t_eff'],band)
+        #gphot_bg = gt.counts2mag(data[band]['bg_cheese']/data[band]['t_eff'],band)
+        mcat_bg = gt.counts2mag(
                     data[band]['skybg']*3600**2*mc.area(gt.aper2deg(4)),band)
-    delta = mcat_bg - gphot_bg
-    ix = (np.isfinite(delta))
-    plt.subplot(1,2,1,xlim=[14,25])
-    plt.title('{band} Background vs. Magnitude (MCAT)'.format(band=band))
-    plt.plot(data[band]['aper4'][ix],mcat_bg[ix],'.',color='k',alpha=0.2)
-    plt.subplot(1,2,2,xlim=[14,25],yticks=[])
-    plt.title('{band} Background vs. Magnitude (gPhoton)'.format(band=band))
-    plt.plot(data[band]['mag_bgsub_cheese'][ix],gphot_bg[ix],'.',
-                                                        color='k',alpha=0.2)
-fig.savefig('../calpaper/src/bg_v_mag.png')
+        delta = mcat_bg - gphot_bg
+        ix = (np.isfinite(delta))
+        plt.subplot(1,2,i+1,yticks=[],xlim=[-3,3])
+        plt.title('{band} {mode} Background {d}Magnitude (MCAT-gPhoton)'.format(
+                                            band=band,mode=mode,d=r'$\Delta$'))
+        plt.hist(delta[ix],bins=500,range=[-3,3],color='k')
+    fig.savefig('../calpaper/src/dMag_{mode}.png'.format(mode=mode))
+
+#"""Background 'Magnitude' vs. Source Magnitude"""
+#for i,band in enumerate(bands):
+#    fig = plt.figure(figsize=(8*scl,4*scl))
+#    fig.subplots_adjust(left=0.12,right=0.95,wspace=0.02,bottom=0.15,top=0.9)
+#    gphot_bg = gt.counts2mag(data[band]['bg']/data[band]['t_eff'],band)
+#    mcat_bg = gt.counts2mag(
+#                    data[band]['skybg']*3600**2*mc.area(gt.aper2deg(4)),band)
+#    delta = mcat_bg - gphot_bg
+#    ix = (np.isfinite(delta))
+#    plt.subplot(1,2,1,xlim=[14,25])
+#    plt.title('{band} Background vs. Magnitude (MCAT)'.format(band=band))
+#    plt.plot(data[band]['aper4'][ix],mcat_bg[ix],'.',color='k',alpha=0.2)
+#    plt.subplot(1,2,2,xlim=[14,25],yticks=[])
+#    plt.title('{band} Background vs. Magnitude (gPhoton)'.format(band=band))
+#    plt.plot(data[band]['mag_bgsub_cheese'][ix],gphot_bg[ix],'.',
+#                                                        color='k',alpha=0.2)
+#fig.savefig('../calpaper/src/bg_v_mag.png')
 
 """Astrometry"""
 a = 3600

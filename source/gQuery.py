@@ -2,6 +2,7 @@
 # database at MAST.
 from MCUtils import manage_requests
 import CalUtils
+from galextools import isPostCSP
 
 """The following three global variables are used in constructing a properly
 formatted query to the MAST database. Don't change them unless you know what
@@ -100,9 +101,9 @@ def mcat_visit_sources(ra0,dec0,radius):
         ' from '+str(MCATDB)+'.visitphotoobjall as vpo'
         ' inner join '+str(MCATDB)+'.visitphotoextract'
         ' as vpe on vpo.photoextractid=vpe.photoextractid inner join'
-        ' '+str(MCATDB)+'.fGetNearbyVisitObjEq('+repr(float(ra0))+', '+repr(float(dec0))+
-        ', '+str(radius*60.)+') as nb on vpo.objid=nb.objid'+
-        str(formatURL))
+        ' '+str(MCATDB)+'.fGetNearbyVisitObjEq('+repr(float(ra0))+','+
+        repr(float(dec0))+', '+str(radius*60.)+
+        ') as nb on vpo.objid=nb.objid'+str(formatURL))
 
 def mcat_objid_search(objid,mode='visit'):
     """Return a bunch of observation data for a visit level objid (ggoid).
@@ -153,27 +154,40 @@ def aperture(band,ra0,dec0,t0,t1,radius,tscale=1000.):
 
 def deadtime1(band,t0,t1,tscale=1000.):
     """Return the global counts of non-NULL data."""
-    return (str(baseURL)+
-        'select count(*) from '+str(band)+'PhotonsV where time between '+
-        str(long(t0*tscale))+' and '+str(long(t1*tscale))+str(formatURL))
+    return ('{baseURL}select count(*) from {baseDB}.{band}PhotonsV where '+
+            'time between {t0} and {t1}{formatURL}').format(baseURL=baseURL,
+                baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
+                t1=str(long(t1*tscale)), formatURL=formatURL)
 
 def deadtime2(band,t0,t1,tscale=1000.):
     """Return the global counts for NULL data."""
-    return (str(baseURL)+
-        'select count(*) from '+str(band)+'PhotonsNULLV where time between '+
-        str(long(t0*tscale))+' and '+str(long(t1*tscale))+str(formatURL))
+    return ('{baseURL}select count(*) from {baseDB}.{band}PhotonsNULLV where '+
+            'time between {t0} and {t1}{formatURL}').format(baseURL=baseURL,
+                baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
+                t1=str(long(t1*tscale)), formatURL=formatURL)
 
-def deadtime(band,t0,t1,tscale=1000.):
+def deadtime(band,t0,t1,tscale=1000.,feeclkratio=0.966,tec2fdead=5.52e-6):
     """Return the emperically determined deadtime correction based upon the
     global count rate.
     """
+    scale = tec2fdead/feeclkratio
     return (str(baseURL)+
-        'select sum(dt)*0.0000057142857142857145 / ('+repr(t1)+'-'+repr(t0)+')'
-        ' from(select count(*) as dt from '+str(band)+
+        'select sum(dt)*'+'%0.30f'%scale+' / ('+repr(t1)+'-'+repr(t0)+')'
+        ' from(select count(*) as dt from '+str(baseDB)+'.'+str(band)+
         'PhotonsNULLV where time between '+str(long(t0*tscale))+' and '+
         str(long(t1*tscale))+' union all select count(*) as dt from '+
-        str(band)+'PhotonsV where time between '+str(long(t0*tscale))+' and '+
+        str(baseDB)+'.'+str(band)+
+        'PhotonsV where time between '+str(long(t0*tscale))+' and '+
         str(long(t1*tscale))+') x'+str(formatURL))
+
+def alltimes(band,t0,t1,tscale=1000.):
+    """Return the time stamps of every detector event within a time range."""
+    return ('{baseURL}select t from (select time as t from {baseDB}.{band}PhotonsV '+
+            'where time between {t0} and {t1} union all select time as t '+
+            'from {baseDB}.{band}PhotonsNULLV where time between '+
+            '{t0} and {t1}) x{formatURL}').format(baseURL=baseURL,
+                baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
+                t1=str(long(t1*tscale)), formatURL=formatURL)
 
 def boxcount(band,t0,t1,xr,yr,tscale=1000.):
     """Find the number of events inside of a box defined by [xy] range in
@@ -184,36 +198,57 @@ def boxcount(band,t0,t1,xr,yr,tscale=1000.):
         str(long(t1*tscale))+' and x between '+str(xr[0])+' and '+str(xr[1])+
         ' and y between '+str(yr[0])+' and '+str(yr[1])+str(formatURL))
 
+def detbox(band,t0,t1,xr,yr,tscale=1000.):
+    """Return all events inside a box defined in detector space by [xy]
+    range. Created as a sanity check for stim events."""
+    return ('{baseURL}select time,x,y,ya from {baseDB}.{band}PhotonsNULLV '+
+            'where time between {t0} and {t1} and '+
+            'x between {xmin} and {xmax} and y between {ymin} and {ymax}'+
+            '{formatURL}').format(baseURL=baseURL, baseDB=baseDB, band=band,
+                t0=str(long(t0*tscale)), t1=str(long(t1*tscale)),
+                xmin=xr[0], xmax=xr[1], ymin=yr[0], ymax=yr[1],
+                formatURL=formatURL)
+
 # FIXME: convert t0 to eclipse
-def stimcount(band,t0,t1,margin=90.01,aspum=68.754932/1000.,tscale=1000,eclipse=31000):
+def stimcount(band,t0,t1,margin=[90.01,90.01],aspum=68.754932/1000.,tscale=1000,
+              eclipse=None):
     """Return stim counts."""
+    if not eclipse:
+        eclipse = 55000 if isPostCSP(t0) else 30000
+    if isPostCSP(t0):
+        margin[1]=180.02
     avgstim = CalUtils.avg_stimpos(band,eclipse)
-    return (str(baseURL)+
-        'select count(*) from '+str(band)+'PhotonsNULLV where time between '+
-        str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and ((x between '+
-        str((avgstim['x1']-margin)/aspum)+' and '+
-        str((avgstim['x1']+margin)/aspum)+' and y between '+
-        str((avgstim['y1']-margin)/aspum)+' and '+
-        str((avgstim['y1']+margin)/aspum)+') or (x between '+
-        str((avgstim['x2']-margin)/aspum)+' and '+
-        str((avgstim['x2']+margin)/aspum)+' and y between '+
-        str((avgstim['y2']-margin)/aspum)+' and '+
-        str((avgstim['y2']+margin)/aspum)+') or (x between '+
-        str((avgstim['x3']-margin)/aspum)+' and '+
-        str((avgstim['x3']+margin)/aspum)+' and y between '+
-        str((avgstim['y3']-margin)/aspum)+' and '+
-        str((avgstim['y3']+margin)/aspum)+') or (x between '+
-        str((avgstim['x4']-margin)/aspum)+' and '+
-        str((avgstim['x4']+margin)/aspum)+' and y between '+
-        str((avgstim['y4']-margin)/aspum)+' and '+
-        str((avgstim['y4']+margin)/aspum)+'))'+
-        str(formatURL))
+    return ('{baseURL}select count(*) from {baseDB}.{band}PhotonsNULLV '+
+            'where time between {t0} and {t1} and ('+
+            '((x between {x10} and {x11}) and (y between {y10} and {y11})) or '+
+            '((x between {x20} and {x21}) and (y between {y20} and {y21})) or '+
+            '((x between {x30} and {x31}) and (y between {y30} and {y31})) or '+
+            '((x between {x40} and {x41}) and (y between {y40} and {y41}))'+
+            '){formatURL}').format(baseURL=baseURL, baseDB=baseDB, band=band,
+                t0=str(long(t0*tscale)), t1=str(long(t1*tscale)),
+                x10=(avgstim['x1']-margin[0])/aspum,
+                x11=(avgstim['x1']+margin[0])/aspum,
+                y10=(avgstim['y1']-margin[1])/aspum,
+                y11=(avgstim['y1']+margin[1])/aspum,
+                x20=(avgstim['x2']-margin[0])/aspum,
+                x21=(avgstim['x2']+margin[0])/aspum,
+                y20=(avgstim['y2']-margin[1])/aspum,
+                y21=(avgstim['y2']+margin[1])/aspum,
+                x30=(avgstim['x3']-margin[0])/aspum,
+                x31=(avgstim['x3']+margin[0])/aspum,
+                y30=(avgstim['y3']-margin[1])/aspum,
+                y31=(avgstim['y3']+margin[1])/aspum,
+                x40=(avgstim['x4']-margin[0])/aspum,
+                x41=(avgstim['x4']+margin[0])/aspum,
+                y40=(avgstim['y4']-margin[1])/aspum,
+                y41=(avgstim['y4']+margin[1])/aspum,formatURL=formatURL)
+
 
 def boxcentroid(band,t0,t1,xr,yr,tscale=1000.):
     """Find the mean position of events inside of a box in detector space."""
     return (str(baseURL)+
         'select avg(x), avg(y) from '+str(baseDB)+
-        '.NUVPhotonsNULLV where time between '+
+        '.'+str(band)+'PhotonsNULLV where time between '+
         str(long(t0*tscale))+' and '+str(long(t1*tscale))+
         ' and x between '+str(xr[0])+' and '+str(xr[1])+' and y between '+
         str(yr[0])+' and '+str(yr[1])+str(formatURL))
@@ -221,14 +256,16 @@ def boxcentroid(band,t0,t1,xr,yr,tscale=1000.):
 def boxtimes(band,t0,t1,xr,yr,tscale=1000.):
     """Get the list of times for events inside of a box in detector space."""
     return (str(baseURL)+
-        'select time from NUVPhotonsNULLV where time between '+
+        'select time from '+str(baseDB)+'.'+str(band)+
+        'PhotonsNULLV where time between '+
         str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and x between '+
         str(xr[0])+' and '+str(xr[1])+' and y between '+str(yr[0])+' and '+
         str(yr[1])+str(formatURL))
 
 def centroid(band,ra0,dec0,t0,t1,radius,tscale=1000.):
     return (str(baseURL)+
-        'select avg(ra), avg(dec) from NUVPhotonsV where time between '+
+        'select avg(ra), avg(dec) from '+str(baseDB)+'.'+str(band)+
+        'PhotonsV where time between '+
         str(long(t0*tscale))+' and '+str(long(t1*tscale))+' and ra between '+
         repr(ra0-radius)+' and '+repr(ra0+radius)+' and dec between '+
         repr(dec0-radius)+' and '+repr(dec0+radius)+str(formatURL))
@@ -236,7 +273,7 @@ def centroid(band,ra0,dec0,t0,t1,radius,tscale=1000.):
 def allphotons(band,ra0,dec0,t0,t1,radius,tscale=1000.):
     """Grab the major columns for all events within an aperture."""
     return (str(baseURL)+
-        'select time,ra,dec,xi,eta from '+str(baseDB)+'.fGetNearbyObjEq'+
+        'select time,ra,dec,xi,eta,x,y from '+str(baseDB)+'.fGetNearbyObjEq'+
         str(band)+'AllColumns('+repr(float(ra0))+','+repr(float(dec0))+','+
         repr(radius)+','+
         str(long(t0*tscale))+','+str(long(t1*tscale))+',0)'+str(formatURL))
@@ -291,6 +328,7 @@ def aspect_skypos(ra,dec,detsize=1.25):
         " and "+repr(dec+detsize/2.)+" order by time"+str(formatURL))
 
 # Return data within a box centered on ra0, dec0 with sides of length 2*radius
+# TODO: deprecate this and rename it skybox()
 def box(band,ra0,dec0,t0,t1,radius,tscale=1000.):
     return (str(baseURL)+
         'select time,ra,dec from '+str(baseDB)+'.'+str(band)+
@@ -301,6 +339,7 @@ def box(band,ra0,dec0,t0,t1,radius,tscale=1000.):
         str(formatURL))
 
 # Return data within a rectangle centered on ra0, dec0
+# TODO: deprecate this and rename it skyrect()
 def rect(band,ra0,dec0,t0,t1,ra,dec,tscale=1000.):
     return (str(baseURL)+
         'select time,ra,dec from '+str(baseDB)+'.fGetObjFromRect'+str(band)+'('+

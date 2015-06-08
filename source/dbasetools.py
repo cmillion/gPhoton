@@ -1,4 +1,4 @@
-# Contains tools for deriving data from the database that are used by
+# Contains tools for working with data from the database that are used by
 #  a number of different modules.
 import numpy as np
 import gQuery
@@ -90,19 +90,22 @@ def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,
 
     return np.array(chunks,dtype='float64')
 
-def exposure(band,trange,verbose=0,retries=20):
+def exposure(band,trange,verbose=0,retries=20,photonfile=None):
     """Compute the effective exposure time for a time range."""
     rawexpt = trange[1]-trange[0]
     if rawexpt<=0:
         return 0.
-    shutdead = gQuery.getArray(gQuery.shutdead(band,trange[0],trange[1]),
-                                            verbose=verbose,retries=retries)
+    if photonfile:
+        print ""
+    else:
+        shutter = gQuery.getArray(gQuery.shutdead(band,trange[0],trange[1]),
+                                        verbose=verbose,retries=retries)[0][0]
     # NOTE: The deadtime correction in shutdead does not work properly in FUV
     # so we're doing it separately for now.
     deadtime = gQuery.getValue(gQuery.deadtime(band,trange[0],trange[1]),
                                             verbose=verbose,retries=retries)
     #return (rawexpt-shutdead[0][0])*(1.-shutdead[1][0])
-    return (rawexpt-shutdead[0][0])*(1.-deadtime)
+    return (rawexpt-shutter)*(1.-deadtime)
 
 def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,
                     retries=20,chunksz=10.e6,coadd=False):
@@ -240,7 +243,7 @@ def get_mags(band,ra0,dec0,radius,maglimit,mode='coadd',
                 7:out[:,17][ix]+zpf}}
     else:
         print "mode must be in [coadd,visit]"
-        return
+        return None
 
 def exp_from_objid(objid):
     out = np.array(gQuery.getArray(gQuery.mcat_objid_search(objid)))
@@ -267,7 +270,10 @@ def find_unique_sources(band,ra0,dec0,searchradius,maglimit=20.0,margin=0.001,
                                                                     verbose=0):
     coadds = get_mags(band,ra0,dec0,searchradius,maglimit,mode='coadd',
                                                             verbose=verbose)
-    return np.array(parse_unique_sources(coadds['ra'],coadds['dec'],
+    if not coadds:
+        return None
+    else:
+        return np.array(parse_unique_sources(coadds['ra'],coadds['dec'],
                     coadds['FUV']['mag'],coadds['NUV']['mag'],margin=margin))
 
 def avg_sources(band,skypos,radius=0.001,maglimit=20.0,verbose=0,

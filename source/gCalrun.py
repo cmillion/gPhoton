@@ -6,22 +6,36 @@ from regtestutils import datamaker
 import MCUtils as mc
 import gFind
 import numpy as np
+import os
+
+def find_random_positions(rarange=[0,360],decrange=[-90,90],nsamples=10,
+                          seed=323):
+    np.random.seed(seed=seed%2)
+    ra = np.random.uniform(rarange[0],rarange[1],nsamples)
+    np.random.seed(seed=seed%3)
+    dec = np.random.uniform(decrange[0],decrange[1],nsamples)
+    return ra, dec
 
 def calrun(outfile,band,nsamples=10,seed=323,rarange=[0,360],decrange=[-90,90],
-           exprange=[0.,5000.],maglimit=24,verbose=0):
+           exprange=[0.,5000.],maglimit=24,verbose=0,calpath='../cal/'):
     """Generate a bunch of magnitudes with comparisons against MCAT values for
     random points on the sky within given legal ranges. Write it to a CSV.
     """
-    np.random.seed(seed=seed)
-    ra = np.random.uniform(rarange[0],rarange[1],nsamples)
-    np.random.seed(seed=seed)
-    dec = np.random.uniform(decrange[0],decrange[1],nsamples)
+    (ra, dec) = find_random_positions(rarange=rarange,decrange=decrange,
+                                      nsamples=nsamples,seed=seed)
+    if verbose:
+        print 'Running {n} random samples with seed of {seed}.'.format(
+            n=nsamples,seed=seed)
+        print 'Bounded by RA:[{r0},{r1}] and Dec:[{d0},{d1}]'.format(
+            r0=rarange[0],r1=rarange[1],d0=decrange[0],d1=decrange[1])
+        print 'Actual positions used will be:'
+        print '{pos}'.format(pos=zip(ra,dec))
 
     for skypos in zip(ra,dec):
         expt = gFind.gFind(skypos=skypos,band=band,quiet=True)[band]['expt']
         if exprange[0]<=expt<=exprange[1]:
             print skypos, expt, True
-            datamaker(band,skypos,outfile,maglimit=maglimit)
+            datamaker(band,skypos,outfile,maglimit=maglimit,calpath=calpath)
         else:
             print skypos, expt, False
     return
@@ -55,6 +69,10 @@ def setup_parser():
         dest="maglimit", help="Lower limit of MCAT magnitudes to use.")
     parser.add_argument("-v", "--verbose", action="store", type=int, default=0,
         dest="verbose", help="Level of verbosity.", choices=[0,1,2])
+    parser.add_argument("--calpath", action="store", type=str,
+        dest="calpath", default=os.pardir+os.sep+"cal"+os.sep,
+        help="Path to the directory that contains the calibration files.")
+
     return parser
 
 def check_args(args):

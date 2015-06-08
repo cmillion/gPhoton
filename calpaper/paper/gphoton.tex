@@ -14,11 +14,12 @@
 Chase Million\altaffilmark{1},
 Scott W. Fleming\altaffilmark{2,3},
 Bernie Shiao\altaffilmark{2},
-Mark Seibert\altaffilmark{4}
+Mark Seibert\altaffilmark{4},
 Randy Thompson\altaffilmark{2,3},
 Myron Smith\altaffilmark{5},
 Richard L. White\altaffilmark{2},
-Karen Levay\altaffilmark{2,3}}
+Karen Levay\altaffilmark{2,3},
+Parke Loyd\altaffilmark{6}}
 
 \email{chase.million@gmail.com}
 \altaffiltext{1}{Million Concepts LLC, 2204 Mountain View Ave., State College, PA 16801, USA}
@@ -26,9 +27,10 @@ Karen Levay\altaffilmark{2,3}}
 \altaffiltext{3}{Computer Sciences Corporation, 3700 San Martin Dr, Baltimore, MD 21218, USA}
 \altaffiltext{4}{The Observatories of the Carnegie Institution of Washington, 813 Santa Barbara Street, Pasadena, CA 91101, USA}
 \altaffiltext{5}{{\color{red}NOAO...need full address from Myron.}}
+\altaffiltext{6}{Department of Astrophysics and Planetary Science, University of Colorado, Boulder CO}
 
 \begin{abstract}
-We describe the gPhoton project, an effort to archive the complete corpus of approximately 1.1 trillion photon events recorded by the GALEX spacecraft. The project includes a standalone calibration pipeline that reproduces core functionalities of the GALEX mission's original calibration pipeline, but also generates lists of aspect corrected photon level data. A suite of software tools simplifies use of the photon level data, with particular emphasis on short time domain analyses.  The software is freely available as an open-source application\footnote{\url{https://github.com/cmillion/gPhoton}} and will continue to be updated in the future. We describe the set of software tools that are available, highlight differences between the gPhoton standalone calibration compared to the original mission's pipeline, and demonstrate the performance of gPhoton's calibration by analyzing standard star fluxes and measuring the pipeline's astrometric precision. We highlight some of the science enabled by gPhoton, including stellar flares, high cadence sampling of known variables, and cross-mission analyses (exemplified through simultaneous GALEX observations of Kepler targets). The database is housed at the MAST archives, and extends the utility and impact of GALEX data in the absence of dedicated, large-scale, space-based, UV-survey missions in the near future.
+We describe the gPhoton project, an effort to archive the complete corpus of approximately 1.1 trillion photon events recorded by the GALEX spacecraft. This effort includes the development of a pure Python, standalone calibration pipeline that reproduces core functionalities of the GALEX mission's original calibration pipeline, but also generates lists of aspect corrected photon level data. A suite of software tools simplifies use of the photon level data as hosted in a MAST database, with particular emphasis on short time domain analyses. The software is freely available as an open-source application\footnote{\url{https://github.com/cmillion/gPhoton}} and will continue to be updated in the future. We describe the set of software tools that are available, highlight differences between the gPhoton standalone calibration compared to the original mission's pipeline, and demonstrate the initial performance of gPhoton's calibration by analyzing standard star fluxes, measuring the pipeline's astrometric precision, and comparing these against the official mission archive. We highlight some of the science enabled by gPhoton, including stellar flares, high cadence sampling of known variables, and cross-mission analyses (exemplified through simultaneous GALEX observations of Kepler targets). The database is housed at the MAST archives, and extends the utility and impact of GALEX data in the absence of dedicated, large-scale, space-based, UV-survey missions in the near future.
 \end{abstract}
 
 \section{Introduction}
