@@ -349,7 +349,7 @@ def optimize_annulus(optrad,outann,verbose=0):
 	return round(1.2*optrad,4),round(2*optrad,4)
 
 def suggest_parameters(band,skypos,verbose=0,retries=20):
-    mcat = get_mcat_data(skypos,0.0005)
+    mcat = get_mcat_data(skypos,0.01)
     ix = np.where((mcat[band]['mag']>0) & (mcat[band]['fwhm']>0))
     pos,fwhm = None, None
     if mcat['objid'].any(): # There is a known star at the target position!
