@@ -191,6 +191,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         searchradius = annulus[1]
     except TypeError:
         searchradius = radius
+    print searchradius
     data = pullphotons(band, ra0, dec0, tranges, searchradius,
                        verbose=verbose, calpath=calpath, photonfile=photonfile)
     if verbose:
@@ -242,13 +243,17 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
             continue
         if verbose:
             mc.print_inline('Binning {i} of {l}.'.format(
-                                                    i=cnt,l=len(np.unique(ix))))
+                                                i=cnt,l=len(np.unique(ix))))
         t_ix = np.where(ix==i)
         # TODO: Optionally limit data to specific parts of detector.
         rad_ix = np.where((angSep <= radius) & (ix == i))
-        lcurve['t0_data'][i-1] = data['t'][t_ix and rad_ix].min()
-        lcurve['t1_data'][i-1] = data['t'][t_ix and rad_ix].max()
-        lcurve['t_mean'][i-1] = data['t'][t_ix and rad_ix].mean()
+        # NOTE: This checks for the dim edge case where you have photons in
+        #  the annulus but not in the aperture.
+        if not len(rad_ix[0]):
+            continue
+        lcurve['t0_data'][i-1] = data['t'][rad_ix].min()
+        lcurve['t1_data'][i-1] = data['t'][rad_ix].max()
+        lcurve['t_mean'][i-1] = data['t'][rad_ix].mean()
         lcurve['counts'][i-1] = len(rad_ix[0])
         lcurve['sources'][i-1] = (1./data['response'][rad_ix]).sum()
         lcurve['responses'][i-1] = data['response'][rad_ix].mean()
@@ -344,7 +349,6 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
         lcurve['flux_bgsub_sigmaclip'] = gxt.counts2flux(
                                         lcurve['cps_bgsub_sigmaclip'],band)
         lcurve['detrad'] = mc.distance(lcurve['detxs'],lcurve['detys'],400,400)
-
     except ValueError:
         lcurve['cps']=[]
         lcurve['cps_bgsub']=[]
@@ -374,11 +378,13 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                     coadd=coadd, minexp=minexp, maxgap=maxgap, calpath=calpath,
                     maskdepth=maskdepth, maskradius=maskradius,
                     sigmaclip=sigmaclip,photonfile=photonfile)
+    print data
     print tranges
     if csvfile:
         columns = ['t0','t1','exptime','mag_bgsub_cheese','t_mean','t0_data',
                    't1_data','cps','counts','bg','mag','mag_bgsub',
                    'flux','flux_bgsub','flux_bgsub_cheese','bg_cheese']
+        print data.keys()
         test=pd.DataFrame({'t0':data['t0'],'t1':data['t1'],
                            't_mean':data['t_mean'],'t0_data':data['t0_data'],
                            't1_data':data['t1_data'],'exptime':data['exptime'],

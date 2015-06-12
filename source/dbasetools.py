@@ -118,7 +118,7 @@ def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,
     else:
         tranges=[trange]
     if verbose>1:
-        print 'Computing exposure within {tr}'.format(tr=tranges)
+        print_inline('Computing exposure within {tr}'.format(tr=tranges))
         if skypos and coadd:
             print 'Based on skypos {sp}'.format(sp=skypos)
     exptime = 0.
