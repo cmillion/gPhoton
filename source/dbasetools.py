@@ -135,8 +135,13 @@ def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,
     return exptime
 
 def get_mcat_data(skypos,rad):
+    # Try once with the default radius.
     out = np.array(gQuery.getArray(
-                         gQuery.mcat_visit_sources(skypos[0],skypos[1],rad)))
+            gQuery.mcat_visit_sources(skypos[0],skypos[1],rad)))
+    # If no MCAT sources found, try again with a radius 5 times bigger.
+    if len(out) == 0:
+        out = np.array(gQuery.getArray(
+                gQuery.mcat_visit_sources(skypos[0],skypos[1],rad*5.)))
     # FIXME: The APER entries should really be generated
     try:
         return {'objid':np.array(out[:,0],dtype='int64'),
@@ -179,7 +184,14 @@ def get_mcat_data(skypos,rad):
                    7:{'mag':np.array(out[:,18],dtype='float32')+zpmag('FUV'),
                       'err':np.array(out[:,32],dtype='float32')} } }
     except IndexError:
-        return False
+        # If there are STILL no detections, then pass a dict with empty values.
+        # A default set of values will then be used.
+        return {'objid':None,
+                'ra':None,
+                'dec':None,
+                'NUV':None,
+                'FUV':None
+            }
     except:
         raise
 
