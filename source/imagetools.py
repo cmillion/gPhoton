@@ -89,21 +89,19 @@ def sigmaclip_bg(data,radius,annulus,skypos,maxiter=10,sigmaclip=3.,
 	mapaps/poissonbg.c of the mission pipeline. (Probably written by Ted Wyder.)
 	"""
 	# FIXME: Does not apply response!
-	d = mc.angularSeparation(
-		skypos[0],skypos[1],data['ra'],data['dec'])
+
 	# This cut is now handled by the ugly loop below, which barely dodges a
 	# conceptula issue about fractional pixels...
 	#ix = np.where((d>annulus[0]) & (d<annulus[1]))
-	coo=zip(data['ra'],data['dec'])
 
 	imsz=gxt.deg2pix(skypos,[annulus[1]*2,annulus[1]*2])
 	wcs=define_wcs(skypos,[annulus[1]*2,annulus[1]*2])
-	foc=wcs.sip_pix2foc(wcs.wcs_world2pix(coo,1),1)
-	H,xedges,yedges=np.histogram2d(foc[:,1]-0.5,foc[:,0]-0.5,bins=imsz,
-										range=([ [0,imsz[0]],[0,imsz[1]] ]))
+	foc_ra,foc_dec=wcs.sip_pix2foc(wcs.wcs_world2pix(data['ra'],data['dec'],1),1)
+	H,xedges,yedges=np.histogram2d(foc_ra-0.5,foc_dec-0.5,bins=imsz,
+				       range=([ [0,imsz[0]],[0,imsz[1]]]))
 
 	# Convert Gaussian sigma to a probability
-	problim = 0.5*scipy.special.erfc(sigmaclip/np.sqrt(2.0));
+	problim = 0.5*scipy.special.erfc(sigmaclip/np.sqrt(2.0))
 
 	# Mask out non-annulus regions... there's probalby a more pythonic way
 	bgimg=np.copy(H)
