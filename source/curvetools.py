@@ -225,8 +225,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     # FIXME: Bottleneck. There's probably a way to do this without looping.
     # Don't bother looping through anything with no data.
     lcurve['bg'] = {'simple':np.zeros(len(bins)-1),
-                    'cheese':np.zeros(len(bins)-1),
-                    'sigmaclip':np.zeros(len(bins)-1)}
+                    'cheese':np.zeros(len(bins)-1)}#,
+                    #'sigmaclip':np.zeros(len(bins)-1)}
     if annulus is not None:
         lcurve['bg']['sources'] = bg_sources(band,ra0,dec0,annulus[1],
                                              maskdepth=maskdepth)
@@ -274,13 +274,13 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
                 data['response'][t_ix], maskdepth=maskdepth,
                 eff_area=lcurve['bg']['eff_area'],
                 sources=lcurve['bg']['sources'])
-            lcurve['bg']['sigmaclip'][i-1] = it.sigmaclip_bg(data,radius,
-                                            annulus,[ra0,dec0],sigmaclip=1)
+            #lcurve['bg']['sigmaclip'][i-1] = it.sigmaclip_bg(data,radius,
+            #                                annulus,[ra0,dec0],sigmaclip=1)
         else:
             lcurve['bg_counts'][i-1]=0.
             lcurve['bg']['simple'][i-1]=0.
             lcurve['bg']['cheese'][i-1]=0.
-            lcurve['bg']['sigmaclip'][i-1]=0.
+            #lcurve['bg']['sigmaclip'][i-1]=0.
     # Only return bins that contain data.
     ix = np.where((np.isfinite(lcurve['sources'])) &
                   (np.array(lcurve['sources']) > 0))
@@ -291,11 +291,11 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     if annulus is not None:
         lcurve['bg']['simple']=lcurve['bg']['simple'][ix]
         lcurve['bg']['cheese']=lcurve['bg']['cheese'][ix]
-        lcurve['bg']['sigmaclip']=lcurve['bg']['sigmaclip'][ix]
+        #lcurve['bg']['sigmaclip']=lcurve['bg']['sigmaclip'][ix]
     else:
         lcurve['bg']['simple']=0.
         lcurve['bg']['cheese']=0.
-        lcurve['bg']['sigmaclip']=0.
+        #lcurve['bg']['sigmaclip']=0.
 
     lcurve['exptime'] = np.array(
         [dbt.compute_exptime(band,trange,skypos=[ra0,dec0],
@@ -334,34 +334,34 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
                                lcurve['bg']['simple'])/lcurve['exptime']
         lcurve['cps_bgsub_cheese'] = (lcurve['sources']-
                                lcurve['bg']['cheese'])/lcurve['exptime']
-        lcurve['cps_bgsub_sigmaclip'] = (lcurve['sources']-
-                            lcurve['bg']['sigmaclip'])/lcurve['exptime']
+        #lcurve['cps_bgsub_sigmaclip'] = (lcurve['sources']-
+        #                    lcurve['bg']['sigmaclip'])/lcurve['exptime']
         lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
         lcurve['mag_bgsub'] = gxt.counts2mag(lcurve['cps_bgsub'],band)
         lcurve['mag_bgsub_cheese'] = gxt.counts2mag(
                                             lcurve['cps_bgsub_cheese'],band)
-        lcurve['mag_bgsub_sigmaclip'] = gxt.counts2mag(
-                                        lcurve['cps_bgsub_sigmaclip'],band)
+        #lcurve['mag_bgsub_sigmaclip'] = gxt.counts2mag(
+        #                                lcurve['cps_bgsub_sigmaclip'],band)
         lcurve['flux'] = gxt.counts2flux(lcurve['cps'],band)
         lcurve['flux_bgsub'] = gxt.counts2flux(lcurve['cps_bgsub'],band)
         lcurve['flux_bgsub_cheese'] = gxt.counts2flux(
                                             lcurve['cps_bgsub_cheese'],band)
-        lcurve['flux_bgsub_sigmaclip'] = gxt.counts2flux(
-                                        lcurve['cps_bgsub_sigmaclip'],band)
+        #lcurve['flux_bgsub_sigmaclip'] = gxt.counts2flux(
+        #                                lcurve['cps_bgsub_sigmaclip'],band)
         lcurve['detrad'] = mc.distance(lcurve['detxs'],lcurve['detys'],400,400)
     except ValueError:
         lcurve['cps']=[]
         lcurve['cps_bgsub']=[]
         lcurve['cps_bgsub_cheese']=[]
-        lcurve['cps_bgsub_sigmaclip']=[]
+        #lcurve['cps_bgsub_sigmaclip']=[]
         lcurve['mag']=[]
         lcurve['mag_bgsub']=[]
         lcurve['mag_bgsub_cheese']=[]
-        lcurve['mag_bgsub_sigmaclip']=[]
+        #lcurve['mag_bgsub_sigmaclip']=[]
         lcurve['flux']=[]
         lcurve['flux_bgsub']=[]
         lcurve['flux_bgsub_cheese']=[]
-        lcurve['flux_bgusb_sigmaclip']=[]
+        #lcurve['flux_bgusb_sigmaclip']=[]
         lcurve['detrad']=[]
     if verbose:
         mc.print_inline("Done.")
