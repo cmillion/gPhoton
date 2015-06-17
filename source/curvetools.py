@@ -67,7 +67,8 @@ def read_photons(photonfile,ra0,dec0,tranges,radius,verbose=0,tscale=1000.,
     angsep = mc.angularSeparation(ra0,dec0,ra,dec)
     ix = np.array([])
     for trange in tranges:
-        print trange
+        if verbose:
+            print trange
         cut = np.where((angsep<=radius) & (np.isfinite(angsep)))[0]
         ix = np.concatenate((ix,cut),axis=0)
     events = {'t':np.array(data['t'][ix])/tscale,
@@ -146,7 +147,6 @@ def bg_mask(band,ra0,dec0,annulus,ras,decs,responses,sources):
     return bg_mask_sources(band,ra0,dec0,ras,decs,responses,sources)
 
 def cheese_bg_area(band,ra0,dec0,annulus,sources,nsamples=10e5,ntests=10):
-    #mc.print_inline('Estimating area of masked background annulus.')
     # This is just a really naive Monte Carlo
     ratios = np.zeros(ntests)
     for i in range(ntests):
@@ -169,12 +169,10 @@ def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maskdepth=20.,
     """ Returns the estimate number of counts (not count rate) within the
     aperture based upon a masked background annulus.
     """
-    #mc.print_inline('Swiss cheesing the background annulus.')
     if not sources:
         sources = bg_sources(band,ra0,dec0,annulus[1],maskdepth=maskdepth)
     bg_counts = bg_mask(band,ra0,dec0,annulus,ras,decs,responses,
                         sources)[2].sum()
-    #mc.print_inline('Numerically integrating area of masked annulus.')
     if not eff_area:
         eff_area = cheese_bg_area(band,ra0,dec0,annulus,sources)
     return mc.area(radius)*bg_counts/eff_area if eff_area else 0.
@@ -189,7 +187,6 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         searchradius = annulus[1]
     except TypeError:
         searchradius = radius
-    print searchradius
     data = pullphotons(band, ra0, dec0, tranges, searchradius,
                        verbose=verbose, calpath=calpath, photonfile=photonfile)
     if verbose:
