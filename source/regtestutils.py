@@ -25,8 +25,7 @@ def file_setup(outfile):
             cols = ['objid','t0','t1','t_raw','t_eff','ra','dec','racent',
                     'deccent','aper4','aper4_err','mag_bgsub_cheese',
                     'mag_bgsub','mag','distance','response','skybg',
-                    'bg','bg_cheese','bg_eff_area', 'bg_sigmaclip',
-                    'mag_bgsub_sigmaclip']
+                    'bg','bg_cheese','bg_eff_area']
             spreadsheet = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             spreadsheet.writerow(cols)
     return extant_objids
@@ -44,14 +43,10 @@ def construct_row(i,band,objid,mcat,data):
             mc.distance(data['detxs'],data['detys'],400,400)[0],
             data['responses'][0], mcat[band]['skybg'][i],
             data['bg']['simple'][0], data['bg']['cheese'][0],
-            data['bg']['eff_area'], data['bg']['sigmaclip'][0],
-            data['mag_bgsub_sigmaclip'][0])
+            data['bg']['eff_area'])
 
-def datamaker(band,skypos,outfile,maglimit=20.,detsize=0.5,
+def datamaker(band,skypos,outfile,maglimit=20.,detsize=0.5,margin=0.005,
               radius=gt.aper2deg(4),annulus=[0.0083,0.025],calpath='../cal/'):
-    """Note: If you wanted to change the default annulus, then a good starting
-    point would be [0.0083,0.025] (i.e. 30" to 90").
-    """
     extant_objids = file_setup(outfile)
     if extant_objids==False:
         print 'NOT RUNNING!!*!'
@@ -62,7 +57,7 @@ def datamaker(band,skypos,outfile,maglimit=20.,detsize=0.5,
         print 'No sources at this position.'
         return
     for pos in uniques:
-        mcat = dt.get_mcat_data(pos,0.005)
+        mcat = dt.get_mcat_data(pos,margin)
         if not mcat:
             print 'Nothing at {pos}.'.format(pos=pos)
             continue
