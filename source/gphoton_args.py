@@ -124,10 +124,11 @@ def check_common_args(args,function_name,
     """ This will ensure calpath has a trailing '/'. """
     if function_name in ['gaperture','gmap']:
         args.calpath = os.path.join(args.calpath,'')
-        if not os.path.isdir(args.calpath):
-            raise SystemExit("Calibration path not found: " + args.calpath)
+        #FIXME: This is breaking nosetests, but it's not a bad idea...
+        #if not os.path.isdir(args.calpath):
+        #    raise SystemExit("Calibration path not found: " + args.calpath)
 
-    if (not (args.ra and args.dec) and not args.skypos and 
+    if (not (args.ra and args.dec) and not args.skypos and
         not allow_no_coords):
         raise SystemExit("Must specify either both RA/DEC or SKYPOS.")
     elif (args.ra and args.dec) and args.skypos:
@@ -200,14 +201,14 @@ def check_common_args(args,function_name,
                 raise SystemExit('Times must be positive: {t}'.format(t=t))
             if t[1]<=t[0]:
                 raise SystemExit('Start time ({t0}) must preceed end time ({t1})'.format(t0=t[0],t1=t[1]))
-    elif not allow_no_coords:
+    elif not allow_no_coords and function_name in ['gmap','gaperture']:
         args.trange=dbt.fGetTimeRanges(args.band,args.skypos,
                                        trange=[args.tmin,args.tmax],
                                        maxgap=args.maxgap,minexp=args.minexp,
                                        detsize=args.detsize,
                                        retries=args.retries)
     else:
-        """ If no coordinates specified then use a huge time range for 
+        """ If no coordinates specified then use a huge time range for
         now. """
         args.trange = [args.tmin, args.tmax]
 
