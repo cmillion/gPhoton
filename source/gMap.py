@@ -117,7 +117,7 @@ def check_args(args,iam='gmap'):
 		if image and os.path.exists(image) and not args.overwrite:
 			raise SystemExit("{f} already exists.".format(f=image))
 		# Check if you need to create a new directory and create it
-		if image and os.path.isdir(os.path.dirname(image)):
+		if image and not os.path.isdir(os.path.dirname(image)):
 			print 'Creating directory: {d}'.format(
 									d=os.path.abspath(os.path.dirname(image)))
 			os.makedirs(os.path.abspath(os.path.dirname(image)),0755)
