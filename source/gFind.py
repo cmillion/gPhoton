@@ -19,16 +19,15 @@ def gFind(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1.0,
 		raise SystemExit('Invalid band: {b}'.format(b=band))
 	all_expt = []
 	for this_band in output.keys():
-		## Get valid time ranges.
-	       	ranges = dbt.fGetTimeRanges(this_band,skypos,maxgap=maxgap,
-									minexp=minexp,trange=trange,verbose=verbose,
-									detsize=detsize,retries=retries,
-									predicted=predicted)
-
+		## Get valid time ranges, but only if trange is not provided.
+		#print 'trange:',trange
+		ranges = dbt.fGetTimeRanges(this_band,skypos,maxgap=maxgap,
+					    minexp=minexp,verbose=verbose,
+					    detsize=detsize,retries=retries,
+					    predicted=predicted, trange=trange)
 		if not len(ranges):
 			if not quiet:
-				print 'No {band} exposure time in database.'.format(
-																band=this_band)
+				print 'No {band} exposure time in database.'.format(band=this_band)
 			output[this_band]={'expt':0,'t0':None,'t1':None}
 		else:
 			expt = (ranges[:,1]-ranges[:,0]).sum()
@@ -49,8 +48,11 @@ def gFind(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1.0,
 #			all_expt.append(expt)
 	return output #{this_band:{'t0':ranges[:,0],'t1':ranges[:,1],'expt':all_expt}}
 
-def setup_parser(iam='gfind'):
-	parser = argparse.ArgumentParser(description="Locate available data.")
+def setup_parser(iam='gfind', parser=None):
+	""" If a parser object is not provided, make one here. """
+	if parser is None:
+		parser = argparse.ArgumentParser(description="Locate available data.")
+
 	parser = gargs.common_args(parser,iam)
 	parser.add_argument("--alt", "--gaper", action="store_true",
 		dest="gaper", default=False, help="Format the output so that it can "+
@@ -65,8 +67,9 @@ def setup_parser(iam='gfind'):
 		"exposure _after the GR6/7 data is fully populated_.")
 	return parser
 
-def check_args(args,iam='gfind'):
-	args = gargs.check_common_args(args,iam)
+def check_args(args,iam='gfind', allow_no_coords=False):
+	args = gargs.check_common_args(args,iam,
+				       allow_no_coords=allow_no_coords)
 	return args
 
 if __name__ == '__main__':

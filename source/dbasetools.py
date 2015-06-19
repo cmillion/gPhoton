@@ -1,4 +1,4 @@
-# Contains tools for deriving data from the database that are used by
+# Contains tools for working with data from the database that are used by
 #  a number of different modules.
 import numpy as np
 import gQuery
@@ -90,19 +90,22 @@ def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,
 
     return np.array(chunks,dtype='float64')
 
-def exposure(band,trange,verbose=0,retries=20):
+def exposure(band,trange,verbose=0,retries=20,photonfile=None):
     """Compute the effective exposure time for a time range."""
     rawexpt = trange[1]-trange[0]
     if rawexpt<=0:
         return 0.
-    shutdead = gQuery.getArray(gQuery.shutdead(band,trange[0],trange[1]),
-                                            verbose=verbose,retries=retries)
+    if photonfile:
+        print ""
+    else:
+        shutter = gQuery.getArray(gQuery.shutdead(band,trange[0],trange[1]),
+                                        verbose=verbose,retries=retries)[0][0]
     # NOTE: The deadtime correction in shutdead does not work properly in FUV
     # so we're doing it separately for now.
     deadtime = gQuery.getValue(gQuery.deadtime(band,trange[0],trange[1]),
                                             verbose=verbose,retries=retries)
     #return (rawexpt-shutdead[0][0])*(1.-shutdead[1][0])
-    return (rawexpt-shutdead[0][0])*(1.-deadtime)
+    return (rawexpt-shutter)*(1.-deadtime)
 
 def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,
                     retries=20,chunksz=10.e6,coadd=False):
@@ -115,7 +118,7 @@ def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,
     else:
         tranges=[trange]
     if verbose>1:
-        print 'Computing exposure within {tr}'.format(tr=tranges)
+        print_inline('Computing exposure within {tr}'.format(tr=tranges))
         if skypos and coadd:
             print 'Based on skypos {sp}'.format(sp=skypos)
     exptime = 0.
@@ -132,8 +135,13 @@ def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,
     return exptime
 
 def get_mcat_data(skypos,rad):
+    # Try once with the default radius.
     out = np.array(gQuery.getArray(
-                         gQuery.mcat_visit_sources(skypos[0],skypos[1],rad)))
+            gQuery.mcat_visit_sources(skypos[0],skypos[1],rad)))
+    # If no MCAT sources found, try again with a radius 5 times bigger.
+    if len(out) == 0:
+        out = np.array(gQuery.getArray(
+                gQuery.mcat_visit_sources(skypos[0],skypos[1],rad*5.)))
     # FIXME: The APER entries should really be generated
     try:
         return {'objid':np.array(out[:,0],dtype='int64'),
@@ -176,7 +184,14 @@ def get_mcat_data(skypos,rad):
                    7:{'mag':np.array(out[:,18],dtype='float32')+zpmag('FUV'),
                       'err':np.array(out[:,32],dtype='float32')} } }
     except IndexError:
-        return False
+        # If there are STILL no detections, then pass a dict with empty values.
+        # A default set of values will then be used.
+        return {'objid':None,
+                'ra':None,
+                'dec':None,
+                'NUV':None,
+                'FUV':None
+            }
     except:
         raise
 
@@ -240,7 +255,7 @@ def get_mags(band,ra0,dec0,radius,maglimit,mode='coadd',
                 7:out[:,17][ix]+zpf}}
     else:
         print "mode must be in [coadd,visit]"
-        return
+        return None
 
 def exp_from_objid(objid):
     out = np.array(gQuery.getArray(gQuery.mcat_objid_search(objid)))
@@ -267,7 +282,10 @@ def find_unique_sources(band,ra0,dec0,searchradius,maglimit=20.0,margin=0.001,
                                                                     verbose=0):
     coadds = get_mags(band,ra0,dec0,searchradius,maglimit,mode='coadd',
                                                             verbose=verbose)
-    return np.array(parse_unique_sources(coadds['ra'],coadds['dec'],
+    if not coadds:
+        return None
+    else:
+        return np.array(parse_unique_sources(coadds['ra'],coadds['dec'],
                     coadds['FUV']['mag'],coadds['NUV']['mag'],margin=margin))
 
 def avg_sources(band,skypos,radius=0.001,maglimit=20.0,verbose=0,
@@ -331,7 +349,7 @@ def optimize_annulus(optrad,outann,verbose=0):
 	return round(1.2*optrad,4),round(2*optrad,4)
 
 def suggest_parameters(band,skypos,verbose=0,retries=20):
-    mcat = get_mcat_data(skypos,0.0005)
+    mcat = get_mcat_data(skypos,0.01)
     ix = np.where((mcat[band]['mag']>0) & (mcat[band]['fwhm']>0))
     pos,fwhm = None, None
     if mcat['objid'].any(): # There is a known star at the target position!

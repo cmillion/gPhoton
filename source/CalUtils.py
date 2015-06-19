@@ -1,6 +1,8 @@
 from MCUtils import *
 from FileUtils import *
 from gnomonic import *
+import pandas as pd
+from galextools import isPostCSP
 
 def clk_cen_scl_slp(band,eclipse):
 	"""Return the detector clock, center, scale and slope constants."""
@@ -31,19 +33,22 @@ def xieta2colrow(xi,eta,detsize,fill,npixx,npixy):
 
 def avg_stimpos(band, eclipse):
 	"""Define the mean detector stim positions."""
-        if band == 'FUV':
-                avgstim = {'x1':-2541.88,'x2':2632.06,'x3':-2541.53,'x4':2631.68,'y1':2455.28,'y2':2455.02,'y3':-2550.89,'y4':-2550.92}
-        elif band =='NUV':
-                if eclipse >= 38268:
-                        # The average stim positions after the clock change
-                        avgstim = {'x1':-2722.53,'x2':2470.29,'x3':-2721.98,'x4':2471.09,'y1':2549.96,'y2':2550.10,'y3':-2538.57,'y4':-2538.62}
-                else:
-                        # The average stim positions for pre-CSP data (ecl 37423)
-                        avgstim = {'x1':-2722.27,'x2':2468.84,'x3':-2721.87,'x4':2469.85,'y1':2453.89,'y2':2453.78,'y3':-2565.81,'y4':-2567.83}
-        else:
-                print "Error: No valid band specified."
+	if band == 'FUV':
+		avgstim = {'x1':-2541.88,'x2':2632.06,'x3':-2541.53,'x4':2631.68,
+				   'y1':2455.28,'y2':2455.02,'y3':-2550.89,'y4':-2550.92}
+	elif band =='NUV':
+		if eclipse >= 38268:
+			# The average stim positions after the clock change
+			avgstim = {'x1':-2722.53,'x2':2470.29,'x3':-2721.98,'x4':2471.09,
+					   'y1':2549.96,'y2':2550.10,'y3':-2538.57,'y4':-2538.62}
+		else:
+			# The average stim positions for pre-CSP data (ecl 37423)
+			avgstim = {'x1':-2722.27,'x2':2468.84,'x3':-2721.87,'x4':2469.85,
+					   'y1':2453.89,'y2':2453.78,'y3':-2565.81,'y4':-2567.83}
+	else:
+		print "Error: No valid band specified."
 
-        return avgstim
+	return avgstim
 
 def find_stims_index(x,y,band,eclipse,margin=90.001):
 	"""Given a list of detector x,y positions of events, returns four
@@ -66,6 +71,90 @@ def find_stims_index(x,y,band,eclipse,margin=90.001):
         index4 = ((x_as > (avg['x4']-margin)) & (x_as < (avg['x4']+margin)) & (y_as > (avg['y4']-margin)) & (y_as < (avg['y4']+margin))).nonzero()[0]
 
         return index1,index2,index3,index4
+
+# FIXME: duplicates major functionality of pre-existing function above.
+def stimcount(data,band,t0,t1,margin=90.001):
+	"""Given a dict() that contains a list of 'x' and 'y' detector positions
+	as well as 't' event times, returns the total number of stim events.
+	"""
+	pltscl = 68.754932 # arcsec/mm
+	aspum = pltscl/1000.0 # arcsec/um
+	eclipse = 100. if isPostCSP(t0) else 40000. # HACK: for backwards comp.
+	avgstim = avg_stimpos(band,eclipse)
+	time = ((np.array(data['t'])>=t0) & (np.array(data['t'])<=t1))
+	stim1 = ((np.array(data['x'])>(avgstim['x1']-margin)) &
+			 (np.array(data['x'])<(avgstim['x1']+margin)) &
+             (np.array(data['y'])>(avgstim['y1']-margin)) &
+			 (np.array(data['y'])<(avgstim['y1']+margin)))
+	stim2 = ((np.array(data['x'])>(avgstim['x2']-margin)) &
+			 (np.array(data['x'])<(avgstim['x2']+margin)) &
+             (np.array(data['y'])>(avgstim['y2']-margin)) &
+			 (np.array(data['y'])<(avgstim['y2']+margin)))
+	stim3 = ((np.array(data['x'])>(avgstim['x3']-margin)) &
+			 (np.array(data['x'])<(avgstim['x3']+margin)) &
+             (np.array(data['y'])>(avgstim['y3']-margin)) &
+			 (np.array(data['y'])<(avgstim['y3']+margin)))
+	stim4 = ((np.array(data['x'])>(avgstim['x4']-margin)) &
+			 (np.array(data['x'])<(avgstim['x4']+margin)) &
+             (np.array(data['y'])>(avgstim['y4']-margin)) &
+			 (np.array(data['y'])<(avgstim['y4']+margin)))
+	ix = np.where(time & (stim1 | stim2 | stim3 | stim4))
+	return len(ix[0])
+
+def totalcount(data,t0,t1):
+	"""Given a dict() containg 't', a list of global even times, return
+	the total number of events within the time range.
+	"""
+	time = ((np.array(data['t'])>=t0) & (np.array(data['t'])<=t1))
+	ix = np.where(time)
+	return len(ix[0])
+
+def deadtime_method0(data,t0,t1,band,tscale=1000.,feeclkratio=0.966,
+					 tec2fdead=5.52e-6):
+	"""Given a dict() containing 't', a list of global event times, computes
+	the deadtime using an empirical formula based on global count rate over
+	the whole time range.
+	"""
+	exptime = t1-t0
+	totcount = totalcount(data,t0,t1)
+	return tec2fdead*(totcount/exptime)/feeclkratio
+
+def deadtime_method1(data,t0,t1,band,tscale=1000.,feeclkratio=0.966,
+					 tec2fdead=5.52e-6,tstep=1.):
+	"""Given a dict() containing 't', a list of global event times, computes
+	the deadtime using an empirical formula based on global count rates, put
+	into bins of depth equal to `tstep` seconds and averaged.
+	"""
+	exptime = t1-t0
+	bins = np.linspace(0.,exptime-exptime%tstep,exptime//tstep+1)+t0
+	h = np.zeros(len(bins))
+	for i,t in enumerate(bins):
+		h[i] = totalcount(data,t,t+tstep-0.0001)
+	return (tec2fdead*(h/tstep)/feeclkratio).mean()
+
+def deadtime_method2(data,t0,t1,band,tscale=1000.,refrate=79.,tstep=1.,
+		feeclkratio=0.966,refrange=[.4,2.]):
+	"""Given a list of global event times, computes the deadtime through
+	direct comparison of the stim rate to the reference rate in bins of
+	depth `tstep` seconds, and trimmed of outliers.
+	This is close to the deadtime method used by the mission pipeline.
+	"""
+	eclipse = 100. if isPostCSP(t0) else 40000. # HACK: for backwards comp.
+	exptime = t1-t0
+	bins = np.linspace(0.,exptime-exptime%tstep,exptime//tstep+1)+t0
+	h = np.zeros(len(bins))
+	for i,t in enumerate(bins):
+		h[i] = stimcount(data,band,t,t+tstep-0.0001,eclipse)/exptime
+	(minrate, maxrate) = (refrate*refrange[0],refrate+refrange[1])
+	ix = ((h<=maxrate) & (h>=minrate)).nonzero()[0]
+	return (1.-((h[ix]/tstep)/feeclkratio)/refrate).mean()
+
+def deadtime_fromlist(photonfile,t0,t1,band,method=0,
+	colnames=['t','x','y','xa','ya','q','xi','eta','ra','dec','flags']):
+	data = pd.io.parsers.read_csv(photonfile,names=colnames)
+	return {0:deadtime_method0,
+			1:deadtime_method1,
+			2:deadtime_method2}[method](data,t0,t1,band)
 
 def find_stims(t,x,y,band,eclipse):
 	"""Returns t,x,y and identity (1-4) of likely stims in the input arrays."""
@@ -216,15 +305,15 @@ def postCSP_caldata(calpath):
         return wig2, wig2data, wlk2, wlk2data, clk2, clk2data
 
 def rtaph_yap(ya,yb,yamc):
-        yap = np.append([],ya)
-        ix = ((yb>1) & (yb<5)).nonzero()[0]
-        ix1 = ((ya[ix]==0) & (yamc[ix]>-50)).nonzero()[0]
-        yap[ix[ix1]]+=32
-        ix1 = ((ya[ix]==1) & (yamc[ix]>-10)).nonzero()[0]
-        yap[ix[ix1]]+=32
-        yap = np.array(yap,dtype='int64') % 32
-
-        return yap
+	"""For post-CSP data, 'wrap' the YA value for YA in [0,1]. From rtaph.c"""
+	yap = np.append([],ya)
+	ix = ((yb>1) & (yb<5)).nonzero()[0]
+	ix1 = ((ya[ix]==0) & (yamc[ix]>-50)).nonzero()[0]
+	yap[ix[ix1]]+=32
+	ix1 = ((ya[ix]==1) & (yamc[ix]>-10)).nonzero()[0]
+	yap[ix[ix1]]+=32
+	yap = np.array(yap,dtype='int64') % 32
+	return yap
 
 def rtaph_yac(yactbl,ya,yb,yamc,eclipse):
         yac = np.zeros(len(ya))
@@ -235,19 +324,18 @@ def rtaph_yac(yactbl,ya,yb,yamc,eclipse):
         return yac
 
 def rtaph_yac2(q,xb,yb,ya,y,calpath,aspum,wig2, wig2data, wlk2, wlk2data, clk2, clk2data):
-        #wig2, wig2data, wlk2, wlk2data, clk2, clk2data = postCSP_caldata(calpath)
         yac=0
         y_as = y*aspum
         yac_as = np.zeros(len(y_as))
         ix = ((y_as>-2000)&(y_as<2000)).nonzero()[0]
 
-        ii = (np.array(y_as,dtype='int64') - wig2data['start']) / wig2data['inc']
+        ii = (np.array(y_as,dtype='int64')-wig2data['start'])/wig2data['inc']
         yac_as[ix] = wig2[ii[ix],yb[ix],ya[ix],xb[ix]]
 
-        ii = (np.array(y_as,dtype='int64') - wlk2data['start']) / wlk2data['inc']
+        ii = (np.array(y_as,dtype='int64')-wlk2data['start'])/wlk2data['inc']
         yac_as[ix] = wlk2[ii[ix],yb[ix],q[ix]]
 
-        ii = (np.array(y_as,dtype='int64') - clk2data['start']) / clk2data['inc']
+        ii = (np.array(y_as,dtype='int64')-clk2data['start'])/clk2data['inc']
         yac_as[ix] = clk2[ii[ix],yb[ix]]
 
         return yac_as/aspum

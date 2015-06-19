@@ -16,7 +16,13 @@ class TestGQueryFunctions(unittest.TestCase):
         self.detsize = 1.25
         self.xr = [200,400]
         self.yr = [300,500]
+        self.tscale = 1000.
+        self.aspum=68.754932/1000.
         self.baseURL = 'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
+        self.baseDB = 'GPFCore.dbo'
+        self.MCATDB = 'GR6Plus7.dbo'
+        self.formatURL = '&format=json&timeout={}'
+
         self.formatURL = '&format=json&timeout={}'
 
     def test_baseURL(self):
@@ -26,10 +32,48 @@ class TestGQueryFunctions(unittest.TestCase):
         self.assertEqual(gq.formatURL,self.formatURL)
 
     def test_mcat_sources(self):
-        self.assertEqual(gq.mcat_sources(self.NUV,self.ra0,self.dec0,self.radius,maglimit=self.maglimit),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7 fuv_magerr_aper_1, fuv_magerr_aper_2, fuv_magerr_aper_3, fuv_magerr_aper_4, fuv_magerr_aper_5, fuv_magerr_aper_6, fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2, nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5, nuv_magerr_aper_6, nuv_magerr_aper_7 from Gr6plus7.dbo.photoobjall as p inner join Gr6plus7.dbo.photoextract as pe on p.photoextractid=pe.photoextractid inner join Gr6plus7.dbo.fgetnearbyobjeq(176.919525856, 0.255696872807, 0.24) as nb on p.objid=nb.objid and (band=3 or band=1) and NUV_mag<30.0&format=json&timeout={}')
+        band = self.NUV
+        bandflag = 1 if band=='NUV' else 2
+        query = (str(self.baseURL)+
+            'select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg,'
+            ' nuv_fwhm_world, fuv_fwhm_world, fuv_mag_aper_1, fuv_mag_aper_2,'
+            ' fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6,'
+            ' fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3,'
+            ' nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7'
+            ' fuv_magerr_aper_1, fuv_magerr_aper_2, fuv_magerr_aper_3,'
+            ' fuv_magerr_aper_4, fuv_magerr_aper_5, fuv_magerr_aper_6,'
+            ' fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2,'
+            ' nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5,'
+            ' nuv_magerr_aper_6, nuv_magerr_aper_7'
+            ' from '+str(self.MCATDB)+'.photoobjall as p inner join '+str(self.MCATDB)+
+            '.photoextract as pe on p.photoextractid=pe.photoextractid inner join '+
+            str(self.MCATDB)+'.fgetnearbyobjeq('+repr(float(self.ra0))+', '+
+            repr(float(self.dec0))+', '+
+            str(self.radius*60.)+') as nb on p.objid=nb.objid and (band=3 or band='+
+            str(bandflag)+') and '+str(band)+'_mag<'+str(self.maglimit)+
+            str(self.formatURL))
+        self.assertEqual(gq.mcat_sources(self.NUV,self.ra0,self.dec0,self.radius,maglimit=self.maglimit),query)
 
     def test_exposure_ranges(self):
-        self.assertEqual(gq.exposure_ranges(self.NUV,self.ra0,self.dec0,t0=self.t0,t1=self.t1,detsize=self.detsize),"http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select distinct time from fGetNearbyAspectEq(176.919525856,0.255696872807,((1.25/2.0)*60.0),766525332995,866526576995) where band='NUV' or band='FUV/NUV' order by time&format=json&timeout={}")
+        query = (str(self.baseURL)+
+            'select vpo.objid, ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg,'
+            ' fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, vpe.fexptime,'
+            ' vpe.nexptime, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3,'
+            ' fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7,'
+            ' nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4,'
+            ' nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7,'
+            ' fuv_magerr_aper_1, fuv_magerr_aper_2, fuv_magerr_aper_3,'
+            ' fuv_magerr_aper_4, fuv_magerr_aper_5, fuv_magerr_aper_6,'
+            ' fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2,'
+            ' nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5,'
+            ' nuv_magerr_aper_6, nuv_magerr_aper_7'
+            ' from '+str(self.MCATDB)+'.visitphotoobjall as vpo'
+            ' inner join '+str(self.MCATDB)+'.visitphotoextract'
+            ' as vpe on vpo.photoextractid=vpe.photoextractid inner join'
+            ' '+str(self.MCATDB)+'.fGetNearbyVisitObjEq('+repr(float(self.ra0))+','+
+            repr(float(self.dec0))+', '+str(self.radius*60.)+
+            ') as nb on vpo.objid=nb.objid'+str(self.formatURL))
+        self.assertEqual(gq.exposure_ranges(self.NUV,self.ra0,self.dec0,t0=self.t0,t1=self.t1,detsize=self.detsize),query)
 
     def test_exposure_range(self):
         self.assertEqual(gq.exposure_range(self.NUV,self.ra0,self.dec0,t0=self.t0,t1=self.t1),"http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select startTimeRange, endTimeRange from fGetTimeRanges(766525332,866526576,176.919525856,0.255696872807) where band='NUV'&format=json&timeout={}")
@@ -50,7 +94,36 @@ class TestGQueryFunctions(unittest.TestCase):
         self.assertEqual(gq.boxcount(self.NUV,self.t0,self.t1,self.xr,self.yr),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select count(*) from NUVPhotonsNULLV where time between 766525332995 and 866526576995 and x between 200 and 400 and y between 300 and 500&format=json&timeout={}')
 
     def test_stimcount(self):
-        self.assertEqual(gq.stimcount(self.NUV,self.t0,self.t1,eclipse=self.eclipse),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select count(*) from NUVPhotonsNULLV where time between 766525332995 and 866526576995 and ((x between -40902.9566054 and -38284.6717091 and y between 34381.2426431 and 36999.5275393) or (x between 34598.6815899 and 37216.9664861 and y between 34379.6427578 and 36997.9276541) or (x between -40897.1388409 and -38278.8539446 and y between -38627.3380359 and -36009.0531396) or (x between 34613.3714451 and 37231.6563414 and y between -38656.7177464 and -36038.4328502))&format=json&timeout={}')
+        margin=[90.01,90.01]
+        avgstim = CalUtils.avg_stimpos(self.NUV,self.eclipse)
+        query = ('{baseURL}select count(*) from {baseDB}.{band}PhotonsNULLV '+
+            'where time between {t0} and {t1} and ('+
+            '((x between {x10} and {x11}) and (y between {y10} and {y11})) or '+
+            '((x between {x20} and {x21}) and (y between {y20} and {y21})) or '+
+            '((x between {x30} and {x31}) and (y between {y30} and {y31})) or '+
+            '((x between {x40} and {x41}) and (y between {y40} and {y41}))'+
+            '){formatURL}').format(baseURL=self.baseURL,
+                baseDB=self.baseDB, band=self.NUV,
+                t0=str(long(t0*self.tscale)), t1=str(long(t1*self.tscale)),
+                x10=(avgstim['x1']-margin[0])/self.aspum,
+                x11=(avgstim['x1']+margin[0])/self.aspum,
+                y10=(avgstim['y1']-margin[1])/self.aspum,
+                y11=(avgstim['y1']+margin[1])/self.aspum,
+                x20=(avgstim['x2']-margin[0])/self.aspum,
+                x21=(avgstim['x2']+margin[0])/self.aspum,
+                y20=(avgstim['y2']-margin[1])/self.aspum,
+                y21=(avgstim['y2']+margin[1])/self.aspum,
+                x30=(avgstim['x3']-margin[0])/self.aspum,
+                x31=(avgstim['x3']+margin[0])/self.aspum,
+                y30=(avgstim['y3']-margin[1])/self.aspum,
+                y31=(avgstim['y3']+margin[1])/self.aspum,
+                x40=(avgstim['x4']-margin[0])/self.aspum,
+                x41=(avgstim['x4']+margin[0])/self.aspum,
+                y40=(avgstim['y4']-margin[1])/self.aspum,
+                y41=(avgstim['y4']+margin[1])/self.aspum,
+                formatURL=self.formatURL)
+
+        self.assertEqual(gq.stimcount(self.NUV,self.t0,self.t1,eclipse=self.eclipse),query)
 
     def test_boxcentroid(self):
         self.assertEqual(gq.boxcentroid(self.NUV,self.t0,self.t1,self.xr,self.yr),'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select avg(x), avg(y) from NUVPhotonsNULLV where time between 766525332995 and 866526576995 and x between 200 and 400 and y between 300 and 500&format=json&timeout={}')
