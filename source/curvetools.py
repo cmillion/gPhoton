@@ -357,13 +357,10 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                     coadd=coadd, minexp=minexp, maxgap=maxgap, calpath=calpath,
                     maskdepth=maskdepth, maskradius=maskradius,
                     photonfile=photonfile)
-    print data
-    print tranges
     if csvfile:
         columns = ['t0','t1','exptime','mag_bgsub_cheese','t_mean','t0_data',
                    't1_data','cps','counts','bg','mag','mag_bgsub',
                    'flux','flux_bgsub','flux_bgsub_cheese','bg_cheese']
-        print data.keys()
         test=pd.DataFrame({'t0':data['t0'],'t1':data['t1'],
                            't_mean':data['t_mean'],'t0_data':data['t0_data'],
                            't1_data':data['t1_data'],'exptime':data['exptime'],
