@@ -1,5 +1,5 @@
 import unittest
-import MCUtils as mc
+import gPhoton.MCUtils as mc
 
 class TestMCUtilsFunctions(unittest.TestCase):
     def setUp(self):

@@ -1,7 +1,7 @@
 import unittest
-import gMap as gm
-import gFind as gf
-import gAperture as ga
+import gPhoton.gMap as gm
+import gPhoton.gFind as gf
+import gPhoton.gAperture as ga
 
 """Unit tests for the command line parameters and checking for the gPhoton
 command line utilities [gPhoton.py, gAperture.py,gMap.py, gFind.py].

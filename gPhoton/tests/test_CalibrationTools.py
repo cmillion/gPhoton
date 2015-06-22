@@ -1,4 +1,4 @@
-import CalibrationTools as CalTools
+import gPhoton.CalibrationTools as CalTools
 import unittest
 import numpy as np
 import os
@@ -39,4 +39,3 @@ class TestCalibrationToolsFunctions(unittest.TestCase):
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestCalibrationToolsFunctions)
 unittest.TextTestRunner(verbosity=2).run(suite)
-

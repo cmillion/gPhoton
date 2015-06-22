@@ -1,4 +1,4 @@
-import galextools as gt
+import gPhoton.galextools as gt
 import unittest
 import numpy as np
 import os
@@ -122,4 +122,3 @@ class TestGalextoolsFunctions(unittest.TestCase):
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestGalextoolsFunctions)
 unittest.TextTestRunner(verbosity=2).run(suite)
-

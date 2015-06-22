@@ -1,7 +1,7 @@
 import unittest
-import gMap as gm
-import gFind as gf
-import gAperture as ga
+import gPhoton.gMap as gm
+import gPhoton.gFind as gf
+import gPhoton.gAperture as ga
 
 """Regression tests for the command line utilities."""
 class TestRegression(unittest.TestCase):

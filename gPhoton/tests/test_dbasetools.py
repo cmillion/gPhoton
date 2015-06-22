@@ -1,5 +1,5 @@
 import unittest
-import dbasetools as dbt
+import gPhoton.dbasetools as dbt
 
 class TestDbasetoolsFunctions(unittest.TestCase):
 
@@ -11,4 +11,3 @@ class TestDbasetoolsFunctions(unittest.TestCase):
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestDbasetoolsFunctions)
 unittest.TextTestRunner(verbosity=2).run(suite)
-
