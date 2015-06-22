@@ -1,0 +1,28 @@
+Copyright (C) 2012 Association of Universities for Research in Astronomy (AURA)
+2   
+3   Redistribution and use in source and binary forms, with or without
+4   modification, are permitted provided that the following conditions are met:
+5   
+6       1. Redistributions of source code must retain the above copyright
+7          notice, this list of conditions and the following disclaimer.
+8   
+9       2. Redistributions in binary form must reproduce the above
+10         copyright notice, this list of conditions and the following
+11         disclaimer in the documentation and/or other materials provided
+12         with the distribution.
+13  
+14      3. The name of AURA and its representatives may not be used to
+15         endorse or promote products derived from this software without
+16         specific prior written permission.
+17  
+18  THIS SOFTWARE IS PROVIDED BY AURA ``AS IS'' AND ANY EXPRESS OR IMPLIED
+19  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+20  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+21  DISCLAIMED. IN NO EVENT SHALL AURA BE LIABLE FOR ANY DIRECT, INDIRECT,
+22  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+23  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+24  OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+25  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+26  TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+27  USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+28  DAMAGE.
