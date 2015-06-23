@@ -92,96 +92,95 @@ def web_query_aspect(eclipse,retries=20):
 
 	return np.array(ra)[ix],np.array(dec)[ix],np.array(twist)[ix],np.array(time)[ix],header,np.array(flags)[ix]
 
-def wiggle_filenames(band,calpath):
-	"""Returns the 'wiggle' calibration file name."""
-	if band == 'NUV':
-		wiggle_files = {'x':calpath+'NUV_wiggle_x.fits','y':calpath+'NUV_wiggle_y.fits'}
-	elif band == 'FUV':
-		wiggle_files = {'x':calpath+'FUV_wiggle_x.fits','y':calpath+'FUV_wiggle_y.fits'}
-	else:
-		print "Band not specified."
-
-	return wiggle_files
-
-def avgwalk_filenames(band,calpath):
-	"""Returns the 'avgwalk' calibration filename."""
-	if band == 'NUV':
-		walk_files = {'x':calpath+'NUV_avgwalk_x.fits','y':calpath+'NUV_avgwalk_y.fits'}
-	elif band == 'FUV':
-		walk_files = {'x':calpath+'FUV_avgwalk_x.fits','y':calpath+'FUV_avgwalk_y.fits'}
-	else:
-		print "Band not specified."
-
-	return walk_files
-
-def walk_filenames(band,calpath):
-	"""Returns the 'walk' calibration filename."""
-	if band == 'NUV':
-		walk_files = {'x':calpath+'NUV_walk_x.fits','y':calpath+'NUV_walk_y.fits'}
-	elif band == 'FUV':
-		walk_files = {'x':calpath+'FUV_walk_x.fits','y':calpath+'FUV_walk_y.fits'}
-	else:
-		print "Band not specified."
-
-	return walk_files
-
-def linearity_filenames(band,calpath):
-	"""Returns the 'linearity' calibration file name."""
-	if band == 'NUV':
-		linfiles = {'x':calpath+'NUV_NLC_x_det2sky.fits','y':calpath+'NUV_NLC_y_det2sky.fits'}
-	elif band == 'FUV':
-		linfiles = {'x':calpath+'FUV_NLC_x_det2sky.fits','y':calpath+'FUV_NLC_y_det2sky.fits'}
-	else:
-		print "Band not specified."
-
-	return linfiles
-
-def flat_filename(band,calpath):
-	"""Returns the 'flat' calibration file name."""
-	if band=='NUV':
-		flatfile = calpath+'NUV_flat.fits'
-	elif band=='FUV':
-		flatfile = calpath+'FUV_flat.fits'
-	else:
-		print "Band not specified."
-
-	return flatfile
-
-def distortion_filenames(band,calpath,eclipse,raw_stimsep):
-	"""Returns the 'distortion' calibration file names."""
-	if band == 'NUV':
-		if (eclipse > 37460):
-			if (raw_stimsep < 5136.3):
-				distfiles = {'x':calpath+'nuv_distortion_cube_dxa.fits','y':calpath+'nuv_distortion_cube_dya.fits'}
-			elif (raw_stimsep < 5137.25):
-				distfiles = {'x':calpath+'nuv_distortion_cube_dxb.fits','y':calpath+'nuv_distortion_cube_dyb.fits'}
-			else:
-				distfiles = {'x':calpath+'nuv_distortion_cube_dxc.fits','y':calpath+'nuv_distortion_cube_dyc.fits'}
-		else:
-			distfiles = {'x':calpath+'nuv_distortion_cube_dx.fits','y':calpath+'nuv_distortion_cube_dy.fits'}
-	elif band == 'FUV':
-		distfiles = {'x':calpath+'fuv_distortion_cube_dx.fits','y':calpath+'fuv_distortion_cube_dy.fits'}
-	else:
-		print "Band not specified."
-
-	return distfiles
-
-def offset_filenames(calpath):
-	"""Returns the NUV->FUV offset calibration file names."""
-	# Offset is for FUV only
-	return {'x':calpath+'fuv_dx_fdttdc_coef_0.tbl','y':calpath+'fuv_dy_fdttdc_coef_0.tbl'}
-
-def mask_filename(band,calpath):
-	if band == 'NUV':
-		maskfile = calpath+'NUV_mask.fits'
-	elif band == 'FUV':
-		maskfile = calpath+'FUV_mask.fits'
-	else:
-		print "Band not specified."
-
-	return maskfile
+# def wiggle_filenames(band,calpath):
+# 	"""Returns the 'wiggle' calibration file name."""
+# 	if band == 'NUV':
+# 		wiggle_files = {'x':calpath+'NUV_wiggle_x.fits','y':calpath+'NUV_wiggle_y.fits'}
+# 	elif band == 'FUV':
+# 		wiggle_files = {'x':calpath+'FUV_wiggle_x.fits','y':calpath+'FUV_wiggle_y.fits'}
+# 	else:
+# 		print "Band not specified."
+#
+# 	return wiggle_files
+#
+# def avgwalk_filenames(band,calpath):
+# 	"""Returns the 'avgwalk' calibration filename."""
+# 	if band == 'NUV':
+# 		walk_files = {'x':calpath+'NUV_avgwalk_x.fits','y':calpath+'NUV_avgwalk_y.fits'}
+# 	elif band == 'FUV':
+# 		walk_files = {'x':calpath+'FUV_avgwalk_x.fits','y':calpath+'FUV_avgwalk_y.fits'}
+# 	else:
+# 		print "Band not specified."
+#
+# 	return walk_files
+#
+# def walk_filenames(band,calpath):
+# 	"""Returns the 'walk' calibration filename."""
+# 	if band == 'NUV':
+# 		walk_files = {'x':calpath+'NUV_walk_x.fits','y':calpath+'NUV_walk_y.fits'}
+# 	elif band == 'FUV':
+# 		walk_files = {'x':calpath+'FUV_walk_x.fits','y':calpath+'FUV_walk_y.fits'}
+# 	else:
+# 		print "Band not specified."
+#
+# 	return walk_files
+#
+# def linearity_filenames(band,calpath):
+# 	"""Returns the 'linearity' calibration file name."""
+# 	if band == 'NUV':
+# 		linfiles = {'x':calpath+'NUV_NLC_x_det2sky.fits','y':calpath+'NUV_NLC_y_det2sky.fits'}
+# 	elif band == 'FUV':
+# 		linfiles = {'x':calpath+'FUV_NLC_x_det2sky.fits','y':calpath+'FUV_NLC_y_det2sky.fits'}
+# 	else:
+# 		print "Band not specified."
+#
+# 	return linfiles
+#
+# def flat_filename(band,calpath):
+# 	"""Returns the 'flat' calibration file name."""
+# 	if band=='NUV':
+# 		flatfile = calpath+'NUV_flat.fits'
+# 	elif band=='FUV':
+# 		flatfile = calpath+'FUV_flat.fits'
+# 	else:
+# 		print "Band not specified."
+#
+# 	return flatfile
+#
+# def distortion_filenames(band,calpath,eclipse,raw_stimsep):
+# 	"""Returns the 'distortion' calibration file names."""
+# 	if band == 'NUV':
+# 		if (eclipse > 37460):
+# 			if (raw_stimsep < 5136.3):
+# 				distfiles = {'x':calpath+'nuv_distortion_cube_dxa.fits','y':calpath+'nuv_distortion_cube_dya.fits'}
+# 			elif (raw_stimsep < 5137.25):
+# 				distfiles = {'x':calpath+'nuv_distortion_cube_dxb.fits','y':calpath+'nuv_distortion_cube_dyb.fits'}
+# 			else:
+# 				distfiles = {'x':calpath+'nuv_distortion_cube_dxc.fits','y':calpath+'nuv_distortion_cube_dyc.fits'}
+# 		else:
+# 			distfiles = {'x':calpath+'nuv_distortion_cube_dx.fits','y':calpath+'nuv_distortion_cube_dy.fits'}
+# 	elif band == 'FUV':
+# 		distfiles = {'x':calpath+'fuv_distortion_cube_dx.fits','y':calpath+'fuv_distortion_cube_dy.fits'}
+# 	else:
+# 		print "Band not specified."
+#
+# 	return distfiles
+#
+# def offset_filenames(calpath):
+# 	"""Returns the NUV->FUV offset calibration file names."""
+# 	# Offset is for FUV only
+# 	return {'x':calpath+'fuv_dx_fdttdc_coef_0.tbl','y':calpath+'fuv_dy_fdttdc_coef_0.tbl'}
+#
+# def mask_filename(band,calpath):
+# 	if band == 'NUV':
+# 		maskfile = calpath+'NUV_mask.fits'
+# 	elif band == 'FUV':
+# 		maskfile = calpath+'FUV_mask.fits'
+# 	else:
+# 		print "Band not specified."
+#
+# 	return maskfile
 
 def create_SSD_filename(band,eclipse):
 	"""Returns the Stim Separation Data (SSD) calibration file name."""
 	return "SSD_"+band.lower()+"_"+str(eclipse)+".tbl"
-

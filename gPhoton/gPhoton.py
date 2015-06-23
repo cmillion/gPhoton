@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import os
+
 from PhotonPipe import *
 
 from optparse import OptionParser
@@ -25,7 +27,7 @@ for m in mandatory:
 	if not options.__dict__[m]:
 		print "A mandatory option is missing:",m
 		parser.print_help()
-		exit(1)
+		os._exit(1)
 
 aspfile = 0
 if options.__dict__['aspfile']:
@@ -42,13 +44,13 @@ if not options.band:
 	if not band:
 		print "Unable to parse band from raw6 filename. Specify band on command line using --band."
 		parser.print_help()
-		exit(1)
+		os._exit(1)
 else:
 	band = options.band
 	band = band.upper()
 	if band != "NUV" and band != "FUV":
 		print "Band must be NUV or FUV. "
-		exit(1)
+		os._exit(1)
 
 if not options.cleanoutput:
 	options.cleanoutput = 0
@@ -60,4 +62,3 @@ else:
 	verbose=options.verbose
 
 PhotonPipe(options.raw6file,options.scstfile,options.calpath,band,options.outbase,aspfile,ssdfile,options.nullout,verbose=verbose,retries=options.retries)
-

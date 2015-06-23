@@ -156,16 +156,15 @@ def PhotonPipe(raw6file,scstfile,calpath,band,outbase,aspfile=0,ssdfile=0,
 		chunkid = " "+str(i+1)+" of "+str(int(nphots/chunksz)+1)+": "
 		print_inline(chunkid+"Unpacking raw6 data...")
 		t = np.array(raw6hdulist[1].data.field('t')[chunkbeg:chunkend])
-
-        phb1 = np.array(raw6hdulist[1].data.field('phb1')[chunkbeg:chunkend],
+		phb1 = np.array(raw6hdulist[1].data.field('phb1')[chunkbeg:chunkend],
 																dtype='int64')
-        phb2 = np.array(raw6hdulist[1].data.field('phb2')[chunkbeg:chunkend],
+		phb2 = np.array(raw6hdulist[1].data.field('phb2')[chunkbeg:chunkend],
 																dtype='int64')
-        phb3 = np.array(raw6hdulist[1].data.field('phb3')[chunkbeg:chunkend],
+		phb3 = np.array(raw6hdulist[1].data.field('phb3')[chunkbeg:chunkend],
 																dtype='int64')
-        phb4 = np.array(raw6hdulist[1].data.field('phb4')[chunkbeg:chunkend],
+		phb4 = np.array(raw6hdulist[1].data.field('phb4')[chunkbeg:chunkend],
 																dtype='int64')
-        phb5 = np.array(raw6hdulist[1].data.field('phb5')[chunkbeg:chunkend],
+		phb5 = np.array(raw6hdulist[1].data.field('phb5')[chunkbeg:chunkend],
 																dtype='int64')
 
 		# Bitwise "decoding" of the raw6 telemetry
@@ -414,7 +413,7 @@ def PhotonPipe(raw6file,scstfile,calpath,band,outbase,aspfile=0,ssdfile=0,
 		print_inline(chunkid+"Applying dither correction...")
 		# Use only photons that are bracketed by valid aspect solutions
 		#  and have been not themselves been flagged as invalid.
-        cut = ((aspix>0) & (aspix<(len(asptime)-1)) &
+		cut = ((aspix>0) & (aspix<(len(asptime)-1)) &
 												( (flags==0) | (flags==6) ))
 		flags[np.where(cut==False)[0]] = 7
 		ix = np.where(cut==True)[0]
