@@ -7,7 +7,7 @@ import glob
 
 here = path.abspath(path.dirname(__file__))
 
-(NAME, VERSION) = ('gPhoton', '1.23.3')
+(NAME, VERSION) = ('gPhoton', '1.23.6')
 URL = 'https://github.com/cmillion/gPhoton'
 AUTHOR = 'Chase Million, et al.'
 EMAIL = 'chase.million@gmail.com'
@@ -32,8 +32,11 @@ setup(
         'Programming Language :: Python :: 2.7',
         ],
     keywords = 'astronomy galex photometry ultraviolet',
-    packages = find_packages(exclude=['source.tests']),
-    data_files=[('cal',[glob.glob('cal/*')]),
-                ('e31000',[glob.glob('e31000/*')])],
-    requires=['numpy','scipy','requests','pandas','astropy',],
+    packages = find_packages(exclude=['gPhoton.tests','gPhoton.analysis']),
+    package_data = {'gPhoton': ['cal/*.fits', 'cal/*.FITS'],}
+    #data_files=[('cal',[glob.glob('cal/*')]),
+    #            ('e31000',[glob.glob('e31000/*')])],
+    install_requires=['numpy','scipy','requests','pandas','astropy',],
+    zip_safe = True,
+    include_package_data = True,
 )
