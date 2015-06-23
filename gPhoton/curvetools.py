@@ -8,7 +8,7 @@ import dbasetools as dbt # fGetTimeRanges(), compute_exptime()
 import galextools as gxt # compute_flat_scale()
 from FileUtils import flat_filename
 
-def gphot_params(band,skypos,radius,annulus=None,calpath='../cal/',
+def gphot_params(band,skypos,radius,annulus=None,calpath='./cal/',
                  verbose=0.,detsize=1.25,stepsz=None,
                  trange=None,maskdepth=None,maskradius=None):
     """Populate a dict() with parameters that are constant over all bins."""
@@ -39,7 +39,7 @@ def xieta2colrow(xi, eta, calfile, detsize=1.25):
     #cut = np.where(ix == True)
     return col, row
 
-def hashresponse(band,events,calpath='../cal/',verbose=0):
+def hashresponse(band,events,calpath='./cal/',verbose=0):
     """Given detector xi, eta, return the response at each position."""
     # Hash out the response correction
     if verbose:
@@ -104,7 +104,7 @@ def query_photons(band,ra0,dec0,tranges,radius,verbose=0,tscale=1000.):
     return events
 
 def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
-                tscale=1000., calpath='../cal/',photonfile=None):
+                tscale=1000., calpath='./cal/',photonfile=None):
     if photonfile:
         events = read_photons(photonfile, ra0, dec0, tranges, radius,
                               verbose=verbose, tscale=tscale)
@@ -178,7 +178,7 @@ def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maskdepth=20.,
     return mc.area(radius)*bg_counts/eff_area if eff_area else 0.
 
 def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
-             stepsz=None, calpath='../cal/', verbose=0, maskdepth=20.0,
+             stepsz=None, calpath='./cal/', verbose=0, maskdepth=20.0,
              maskradius=1.5,detsize=1.25,coadd=False, photonfile=None):
     if verbose:
         mc.print_inline("Retrieving all of the target events.")

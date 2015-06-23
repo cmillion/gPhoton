@@ -193,7 +193,7 @@ def write_jpeg(filename,band,skypos,tranges,skyrange,width=False,height=False,
 	return
 
 def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,
-		 verbose=0,calpath='../cal/',tscale=1000.,response=True,hdu=False,
+		 verbose=0,calpath='./cal/',tscale=1000.,response=True,hdu=False,
 		 retries=20):
 	"""Generate a high resolution relative response (rrhr) map."""
 	imsz = gxt.deg2pix(skypos,skyrange)
@@ -250,7 +250,7 @@ def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,
 
 def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,
 		  verbose=0,tscale=1000.,memlight=False,coadd=False,
-		  response=False,calpath='../cal/',hdu=False,retries=20):
+		  response=False,calpath='./cal/',hdu=False,retries=20):
 	"""Generate a movie (mov)."""
 	# Not defining stepsz effectively creates a count map.
 	mv = []
@@ -281,7 +281,7 @@ def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,
 
 def create_images(band,skypos,tranges,skyrange,framesz=0,width=False,
 				  height=False,verbose=0,tscale=1000.,memlight=False,
-				  coadd=False,response=False,calpath='../cal/',hdu=False,
+				  coadd=False,response=False,calpath='./cal/',hdu=False,
 				  retries=20):
 	count,rr = movie(band,skypos,tranges,skyrange,framesz=framesz,
 					 width=width,height=height,verbose=verbose,tscale=tscale,

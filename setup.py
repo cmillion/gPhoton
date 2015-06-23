@@ -7,7 +7,7 @@ import glob
 
 here = path.abspath(path.dirname(__file__))
 
-(NAME, VERSION) = ('gPhoton', '1.23.3')
+(NAME, VERSION) = ('gPhoton', '1.23.4')
 URL = 'https://github.com/cmillion/gPhoton'
 AUTHOR = 'Chase Million, et al.'
 EMAIL = 'chase.million@gmail.com'
