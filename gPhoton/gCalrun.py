@@ -17,7 +17,7 @@ def find_random_positions(rarange=[0,360],decrange=[-90,90],nsamples=10,
     return ra, dec
 
 def calrun(outfile,band,nsamples=10,seed=323,rarange=[0,360],decrange=[-90,90],
-           exprange=[0.,5000.],maglimit=24,verbose=0,calpath='../cal/'):
+           exprange=[0.,5000.],maglimit=24,verbose=0,calpath='./cal/'):
     """Generate a bunch of magnitudes with comparisons against MCAT values for
     random points on the sky within given legal ranges. Write it to a CSV.
     """

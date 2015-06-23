@@ -8,6 +8,7 @@ import glob
 here = path.abspath(path.dirname(__file__))
 
 (NAME, VERSION) = ('gPhoton', '1.23.6')
+
 URL = 'https://github.com/cmillion/gPhoton'
 AUTHOR = 'Chase Million, et al.'
 EMAIL = 'chase.million@gmail.com'

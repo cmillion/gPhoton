@@ -46,7 +46,7 @@ def construct_row(i,band,objid,mcat,data):
             data['bg']['eff_area'])
 
 def datamaker(band,skypos,outfile,maglimit=20.,detsize=0.5,margin=0.005,
-              radius=gt.aper2deg(4),annulus=[0.0083,0.025],calpath='../cal/'):
+              radius=gt.aper2deg(4),annulus=[0.0083,0.025],calpath='./cal/'):
     extant_objids = file_setup(outfile)
     if extant_objids==False:
         print 'NOT RUNNING!!*!'
