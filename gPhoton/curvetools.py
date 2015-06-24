@@ -6,7 +6,6 @@ import gQuery
 import MCUtils as mc
 import dbasetools as dbt # fGetTimeRanges(), compute_exptime()
 import galextools as gxt # compute_flat_scale()
-from FileUtils import flat_filename
 import cal
 
 def gphot_params(band,skypos,radius,annulus=None,

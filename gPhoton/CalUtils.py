@@ -220,21 +220,17 @@ def get_stim_coefs(ssdfile):#,band):
 
 def find_FUV_offset(scstfile):
 	"""Computes NUV->FUV center offset based on a lookup table."""
-        #cdef double stim_coef0, stim_coef1, fodx_coef_0, fody_coef_0, fodx_coef_1, fody_coef_1
-        fodx_coef_0 = 0.
-        fody_coef_0 = 0.
-        fodx_coef_1 = 0.
-        fody_coef_1 = 0.
-        scsthead = get_fits_header(scstfile)
-        print "Reading header values from scst file: ",scstfile
+	fodx_coef_0, fody_coef_0, fodx_coef_1, fody_coef_1 = (0., 0., 0., 0.)
+	scsthead = get_fits_header(scstfile)
+	print "Reading header values from scst file: ",scstfile
 	try:
-        	eclipse = int(scsthead['eclipse'])
-        	fdttdc = float(scsthead['fdttdc'])
+		eclipse = int(scsthead['eclipse'])
+		fdttdc = float(scsthead['fdttdc'])
 	except KeyError:
 		print "ERROR: FUV header values missing from SCST."
 		return 0.,0.
 
-        print "         Offsetting FUV image using eclipse of "+str(eclipse)+" and fdttdc of "+str(fdttdc)
+		print "         Offsetting FUV image using eclipse of "+str(eclipse)+" and fdttdc of "+str(fdttdc)
 
 		fuv_dx_tbl = cal.offset(band,'x')
 		fuv_dy_tbl = cal.offset(band,'y')
@@ -258,40 +254,40 @@ def find_FUV_offset(scstfile):
 
 def postCSP_caldata():
 	"""Loads the calibration data for after the CSP event."""
-        print "Loading post-CSP wiggle file..."
-		wig2fits, wig2head = cal.wiggle2()
-        wig2 = np.zeros([128,8,32,8])
-        for i in xrange(len(wig2fits)):
-                ya=wig2fits[i][0]
-                yb=wig2fits[i][1]
-                xb=wig2fits[i][2]
-                yy=wig2fits[i][3]
-                ycor=wig2fits[i][4]
-                wig2[yy][yb][ya][xb]=ycor
-        wig2data = {'start':wig2head['Y_AS_0'],'inc':wig2head['Y_AS_INC']}
+	print "Loading post-CSP wiggle file..."
+	wig2fits, wig2head = cal.wiggle2()
+	wig2 = np.zeros([128,8,32,8])
+	for i in xrange(len(wig2fits)):
+		ya=wig2fits[i][0]
+		yb=wig2fits[i][1]
+		xb=wig2fits[i][2]
+		yy=wig2fits[i][3]
+		ycor=wig2fits[i][4]
+		wig2[yy][yb][ya][xb]=ycor
+	wig2data = {'start':wig2head['Y_AS_0'],'inc':wig2head['Y_AS_INC']}
 
-        print "Loading post-CSP walk file..."
-		wlk2fits, wlk2head = cal.walk2()
-        wlk2 = np.zeros([100,8,32])
-        for i in xrange(len(wlk2fits)):
-                q=wlk2fits[i][0]
-                yb=wlk2fits[i][1]
-                yy=wlk2fits[i][2]
-                ycor=wlk2fits[i][3]
-                wlk2[yy][yb][q]=ycor
-        wlk2data = {'start':wlk2head['Y_AS_0'],'inc':wlk2head['Y_AS_INC']}
+	print "Loading post-CSP walk file..."
+	wlk2fits, wlk2head = cal.walk2()
+	wlk2 = np.zeros([100,8,32])
+	for i in xrange(len(wlk2fits)):
+		q=wlk2fits[i][0]
+		yb=wlk2fits[i][1]
+		yy=wlk2fits[i][2]
+		ycor=wlk2fits[i][3]
+		wlk2[yy][yb][q]=ycor
+	wlk2data = {'start':wlk2head['Y_AS_0'],'inc':wlk2head['Y_AS_INC']}
 
-        print "Loading post-CSP clock file..."
-		clk2fits, clk2head = cal.clock2()
-        clk2 = np.zeros([100,8])
-        for i in xrange(len(clk2fits)):
-                yb=clk2fits[i][0]
-                yy=clk2fits[i][1]
-                ycor=clk2fits[i][2]
-                clk2[yy][yb]=ycor
-        clk2data = {'start':clk2head['Y_AS_0'],'inc':clk2head['Y_AS_INC']}
+	print "Loading post-CSP clock file..."
+	clk2fits, clk2head = cal.clock2()
+	clk2 = np.zeros([100,8])
+	for i in xrange(len(clk2fits)):
+		yb=clk2fits[i][0]
+		yy=clk2fits[i][1]
+		ycor=clk2fits[i][2]
+		clk2[yy][yb]=ycor
+	clk2data = {'start':clk2head['Y_AS_0'],'inc':clk2head['Y_AS_INC']}
 
-        return wig2, wig2data, wlk2, wlk2data, clk2, clk2data
+	return wig2, wig2data, wlk2, wlk2data, clk2, clk2data
 
 def rtaph_yap(ya,yb,yamc):
 	"""For post-CSP data, 'wrap' the YA value for YA in [0,1]. From rtaph.c"""

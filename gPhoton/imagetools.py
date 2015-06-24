@@ -6,7 +6,6 @@ from astropy.io import fits as pyfits
 import scipy.misc
 import scipy.special # erfc
 import scipy.ndimage
-from FileUtils import flat_filename
 import gnomonic
 import dbasetools as dbt
 import galextools as gxt

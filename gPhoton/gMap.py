@@ -108,7 +108,7 @@ def check_args(args,iam='gmap'):
 
 	return args
 
-if __name__ == '__main__':
+def __main__():
 	"""Called when gMap is executed directly through command line."""
 	args = setup_parser().parse_args()
 	args = check_args(args)
@@ -124,3 +124,9 @@ if __name__ == '__main__':
 		memlight=args.memlight, minexp=args.minexp, overwrite=args.overwrite,
 		retries=args.retries, skyrange=args.skyrange, stepsz=args.stepsz,
 		trange=args.trange, verbose=args.verbose)
+
+if __name__ == "__main__":
+    try:
+        __main__()
+    except (KeyboardInterrupt, pycurl.error):
+        exit('Received Ctrl + C... Exiting! Bye.', 1)

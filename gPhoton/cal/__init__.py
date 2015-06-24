@@ -4,7 +4,7 @@ from ..MCUtils import get_fits_data, get_fits_header, get_tbl_data
 
 def check_band(band):
     if not band in ['NUV','FUV']:
-        raise ValueError('Band must be NUV or FU
+        raise ValueError('Band must be NUV or FUV')
     return band
 
 def check_xy(xy):

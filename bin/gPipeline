@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import gPhoton.gPhoton
+
+if __name__ == '__main__':
+    gPhoton.gPhoton.__main__()

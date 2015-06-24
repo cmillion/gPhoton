@@ -81,9 +81,15 @@ def check_args(args):
         raise SystemExit("Invalid exposure range: {r}".format(r=args.exprange))
     return args
 
-if __name__ == '__main__':
+def __main__():
     args = setup_parser().parse_args()
     args = check_args(args)
     calrun(args.file,args.band,nsamples=args.nsamples,seed=args.seed,
            rarange=args.rarange,decrange=args.decrange,exprange=args.exprange,
            maglimit=args.maglimit,verbose=args.verbose)
+
+if __name__ == "__main__":
+    try:
+        __main__()
+    except (KeyboardInterrupt, pycurl.error):
+        exit('Received Ctrl + C... Exiting! Bye.', 1)

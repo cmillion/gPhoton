@@ -153,7 +153,7 @@ def stamp(args):
                    verbose=args.verbose)
         return
 
-if __name__ == '__main__':
+def __main__():
     """Called when gAperture is executed through the command line."""
     args = setup_parser().parse_args()
     args = check_args(args)
@@ -167,3 +167,9 @@ if __name__ == '__main__':
                      coadd=args.coadd, minexp=args.minexp, maxgap=args.maxgap,
                      iocode=args.iocode, maskdepth=args.maskdepth,
                      maskradius=args.maskradius)
+
+if __name__ == "__main__":
+    try:
+        __main__()
+    except (KeyboardInterrupt, pycurl.error):
+        exit('Received Ctrl + C... Exiting! Bye.', 1)

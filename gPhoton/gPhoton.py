@@ -6,57 +6,79 @@ from PhotonPipe import *
 
 from optparse import OptionParser
 
-parser = OptionParser()
-parser.add_option("-r", "--raw6", action="store", type="string", dest="raw6file", help="raw6 path/filename", metavar="FILE")
-parser.add_option("-a", "--aspect", action="store", type="string", dest="aspfile", help="aspection path/filename", metavar="FILE")
-parser.add_option("-s", "--scst", action="store", type="string", dest="scstfile", help="spacecraft state path/filename", metavar="SCST")
-parser.add_option("-b", "--band", action="store", type="string", dest="band", help="[NF]UV band designation", metavar="BAND")
-parser.add_option("-o", "--outbase", action="store", type="string", dest="outbase", help="output file(s) path/filename base", metavar="FILE")
-parser.add_option("-d", "--ssd", action="store", type="string", dest="ssdfile", help="stim separation (SSD) path/filename", metavar="SSD")
-parser.add_option("-n", "--cleanoutput", action="store_true", dest="cleanoutput", help="only write unmasked, fully calibrated data -- DEPRECATED")
-parser.add_option("-u", "--nullout", action="store_true", dest="nullout", help="write NULL entries to a separate file", metavar="NULL")
-parser.add_option("-v", "--verbose", action="store", type="float", dest="verbose", help="Display more output. Set to 0-2", metavar="VRB")
-parser.add_option("--retries", action="store", type="int", dest="retries", default=20, help="Set the number of times to ping the server for a response before defining a query failure.  Default is 20, set to a large number if you expect, or want to allow, the query to take a long time.")
+def gPhoton(raw6file,scstfile,band,outbase,aspfile,ssdfile,nullout,
+			verbose=0,retries=20):
+	PhotonPipe(raw6file,scstfile,band,outbase,aspfile,ssdfile,nullout,
+			   verbose=verbose,retries=retries)
+	return
 
-(options, args) = parser.parse_args()
+def setup_parser():
+	parser = OptionParser()
+	parser.add_option("-r", "--raw6", action="store", type="string",
+		dest="raw6file", help="raw6 path/filename", metavar="FILE")
+	parser.add_option("-a", "--aspect", action="store", type="string",
+		dest="aspfile", help="aspection path/filename", metavar="FILE")
+	parser.add_option("-s", "--scst", action="store", type="string",
+		dest="scstfile", help="spacecraft state path/filename", metavar="SCST")
+	parser.add_option("-b", "--band", action="store", type="string",
+		dest="band", help="[NF]UV band designation", metavar="BAND")
+	parser.add_option("-o", "--outbase", action="store", type="string",
+		dest="outbase", help="output file(s) path/filename base",
+		metavar="FILE")
+	parser.add_option("-d", "--ssd", action="store", type="string",
+		dest="ssdfile", help="stim separation (SSD) path/filename",
+		metavar="SSD")
+	parser.add_option("-n", "--cleanoutput", action="store_true",
+		dest="cleanoutput", default=0,
+		help="only write unmasked, fully calibrated data -- DEPRECATED")
+	parser.add_option("-u", "--nullout", action="store_true", dest="nullout",
+		help="write NULL entries to a separate file", metavar="NULL",
+		default=0)
+	parser.add_option("-v", "--verbose", action="store", type="float",
+		dest="verbose", help="Display more output. Set to 0-2", metavar="VRB",
+		default=0)
+	parser.add_option("--retries", action="store", type="int", dest="retries",
+		default=20, help="Query attempts before timeout.")
+	return parser
 
-mandatory = ['raw6file', 'scstfile', 'outbase']
-for m in mandatory:
-	if not options.__dict__[m]:
-		print "A mandatory option is missing:",m
-		parser.print_help()
+def check_args(args):
+	try:
+		if not (args.raw6file and args.scstfile and args.outbase):
+			print "A mandatory option is missing."
+			os._exit(1)
+	except:
+		print "A mandatory option is missing: raw6file, scstfile, or outbase"
 		os._exit(1)
 
-aspfile = 0
-if options.__dict__['aspfile']:
-	aspfile = str(options.aspfile).split(',')
+	if args.aspfile:
+		args.aspfile = str(args.aspfile).split(',')
 
-ssdfile = 0
-if options.__dict__['ssdfile']:
-	ssdfile = str(options.ssdfile)
+	if args.ssdfile:
+		args.ssdfile = str(args.ssdfile)
 
-# If the band is not explicity called, attempt to derive it from the raw6 filename.
-if not options.band:
-	print "Determining band from raw6 filename..."
-	band = find_band(options.raw6file)
-	if not band:
-		print "Unable to parse band from raw6 filename. Specify band on command line using --band."
-		parser.print_help()
-		os._exit(1)
-else:
-	band = options.band
-	band = band.upper()
-	if band != "NUV" and band != "FUV":
-		print "Band must be NUV or FUV. "
-		os._exit(1)
+	# If the band is not explicity called, attempt to derive it from the raw6 filename.
+	if not args.band:
+		print "Determining band from raw6 filename..."
+		args.band = find_band(args.raw6file)
+		if not args.band:
+			print "Unable to parse band from raw6 filename. Specify band on command line using --band."
+			os._exit(1)
+	else:
+		args.band = args.band.upper()
+		if not band in ["NUV","FUV"]:
+			print "Band must be NUV or FUV. "
+			os._exit(1)
 
-if not options.cleanoutput:
-	options.cleanoutput = 0
-if not options.nullout:
-	options.nullout = 0
-if not options.verbose:
-	verbose=0
-else:
-	verbose=options.verbose
+	return args
 
-PhotonPipe(options.raw6file,options.scstfile,band,options.outbase,aspfile,ssdfile,options.nullout,verbose=verbose,retries=options.retries)
+def __main__():
+	args = setup_parser().parse_args()
+	args = check_args(args)
+	gPhoton(args.raw6file,args.scstfile,args.band,args.outbase,args.aspfile,
+		args.ssdfile,args.nullout,verbose=args.verbose,retries=args.retries)
+
+if __name__ == "__main__":
+    try:
+        __main__()
+    except (KeyboardInterrupt, pycurl.error):
+        exit('Received Ctrl + C... Exiting! Bye.', 1)

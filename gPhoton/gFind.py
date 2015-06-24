@@ -72,7 +72,7 @@ def check_args(args,iam='gfind', allow_no_coords=False):
 				       allow_no_coords=allow_no_coords)
 	return args
 
-if __name__ == '__main__':
+def __main__():
 	"""Called when gFind is executed directly through command line."""
 	args = setup_parser().parse_args()
 	args = check_args(args)
@@ -81,3 +81,9 @@ if __name__ == '__main__':
 		minexp=args.minexp, quiet=args.quiet, retries=args.retries,
 		skypos=args.skypos, trange=args.trange, predicted=args.predicted,
 		verbose=args.verbose)
+
+if __name__ == "__main__":
+    try:
+        __main__()
+    except (KeyboardInterrupt, pycurl.error):
+        exit('Received Ctrl + C... Exiting! Bye.', 1)

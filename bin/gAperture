@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import gPhoton.gAperture
+
+if __name__ == '__main__':
+    gPhoton.gAperture.__main__()
