@@ -7,6 +7,7 @@ from CalUtils import *
 from FileUtils import *
 from gnomonic import *
 from MCUtils import *
+import cal
 
 def PhotonPipe(raw6file,scstfile,calpath,band,outbase,aspfile=0,ssdfile=0,
 											nullfile=0,verbose=0,retries=20):
@@ -51,27 +52,35 @@ def PhotonPipe(raw6file,scstfile,calpath,band,outbase,aspfile=0,ssdfile=0,
 										clk2data) = postCSP_caldata(calpath)
 
 	print "Loading wiggle files..."
-	wiggle_x = get_fits_data(wiggle_filenames(band,calpath)['x'])
-	wiggle_y = get_fits_data(wiggle_filenames(band,calpath)['y'])
+	#wiggle_x = get_fits_data(wiggle_filenames(band,calpath)['x'])
+	#wiggle_y = get_fits_data(wiggle_filenames(band,calpath)['y'])
+	wiggle_x, _ = cal.wiggle(band,'x')
+	wiggle_y, _ = cal.wiggle(band,'y')
 
 	print "Loading walk files..."
-	walk_x = get_fits_data(walk_filenames(band,calpath)['x'])
-	walk_y = get_fits_data(walk_filenames(band,calpath)['y'])
+	#walk_x = get_fits_data(walk_filenames(band,calpath)['x'])
+	#walk_y = get_fits_data(walk_filenames(band,calpath)['y'])
+	walk_x, _ = cal.walk(band,'x')
+	walk_y, _ = cal.walk(band,'y')
 
 	print "Loading linearity files..."
-	linearity_x = get_fits_data(linearity_filenames(band,calpath)['x'])
-	linearity_y = get_fits_data(linearity_filenames(band,calpath)['y'])
+	#linearity_x = get_fits_data(linearity_filenames(band,calpath)['x'])
+	#linearity_y = get_fits_data(linearity_filenames(band,calpath)['y'])
+	linearity_x, _ = cal.linearity(band,'x')
+	linearity_y, _ = cal.linearity(band,'y')
 
 	# This is for the post-CSP stim distortion corrections.
 	print "Loading distortion files..."
 	if (eclipse>37460):
 		print " Using stim separation of :"+str(stimsep)
-	distortion_x = get_fits_data(
-					distortion_filenames(band,calpath,eclipse,stimsep)['x'])
-	distortion_y = get_fits_data(
-					distortion_filenames(band,calpath,eclipse,stimsep)['y'])
-	disthead = get_fits_header(
-					distortion_filenames(band,calpath,eclipse,stimsep)['x'])
+	#distortion_x = get_fits_data(
+	#				distortion_filenames(band,calpath,eclipse,stimsep)['x'])
+	#distortion_y = get_fits_data(
+	#				distortion_filenames(band,calpath,eclipse,stimsep)['y'])
+	#disthead = get_fits_header(
+	#				distortion_filenames(band,calpath,eclipse,stimsep)['x'])
+	distortion_x, disthead = cal.distortion(band,'x',eclipse,stimsep)
+	distortion_y, _ = cal.distortion(band,'y',eclipse,stimsep)
 	(cube_x0, cube_dx, cube_y0,
 	 cube_dy, cube_d0, cube_dd,
 	 cube_nd, cube_nc, cube_nr) = (disthead['DC_X0'], disthead['DC_DX'],
@@ -97,8 +106,9 @@ def PhotonPipe(raw6file,scstfile,calpath,band,outbase,aspfile=0,ssdfile=0,
 	print "		stim_coef0, stim_coef1 = "+str(stim_coef0)+", "+str(stim_coef1)
 
 	print "Loading mask file..."
-	mask = get_fits_data(mask_filename(band,calpath))
-	maskinfo = get_fits_header(mask_filename(band,calpath))
+	#mask = get_fits_data(mask_filename(band,calpath))
+	#maskinfo = get_fits_header(mask_filename(band,calpath))
+	mask, maskinfo = cal.mask(band)
 	npixx = mask.shape[0]
 	npixy = mask.shape[1]
 	pixsz = maskinfo['CDELT2']

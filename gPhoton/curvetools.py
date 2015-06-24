@@ -7,6 +7,7 @@ import MCUtils as mc
 import dbasetools as dbt # fGetTimeRanges(), compute_exptime()
 import galextools as gxt # compute_flat_scale()
 from FileUtils import flat_filename
+import cal
 
 def gphot_params(band,skypos,radius,annulus=None,calpath='./cal/',
                  verbose=0.,detsize=1.25,stepsz=None,
@@ -20,10 +21,11 @@ def gphot_params(band,skypos,radius,annulus=None,calpath='./cal/',
             'apcorrect2':gxt.apcorrect2(radius,band),
             'detbg':gxt.detbg(mc.area(radius),band)}
 
-def xieta2colrow(xi, eta, calfile, detsize=1.25):
+def xieta2colrow(xi, eta, band, detsize=1.25):
     """Convert detector xi, eta into col, row."""
-    flat = mc.get_fits_data(calfile)
-    flatinfo = mc.get_fits_header(calfile)
+    #flat = mc.get_fits_data(calfile)
+    #flatinfo = mc.get_fits_header(calfile)
+    flat, flatinfo = cal.flat(band)
     # should be able to get npix from the header...
     npixx = flat.shape[0]
     npixy = flat.shape[1]
@@ -44,9 +46,10 @@ def hashresponse(band,events,calpath='./cal/',verbose=0):
     # Hash out the response correction
     if verbose:
         mc.print_inline("Applying the response correction.")
-    flat = mc.get_fits_data(flat_filename(band, calpath))
-    events['col'], events['row'] = xieta2colrow(events['xi'], events['eta'],
-                                                flat_filename(band, calpath))
+    #flat = mc.get_fits_data(flat_filename(band, calpath))
+    flat, _ = cal.flat(band)
+    events['col'], events['row'] = xieta2colrow(
+                                            events['xi'], events['eta'], band)
     events['flat'] = flat[np.array(events['col'], dtype='int16'),
                           np.array(events['row'], dtype='int16')]
     events['scale'] = gxt.compute_flat_scale(events['t'], band)

@@ -8,6 +8,7 @@ from PhotonTools import *
 from MCUtils import *
 from CalUtils import *
 from gnomonic import *
+import cal
 
 GPSSECS = 315532800+432000
 
@@ -57,7 +58,7 @@ def compute_deadtime(t,x,y,band,eclipse,trange=[[],[]]):
 	print "Located "+str(len(stimt))+" stim events."
 
 	dead = 0.
-	# Compute using an emperical formula -- Method 1	
+	# Compute using an emperical formula -- Method 1
 	dead0 = tec2fdead*(len(t)/exptime)/feeclkratio
 	print "	Simple correction w/ Method 1: "+str(dead0)
 
@@ -108,7 +109,7 @@ def compute_shutter(t,trange=[[],[]]):
 	bins = np.linspace(0.,exptime-exptime%tstep,exptime//tstep+1)
 	h,xh = np.histogram(t-trange[0],bins=bins)
 
-	# If no counts are recorded for a tstep interval, consider the 
+	# If no counts are recorded for a tstep interval, consider the
 	#  virtual shutter to have been effectively closed during that time
 	gaps = len((h==0).nonzero()[0])
 
@@ -164,7 +165,7 @@ def compute_exposure(t,x,y,flags,band,eclipse,trange=[[],[]]):
 #	print "		Time range:    ["+str(mint)+","+str(maxt)+"]"
 #	exptime=maxt-mint
 #	print "		Raw exposure: "+str(exptime)
-#	
+#
 #	print "Computing dead time and shutter corrections..."
 #	tstep=1. # seconds; time resolution of the dead time correction
 #	t,x,y,flags=[],[],[],[]
@@ -210,7 +211,7 @@ def compute_exposure(t,x,y,flags,band,eclipse,trange=[[],[]]):
 #	tstep = 1. # seconds
 #	tec2fdead = 5.52e-6 # conversion from TEC to deadtime correction
 #
-#	# Compute using an empirical formula -- Method 1	
+#	# Compute using an empirical formula -- Method 1
 #	dead0 = tec2fdead*(tot/exptime)/feeclkratio
 #	print "		Simple dead time correction w/ Method 1: "+str(dead0)
 #
@@ -229,7 +230,7 @@ def compute_exposure(t,x,y,flags,band,eclipse,trange=[[],[]]):
 #		print "Warning: The deadtime correction is suspect."
 #
 #	exptcorr = exptime-(exptime*dead2)-shutter
-#	print "Corrected exposure time: "+str(exptcorr)+" seconds ("+str(exptcorr/60.)+" min.)"	
+#	print "Corrected exposure time: "+str(exptcorr)+" seconds ("+str(exptcorr/60.)+" min.)"
 #
 #	return exptcorr
 
@@ -240,8 +241,9 @@ def create_rr(csvfile,band,calpath,eclipse,aspfile=0.,expstart=0.,expend=0.,retr
 	aspum = pltscl/1000.0
 
 	print "Loading flat file..."
-	flat = get_fits_data(flat_filename(band,calpath))
-	flatinfo = get_fits_header(flat_filename(band,calpath))
+	#flat = get_fits_data(flat_filename(band,calpath))
+	flat, flatinfo = cal.flat(band)
+	#flatinfo = get_fits_header(flat_filename(band,calpath))
 	npixx = flat.shape[0]
 	npixy = flat.shape[1]
 	pixsz = flatinfo['CDELT2']

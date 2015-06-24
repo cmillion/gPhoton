@@ -3,6 +3,7 @@ from FileUtils import *
 from gnomonic import *
 import pandas as pd
 from galextools import isPostCSP
+import cal
 
 def clk_cen_scl_slp(band,eclipse):
 	"""Return the detector clock, center, scale and slope constants."""
@@ -235,11 +236,13 @@ def find_FUV_offset(scstfile,calpath):
 
         print "         Offsetting FUV image using eclipse of "+str(eclipse)+" and fdttdc of "+str(fdttdc)
 
-        file_x = offset_filenames(calpath)['x']
-        file_y = offset_filenames(calpath)['y']
-        print "Reading offset tables ",file_x," and ",file_y
-        fuv_dx_tbl = get_tbl_data(file_x)
-        fuv_dy_tbl = get_tbl_data(file_y)
+        #file_x = offset_filenames(calpath)['x']
+        #file_y = offset_filenames(calpath)['y']
+        #print "Reading offset tables ",file_x," and ",file_y
+        #fuv_dx_tbl = get_tbl_data(file_x)
+        #fuv_dy_tbl = get_tbl_data(file_y)
+		fuv_dx_tbl = cal.offset(band,'x')
+		fuv_dy_tbl = cal.offset(band,'y')
 
         fodx_coef_0 = fuv_dx_tbl[eclipse-1,1]
         fody_coef_0 = fuv_dy_tbl[eclipse-1,1]
@@ -261,9 +264,9 @@ def find_FUV_offset(scstfile,calpath):
 def postCSP_caldata(calpath):
 	"""Loads the calibration data for after the CSP event."""
         print "Loading post-CSP wiggle file..."
-        wig2file = calpath+'WIG2_Sep2010.fits'
-        wig2fits = get_fits_data(wig2file,dim=1)
-        #wig2 = {'ya':np.array([]),'yb':np.array([]),'xb':np.array([]),'yy':np.array([]),'ycor':np.array([])}
+		#wig2file = calpath+'WIG2_Sep2010.fits'
+        #wig2fits = get_fits_data(wig2file,dim=1)
+		wig2fits, wig2head = cal.wiggle2()
         wig2 = np.zeros([128,8,32,8])
         for i in xrange(len(wig2fits)):
                 ya=wig2fits[i][0]
@@ -272,12 +275,13 @@ def postCSP_caldata(calpath):
                 yy=wig2fits[i][3]
                 ycor=wig2fits[i][4]
                 wig2[yy][yb][ya][xb]=ycor
-        wig2head = get_fits_header(wig2file)
+        #wig2head = get_fits_header(wig2file)
         wig2data = {'start':wig2head['Y_AS_0'],'inc':wig2head['Y_AS_INC']}
 
         print "Loading post-CSP walk file..."
-        wlk2file = calpath+'WLK2_Sep2010.fits'
-        wlk2fits = get_fits_data(wlk2file,dim=1)
+        #wlk2file = calpath+'WLK2_Sep2010.fits'
+        #wlk2fits = get_fits_data(wlk2file,dim=1)
+		wlk2fits, wlk2head = cal.walk2()
         #wlk2 = {'q':np.array([]),'yb':np.array([]),'yy':np.array([]),'ycor':np.array([])}
         wlk2 = np.zeros([100,8,32])
         for i in xrange(len(wlk2fits)):
@@ -286,12 +290,13 @@ def postCSP_caldata(calpath):
                 yy=wlk2fits[i][2]
                 ycor=wlk2fits[i][3]
                 wlk2[yy][yb][q]=ycor
-        wlk2head = get_fits_header(wlk2file)
+        #wlk2head = get_fits_header(wlk2file)
         wlk2data = {'start':wlk2head['Y_AS_0'],'inc':wlk2head['Y_AS_INC']}
 
         print "Loading post-CSP clock file..."
-        clk2file = calpath+'CLK2_Sep2010.fits'
-        clk2fits = get_fits_data(clk2file,dim=1)
+        #clk2file = calpath+'CLK2_Sep2010.fits'
+        #clk2fits = get_fits_data(clk2file,dim=1)
+		clk2fits, clk2head = cal.clock2()
         #clk2 = {'yb':np.array([]),'yy':np.array([]),'ycor':np.array([])}
         clk2 = np.zeros([100,8])
         for i in xrange(len(clk2fits)):
@@ -299,7 +304,7 @@ def postCSP_caldata(calpath):
                 yy=clk2fits[i][1]
                 ycor=clk2fits[i][2]
                 clk2[yy][yb]=ycor
-        clk2head = get_fits_header(clk2file)
+        #clk2head = get_fits_header(clk2file)
         clk2data = {'start':clk2head['Y_AS_0'],'inc':clk2head['Y_AS_INC']}
 
         return wig2, wig2data, wlk2, wlk2data, clk2, clk2data

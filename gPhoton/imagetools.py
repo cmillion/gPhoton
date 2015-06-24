@@ -10,6 +10,7 @@ from FileUtils import flat_filename
 import gnomonic
 import dbasetools as dbt
 import galextools as gxt
+import cal
 
 def define_wcs(skypos,skyrange,width=False,height=False,verbose=0,
 			   pixsz=0.000416666666666667):
@@ -199,8 +200,9 @@ def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,
 	imsz = gxt.deg2pix(skypos,skyrange)
 	# TODO the if width / height
 
-	flat = mc.get_fits_data(flat_filename(band,calpath),verbose=verbose)
-	flatinfo = mc.get_fits_header(flat_filename(band,calpath))
+	#flat = mc.get_fits_data(flat_filename(band,calpath),verbose=verbose)
+	#flatinfo = mc.get_fits_header(flat_filename(band,calpath))
+	flat, flatinfo = cal.flat(band)
 	npixx,npixy 	= flat.shape
 	fltsz 		= flat.shape
 	pixsz = flatinfo['CDELT2']
