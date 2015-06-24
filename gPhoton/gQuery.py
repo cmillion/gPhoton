@@ -4,6 +4,8 @@ from MCUtils import manage_requests
 import CalUtils
 from galextools import isPostCSP
 
+tscale = 1000. # time in the database is "integer-ized" by multiplying by this
+
 """The following three global variables are used in constructing a properly
 formatted query to the MAST database. Don't change them unless you know what
 you're doing.
@@ -119,8 +121,7 @@ def mcat_objid_search(objid,mode='visit'):
         ' vp.photoextractid=vpe.photoextractid where objid = '+
         str(long(objid))+str(formatURL))
 
-def exposure_ranges(band,ra0,dec0,t0=1,t1=10000000000000,tscale=1000.,
-                                                                detsize=1.25):
+def exposure_ranges(band,ra0,dec0,t0=1,t1=10000000000000,detsize=1.25):
     """Returns a list of times (in one second increments) where data exists
     with an aspect solution within detsize of [ra0,dec0].
     """
@@ -144,7 +145,7 @@ def exposure_range(band,ra0,dec0,t0=1,t1=10000000000000):
             repr(float(ra0))+','+repr(float(dec0))+') where band=\''+
             str(band)+'\''+str(formatURL))
 
-def aperture(band,ra0,dec0,t0,t1,radius,tscale=1000.):
+def aperture(band,ra0,dec0,t0,t1,radius):
     """Integrate counts over an aperture at a position."""
     return (str(baseURL)+
         'Select  sum(photonCount)'
@@ -153,21 +154,21 @@ def aperture(band,ra0,dec0,t0,t1,radius,tscale=1000.):
         ','+str(radius)+','+str(long(t0*tscale))+','+
         str(long(t1*tscale))+',0)'+str(formatURL))
 
-def deadtime1(band,t0,t1,tscale=1000.):
+def deadtime1(band,t0,t1):
     """Return the global counts of non-NULL data."""
     return ('{baseURL}select count(*) from {baseDB}.{band}PhotonsV where '+
             'time between {t0} and {t1}{formatURL}').format(baseURL=baseURL,
                 baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
                 t1=str(long(t1*tscale)), formatURL=formatURL)
 
-def deadtime2(band,t0,t1,tscale=1000.):
+def deadtime2(band,t0,t1):
     """Return the global counts for NULL data."""
     return ('{baseURL}select count(*) from {baseDB}.{band}PhotonsNULLV where '+
             'time between {t0} and {t1}{formatURL}').format(baseURL=baseURL,
                 baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
                 t1=str(long(t1*tscale)), formatURL=formatURL)
 
-def deadtime(band,t0,t1,tscale=1000.,feeclkratio=0.966,tec2fdead=5.52e-6):
+def deadtime(band,t0,t1,feeclkratio=0.966,tec2fdead=5.52e-6):
     """Return the emperically determined deadtime correction based upon the
     global count rate.
     """
@@ -181,7 +182,7 @@ def deadtime(band,t0,t1,tscale=1000.,feeclkratio=0.966,tec2fdead=5.52e-6):
         'PhotonsV where time between '+str(long(t0*tscale))+' and '+
         str(long(t1*tscale))+') x'+str(formatURL))
 
-def alltimes(band,t0,t1,tscale=1000.):
+def alltimes(band,t0,t1):
     """Return the time stamps of every detector event within a time range."""
     return ('{baseURL}select t from (select time as t from {baseDB}.{band}PhotonsV '+
             'where time between {t0} and {t1} union all select time as t '+
@@ -190,7 +191,7 @@ def alltimes(band,t0,t1,tscale=1000.):
                 baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
                 t1=str(long(t1*tscale)), formatURL=formatURL)
 
-def boxcount(band,t0,t1,xr,yr,tscale=1000.):
+def boxcount(band,t0,t1,xr,yr):
     """Find the number of events inside of a box defined by [xy] range in
     detector space coordinates. This is useful for pulling out stim events.
     """
@@ -199,7 +200,7 @@ def boxcount(band,t0,t1,xr,yr,tscale=1000.):
         str(long(t1*tscale))+' and x between '+str(xr[0])+' and '+str(xr[1])+
         ' and y between '+str(yr[0])+' and '+str(yr[1])+str(formatURL))
 
-def detbox(band,t0,t1,xr,yr,tscale=1000.):
+def detbox(band,t0,t1,xr,yr):
     """Return all events inside a box defined in detector space by [xy]
     range. Created as a sanity check for stim events."""
     return ('{baseURL}select time,x,y,ya from {baseDB}.{band}PhotonsNULLV '+
@@ -211,7 +212,7 @@ def detbox(band,t0,t1,xr,yr,tscale=1000.):
                 formatURL=formatURL)
 
 # FIXME: convert t0 to eclipse
-def stimcount(band,t0,t1,margin=[90.01,90.01],aspum=68.754932/1000.,tscale=1000,
+def stimcount(band,t0,t1,margin=[90.01,90.01],aspum=68.754932/1000.,
               eclipse=None):
     """Return stim counts."""
     if not eclipse:
@@ -245,7 +246,7 @@ def stimcount(band,t0,t1,margin=[90.01,90.01],aspum=68.754932/1000.,tscale=1000,
                 y41=(avgstim['y4']+margin[1])/aspum,formatURL=formatURL)
 
 
-def boxcentroid(band,t0,t1,xr,yr,tscale=1000.):
+def boxcentroid(band,t0,t1,xr,yr):
     """Find the mean position of events inside of a box in detector space."""
     return (str(baseURL)+
         'select avg(x), avg(y) from '+str(baseDB)+
@@ -254,7 +255,7 @@ def boxcentroid(band,t0,t1,xr,yr,tscale=1000.):
         ' and x between '+str(xr[0])+' and '+str(xr[1])+' and y between '+
         str(yr[0])+' and '+str(yr[1])+str(formatURL))
 
-def boxtimes(band,t0,t1,xr,yr,tscale=1000.):
+def boxtimes(band,t0,t1,xr,yr):
     """Get the list of times for events inside of a box in detector space."""
     return (str(baseURL)+
         'select time from '+str(baseDB)+'.'+str(band)+
@@ -263,7 +264,7 @@ def boxtimes(band,t0,t1,xr,yr,tscale=1000.):
         str(xr[0])+' and '+str(xr[1])+' and y between '+str(yr[0])+' and '+
         str(yr[1])+str(formatURL))
 
-def centroid(band,ra0,dec0,t0,t1,radius,tscale=1000.):
+def centroid(band,ra0,dec0,t0,t1,radius):
     return (str(baseURL)+
         'select avg(ra), avg(dec) from '+str(baseDB)+'.'+str(band)+
         'PhotonsV where time between '+
@@ -271,7 +272,7 @@ def centroid(band,ra0,dec0,t0,t1,radius,tscale=1000.):
         repr(ra0-radius)+' and '+repr(ra0+radius)+' and dec between '+
         repr(dec0-radius)+' and '+repr(dec0+radius)+str(formatURL))
 
-def allphotons(band,ra0,dec0,t0,t1,radius,tscale=1000.):
+def allphotons(band,ra0,dec0,t0,t1,radius):
     """Grab the major columns for all events within an aperture."""
     return (str(baseURL)+
         'select time,ra,dec,xi,eta,x,y from '+str(baseDB)+'.fGetNearbyObjEq'+
@@ -281,12 +282,12 @@ def allphotons(band,ra0,dec0,t0,t1,radius,tscale=1000.):
 
 # Shutter correction
 #  i.e. number of 0.05s gaps in data
-def shutter(band,t0,t1,tscale=1000.):
+def shutter(band,t0,t1):
     return (str(baseURL)+
         'select shutter*0.05 from '+str(baseDB)+'.fGet'+str(band)+'Shutter('+
         str(long(t0*tscale))+','+str(long(t1*tscale))+')'+str(formatURL))
 
-def shutdead(band,t0,t1,tscale=1000.):
+def shutdead(band,t0,t1):
     tt0, tt1 = [long(t*tscale) for t in [t0, t1]]
     return ('{baseURL}SELECT shutter*0.05 FROM {baseDB}'
             '.fGet{band}Shutter({tt0},{tt1}) AS '
@@ -299,13 +300,13 @@ def shutdead(band,t0,t1,tscale=1000.):
                 baseDB=baseDB, fmt=formatURL))
 
 
-def exptime(band,t0,t1,stepsz=1.,tscale=1000.):
+def exptime(band,t0,t1,stepsz=1.):
     return (str(baseURL)+
         'select * from '+str(baseDB)+'.fGet'+str(band)+'EffectiveExposureTime('+
         str(long(t0*tscale))+','+str(long(t1*tscale))+','+str(stepsz)+')'+
         str(formatURL))
 
-def aspect(t0,t1,tscale=1000.):
+def aspect(t0,t1):
     """Return the aspect information based on time range."""
     return (str(baseURL)+
         'select eclipse, filename, time, ra, dec, twist, flag, ra0, dec0,'
@@ -330,7 +331,7 @@ def aspect_skypos(ra,dec,detsize=1.25):
 
 # Return data within a box centered on ra0, dec0 with sides of length 2*radius
 # TODO: deprecate this and rename it skybox()
-def box(band,ra0,dec0,t0,t1,radius,tscale=1000.):
+def box(band,ra0,dec0,t0,t1,radius):
     return (str(baseURL)+
         'select time,ra,dec from '+str(baseDB)+'.'+str(band)+
         'PhotonsV where time between '+
@@ -341,7 +342,7 @@ def box(band,ra0,dec0,t0,t1,radius,tscale=1000.):
 
 # Return data within a rectangle centered on ra0, dec0
 # TODO: deprecate this and rename it skyrect()
-def rect(band,ra0,dec0,t0,t1,ra,dec,tscale=1000.):
+def rect(band,ra0,dec0,t0,t1,ra,dec):
     return (str(baseURL)+
         'select time,ra,dec from '+str(baseDB)+'.fGetObjFromRect'+str(band)+'('+
         repr(ra0-ra/2.)+','+repr(ra0+ra/2.)+','+repr(dec0-dec/2.)+','+

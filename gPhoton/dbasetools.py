@@ -4,8 +4,9 @@ import numpy as np
 import gQuery
 from MCUtils import print_inline,area,distance,angularSeparation
 from galextools import GPSSECS, zpmag
+from gQuery import tscale
 
-def get_aspect(band,skypos,trange=[6e8,11e8],tscale=1000.,verbose=0,
+def get_aspect(band,skypos,trange=[6e8,11e8],verbose=0,
                detsize=1.25):
     """Get aspect solution in a dict() for given time range."""
     asp = np.array(gQuery.getArray(gQuery.aspect_skypos(skypos[0],skypos[1],
@@ -26,7 +27,7 @@ def get_aspect(band,skypos,trange=[6e8,11e8],tscale=1000.,verbose=0,
         data[key] = data[key][ix]
     return data
 
-def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,
+def fGetTimeRanges(band,skypos,trange=None,detsize=1.25,verbose=0,
                    maxgap=1.,minexp=1.,retries=100.,predicted=False):
     """Find the contiguous time ranges within a time range at a
     specific location.
@@ -45,11 +46,11 @@ def fGetTimeRanges(band,skypos,trange=None,tscale=1000.,detsize=1.25,verbose=0,
         if verbose and predicted:
             print "Querying coverage of GR6/7. (Not current database.)"
         times = (np.array(gQuery.getArray(gQuery.exposure_ranges(band,
-            skypos[0],skypos[1],t0=trange[0],t1=trange[1],detsize=detsize,
-            tscale=tscale),verbose=verbose,retries=retries),
+            skypos[0],skypos[1],t0=trange[0],t1=trange[1],detsize=detsize),
+            verbose=verbose,retries=retries),
                                                 dtype='float64')[:,0]/tscale
             if not predicted else get_aspect(band,skypos,trange,detsize=detsize,
-                                        tscale=tscale,verbose=verbose)['t'])
+                                        verbose=verbose)['t'])
     except IndexError:
         if verbose:
             print "No exposure time available at {pos}".format(pos=skypos)

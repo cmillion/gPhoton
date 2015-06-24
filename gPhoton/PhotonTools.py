@@ -10,7 +10,7 @@ from CalUtils import *
 
 from MCUtils import *
 
-GPSSECS = 315532800+432000 # conversion fact from galex time to unix time
+from CalibrationTools import GPSSECS
 
 # FIXME: This looks like a vestigial test funtion. Does it still have a purpose?
 #	 It is NOT USED ANYWHERE.
@@ -227,7 +227,7 @@ def create_cnt(csvfile,imsz,cntfile,outfile,matchtimes=0,expstart=0,expend=0):
 	wcs.wcs.ctype = [hdr['ctype1'],hdr['ctype2']]
 	racent,deccent=hdr['crval1'],hdr['crval2']
 	if not expend and not expstart:
-		expstart,expend = hdr['expstart'],hdr['expend']	
+		expstart,expend = hdr['expstart'],hdr['expend']
 	elif expend and not expstart:
 		expstart = hdr['expstart']
 	elif expstart and not expend:
@@ -372,5 +372,3 @@ def load_stims(csvfile,band,eclipse):
 		y.append(np.float64(row[2]))
 
 	return find_stims(x,y,band,eclipse)
-
-

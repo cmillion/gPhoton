@@ -110,8 +110,7 @@ def totalcount(data,t0,t1):
 	ix = np.where(time)
 	return len(ix[0])
 
-def deadtime_method0(data,t0,t1,band,tscale=1000.,feeclkratio=0.966,
-					 tec2fdead=5.52e-6):
+def deadtime_method0(data,t0,t1,band,feeclkratio=0.966,tec2fdead=5.52e-6):
 	"""Given a dict() containing 't', a list of global event times, computes
 	the deadtime using an empirical formula based on global count rate over
 	the whole time range.
@@ -120,8 +119,7 @@ def deadtime_method0(data,t0,t1,band,tscale=1000.,feeclkratio=0.966,
 	totcount = totalcount(data,t0,t1)
 	return tec2fdead*(totcount/exptime)/feeclkratio
 
-def deadtime_method1(data,t0,t1,band,tscale=1000.,feeclkratio=0.966,
-					 tec2fdead=5.52e-6,tstep=1.):
+def deadtime_method1(data,t0,t1,band,feeclkratio=0.966,tec2fdead=5.52e-6,tstep=1.):
 	"""Given a dict() containing 't', a list of global event times, computes
 	the deadtime using an empirical formula based on global count rates, put
 	into bins of depth equal to `tstep` seconds and averaged.
@@ -133,7 +131,7 @@ def deadtime_method1(data,t0,t1,band,tscale=1000.,feeclkratio=0.966,
 		h[i] = totalcount(data,t,t+tstep-0.0001)
 	return (tec2fdead*(h/tstep)/feeclkratio).mean()
 
-def deadtime_method2(data,t0,t1,band,tscale=1000.,refrate=79.,tstep=1.,
+def deadtime_method2(data,t0,t1,band,refrate=79.,tstep=1.,
 		feeclkratio=0.966,refrange=[.4,2.]):
 	"""Given a list of global event times, computes the deadtime through
 	direct comparison of the stim rate to the reference rate in bins of

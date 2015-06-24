@@ -3,6 +3,7 @@ import pandas as pd
 import os
 # gPhoton specific
 import gQuery
+from gQuery import tscale
 import MCUtils as mc
 import dbasetools as dbt # fGetTimeRanges(), compute_exptime()
 import galextools as gxt # compute_flat_scale()
@@ -22,8 +23,6 @@ def gphot_params(band,skypos,radius,annulus=None,
 
 def xieta2colrow(xi, eta, band, detsize=1.25):
     """Convert detector xi, eta into col, row."""
-    #flat = mc.get_fits_data(calfile)
-    #flatinfo = mc.get_fits_header(calfile)
     flat, flatinfo = cal.flat(band)
     # should be able to get npix from the header...
     npixx = flat.shape[0]
@@ -56,7 +55,7 @@ def hashresponse(band,events,verbose=0):
     return events
 
 # Thould this be moved to dbasetools?
-def read_photons(photonfile,ra0,dec0,tranges,radius,verbose=0,tscale=1000.,
+def read_photons(photonfile,ra0,dec0,tranges,radius,verbose=0,
         colnames=['t','x','y','xa','ya','q','xi','eta','ra','dec','flags']):
     """Read a photon list file and return a python dict() with the expected
     format.
@@ -82,7 +81,7 @@ def read_photons(photonfile,ra0,dec0,tranges,radius,verbose=0,tscale=1000.,
     return events
 
 # This should be moved to dbasetools.
-def query_photons(band,ra0,dec0,tranges,radius,verbose=0,tscale=1000.):
+def query_photons(band,ra0,dec0,tranges,radius,verbose=0):
     """Retrieve photons within an aperture from the database."""
     stream = []
     if verbose:
@@ -105,13 +104,13 @@ def query_photons(band,ra0,dec0,tranges,radius,verbose=0,tscale=1000.):
     return events
 
 def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
-                tscale=1000.,photonfile=None):
+                photonfile=None):
     if photonfile:
         events = read_photons(photonfile, ra0, dec0, tranges, radius,
-                              verbose=verbose, tscale=tscale)
+                              verbose=verbose)
     else:
         events = query_photons(band, ra0, dec0, tranges, radius,
-                               verbose=verbose, tscale=tscale)
+                               verbose=verbose)
 
     events = hashresponse(band, events, verbose=verbose)
     return events
