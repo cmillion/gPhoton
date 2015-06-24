@@ -46,7 +46,7 @@ def construct_row(i,band,objid,mcat,data):
             data['bg']['eff_area'])
 
 def datamaker(band,skypos,outfile,maglimit=20.,detsize=0.5,margin=0.005,
-              radius=gt.aper2deg(4),annulus=[0.0083,0.025],calpath='./cal/'):
+              radius=gt.aper2deg(4),annulus=[0.0083,0.025]):
     extant_objids = file_setup(outfile)
     if extant_objids==False:
         print 'NOT RUNNING!!*!'
@@ -72,8 +72,7 @@ def datamaker(band,skypos,outfile,maglimit=20.,detsize=0.5,margin=0.005,
                 continue
             data = gAperture(band,[mcat['ra'][i],mcat['dec'][i]],radius,
                              annulus=annulus,verbose=0,coadd=True,
-                             trange=[exp[band]['t0'],exp[band]['t1']],
-                             calpath=calpath)
+                             trange=[exp[band]['t0'],exp[band]['t1']])
             if (data['mag_bgsub_cheese'] and
                                         np.isfinite(data['mag_bgsub_cheese'])):
                 csv_construct = construct_row(i,band,objid,mcat,data)

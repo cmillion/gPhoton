@@ -13,7 +13,7 @@ from galextools import aper2deg
 def gAperture(band,skypos,radius,csvfile=None,annulus=None, coadd=False,
               stepsz=False,verbose=0,clobber=False,trange=None,tranges=None,
               minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,iocode='wb',
-              calpath='./cal/',photonfile=None):
+              photonfile=None):
     """Runs gAperture and returns the data in a python dict() and as
     a CSV file if outfile is specified. Can be called from the interpreter.
     """
@@ -27,7 +27,6 @@ def gAperture(band,skypos,radius,csvfile=None,annulus=None, coadd=False,
         print " stepsz:  {stepsz}".format(stepsz=stepsz)
         print " csvfile: {csvfile}".format(csvfile=csvfile)
         print " verbose: {verbose}".format(verbose=verbose)
-        print " calpath: {calpath}".format(calpath=calpath)
         if photonfile:
             print "Using local photon file: {photonfile}".format(
                                                         photonfile=photonfile)
@@ -36,7 +35,7 @@ def gAperture(band,skypos,radius,csvfile=None,annulus=None, coadd=False,
                           clobber=clobber, trange=trange, tranges=tranges,
                           coadd=coadd, minexp=minexp, maxgap=maxgap,
                           iocode = iocode, maskdepth=maskdepth,
-                          maskradius=maskradius, calpath=calpath)
+                          maskradius=maskradius)
     return data
 
 def check_radius(args):
@@ -167,4 +166,4 @@ if __name__ == '__main__':
                      trange=[args.tmin,args.tmax], tranges=args.trange,
                      coadd=args.coadd, minexp=args.minexp, maxgap=args.maxgap,
                      iocode=args.iocode, maskdepth=args.maskdepth,
-                     maskradius=args.maskradius,calpath=args.calpath)
+                     maskradius=args.maskradius)

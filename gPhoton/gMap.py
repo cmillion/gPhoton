@@ -7,32 +7,16 @@ import dbasetools as dbt
 import gphoton_args as gargs
 import numpy as np
 
-def gMap(band=None,calpath=os.pardir+os.sep+"cal"+os.sep,cntfile=False,
+def gMap(band=None,cntfile=False,
 		 coadd=False,detsize=1.25,intfile=False,rrfile=False,skypos=None,
 		 maxgap=1500.,memlight=100.,minexp=1.,overwrite=False,retries=20,
 		 skyrange=None,stepsz=0.,trange=None,verbose=0):
-#	if verbose:
-#		print 'Using all exposure in [{t0},{t1}]'.format(
-#													t0=trange[0],t1=trange[1])
-#	trange = dbt.fGetTimeRanges(band,skypos,maxgap=maxgap,verbose=verbose,
-#							minexp=minexp,trange=trange,detsize=detsize,
-#							retries=retries)
-#	if not len(trange):
-#		print 'No exposure time in database.'
-#		exit(0)
-#	if verbose:
-#		print 'Using {traw} seconds (raw) in {n} distinct exposures.'.format(
-#							traw=(trange[:,1]-trange[:,0]).sum(), n=len(trange))
-#
-#	# Make sure trange is a 2D array
-#	if len(np.array(trange).shape)==1:
-#		trange=[trange]
-
-	# Use a mix of strings (if we want to make an output file) and Booleans
-	# (False if we do not). I don't think this is the best way (I'd rather
-	# have separate variables for the True/False to create an image, and a
-	# string with the name of the output image), but for now this is kept since
-	# this is how the code was originally written.
+	"""Use a mix of strings (if we want to make an output file) and Booleans
+	(False if we do not). I don't think this is the best way (I'd rather
+	have separate variables for the True/False to create an image, and a
+	string with the name of the output image), but for now this is kept since
+	this is how the code was originally written.
+	"""
 	# FIXME: Maybe?
 	response = True if (intfile or rrfile) else False
 	write_cnt = cntfile if (cntfile) else False
@@ -43,7 +27,7 @@ def gMap(band=None,calpath=os.pardir+os.sep+"cal"+os.sep,cntfile=False,
 				 write_cnt=write_cnt,write_int=write_int,write_rr=write_rr,
 				 framesz=stepsz,clobber=overwrite,verbose=verbose,
 				 memlight=memlight,coadd=coadd,response=response,
-				 calpath=calpath,retries=retries)
+				 retries=retries)
 
 def setup_parser(iam='gmap'):
 	parser = argparse.ArgumentParser(description="Generate images / maps.")
@@ -134,7 +118,7 @@ if __name__ == '__main__':
 		print '		of dimensions {w}x{h} degrees'.format(w=args.skyrange[0],
 														  h=args.skyrange[1])
 		print '		in time range(s): {t}'.format(t=args.trange)
-	gMap(band=args.band, calpath=args.calpath, cntfile=args.cntfile,
+	gMap(band=args.band, cntfile=args.cntfile,
 		coadd=args.coadd, detsize=args.detsize, intfile=args.intfile,
 		rrfile=args.rrfile, skypos=args.skypos, maxgap=args.maxgap,
 		memlight=args.memlight, minexp=args.minexp, overwrite=args.overwrite,

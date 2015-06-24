@@ -17,7 +17,7 @@ def find_random_positions(rarange=[0,360],decrange=[-90,90],nsamples=10,
     return ra, dec
 
 def calrun(outfile,band,nsamples=10,seed=323,rarange=[0,360],decrange=[-90,90],
-           exprange=[0.,5000.],maglimit=24,verbose=0,calpath='./cal/'):
+           exprange=[0.,5000.],maglimit=24,verbose=0):
     """Generate a bunch of magnitudes with comparisons against MCAT values for
     random points on the sky within given legal ranges. Write it to a CSV.
     """
@@ -35,7 +35,7 @@ def calrun(outfile,band,nsamples=10,seed=323,rarange=[0,360],decrange=[-90,90],
         expt = gFind.gFind(skypos=skypos,band=band,quiet=True)[band]['expt']
         if exprange[0]<=expt<=exprange[1]:
             print skypos, expt, True
-            datamaker(band,skypos,outfile,maglimit=maglimit,calpath=calpath)
+            datamaker(band,skypos,outfile,maglimit=maglimit)
         else:
             print skypos, expt, False
     return
@@ -69,9 +69,6 @@ def setup_parser():
         dest="maglimit", help="Lower limit of MCAT magnitudes to use.")
     parser.add_argument("-v", "--verbose", action="store", type=int, default=0,
         dest="verbose", help="Level of verbosity.", choices=[0,1,2])
-    parser.add_argument("--calpath", action="store", type=str,
-        dest="calpath", default=os.pardir+os.sep+"cal"+os.sep,
-        help="Path to the directory that contains the calibration files.")
 
     return parser
 

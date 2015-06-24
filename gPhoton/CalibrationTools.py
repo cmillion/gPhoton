@@ -234,16 +234,14 @@ def compute_exposure(t,x,y,flags,band,eclipse,trange=[[],[]]):
 #
 #	return exptcorr
 
-def create_rr(csvfile,band,calpath,eclipse,aspfile=0.,expstart=0.,expend=0.,retries=20):
+def create_rr(csvfile,band,eclipse,aspfile=0.,expstart=0.,expend=0.,retries=20):
 	"""Creates a relative response map for an eclipse, given a photon list."""
 	detsize = 1.25
 	pltscl = 68.754932
 	aspum = pltscl/1000.0
 
 	print "Loading flat file..."
-	#flat = get_fits_data(flat_filename(band,calpath))
 	flat, flatinfo = cal.flat(band)
-	#flatinfo = get_fits_header(flat_filename(band,calpath))
 	npixx = flat.shape[0]
 	npixy = flat.shape[1]
 	pixsz = flatinfo['CDELT2']
@@ -307,11 +305,11 @@ def create_rr(csvfile,band,calpath,eclipse,aspfile=0.,expstart=0.,expend=0.,retr
 
 	return rr*flat_scale*(1-deadt),exp
 
-def write_rr(csvfile,band,calpath,eclipse,rrfile,outfile,aspfile=0,expstart=0.,expend=0.,exptime=0.,imsz=960.,retries=20):
+def write_rr(csvfile,band,eclipse,rrfile,outfile,aspfile=0,expstart=0.,expend=0.,exptime=0.,imsz=960.,retries=20):
 	"""Creates a relative response map for an eclipse, given a photon list file,
 	and writes it to a FITS file.
 	"""
-	rr,exptime = create_rr(csvfile,band,calpath,eclipse,aspfile,expstart,expend,retries=retries)
+	rr,exptime = create_rr(csvfile,band,eclipse,aspfile,expstart,expend,retries=retries)
 
 	#aspra, aspdec, asptwist, asptime, aspheader, aspflags = load_aspect([aspfile])
         if aspfile:

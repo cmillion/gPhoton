@@ -9,13 +9,13 @@ import galextools as gxt # compute_flat_scale()
 from FileUtils import flat_filename
 import cal
 
-def gphot_params(band,skypos,radius,annulus=None,calpath='./cal/',
+def gphot_params(band,skypos,radius,annulus=None,
                  verbose=0.,detsize=1.25,stepsz=None,
                  trange=None,maskdepth=None,maskradius=None):
     """Populate a dict() with parameters that are constant over all bins."""
     return {'band':band,'ra0':skypos[0],'dec0':skypos[1],'skypos':skypos,
             'trange':trange,'radius':radius,'annulus':annulus,
-            'stepsz':stepsz,'calpath':calpath,'verbose':verbose,
+            'stepsz':stepsz,'verbose':verbose,
             'maskdepth':maskdepth,'maskradius':maskradius,'detsize':detsize,
             'apcorrect1':gxt.apcorrect1(radius,band),
             'apcorrect2':gxt.apcorrect2(radius,band),
@@ -41,12 +41,11 @@ def xieta2colrow(xi, eta, band, detsize=1.25):
     #cut = np.where(ix == True)
     return col, row
 
-def hashresponse(band,events,calpath='./cal/',verbose=0):
+def hashresponse(band,events,verbose=0):
     """Given detector xi, eta, return the response at each position."""
     # Hash out the response correction
     if verbose:
         mc.print_inline("Applying the response correction.")
-    #flat = mc.get_fits_data(flat_filename(band, calpath))
     flat, _ = cal.flat(band)
     events['col'], events['row'] = xieta2colrow(
                                             events['xi'], events['eta'], band)
@@ -107,7 +106,7 @@ def query_photons(band,ra0,dec0,tranges,radius,verbose=0,tscale=1000.):
     return events
 
 def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
-                tscale=1000., calpath='./cal/',photonfile=None):
+                tscale=1000.,photonfile=None):
     if photonfile:
         events = read_photons(photonfile, ra0, dec0, tranges, radius,
                               verbose=verbose, tscale=tscale)
@@ -115,7 +114,7 @@ def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
         events = query_photons(band, ra0, dec0, tranges, radius,
                                verbose=verbose, tscale=tscale)
 
-    events = hashresponse(band, events, calpath=calpath, verbose=verbose)
+    events = hashresponse(band, events, verbose=verbose)
     return events
 
 def bg_sources(band,ra0,dec0,radius,maskdepth=20.0,maskradius=1.5,margin=0.001):
@@ -181,7 +180,7 @@ def cheese_bg(band,ra0,dec0,radius,annulus,ras,decs,responses,maskdepth=20.,
     return mc.area(radius)*bg_counts/eff_area if eff_area else 0.
 
 def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
-             stepsz=None, calpath='./cal/', verbose=0, maskdepth=20.0,
+             stepsz=None, verbose=0, maskdepth=20.0,
              maskradius=1.5,detsize=1.25,coadd=False, photonfile=None):
     if verbose:
         mc.print_inline("Retrieving all of the target events.")
@@ -191,7 +190,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     except TypeError:
         searchradius = radius
     data = pullphotons(band, ra0, dec0, tranges, searchradius,
-                       verbose=verbose, calpath=calpath, photonfile=photonfile)
+                       verbose=verbose, photonfile=photonfile)
     if verbose:
         mc.print_inline("Isolating source from background.")
     angSep = mc.angularSeparation(ra0, dec0, data['ra'], data['dec'])
@@ -214,7 +213,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
                    'detxs', 'detys', 't0_data', 't1_data', 't_mean', 'racent',
                    'deccent']
     lcurve = {'params':gphot_params(band,[ra0,dec0],radius,annulus=annulus,
-                                    calpath=calpath,verbose=verbose,
+                                    verbose=verbose,
                                     detsize=detsize,stepsz=stepsz,
                                     trange=trange,maskdepth=maskdepth,
                                     maskradius=maskradius)}
@@ -300,7 +299,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
 
 def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
              trange=None, tranges=None, verbose=0, coadd=False, minexp=1.,
-             maxgap=1., calpath='../cal/', maskdepth=20, maskradius=1.5,
+             maxgap=1., maskdepth=20, maskradius=1.5,
              photonfile=None):
     if verbose:
         mc.print_inline("Getting exposure ranges.")
@@ -318,7 +317,7 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     try:
         lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
                           stepsz=stepsz, verbose=verbose, coadd=coadd,
-                          calpath=calpath, maskdepth=maskdepth,
+                          maskdepth=maskdepth,
                           maskradius=maskradius,photonfile=photonfile)
         lcurve['cps'] = lcurve['sources']/lcurve['exptime']
         lcurve['cps_bgsub'] = (lcurve['sources']-
@@ -352,12 +351,12 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
 
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                 stepsz=None, trange=None, tranges=None, verbose=0, coadd=False,
-                iocode='wb',calpath='../cal/',detsize=1.25,clobber=False,
+                iocode='wb',detsize=1.25,clobber=False,
                 minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,
                 photonfile=None):
     data = getcurve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
                     trange=trange, tranges=tranges, verbose=verbose,
-                    coadd=coadd, minexp=minexp, maxgap=maxgap, calpath=calpath,
+                    coadd=coadd, minexp=minexp, maxgap=maxgap,
                     maskdepth=maskdepth, maskradius=maskradius,
                     photonfile=photonfile)
     if csvfile:

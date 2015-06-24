@@ -10,7 +10,6 @@ parser = OptionParser()
 parser.add_option("-r", "--raw6", action="store", type="string", dest="raw6file", help="raw6 path/filename", metavar="FILE")
 parser.add_option("-a", "--aspect", action="store", type="string", dest="aspfile", help="aspection path/filename", metavar="FILE")
 parser.add_option("-s", "--scst", action="store", type="string", dest="scstfile", help="spacecraft state path/filename", metavar="SCST")
-parser.add_option("-c", "--calpath", action="store", type="string", dest="calpath", help="calibration directory path", metavar="PATH")
 parser.add_option("-b", "--band", action="store", type="string", dest="band", help="[NF]UV band designation", metavar="BAND")
 parser.add_option("-o", "--outbase", action="store", type="string", dest="outbase", help="output file(s) path/filename base", metavar="FILE")
 parser.add_option("-d", "--ssd", action="store", type="string", dest="ssdfile", help="stim separation (SSD) path/filename", metavar="SSD")
@@ -21,8 +20,7 @@ parser.add_option("--retries", action="store", type="int", dest="retries", defau
 
 (options, args) = parser.parse_args()
 
-#mandatory = ['raw6file', 'aspfile', 'scstfile', 'ssdfile', 'calpath', 'outbase']
-mandatory = ['raw6file', 'scstfile', 'calpath', 'outbase']
+mandatory = ['raw6file', 'scstfile', 'outbase']
 for m in mandatory:
 	if not options.__dict__[m]:
 		print "A mandatory option is missing:",m
@@ -61,4 +59,4 @@ if not options.verbose:
 else:
 	verbose=options.verbose
 
-PhotonPipe(options.raw6file,options.scstfile,options.calpath,band,options.outbase,aspfile,ssdfile,options.nullout,verbose=verbose,retries=options.retries)
+PhotonPipe(options.raw6file,options.scstfile,band,options.outbase,aspfile,ssdfile,options.nullout,verbose=verbose,retries=options.retries)

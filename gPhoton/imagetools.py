@@ -194,14 +194,12 @@ def write_jpeg(filename,band,skypos,tranges,skyrange,width=False,height=False,
 	return
 
 def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,
-		 verbose=0,calpath='./cal/',tscale=1000.,response=True,hdu=False,
+		 verbose=0,tscale=1000.,response=True,hdu=False,
 		 retries=20):
 	"""Generate a high resolution relative response (rrhr) map."""
 	imsz = gxt.deg2pix(skypos,skyrange)
 	# TODO the if width / height
 
-	#flat = mc.get_fits_data(flat_filename(band,calpath),verbose=verbose)
-	#flatinfo = mc.get_fits_header(flat_filename(band,calpath))
 	flat, flatinfo = cal.flat(band)
 	npixx,npixy 	= flat.shape
 	fltsz 		= flat.shape
@@ -252,7 +250,7 @@ def rrhr(band,skypos,tranges,skyrange,width=False,height=False,stepsz=1.,
 
 def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,
 		  verbose=0,tscale=1000.,memlight=False,coadd=False,
-		  response=False,calpath='./cal/',hdu=False,retries=20):
+		  response=False,hdu=False,retries=20):
 	"""Generate a movie (mov)."""
 	# Not defining stepsz effectively creates a count map.
 	mv = []
@@ -263,7 +261,7 @@ def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,
 		mv.append(countmap(band,skypos,tranges,skyrange,width=width,
 				  height=height,verbose=verbose,tscale=tscale,memlight=memlight,
 				  hdu=hdu,retries=retries))
-		rr.append(rrhr(band,skypos,tranges,skyrange,response=response,width=width,height=height,stepsz=1.,verbose=verbose,calpath=calpath,tscale=tscale,hdu=hdu,retries=retries)) if response else rr.append(np.ones(np.shape(mv)[1:]))
+		rr.append(rrhr(band,skypos,tranges,skyrange,response=response,width=width,height=height,stepsz=1.,verbose=verbose,tscale=tscale,hdu=hdu,retries=retries)) if response else rr.append(np.ones(np.shape(mv)[1:]))
 	else:
 		for trange in tranges:
 			stepsz = framesz if framesz else trange[1]-trange[0]
@@ -277,13 +275,13 @@ def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,
 								   height=height,verbose=verbose,tscale=tscale,
 								   memlight=memlight,hdu=hdu,retries=retries))
 	# FIXME: This should not create an rr unless it's requested...
-				rr.append(rrhr(band,skypos,[[t0,t1]],skyrange,response=response,width=width,height=height,stepsz=1.,verbose=verbose,calpath=calpath,tscale=tscale,retries=retries)) if response else rr.append(np.ones(np.shape(mv)[1:]))
+				rr.append(rrhr(band,skypos,[[t0,t1]],skyrange,response=response,width=width,height=height,stepsz=1.,verbose=verbose,tscale=tscale,retries=retries)) if response else rr.append(np.ones(np.shape(mv)[1:]))
 
 	return np.array(mv),np.array(rr)
 
 def create_images(band,skypos,tranges,skyrange,framesz=0,width=False,
 				  height=False,verbose=0,tscale=1000.,memlight=False,
-				  coadd=False,response=False,calpath='./cal/',hdu=False,
+				  coadd=False,response=False,hdu=False,
 				  retries=20):
 	count,rr = movie(band,skypos,tranges,skyrange,framesz=framesz,
 					 width=width,height=height,verbose=verbose,tscale=tscale,
