@@ -16,24 +16,6 @@ def load_raw6(raw6file):
 	hdulist.close()
 	return htab, hdulist
 
-def find_band(raw6file):
-	"""Tries to guess the band based on a raw6 filename."""
-	# This assumes the standard raw6 naming convention. I made it
-	# this needlessly specific to avoid false positives in the directory path.
-	if raw6file.rfind('-fd-raw6.fits') > 0 and raw6file.rfind('-nd-raw6.fits') > 0:
-		print "Multiple bands implied in raw6 filename. Specify band on command line."
-		return 0
-
-	if raw6file.rfind('-fd-raw6.fits') > 0:
-		band = 'FUV'
-	elif raw6file.rfind('-nd-raw6.fits') > 0:
-		band = 'NUV'
-	else:
-		print "Band not derivable from raw6 filename. Specify band on command line."
-		band = 0
-
-	return band
-
 def load_aspect(aspfile):
 	"""Loads an aspect file into a bunch of arrays."""
 	ra,dec,twist,time,aspflags=np.array([]),np.array([]),np.array([]),np.array([]),np.array([])

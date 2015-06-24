@@ -23,7 +23,7 @@ def read_data(fn,dim=0):
 
 def wiggle(band,xy):
     fn = '{b}_wiggle_{d}.fits'.format(b=check_band(band),d=check_xy(xy))
-    return read_data(fn,dim=1)
+    return read_data(fn)
 
 def wiggle2():
     """The post-CSP wiggle file."""
@@ -56,7 +56,7 @@ def flat(band):
     fn = '{b}_flat.fits'.format(b=check_band(band))
     return read_data(fn)
 
-def distortion_filenames(band,xy,eclipse,raw_stimsep):
+def distortion(band,xy,eclipse,raw_stimsep):
     index = ''
     if band == 'NUV':
         if eclipse > 37460:
