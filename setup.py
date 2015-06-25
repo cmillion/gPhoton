@@ -4,39 +4,26 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 import glob
+from gPhoton import __version__
 
 here = path.abspath(path.dirname(__file__))
 
-(NAME, VERSION) = ('gPhoton', '1.23.6')
-
-URL = 'https://github.com/cmillion/gPhoton'
-AUTHOR = 'Chase Million, et al.'
-EMAIL = 'chase.million@gmail.com'
-LICENSE = 'AURA'
-
-# Get the long description from the relevant file
-#with open(path.join(here, 'README.md'), encoding='utf-8') as f:
-#    long_description = f.read()
-
 setup(
-    name = NAME,
-    version = VERSION,
+    name = 'gPhoton',
+    version = __version__,
     description = 'The GALEX photon project.',
-    #long_description = long_description,
-    url = URL,
-    author = AUTHOR,
-    author_email = EMAIL,
-    license = LICENSE,
+    url = 'https://github.com/cmillion/gPhoton',
+    author = 'Chase Million, et al.',
+    author_email = 'chase.million@gmail.com',
+    license = 'AURA',
     classifiers = [
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
         'Programming Language :: Python :: 2.7',
         ],
-    keywords = 'astronomy galex photometry ultraviolet',
+    keywords = ['astronomy', 'galex', 'photometry', 'ultraviolet'],
+    scripts=['bin/gPipeline','bin/gAperture','bin/gFind','bin/gMap'],
     packages = find_packages(exclude=['gPhoton.tests','gPhoton.analysis']),
-    package_data = {'gPhoton': ['cal/*.fits', 'cal/*.FITS'],}
-    #data_files=[('cal',[glob.glob('cal/*')]),
-    #            ('e31000',[glob.glob('e31000/*')])],
     install_requires=['numpy','scipy','requests','pandas','astropy',],
     zip_safe = True,
     include_package_data = True,
