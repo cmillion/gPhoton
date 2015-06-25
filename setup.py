@@ -23,7 +23,7 @@ setup(
         ],
     keywords = ['astronomy', 'galex', 'photometry', 'ultraviolet'],
     scripts=['bin/gPipeline','bin/gAperture','bin/gFind','bin/gMap'],
-    packages = find_packages(exclude=['gPhoton.tests','gPhoton.analysis']),
+    packages=['gPhoton','gPhoton.cal'],
     install_requires=['numpy','scipy','requests','pandas','astropy',],
     zip_safe = True,
     include_package_data = True,
