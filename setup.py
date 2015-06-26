@@ -25,6 +25,7 @@ setup(
     scripts=['bin/gPipeline','bin/gAperture','bin/gFind','bin/gMap'],
     packages=['gPhoton','gPhoton.cal'],
     install_requires=['numpy','scipy','requests','pandas','astropy',],
-    #download_url = 'http://github.com/cmillion/gPhoton/tarball/gPhoton-{v}'.format(v=__version__),
-    download_url = 'https://dl.dropboxusercontent.com/u/57393828/gPhoton-1.23.0.tar.gz',
+    package_data = {'gPhoton.cal' : ['cal/*.fits','cal/*.tbl']},
+    include_package_data = True,
+    download_url = 'https://dl.dropboxusercontent.com/u/57393828/gPhoton-{v}.tar.gz'.format(v=__version__),
 )
