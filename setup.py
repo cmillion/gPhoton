@@ -27,5 +27,5 @@ setup(
     install_requires=['numpy','scipy','requests','pandas','astropy',],
     zip_safe = True,
     include_package_data = True,
-    download_url = 'https://github.com/cmillion/gPhoton/tarball/gPhoton-{v}.tar.gz'.format(v=__version__),
+    download_url = 'https://github.com/cmillion/gPhoton/tarball/gPhoton-{v}'.format(v=__version__),
 )
