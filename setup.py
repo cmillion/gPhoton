@@ -27,4 +27,5 @@ setup(
     install_requires=['numpy','scipy','requests','pandas','astropy',],
     zip_safe = True,
     include_package_data = True,
+    download_url = 'https://github.com/cmillion/gPhoton/tarball/1.23.0',
 )
