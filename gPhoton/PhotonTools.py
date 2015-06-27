@@ -10,8 +10,6 @@ from CalUtils import *
 
 from MCUtils import *
 
-from CalibrationTools import GPSSECS
-
 # FIXME: This looks like a vestigial test funtion. Does it still have a purpose?
 #	 It is NOT USED ANYWHERE.
 def scanraw6(raw6file):
