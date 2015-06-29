@@ -77,7 +77,7 @@ def PhotonPipe(raw6file,scstfile,band,outbase,aspfile=0,ssdfile=0,
 								   disthead['NAXIS2'])
 
 	if band == 'FUV':
-		xoffset,yoffset = find_FUV_offset(scstfile,calpath)
+		xoffset,yoffset = find_FUV_offset(scstfile)
 	else:
 		xoffset,yoffset = 0.,0.
 
@@ -93,8 +93,6 @@ def PhotonPipe(raw6file,scstfile,band,outbase,aspfile=0,ssdfile=0,
 	print "		stim_coef0, stim_coef1 = "+str(stim_coef0)+", "+str(stim_coef1)
 
 	print "Loading mask file..."
-	#mask = get_fits_data(mask_filename(band,calpath))
-	#maskinfo = get_fits_header(mask_filename(band,calpath))
 	mask, maskinfo = cal.mask(band)
 	npixx = mask.shape[0]
 	npixy = mask.shape[1]
@@ -192,7 +190,7 @@ def PhotonPipe(raw6file,scstfile,band,outbase,aspfile=0,ssdfile=0,
 			y = My*y+By
 			yac = rtaph_yac(yactbl,ya,yb,yamc,eclipse)
 			y = y-yac
-			yac = rtaph_yac2(q,xb,yb,ya,y,calpath,aspum,wig2,wig2data,
+			yac = rtaph_yac2(q,xb,yb,ya,y,aspum,wig2,wig2data,
 												wlk2,wlk2data,clk2,clk2data)
 			y = y + yac
 
