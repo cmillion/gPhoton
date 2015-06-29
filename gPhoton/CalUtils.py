@@ -230,8 +230,8 @@ def find_FUV_offset(scstfile):
 
 		print "         Offsetting FUV image using eclipse of "+str(eclipse)+" and fdttdc of "+str(fdttdc)
 
-		fuv_dx_tbl = cal.offset(band,'x')
-		fuv_dy_tbl = cal.offset(band,'y')
+		fuv_dx_tbl = cal.offset('x')
+		fuv_dy_tbl = cal.offset('y')
 
         fodx_coef_0 = fuv_dx_tbl[eclipse-1,1]
         fody_coef_0 = fuv_dy_tbl[eclipse-1,1]

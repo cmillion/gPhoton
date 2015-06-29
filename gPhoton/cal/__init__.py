@@ -70,9 +70,8 @@ def distortion(band,xy,eclipse,raw_stimsep):
             b=check_band(band).lower(),d=check_xy(xy),i=index)
     return read_data(fn)
 
-def offset(band,xy):
-    fn = '{b}_d{d}_fdttdc_coef_0.tbl'.format(
-            b=check_band(band).lower(),d=check_xy(xy))
+def offset(xy):
+    fn = 'fuv_d{d}_fdttdc_coef_0.tbl'.format(d=check_xy(xy))
     return read_data(fn)
 
 def mask(band):
