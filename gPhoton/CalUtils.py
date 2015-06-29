@@ -228,27 +228,27 @@ def find_FUV_offset(scstfile):
 		print "ERROR: FUV header values missing from SCST."
 		return 0.,0.
 
-		print "Offsetting FUV image for eclipse {e} at {t} degrees.".format(
+	print "Offsetting FUV image for eclipse {e} at {t} degrees.".format(
 															e=eclipse, t=fdttdc)
 
-		#fuv_dx_tbl = cal.offset('x')
-		#fuv_dy_tbl = cal.offset('y')
+	#fuv_dx_tbl = cal.offset('x')
+	#fuv_dy_tbl = cal.offset('y')
 
-		fodx_coef_0 = cal.offset('x')[eclipse-1,1]
-		fody_coef_0 = cal.offset('y')[eclipse-1,1]
+	fodx_coef_0 = cal.offset('x')[eclipse-1,1]
+	fody_coef_0 = cal.offset('y')[eclipse-1,1]
 
-		fodx_coef_1 = 0.
-		fody_coef_1 = 0.3597
-		if (fdttdc <= 20.) or (fdttdc >= 40.):
-			print "ERROR: FDTTDC is out of range at {t}".format(t=fdttdc)
-			return 0.,0.
-		else:
-			xoffset = fodx_coef_0 - (fodx_coef_1 * (fdttdc - 29.))
-			yoffset = fody_coef_0 - (fody_coef_1 * (fdttdc - 29.))
-			print "Setting FUV offsets to x={x}, y={y}".format(
+	fodx_coef_1 = 0.
+	fody_coef_1 = 0.3597
+	if (fdttdc <= 20.) or (fdttdc >= 40.):
+		print "ERROR: FDTTDC is out of range at {t}".format(t=fdttdc)
+		return 0.,0.
+	else:
+		xoffset = fodx_coef_0 - (fodx_coef_1 * (fdttdc - 29.))
+		yoffset = fody_coef_0 - (fody_coef_1 * (fdttdc - 29.))
+		print "Setting FUV offsets to x={x}, y={y}".format(
 															x=xoffset,y=yoffset)
 
-		return xoffset, yoffset
+	return xoffset, yoffset
 
 def postCSP_caldata():
 	"""Loads the calibration data for after the CSP event."""
