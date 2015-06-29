@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import gPhoton.gFind
+
+if __name__ == '__main__':
+    gPhoton.gFind.__main__()

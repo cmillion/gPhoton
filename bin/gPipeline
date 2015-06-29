@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import gPhoton.gPipeline
+
+if __name__ == '__main__':
+    gPhoton.gPipeline.__main__()
