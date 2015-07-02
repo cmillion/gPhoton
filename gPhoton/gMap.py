@@ -7,10 +7,10 @@ import dbasetools as dbt
 import gphoton_args as gargs
 import numpy as np
 
-def gMap(band=None,cntfile=False,
-		 coadd=False,detsize=1.25,intfile=False,rrfile=False,skypos=None,
-		 maxgap=1500.,memlight=100.,minexp=1.,overwrite=False,retries=20,
-		 skyrange=None,stepsz=0.,trange=None,verbose=0):
+def gMap(band=None,cntfile=False,coadd=False,detsize=1.25,intfile=False,
+		 rrfile=False,skypos=None,maxgap=1500.,memlight=100.,minexp=1.,
+		 overwrite=False,retries=20,skyrange=None,stepsz=0.,trange=None,
+		 verbose=0,cntcoaddfile=False,intcoaddfile=False):
 	"""Use a mix of strings (if we want to make an output file) and Booleans
 	(False if we do not). I don't think this is the best way (I'd rather
 	have separate variables for the True/False to create an image, and a
@@ -18,24 +18,24 @@ def gMap(band=None,cntfile=False,
 	this is how the code was originally written.
 	"""
 	# FIXME: Maybe?
-	response = True if (intfile or rrfile) else False
 	write_cnt = cntfile if (cntfile) else False
 	write_int = intfile if (intfile) else False
 	write_rr = rrfile if (rrfile) else False
+	write_cnt_coadd = cntcoaddfile if cntcoaddfile else False
+	write_int_coadd = intcoaddfile if intcoaddfile else False
 
-	write_images(band,skypos,trange,args.skyrange,width=False,height=False,
+	write_images(band,skypos,trange,skyrange,width=False,height=False,
 				 write_cnt=write_cnt,write_int=write_int,write_rr=write_rr,
 				 framesz=stepsz,clobber=overwrite,verbose=verbose,
-				 memlight=memlight,coadd=coadd,response=response,
-				 retries=retries)
+				 memlight=memlight,coadd=coadd,retries=retries,
+				 write_cnt_coadd=write_cnt_coadd,
+				 write_int_coadd=write_int_coadd)
 
 def setup_parser(iam='gmap'):
 	parser = argparse.ArgumentParser(description="Generate images / maps.")
 	parser = gargs.common_args(parser,iam)
 	parser.add_argument("--angle", action="store", type=float, dest="angle",
 		default=None, help="The angle subtended in both RA and DEC in degrees.")
-	parser.add_argument("--count", action="store", type=str, dest="cntfile",
-		default=None, help="File name (full path) for the count image.")
 	parser.add_argument("--raangle", action="store", type=float, dest="raangle",
 		help="The angle of sky in degrees that the right ascension subtends. "+
 		"Overrides --angle.",default=None)
@@ -46,8 +46,16 @@ def setup_parser(iam='gmap'):
 	parser.add_argument("--skyrange", action="store", dest="skyrange",
 		type=ast.literal_eval, help="Two element list of ra and dec ranges. "+
 		"Equivalent to separately setting --raangle and decangle.")
+	parser.add_argument("--count", action="store", type=str, dest="cntfile",
+		default=None, help="File name (full path) for the count image.")
 	parser.add_argument("--intensity", action="store", type=str, dest="intfile",
 		default=None, help="File name (full path) for the intensity image.")
+	parser.add_argument("--count_coadd", action="store", type=str,
+		dest="cntcoaddfile", default=None,
+		help="File name (full path) for the count coadd image.")
+	parser.add_argument("--intensity_coadd", action="store", type=str,
+		dest="intcoaddfile", default=None,
+		help="File name (full path) for the intensity coadd image.")
 	parser.add_argument("--memlight", action="store", type=float,
 		dest="memlight", default=100., help="Reduce server-side memory usage "+
 		"by requesting data in chunks of no more than this depth in seconds.")
@@ -62,7 +70,8 @@ def check_args(args,iam='gmap'):
 	if (not args.skyrange and not (args.raangle and args.decangle)
 															and not args.angle):
 		raise SystemExit('Must specify either skyrange or ra/dec angle.')
-	if (args.raangle and not args.decangle) or (not args.raangle and args.decangle):
+	if ((args.raangle and not args.decangle) or
+										(not args.raangle and args.decangle)):
 		raise SystemExit('Must specify both raangle and deangle or neither.')
 
 	# --angle overwrites everything
@@ -101,10 +110,10 @@ def check_args(args,iam='gmap'):
 		if image and os.path.exists(image) and not args.overwrite:
 			raise SystemExit("{f} already exists.".format(f=image))
 		# Check if you need to create a new directory and create it
-		if image and not os.path.isdir(os.path.dirname(image)):
-			print 'Creating directory: {d}'.format(
-									d=os.path.abspath(os.path.dirname(image)))
-			os.makedirs(os.path.abspath(os.path.dirname(image)),0755)
+		#if image and not os.path.isdir(os.path.dirname(image)):
+		#	print 'Creating directory: {d}'.format(
+		#							d=os.path.abspath(os.path.dirname(image)))
+		#	os.makedirs(os.path.abspath(os.path.dirname(image)),0755)
 
 	return args
 
@@ -123,7 +132,8 @@ def __main__():
 		rrfile=args.rrfile, skypos=args.skypos, maxgap=args.maxgap,
 		memlight=args.memlight, minexp=args.minexp, overwrite=args.overwrite,
 		retries=args.retries, skyrange=args.skyrange, stepsz=args.stepsz,
-		trange=args.trange, verbose=args.verbose)
+		trange=args.trange, verbose=args.verbose,
+		cntcoaddfile=args.cntcoaddfile, intcoaddfile=args.intcoaddfile)
 
 if __name__ == "__main__":
     try:
