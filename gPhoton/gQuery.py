@@ -343,8 +343,12 @@ def box(band,ra0,dec0,t0,t1,radius):
 # Return data within a rectangle centered on ra0, dec0
 # TODO: deprecate this and rename it skyrect()
 def rect(band,ra0,dec0,t0,t1,ra,dec):
+    #time,ra,dec,xi,eta,x,y
     return (str(baseURL)+
-        'select time,ra,dec from '+str(baseDB)+'.fGetObjFromRect'+str(band)+'('+
+        'select time,ra,dec,xi,eta,x,y from '+str(baseDB)+'.fGetObjFromRect'+str(band)+'('+
         repr(ra0-ra/2.)+','+repr(ra0+ra/2.)+','+repr(dec0-dec/2.)+','+
         repr(dec0+dec/2.)+','+str(long(t0*tscale))+','+
         str(long(t1*tscale))+',0)'+str(formatURL))
+
+def skyrect(band,ra0,dec0,t0,t1,ra,dec):
+    return '{baseURL}select time,ra,dec,xi,eta,x,y from {baseDB}.fGetObjFromRect{band}AllColumns({ra_min},{ra_max},{dec_min},{dec_max},{t0},{t1},0){formatURL}'.format(baseURL=baseURL,baseDB=baseDB,band=band,ra_min=repr(ra0-ra/2.),ra_max=repr(ra0+ra/2.),dec_min=repr(dec0-dec/2.),dec_max=repr(dec0+dec/2.),t0=str(long(t0*tscale)),t1=str(long(t1*tscale)),formatURL=formatURL)
