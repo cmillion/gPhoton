@@ -9,6 +9,7 @@ import gphoton_args as gargs
 from imagetools import write_jpeg # For JPEG preview image creation
 from dbasetools import suggest_parameters
 from galextools import aper2deg
+from gPhoton import __version__
 
 def gAperture(band,skypos,radius,csvfile=None,annulus=None, coadd=False,
               stepsz=False,verbose=0,clobber=False,trange=None,tranges=None,
@@ -18,6 +19,7 @@ def gAperture(band,skypos,radius,csvfile=None,annulus=None, coadd=False,
     a CSV file if outfile is specified. Can be called from the interpreter.
     """
     if verbose>1:
+        print "Using v{v} of gAperture.".format(v=__version__)
         print "Generating a light curve with the following paramters:"
         print " band:    {band}".format(band=band)
         print " skypos:  {skypos}".format(skypos=skypos)
@@ -106,7 +108,7 @@ def check_args(args,iam='gaperture'):
     return args
 
 def reconstruct_command(args):
-    """Reconstruct the command line."""
+    """Rebuild the equivalent command line for this call to gAperture."""
     cmd = " ".join(sys.argv)
     if args.suggest:
         cmd = "{cmd} --annulus [{i},{o}] --aperture {a}".format(
@@ -128,6 +130,7 @@ def setup_file(args):
                                                           csvfile=args.csvfile)
             raise SystemExit
         f = open(args.csvfile,args.iocode)
+        f.write('| v{v}\n'.format(v=__version__))
         if args.addhdr:
             if args.verbose:
                 print 'Recording command line construction to {f}'.format(

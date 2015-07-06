@@ -12,6 +12,7 @@ import galextools as gxt
 import curvetools as ct
 import cal
 from gQuery import tscale
+from gPhoton import __version__
 
 def define_wcs(skypos,skyrange,width=False,height=False,verbose=0,
 			   pixsz=0.000416666666666667):
@@ -62,6 +63,7 @@ def fits_header(band,skypos,tranges,skyrange,width=False,height=False,
 	#hdu.header['RA_CENT'],hdu.header['DEC_CENT'] = wcs.wcs.crval # Dupe.
 	hdu.header['EQUINOX'],hdu.header['EPOCH'] = 2000., 2000.
 	hdu.header['BAND'] = 1 if band=='NUV' else 2
+	hdu.header['VERSION'] = 'v{v}'.format(v=__version__)
 	# Do we want to set the following?
 	#hdu.header['OW'] = 1
 	#hdu.header['DIRECT'] = 1
