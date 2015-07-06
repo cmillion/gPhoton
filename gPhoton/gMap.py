@@ -7,7 +7,7 @@ import dbasetools as dbt
 import gphoton_args as gargs
 import numpy as np
 
-def gMap(band=None,cntfile=False,coadd=False,detsize=1.25,intfile=False,
+def gMap(band,cntfile=False,coadd=False,detsize=1.25,intfile=False,
 		 rrfile=False,skypos=None,maxgap=1500.,memlight=100.,minexp=1.,
 		 overwrite=False,retries=20,skyrange=None,stepsz=0.,trange=None,
 		 verbose=0,cntcoaddfile=False,intcoaddfile=False):
@@ -23,6 +23,15 @@ def gMap(band=None,cntfile=False,coadd=False,detsize=1.25,intfile=False,
 	write_rr = rrfile if (rrfile) else False
 	write_cnt_coadd = cntcoaddfile if cntcoaddfile else False
 	write_int_coadd = intcoaddfile if intcoaddfile else False
+
+	# If gMap is called via an import, and no trange is specified, then use a database
+	# call to get the appropriate time range.
+	if trange is None:
+		trange=dbt.fGetTimeRanges(band, skypos,
+					  trange=[6.E8,11.E8],
+					  maxgap=maxgap, minexp=minexp,
+					  detsize=detsize,
+					  retries=retries)
 
 	write_images(band,skypos,trange,skyrange,width=False,height=False,
 				 write_cnt=write_cnt,write_int=write_int,write_rr=write_rr,
@@ -105,7 +114,7 @@ def check_args(args,iam='gmap'):
 	if args.memlight and args.memlight <= 0.:
 		raise SystemExit("Maximum data chunk per must be > 0 seconds.")
 
-	for image in [args.cntfile, args.intfile, args.rrfile]:
+	for image in [args.cntfile, args.intfile]:#, args.rrfile]:
 		# Check for overwriting existing images.
 		if image and os.path.exists(image) and not args.overwrite:
 			raise SystemExit("{f} already exists.".format(f=image))
