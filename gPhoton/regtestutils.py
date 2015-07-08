@@ -45,14 +45,14 @@ def construct_row(i,band,objid,mcat,data):
             data['bg']['simple'][0], data['bg']['cheese'][0],
             data['bg']['eff_area'])
 
-def datamaker(band,skypos,outfile,maglimit=20.,detsize=0.5,margin=0.005,
+def datamaker(band,skypos,outfile,maglimit=20.,margin=0.005,
               radius=gt.aper2deg(4),annulus=[0.0083,0.025]):
     extant_objids = file_setup(outfile)
     if extant_objids==False:
         print 'NOT RUNNING!!*!'
         return False
     uniques = dt.find_unique_sources(band,skypos[0],skypos[1],
-                                                    detsize,maglimit=maglimit)
+                                                    margin,maglimit=maglimit)
     if uniques is None:
         print 'No sources at this position.'
         return

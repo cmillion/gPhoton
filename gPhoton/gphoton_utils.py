@@ -51,11 +51,13 @@ def data_errors(catmag,t,band,sigma=3,mode='mag'):
 	return ymin, ymax
 
 def dmag_errors(t,band,sigma=3,mode='mag',mags=np.arange(13,24,0.1)):
-    """Given an exposure time, give dmag error bars at a range of magnitudes."""
-    cnts = gt.mag2counts(mags,band)
-    ymin = (cnts*t/t)-sigma*np.sqrt(cnts*t)/t
-    ymax = (cnts*t/t)+sigma*np.sqrt(cnts*t)/t
-    if mode=='mag':
-        ymin=mags-gt.counts2mag(ymin,band)
-        ymax=mags-gt.counts2mag(ymax,band)
-    return mags,ymin,ymax
+	"""Given an exposure time, give dmag error bars at a range of magnitudes."""
+	cnts = gt.mag2counts(mags,band)*t
+    #ymin = (cnts*t/t)-sigma*np.sqrt(cnts*t)/t
+    #ymax = (cnts*t/t)+sigma*np.sqrt(cnts*t)/t
+	ymin = (cnts-sigma/np.sqrt(cnts))/t
+	ymax = (cnts+sigma/np.sqrt(cnts))/t
+	if mode=='mag':
+		ymin=mags-gt.counts2mag(ymin,band)
+		ymax=mags-gt.counts2mag(ymax,band)
+	return mags,ymin,ymax

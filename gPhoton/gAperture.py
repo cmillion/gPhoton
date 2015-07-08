@@ -13,7 +13,7 @@ from gPhoton import __version__
 
 def gAperture(band,skypos,radius,csvfile=None,annulus=None, coadd=False,
               stepsz=False,verbose=0,clobber=False,trange=None,tranges=None,
-              minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,iocode='wb',
+              minexp=1.,maxgap=1500.,maskdepth=20.,maskradius=1.5,iocode='wb',
               photonfile=None):
     """Runs gAperture and returns the data in a python dict() and as
     a CSV file if outfile is specified. Can be called from the interpreter.

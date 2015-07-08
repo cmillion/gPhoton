@@ -91,22 +91,45 @@ def fGetTimeRanges(band,skypos,trange=None,detsize=1.25,verbose=0,
 
     return np.array(chunks,dtype='float64')
 
-def exposure(band,trange,verbose=0,retries=20,photonfile=None):
-    """Compute the effective exposure time for a time range."""
+def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966):
+    """Calculate empirical deadtime (per global count rate) using revised
+    formulas.
+    """
+    model = {'FUV':[-0.000386611005025,76.5419507472],
+             'NUV':[-0.000417794996843,77.1516557638]}
+    gcr = gQuery.getValue(gQuery.globalcounts(band,trange[0],trange[1]))
+    refrate = model[band][1]/feeclkratio
+    scr = model[band][0]*gcr+model[band][1]
+    return (1-scr/feeclkratio/refrate)
+
+def compute_shutter(band,trange,verbose=0,retries=20,shutgap=0.05):
+    t = np.sort(np.array(gQuery.getArray(gQuery.uniquetimes(
+        'FUV',trange[0],trange[1])),dtype='float64')[:,0]/gQuery.tscale)
+    ix = np.where(t[1:]-t[:-1]>=shutgap)
+    return len(ix[0])*shutgap
+
+def exposure(band,trange,verbose=0,retries=20):
     rawexpt = trange[1]-trange[0]
-    if rawexpt<=0:
-        return 0.
-    if photonfile:
-        print ""
-    else:
-        shutter = gQuery.getArray(gQuery.shutdead(band,trange[0],trange[1]),
-                                        verbose=verbose,retries=retries)[0][0]
-    # NOTE: The deadtime correction in shutdead does not work properly in FUV
-    # so we're doing it separately for now.
-    deadtime = gQuery.getValue(gQuery.deadtime(band,trange[0],trange[1]),
-                                            verbose=verbose,retries=retries)
-    #return (rawexpt-shutdead[0][0])*(1.-shutdead[1][0])
+    shutter = compute_shutter(band,trange,verbose=verbose,retries=retries)
+    deadtime = empirical_deadtime(band,trange,verbose=verbose,retries=retries)
     return (rawexpt-shutter)*(1.-deadtime)
+
+#def exposure(band,trange,verbose=0,retries=20,photonfile=None):
+#    """Compute the effective exposure time for a time range."""
+#    rawexpt = trange[1]-trange[0]
+#    if rawexpt<=0:
+#        return 0.
+#    if photonfile:
+#        print ""
+#    else:
+#        shutter = gQuery.getArray(gQuery.shutdead(band,trange[0],trange[1]),
+#                                        verbose=verbose,retries=retries)[0][0]
+#    # NOTE: The deadtime correction in shutdead does not work properly in FUV
+#    # so we're doing it separately for now.
+#    deadtime = gQuery.getValue(gQuery.deadtime(band,trange[0],trange[1]),
+#                                            verbose=verbose,retries=retries)
+#    #return (rawexpt-shutdead[0][0])*(1.-shutdead[1][0])
+#    return (rawexpt-shutter)*(1.-deadtime)
 
 def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,
                     retries=20,chunksz=10.e6,coadd=False):

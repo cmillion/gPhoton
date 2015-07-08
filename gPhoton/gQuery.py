@@ -182,6 +182,16 @@ def deadtime(band,t0,t1,feeclkratio=0.966,tec2fdead=5.52e-6):
         'PhotonsV where time >= '+str(long(t0*tscale))+' and time < '+
         str(long(t1*tscale))+') x'+str(formatURL))
 
+def globalcounts(band,t0,t1):
+    """Return the total number of detector events within a time range."""
+    return ('{baseURL}select count(t) from (select time as t from {baseDB}.{band}PhotonsV '+
+            'where time >= {t0} and time < {t1} union all select time as t '+
+            'from {baseDB}.{band}PhotonsNULLV where time >= '+
+            '{t0} and time < {t1}) x{formatURL}').format(baseURL=baseURL,
+                baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
+                t1=str(long(t1*tscale)), formatURL=formatURL)
+
+
 def alltimes(band,t0,t1):
     """Return the time stamps of every detector event within a time range."""
     return ('{baseURL}select t from (select time as t from {baseDB}.{band}PhotonsV '+
@@ -190,6 +200,16 @@ def alltimes(band,t0,t1):
             '{t0} and time < {t1}) x{formatURL}').format(baseURL=baseURL,
                 baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
                 t1=str(long(t1*tscale)), formatURL=formatURL)
+
+def uniquetimes(band,t0,t1):
+    """Return the _unique_ timestamps for all detector events within range."""
+    return ('{baseURL}select distinct t from (select time as t from {baseDB}.{band}PhotonsV '+
+            'where time >= {t0} and time < {t1} union all select time as t '+
+            'from {baseDB}.{band}PhotonsNULLV where time >= '+
+            '{t0} and time < {t1}) x{formatURL}').format(baseURL=baseURL,
+                baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
+                t1=str(long(t1*tscale)), formatURL=formatURL)
+
 
 def boxcount(band,t0,t1,xr,yr):
     """Find the number of events inside of a box defined by [xy] range in
