@@ -116,7 +116,6 @@ def integrate_map(band,skypos,tranges,skyrange,width=False,height=False,
 		# FIXME: memlight gives slightly wrong answers right now
 		# This is probably due to a quirk of SQL, per issue #140.
 		# Deprecating memlight until this can be resolved.
-		memlight = False
 		step = memlight if memlight else trange[1]-trange[0]
 		for i in np.arange(trange[0],trange[1],step):
 			t0,t1=i,i+step
