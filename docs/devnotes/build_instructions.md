@@ -4,6 +4,7 @@
     cd gPhoton
     git fetch
     git checkout -b BRANCH
+    git pull origin BRANCH
 2. Run `python setup.py sdist` from the checkout directory to generate a dist file (in ./dist/) with the correct naming convention.
 3. Copy that tar.gz file into your Public Dropbox directory and copy the link.
 4. Replace download_url in setup.py with that link.
