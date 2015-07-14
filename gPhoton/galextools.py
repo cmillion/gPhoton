@@ -104,9 +104,11 @@ def detbg(area, band):
 	return area * rate / ((1.5/(60*60))**2.)
 
 def counts2mag(cps,band):
-	"""Converts GALEX counts per second to AB magnitudes"""
-	scale = 18.82 if band=='FUV' else 20.08
-	return -2.5 * np.log10(cps) + scale
+    """Converts GALEX counts per second to AB magnitudes"""
+    scale = 18.82 if band=='FUV' else 20.08
+    with np.errstate(invalid='ignore'):
+        mag = -2.5 * np.log10(cps) + scale
+    return mag
 
 def mag2counts(mag,band):
 	"""Converts AB magnitudes to GALEX counts per second."""
