@@ -286,6 +286,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         lcurve['bg']['simple']=0.
         lcurve['bg']['cheese']=0.
 
+    # NOTE: Why does this use t[01]_data instead of t[01]?
     lcurve['exptime'] = np.array(
         [dbt.compute_exptime(band,trange,skypos=[ra0,dec0],
                              verbose=verbose,coadd=coadd)

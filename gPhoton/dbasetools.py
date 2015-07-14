@@ -111,6 +111,8 @@ def compute_shutter(band,trange,verbose=0,retries=20,shutgap=0.05):
 
 def exposure(band,trange,verbose=0,retries=20):
     rawexpt = trange[1]-trange[0]
+    if rawexpt==0.:
+        return 0.
     shutter = compute_shutter(band,trange,verbose=verbose,retries=retries)
     deadtime = empirical_deadtime(band,trange,verbose=verbose,retries=retries)
     return (rawexpt-shutter)*(1.-deadtime)
