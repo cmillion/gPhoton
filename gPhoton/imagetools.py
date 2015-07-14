@@ -130,7 +130,7 @@ def integrate_map(band,skypos,tranges,skyrange,width=False,height=False,
 	return img
 
 def write_jpeg(filename,band,skypos,tranges,skyrange,width=False,height=False,
-			   stepsz=1.,clobber=False,verbose=0,retries=20):
+			   stepsz=1.,overwrite=False,verbose=0,retries=20):
 	"""Write a 'preview' jpeg image from a count map."""
 	scipy.misc.imsave(filename,integrate_map(band,skypos,tranges,skyrange,
 					  width=width,height=height,verbose=verbose,
@@ -239,7 +239,7 @@ def create_image(band,skypos,tranges,skyrange,framesz=0,width=False,
 
 def write_images(band,skypos,tranges,skyrange,write_cnt=False,write_int=False,
 				 write_rr=False,framesz=0,width=False,height=False,verbose=0,
-				 memlight=False,coadd=False,clobber=False,retries=20,
+				 memlight=False,coadd=False,overwrite=False,retries=20,
 				 write_cnt_coadd=False, write_int_coadd=False):
 	"""Generate a write various maps to files."""
 	# No files were requested, so don't bother doing anything.
@@ -264,6 +264,6 @@ def write_images(band,skypos,tranges,skyrange,write_cnt=False,write_int=False,
 		hdulist = pyfits.HDUList([hdu])
 		if verbose:
 			print 'Writing image to {o}'.format(o=imtypes[i])
-		hdulist.writeto(imtypes[i],clobber=clobber)
+		hdulist.writeto(imtypes[i],overwrite=overwrite)
 
 	return

@@ -349,7 +349,7 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
 
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                 stepsz=None, trange=None, tranges=None, verbose=0, coadd=False,
-                iocode='wb',detsize=1.25,clobber=False,
+                iocode='wb',detsize=1.25,overwrite=False,
                 minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,
                 photonfile=None):
     data = getcurve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
