@@ -98,7 +98,8 @@ def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966):
     model = {'FUV':[-0.000386611005025,76.5419507472],
              'NUV':[-0.000417794996843,77.1516557638]}
     rawexpt = trange[1]-trange[0]
-    gcr = gQuery.getValue(gQuery.globalcounts(band,trange[0],trange[1]))/rawexpt
+    gcr = gQuery.getValue(gQuery.globalcounts(band,trange[0],trange[1]),
+                          verbose=verbose)/rawexpt
     refrate = model[band][1]/feeclkratio
     scr = model[band][0]*gcr+model[band][1]
     return (1-scr/feeclkratio/refrate)
@@ -106,7 +107,8 @@ def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966):
 def compute_shutter(band,trange,verbose=0,retries=20,shutgap=0.05):
     try:
         t = np.sort(np.array(gQuery.getArray(gQuery.uniquetimes(
-            band,trange[0],trange[1])),dtype='float64')[:,0]/gQuery.tscale)
+                    band,trange[0],trange[1]),verbose=verbose),
+                    dtype='float64')[:,0]/gQuery.tscale)
     except IndexError: # Shutter this whole time range.
         return trange[1]-trange[0]
     ix = np.where(t[1:]-t[:-1]>=shutgap)

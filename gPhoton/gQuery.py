@@ -3,6 +3,7 @@
 from MCUtils import manage_requests
 import CalUtils
 from galextools import isPostCSP
+from gPhoton import time_id
 
 tscale = 1000. # time in the database is "integer-ized" by multiplying by this
 
@@ -11,12 +12,9 @@ formatted query to the MAST database. Don't change them unless you know what
 you're doing.
 """
 baseURL = 'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
-#baseDB = 'GPFDB10.dbo' # >52.5 deg declination
 baseDB = 'GPFCore.dbo'
-#baseDB = 'GPLAdmin.dbo' # Full GR6/7 corpus!
 MCATDB = 'GR6Plus7.dbo'
-#baseDbo = 'Gr6plus7.dbo'
-formatURL = '&format=json&timeout={}'
+formatURL = ' -- '+str(time_id)+'&format=json&timeout={}'
 
 def hasNaN(query):
     """Check if there is NaN in a query (or any string) and, if so, raise an
