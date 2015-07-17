@@ -42,7 +42,7 @@ def print_inline(text,blanks=60):
         stdout.flush()
         return
 
-def manage_requests(query,maxcnt=100,wait=10,timeout=10):
+def manage_requests(query,maxcnt=100,wait=10,timeout=60):
 	""" Make simple 'requests' calls slightly more robust against network
     issues.
     """
