@@ -42,14 +42,14 @@ def print_inline(text,blanks=60):
         stdout.flush()
         return
 
-def manage_requests(query,maxcnt=100,wait=10):
+def manage_requests(query,maxcnt=100,wait=10,timeout=10):
 	""" Make simple 'requests' calls slightly more robust against network
     issues.
     """
 	cnt = 0
 	while cnt < maxcnt:
 		try:
-			r = requests.get(query)
+			r = requests.get(query,timeout=timeout)
 			# HACK: This specifically tests for the return structure
 			#  from the MAST photon database and is therefore
 			#  not a good general test condition.
