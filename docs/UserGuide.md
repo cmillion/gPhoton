@@ -71,6 +71,8 @@ You should use `pip` to get the latest versions of _requests_ and _astropy_. If 
     sudo port install py27-requests
     sudo port install py27-pandas
 
+Note: If your installation of requests complains about missing library dependencies, you may need to install them explicitly with the following command: `sudo pip install --upgrade pyopenssl ndg-httpsclient pyasn1`
+
 ######Windows
 **Draft.** We haven't actually tried to do any of this on Windows. We suggest trying the [Enthought Python Distribution (EPD)](https://www.enthought.com/products/epd/) or the aforementioned [Anaconda](https://store.continuum.io/cshop/anaconda/) distribution.
 
