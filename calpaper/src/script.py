@@ -19,27 +19,32 @@ bands = ['NUV','FUV']
 
 ra0,dec0=skypos['LDS749B']
 
-band = 'FUV'
-outfile = 'LDS749B_FUV.csv'
-datamaker(band,skypos['LDS749B'],outfile)
+from gPhoton.regtestutils import datamaker
+datamaker('FUV',[323.06766667,0.25400000],'LDS749B_dm_FUV.csv',margin=0.001,searchradius=0.001)
 
-band = 'NUV'
-outfile = 'LDS749B_NUV.csv'
-datamaker(band,skypos['LDS749B'],outfile)
+from gPhoton.regtestutils import datamaker
+datamaker('NUV',[323.06766667,0.25400000],'LDS749B_dm_NUV.csv',margin=0.001,searchradius=0.001)
 
-"""To avoid wasting a lot of time on the same tiles and also biasing the
-result with the same few super deep tiles (LDS and CDFS, mostly), the
-following filters on <5000s coadd depth, more or less, based upon
-the most recent coadd level database coverage reference table.
+"""The following gCalrun commands generate photometry for a large number of
+random sources, which serves as a test of relative photometry.
 """
+./gCalrun -f 'DPFCore_calrun_FUV.csv' -b 'FUV' --rarange [0,360] --decrange [-90,90] -n 100 --seed 323 -v 1
 
-nsamples = 10
-rarange=[0,360]
-decrange=[53,90]
+./gCalrun -f 'DPFCore_calrun_NUV.csv' -b 'NUV' --rarange [0,360] --decrange [-90,90] -n 100 --seed 323 -v 1
 
-./gCalrun.py -f 'DB10_calrun_FUV.csv' -b 'FUV' --rarange [0,360] --decrange [53,90] -n 100 --seed 323 -v 1
+"""The following gAperture commands generate photometry for the full depth
+of LDS749B observations, a test of absolute photometry.
+"""
+./gAperture --skypos [323.06766667,0.25400000] -a 0.005 --annulus [0.01,0.02] -b 'NUV' -v 2 -f 'LDS749B_NUV.csv' --maxgap 50 --minexp 90 --overwrite
 
-./gCalrun.py -f 'DB10_calrun_NUV.csv' -b 'NUV' --rarange [0,360] --decrange [53,90] -n 100 --seed 323 -v 1
+./gAperture --skypos [323.06766667,0.25400000] -a 0.005 --annulus [0.01,0.02] -b 'NUV' -v 2 -f 'LDS749B_NUV_-9.csv' --maxgap 50 --minexp 90 --overwrite --t0 1 --t1 900000000.
+
+./gAperture --skypos [323.06766667,0.25400000] -a 0.005 --annulus [0.01,0.02] -b 'NUV' -v 2 -f 'LDS749B_NUV_9-.csv' --maxgap 50 --minexp 90 --overwrite --t0 900000000. --t1 1100000000.
+
+
+./gAperture --skypos [323.06766667,0.25400000] -a 0.005 --annulus [0.01,0.02] -b 'FUV' -v 2 -f 'LDS749B_FUV.csv' --maxgap 50 --minexp 90 --overwrite
+
+
 
 ###############################################################################
 def error(data,band,radius,annulus):

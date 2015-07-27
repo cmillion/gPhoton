@@ -12,7 +12,7 @@ from galextools import aper2deg
 from gPhoton import __version__
 
 def gAperture(band,skypos,radius,csvfile=None,annulus=None, coadd=False,
-              stepsz=False,verbose=0,clobber=False,trange=None,tranges=None,
+              stepsz=False,verbose=0,overwrite=False,trange=None,tranges=None,
               minexp=1.,maxgap=1500.,maskdepth=20.,maskradius=1.5,iocode='wb',
               photonfile=None):
     """Runs gAperture and returns the data in a python dict() and as
@@ -34,7 +34,7 @@ def gAperture(band,skypos,radius,csvfile=None,annulus=None, coadd=False,
                                                         photonfile=photonfile)
     data = ct.write_curve(band, skypos[0], skypos[1], radius, csvfile=csvfile,
                           annulus=annulus, stepsz=stepsz, verbose=verbose,
-                          clobber=clobber, trange=trange, tranges=tranges,
+                          overwrite=overwrite, trange=trange, tranges=tranges,
                           coadd=coadd, minexp=minexp, maxgap=maxgap,
                           iocode = iocode, maskdepth=maskdepth,
                           maskradius=maskradius)
@@ -152,7 +152,7 @@ def stamp(args):
         args.skyrange = [width,width]
         write_jpeg(args.stamp, args.band, args.skypos, args.trange,
                    args.skyrange, width=False, height=False,
-                   stepsz=args.stepsz, clobber=args.overwrite,
+                   stepsz=args.stepsz, overwrite=args.overwrite,
                    verbose=args.verbose)
         return
 
@@ -165,7 +165,7 @@ def __main__():
     # TODO: add support for trange(s)
     data = gAperture(args.band, args.skypos, args.radius, csvfile=args.csvfile,
                      annulus=args.annulus, stepsz=args.stepsz,
-                     verbose=args.verbose, clobber=args.overwrite,
+                     verbose=args.verbose, overwrite=args.overwrite,
                      trange=[args.tmin,args.tmax], tranges=args.trange,
                      coadd=args.coadd, minexp=args.minexp, maxgap=args.maxgap,
                      iocode=args.iocode, maskdepth=args.maskdepth,

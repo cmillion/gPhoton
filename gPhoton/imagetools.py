@@ -85,23 +85,27 @@ def fits_header(band,skypos,tranges,skyrange,width=False,height=False,
 	return hdu
 
 def makemap(band,skypos,trange,skyrange,response=False,verbose=0):
-    imsz = gxt.deg2pix(skypos,skyrange)
-    photons = np.array(gQuery.getArray(gQuery.skyrect(band,
+	imsz = gxt.deg2pix(skypos,skyrange)
+	photons = np.array(gQuery.getArray(gQuery.skyrect(band,
 		skypos[0],skypos[1],trange[0],trange[1],skyrange[0],skyrange[1]),
 		verbose=verbose),dtype='float64')
-    events = {'t':photons[:,0 ]/tscale, 'ra':photons[:,1], 'dec':photons[:,2],
-              'xi':photons[:,3],'eta':photons[:,4],
-			  'x':photons[:,5], 'y':photons[:,6]}
-    if len(events['t'])==0:
-        return np.zeros(imsz)
-    events = ct.hashresponse(band,events)
-    wcs = define_wcs(skypos,skyrange,width=False,height=False)
-    coo = zip(events['ra'],events['dec'])
-    foc = wcs.sip_pix2foc(wcs.wcs_world2pix(coo,1),1)
-    weights = 1./events['response'] if response else None
-    H,xedges,yedges=np.histogram2d(foc[:,1]-0.5,foc[:,0]-0.5,bins=imsz,
+	try:
+		events = {'t':photons[:,0 ]/tscale,'ra':photons[:,1],'dec':photons[:,2],
+			'xi':photons[:,3],'eta':photons[:,4],
+			'x':photons[:,5], 'y':photons[:,6]}
+	except IndexError:
+		if verbose>2:
+			print 'No events found at {s} +/- {r} in {t}.'.format(
+				s=skypos,r=skyrange,t=trange)
+		return np.zeros(imsz)
+	events = ct.hashresponse(band,events)
+	wcs = define_wcs(skypos,skyrange,width=False,height=False)
+	coo = zip(events['ra'],events['dec'])
+	foc = wcs.sip_pix2foc(wcs.wcs_world2pix(coo,1),1)
+	weights = 1./events['response'] if response else None
+	H,xedges,yedges=np.histogram2d(foc[:,1]-0.5,foc[:,0]-0.5,bins=imsz,
 		range=([ [0,imsz[0]],[0,imsz[1]] ]),weights=weights)
-    return H
+	return H
 
 def integrate_map(band,skypos,tranges,skyrange,width=False,height=False,
 				  verbose=0,memlight=False,hdu=False,retries=20,response=False):
@@ -130,7 +134,7 @@ def integrate_map(band,skypos,tranges,skyrange,width=False,height=False,
 	return img
 
 def write_jpeg(filename,band,skypos,tranges,skyrange,width=False,height=False,
-			   stepsz=1.,clobber=False,verbose=0,retries=20):
+			   stepsz=1.,overwrite=False,verbose=0,retries=20):
 	"""Write a 'preview' jpeg image from a count map."""
 	scipy.misc.imsave(filename,integrate_map(band,skypos,tranges,skyrange,
 					  width=width,height=height,verbose=verbose,
@@ -239,7 +243,7 @@ def create_image(band,skypos,tranges,skyrange,framesz=0,width=False,
 
 def write_images(band,skypos,tranges,skyrange,write_cnt=False,write_int=False,
 				 write_rr=False,framesz=0,width=False,height=False,verbose=0,
-				 memlight=False,coadd=False,clobber=False,retries=20,
+				 memlight=False,coadd=False,overwrite=False,retries=20,
 				 write_cnt_coadd=False, write_int_coadd=False):
 	"""Generate a write various maps to files."""
 	# No files were requested, so don't bother doing anything.
@@ -264,6 +268,6 @@ def write_images(band,skypos,tranges,skyrange,write_cnt=False,write_int=False,
 		hdulist = pyfits.HDUList([hdu])
 		if verbose:
 			print 'Writing image to {o}'.format(o=imtypes[i])
-		hdulist.writeto(imtypes[i],clobber=clobber)
+		hdulist.writeto(imtypes[i],clobber=overwrite)
 
 	return

@@ -289,7 +289,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     lcurve['exptime'] = np.array(
         [dbt.compute_exptime(band,trange,skypos=[ra0,dec0],
                              verbose=verbose,coadd=coadd)
-            for trange in zip(lcurve['t0_data'],lcurve['t1_data'])])
+            for trange in zip(lcurve['t0'],lcurve['t1'])])
     if verbose:
         mc.print_inline("Returning curve data.")
     lcurve['photons'] = data
@@ -349,7 +349,7 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
 
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                 stepsz=None, trange=None, tranges=None, verbose=0, coadd=False,
-                iocode='wb',detsize=1.25,clobber=False,
+                iocode='wb',detsize=1.25,overwrite=False,
                 minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,
                 photonfile=None):
     data = getcurve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
