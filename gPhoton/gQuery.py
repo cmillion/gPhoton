@@ -201,13 +201,18 @@ def alltimes(band,t0,t1):
 
 def uniquetimes(band,t0,t1):
     """Return the _unique_ timestamps for all detector events within range."""
-    return ('{baseURL}select distinct t from (select time as t from {baseDB}.{band}PhotonsV '+
-            'where time >= {t0} and time < {t1} union all select time as t '+
-            'from {baseDB}.{band}PhotonsNULLV where time >= '+
-            '{t0} and time < {t1}) x{formatURL}').format(baseURL=baseURL,
+    #return ('{baseURL}select distinct t from (select time as t from #{baseDB}.{band}PhotonsV '+
+#            'where time >= {t0} and time < {t1} union all select time as t '+
+#            'from {baseDB}.{band}PhotonsNULLV where time >= '+
+#            '{t0} and time < {t1}) x order by t'+
+#            '{formatURL}').format(baseURL=baseURL,
+#                baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
+#                t1=str(long(t1*tscale)), formatURL=formatURL)
+    return ('{baseURL}select distinct time from {baseDB}.{band}PhotonsV '+
+            'where time >= {t0} and time < {t1} order by time'+
+            '{formatURL}').format(baseURL=baseURL,
                 baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
                 t1=str(long(t1*tscale)), formatURL=formatURL)
-
 
 def boxcount(band,t0,t1,xr,yr):
     """Find the number of events inside of a box defined by [xy] range in

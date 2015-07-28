@@ -106,13 +106,15 @@ def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966):
 
 def compute_shutter(band,trange,verbose=0,retries=20,shutgap=0.05):
     try:
-        t = np.sort(np.array(gQuery.getArray(gQuery.uniquetimes(
-                    band,trange[0],trange[1]),verbose=verbose),
-                    dtype='float64')[:,0]/gQuery.tscale)
+        t = np.array(gQuery.getArray(gQuery.uniquetimes(band,
+                     trange[0],trange[1]),verbose=verbose),
+                     dtype='float64')[:,0]/gQuery.tscale
     except IndexError: # Shutter this whole time range.
         return trange[1]-trange[0]
+    t = np.sort(np.unique(np.append(t,trange)))
     ix = np.where(t[1:]-t[:-1]>=shutgap)
-    return len(ix[0])*shutgap
+    return np.array(t[1:]-t[:-1])[ix].sum()
+    #return len(ix[0])*shutgap
 
 def exposure(band,trange,verbose=0,retries=20):
     rawexpt = trange[1]-trange[0]
