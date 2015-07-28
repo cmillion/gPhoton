@@ -160,6 +160,10 @@ def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,
 					width=width,height=height,verbose=verbose,
 					memlight=memlight,hdu=hdu,retries=retries,
 					response=response)
+				if img.min() == 0 and img.max() == 0:
+					if verbose>1:
+						print 'No data in frame {i}. Skipping...'.format(i=i)
+					continue
 				try:
 					mv.append(img)
 				except:
