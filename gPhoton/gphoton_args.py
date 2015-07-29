@@ -42,9 +42,9 @@ def common_args(parser,function_name,
         help="Center Declination position in decimal degrees. "
              "Must be 0 < DEC < 90.")
     parser.add_argument("--detsize", action="store", type=float,
-        dest="detsize", default=1.25,
+        dest="detsize", default=1.1,
         help="Set the effective field diameter in degrees for the "
-             "exposure search.  Default = 1.25.")
+             "exposure search.  Default = 1.1.")
     parser.add_argument("-g", "--gap", "--maxgap", action="store",
         type=float, dest="maxgap", default=1500.,
         help="Maximum gap size in seconds for data to be considered "

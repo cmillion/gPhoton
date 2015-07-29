@@ -37,6 +37,7 @@ def xieta2colrow(xi, eta, band, detsize=1.25):
     #cut = ((col > 0.) & (col < flat.shape[0]-1) &
     #       (row > 0.) & (row < flat.shape[1]-1))
     #cut = np.where(ix == True)
+    #ix = np.where((1.25/800.)*mc.distance(col,row,400,400)=detsize)
     return col, row
 
 def hashresponse(band,events,verbose=0):
@@ -298,12 +299,12 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
 def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
              trange=None, tranges=None, verbose=0, coadd=False, minexp=1.,
              maxgap=1., maskdepth=20, maskradius=1.5,
-             photonfile=None):
+             photonfile=None, detsize=1.1):
     if verbose:
         mc.print_inline("Getting exposure ranges.")
     if tranges is None:
         tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
-                                 maxgap=maxgap, minexp=minexp, verbose=verbose)
+                maxgap=maxgap, minexp=minexp, verbose=verbose, detsize=detsize)
     elif not np.array(tranges).shape:
         print "No exposure time at this location: [{ra},{dec}]".format(
                                                             ra=ra0,dec=dec0)
@@ -349,14 +350,14 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
 
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                 stepsz=None, trange=None, tranges=None, verbose=0, coadd=False,
-                iocode='wb',detsize=1.25,overwrite=False,
+                iocode='wb',detsize=1.1,overwrite=False,
                 minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,
                 photonfile=None):
     data = getcurve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
                     trange=trange, tranges=tranges, verbose=verbose,
                     coadd=coadd, minexp=minexp, maxgap=maxgap,
                     maskdepth=maskdepth, maskradius=maskradius,
-                    photonfile=photonfile)
+                    photonfile=photonfile, detsize=detsize)
     if csvfile:
         columns = ['t0','t1','exptime','mag_bgsub_cheese','t_mean','t0_data',
                    't1_data','cps','counts','bg','mag','mag_bgsub',

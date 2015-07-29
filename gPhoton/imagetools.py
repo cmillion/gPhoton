@@ -64,21 +64,9 @@ def fits_header(band,skypos,tranges,skyrange,width=False,height=False,
 	hdu.header['BAND'] = 1 if band=='NUV' else 2
 	hdu.header['VERSION'] = 'v{v}'.format(v=__version__)
 
-	# If requested, put the total exposure time into the primary header
-	#hdu.header['EXPTIME'] = 0.
-	#for trange in tranges:
-	#	hdu.header['EXPTIME'] += dbt.compute_exptime(band,trange,
-	#											verbose=verbose,retries=retries)
-
-	#if len(tranges)==1:
-	# Put the time range into the primary header for a single frame image
-	#	hdu.header['EXPSTART'],hdu.header['EXPEND'] = tranges[0]
-		# These are the proper keywords for this:
-	#	hdu.header['TIME-OBS'],hdu.header['TIME-END'] = tranges[0]
-
 	return hdu
 
-def makemap(band,skypos,trange,skyrange,response=False,verbose=0):
+def makemap(band,skypos,trange,skyrange,response=False,verbose=0,detsize=1.1):
 	imsz = gxt.deg2pix(skypos,skyrange)
 	photons = np.array(gQuery.getArray(gQuery.skyrect(band,
 		skypos[0],skypos[1],trange[0],trange[1],skyrange[0],skyrange[1]),
@@ -92,6 +80,16 @@ def makemap(band,skypos,trange,skyrange,response=False,verbose=0):
 			print 'No events found at {s} +/- {r} in {t}.'.format(
 				s=skypos,r=skyrange,t=trange)
 		return np.zeros(imsz)
+	# Trim the data on detsize
+	col, row = ct.xieta2colrow(events['xi'],events['eta'],band)
+	ix = np.where((1.25/800.)*mc.distance(col,row,400,400)<=detsize)
+	n = len(ix[0])
+	m = len(col)
+	#print 'With detsize {d} using {n} of {m} data.'.format(d=detsize,n=n,m=m)
+	if n == 0:
+		return np.zeros(imsz)
+	for k in events.keys():
+		events[k] = events[k][ix]
 	events = ct.hashresponse(band,events)
 	wcs = define_wcs(skypos,skyrange,width=False,height=False)
 	coo = zip(events['ra'],events['dec'])
@@ -102,7 +100,8 @@ def makemap(band,skypos,trange,skyrange,response=False,verbose=0):
 	return H
 
 def integrate_map(band,skypos,tranges,skyrange,width=False,height=False,
-				  verbose=0,memlight=False,hdu=False,retries=20,response=False):
+				  verbose=0,memlight=False,hdu=False,retries=20,response=False,
+				  detsize=1.1):
 	""" Integrate an image over some number of time ranges. Use a reduced
 	memory optimization (at the expense of more web queries) if requested.
 	"""
@@ -120,7 +119,7 @@ def integrate_map(band,skypos,tranges,skyrange,width=False,height=False,
 			if verbose:
 				mc.print_inline('Coadding '+str(t0)+' to '+str(t1))
 			img += makemap(band,skypos,[t0,t1],skyrange,response=response,
-							 verbose=verbose)
+							 verbose=verbose,detsize=detsize)
 		if response: # This is an intensity map.
 			img /= dbt.compute_exptime(band,trange,skypos=skypos,
 	                             						verbose=verbose)
@@ -136,7 +135,8 @@ def write_jpeg(filename,band,skypos,tranges,skyrange,width=False,height=False,
 	return
 
 def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,
-	verbose=0,memlight=False,coadd=False,response=False,hdu=False,retries=20):
+	verbose=0,memlight=False,coadd=False,response=False,hdu=False,retries=20,
+	detsize=1.1):
 	"""Generate a movie (mov)."""
 	# Not defining stepsz creates a single full depth image.
 	if coadd or (len(tranges)==1 and not framesz):
@@ -144,7 +144,7 @@ def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,
 			print 'Coadding across '+str(tranges)
 		mv = integrate_map(band,skypos,tranges,skyrange,width=width,
 			height=height,verbose=verbose,memlight=memlight,hdu=hdu,
-			retries=retries,response=response)
+			retries=retries,response=response,detsize=detsize)
 		#rr.append(rrhr(band,skypos,tranges,skyrange,response=response,width=width,height=height,stepsz=1.,verbose=verbose,hdu=hdu,retries=retries)) if response else rr.append(np.ones(np.shape(mv)[1:]))
 	else:
 		for trange in tranges:
@@ -159,7 +159,7 @@ def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,
 				img = integrate_map(band,skypos,[[t0,t1]],skyrange,
 					width=width,height=height,verbose=verbose,
 					memlight=memlight,hdu=hdu,retries=retries,
-					response=response)
+					response=response,detsize=detsize)
 				if img.min() == 0 and img.max() == 0:
 					if verbose>1:
 						print 'No data in frame {i}. Skipping...'.format(i=i)
@@ -173,17 +173,17 @@ def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,
 
 def create_image(band,skypos,tranges,skyrange,framesz=0,width=False,
 				 height=False,verbose=0,memlight=False,coadd=False,
-				 response=False,hdu=False,retries=20):
+				 response=False,hdu=False,retries=20,detsize=1.1):
 	img = movie(band,skypos,tranges,skyrange,framesz=framesz,
 		width=width,height=height,verbose=verbose,memlight=memlight,
-		coadd=coadd,response=response,hdu=hdu,retries=retries)
+		coadd=coadd,response=response,hdu=hdu,retries=retries,detsize=detsize)
 
 	return np.array(img)
 
 def write_images(band,skypos,tranges,skyrange,write_cnt=False,write_int=False,
 				 write_rr=False,framesz=0,width=False,height=False,verbose=0,
 				 memlight=False,coadd=False,overwrite=False,retries=20,
-				 write_cnt_coadd=False, write_int_coadd=False):
+				 write_cnt_coadd=False, write_int_coadd=False,detsize=1.1):
 	"""Generate a write various maps to files."""
 	# No files were requested, so don't bother doing anything.
 	imtypes = {'cnt':write_cnt,'int':write_int,'int_coadd':write_int_coadd,
@@ -193,7 +193,7 @@ def write_images(band,skypos,tranges,skyrange,write_cnt=False,write_int=False,
 			continue
 		img = create_image(band,skypos,tranges,skyrange,framesz=framesz,
 			width=width,height=height,verbose=verbose,memlight=memlight,
-			retries=retries,
+			retries=retries,detsize=detsize,
 			coadd=True if (coadd or i in ['cnt_coadd','int_coadd']) else False,
 			response=True if i in ['int','int_coadd'] else False)
 		# Add a conditional so that this is only created for multi-frame images

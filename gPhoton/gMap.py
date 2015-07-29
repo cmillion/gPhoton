@@ -7,7 +7,7 @@ import dbasetools as dbt
 import gphoton_args as gargs
 import numpy as np
 
-def gMap(band,cntfile=False,coadd=False,detsize=1.25,intfile=False,
+def gMap(band,cntfile=False,coadd=False,detsize=1.1,intfile=False,
 		 rrfile=False,skypos=None,maxgap=1500.,memlight=100.,minexp=1.,
 		 overwrite=False,retries=20,skyrange=None,stepsz=0.,trange=None,
 		 verbose=0,cntcoaddfile=False,intcoaddfile=False):
@@ -38,7 +38,8 @@ def gMap(band,cntfile=False,coadd=False,detsize=1.25,intfile=False,
 				 framesz=stepsz,overwrite=overwrite,verbose=verbose,
 				 memlight=memlight,coadd=coadd,retries=retries,
 				 write_cnt_coadd=write_cnt_coadd,
-				 write_int_coadd=write_int_coadd)
+				 write_int_coadd=write_int_coadd,
+				 detsize=detsize)
 
 def setup_parser(iam='gmap'):
 	parser = argparse.ArgumentParser(description="Generate images / maps.")
