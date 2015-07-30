@@ -99,7 +99,7 @@ def common_args(parser,function_name,
         parser.add_argument("--overwrite", "--ow", "--clobber",
             action="store_true", dest="overwrite", help="Overwrite existing "+
             "output files?  Default = False.", default=False)
-        parser.add_argument("-s", "--step", "--frame", action="store",
+        parser.add_argument("-s","--step","--stepsz","--frame", action="store",
             type=float, dest="stepsz", help="Step size for lightcurve or "+
             "movie in seconds.  Default = 0. (no binning).", default=0.)
 

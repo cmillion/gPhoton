@@ -4,7 +4,7 @@ import argparse
 import dbasetools as dbt
 import gphoton_args as gargs
 
-def gFind(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1500.0,
+def gFind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
 		  minexp=1.0, quiet=False, retries=20, skypos=None, trange=None,
 		  verbose=0,predicted=False,skyrange=None):
 	"""Primary program in the module. Prints time ranges to the screen and

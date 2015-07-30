@@ -64,7 +64,6 @@ def get_valid_times(band,skypos,trange=None,detsize=1.1,verbose=0,retries=100.,
 
     return np.sort(np.unique(times))
 
-
 def fGetTimeRanges(band,skypos,trange=None,detsize=1.1,verbose=0,
                    maxgap=1.,minexp=1.,retries=100.,predicted=False,
                    skyrange=None):
@@ -81,34 +80,18 @@ def fGetTimeRanges(band,skypos,trange=None,detsize=1.1,verbose=0,
                             verbose=verbose,retries=retries,skyrange=skyrange)
     if verbose:
         print_inline('Parsing '+str(len(times)-1)+' seconds of exposure.: ['+str(trange[0])+', '+str(trange[1])+']')
-    blah = []
-    for i in xrange(len(times[0:-1])):
-        blah.append(times[i+1]-times[i])
-    # A drop in data with duration greater than maxgap initiates a
-    #  new exposure
-    gaps = np.where(np.array(blah)>maxgap)
-    ngaps = len(gaps[0])
-    chunks = []
-    for i in range(ngaps):
-        if not i:
-            chunk = [times[0],times[gaps[0][i]]]
-        elif i==ngaps-1:
-            chunk = [times[gaps[0][i]+1],times[-1]]
-        else:
-            chunk = [times[gaps[0][i]+1],times[gaps[0][i+1]]]
-        # If the duration of this slice is less than minexp, do not
-        #  count it as valid exposure.
-        if chunk[1]-chunk[0]<minexp:
-            continue
-        else:
-            chunks.append(chunk)
-    if not ngaps:
-        if times.min()==times.max():
-            chunks.append([times.min(),times.min()+1])
-        else:
-            chunks.append([times.min(),times.max()])
 
-    return np.array(chunks,dtype='float64')
+    # NOTE: The minimum meaningful maxgap is 1 second.
+    if maxgap<1:
+        raise 'maxgap must be >=1 second'
+    ix=np.where(times[1:]-times[:-1]>maxgap)
+    a = [-1] + list(ix[0]) + [len(times)-1]
+    tranges = [[times[a[i]+1],times[a[i+1]]] for i,b in enumerate(a[:-1])]
+
+    ix = np.where(np.array(tranges)[:,1]-np.array(tranges)[:,0]>=minexp)
+    tranges = np.array(tranges)[ix].tolist()
+
+    return np.array(tranges,dtype='float64')
 
 def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966):
     """Calculate empirical deadtime (per global count rate) using revised
