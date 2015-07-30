@@ -300,6 +300,8 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
              trange=None, tranges=None, verbose=0, coadd=False, minexp=1.,
              maxgap=1., maskdepth=20, maskradius=1.5,
              photonfile=None, detsize=1.1):
+    skyrange = [np.array(annulus).max().tolist() if annulus else radius,
+                np.array(annulus).max().tolist() if annulus else radius,]
     if verbose:
         mc.print_inline("Getting exposure ranges.")
     if tranges is None:
