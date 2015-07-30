@@ -31,7 +31,7 @@ def gMap(band,cntfile=False,coadd=False,detsize=1.1,intfile=False,
 					  trange=[6.E8,11.E8],
 					  maxgap=maxgap, minexp=minexp,
 					  detsize=detsize,
-					  retries=retries)
+					  retries=retries,skyrange=skyrange)
 
 	write_images(band,skypos,trange,skyrange,width=False,height=False,
 				 write_cnt=write_cnt,write_int=write_int,write_rr=write_rr,
@@ -53,9 +53,6 @@ def setup_parser(iam='gmap'):
 		dest="decangle", default=None,
 		help="The angle of sky in degrees that the declination subtends. "+
 		"Overrides --angle.")
-	parser.add_argument("--skyrange", action="store", dest="skyrange",
-		type=ast.literal_eval, help="Two element list of ra and dec ranges. "+
-		"Equivalent to separately setting --raangle and decangle.")
 	parser.add_argument("--count", action="store", type=str, dest="cntfile",
 		default=None, help="File name (full path) for the count image.")
 	parser.add_argument("--intensity", action="store", type=str, dest="intfile",
@@ -136,7 +133,7 @@ def __main__():
 				a='Writing' if not args.coadd else 'Coadding', pos=args.skypos)
 		print '		of dimensions {w}x{h} degrees'.format(w=args.skyrange[0],
 														  h=args.skyrange[1])
-		print '		in time range(s): {t}'.format(t=args.trange)
+		print '		in time range(s): {t}'.format(t=repr(args.trange))
 	gMap(band=args.band, cntfile=args.cntfile,
 		coadd=args.coadd, detsize=args.detsize, intfile=args.intfile,
 		rrfile=args.rrfile, skypos=args.skypos, maxgap=args.maxgap,

@@ -27,8 +27,47 @@ def get_aspect(band,skypos,trange=[6e8,11e8],verbose=0,
         data[key] = data[key][ix]
     return data
 
-def fGetTimeRanges(band,skypos,trange=None,detsize=1.25,verbose=0,
-                   maxgap=1.,minexp=1.,retries=100.,predicted=False):
+def get_valid_times(band,skypos,trange=None,detsize=1.1,verbose=0,retries=100.,
+                    skyrange=None):
+    if not np.array(trange).tolist():
+        trange = [1,1000000000000]
+    if len(np.shape(trange))==2:
+        trange=trange[0]
+
+    # FIXME: This is probably not an optimally efficient way to check an entire
+    #  region of sky for data, but it's not hugely dumb and does work...
+    # Assemble sky positions on a grid within the targeted region.
+    skypos_list = [skypos]
+    if skyrange:
+        for r in np.arange(skypos[0],skypos[0]+skyrange[0]/2.,detsize/2.):
+            for d in np.arange(skypos[1],skypos[1]+skyrange[1]/2.,detsize/2.):
+                #print r,d
+                skypos_list += [[r,d]] + [[-r,-d]] + [[-r,d]] + [[r,-d]]
+
+    times = []
+    for skypos in skypos_list:
+        try:
+            times = (list(times) +
+                list(np.array(gQuery.getArray(gQuery.exposure_ranges(
+                    band,skypos[0],skypos[1],t0=trange[0],t1=trange[1],
+                    detsize=detsize),verbose=verbose,retries=retries),
+                    dtype='float64')[:,0]/tscale))
+        except IndexError:
+            if verbose:
+                print "No exposure time available at {pos}".format(pos=skypos)
+                return np.array([],dtype='float64')
+        except TypeError:
+            print "Is one of the inputs malformed?"
+            raise
+        except:
+            raise
+
+    return np.sort(np.unique(times))
+
+
+def fGetTimeRanges(band,skypos,trange=None,detsize=1.1,verbose=0,
+                   maxgap=1.,minexp=1.,retries=100.,predicted=False,
+                   skyrange=None):
     """Find the contiguous time ranges within a time range at a
     specific location.
 	minexp - Do not include exposure time less than this.
@@ -38,28 +77,8 @@ def fGetTimeRanges(band,skypos,trange=None,detsize=1.25,verbose=0,
     predicted - Use the aspect solutions to estimate what exposure will be
     available once the database is fully populated.
 	"""
-    try:
-        if not np.array(trange).tolist():
-            trange = [1,1000000000000]
-        if len(np.shape(trange))==2:
-            trange=trange[0]
-        if verbose and predicted:
-            print "Querying coverage of GR6/7. (Not current database.)"
-        times = (np.array(gQuery.getArray(gQuery.exposure_ranges(band,
-            skypos[0],skypos[1],t0=trange[0],t1=trange[1],detsize=detsize),
-            verbose=verbose,retries=retries),
-                                                dtype='float64')[:,0]/tscale
-            if not predicted else get_aspect(band,skypos,trange,detsize=detsize,
-                                        verbose=verbose)['t'])
-    except IndexError:
-        if verbose:
-            print "No exposure time available at {pos}".format(pos=skypos)
-        return np.array([],dtype='float64')
-    except TypeError:
-        print "Is one of the inputs malformed?"
-        raise
-    except:
-        raise
+    times = get_valid_times(band,skypos,trange=trange,detsize=detsize,
+                            verbose=verbose,retries=retries,skyrange=skyrange)
     if verbose:
         print_inline('Parsing '+str(len(times)-1)+' seconds of exposure.: ['+str(trange[0])+', '+str(trange[1])+']')
     blah = []

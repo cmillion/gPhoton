@@ -83,6 +83,10 @@ def common_args(parser,function_name,
              "The includes recenting on the nearest MCAT source. This flag"+
              "will clobber other annuli and aperture radii parameters.",
         default=False)
+    parser.add_argument("--skyrange", action="store", dest="skyrange",
+    	type=ast.literal_eval, help="Two element list of ra and dec ranges. "+
+    		"Equivalent to separately setting --raangle and decangle.")
+
 
     if function_name in ['gaperture','gmap']:
         parser.add_argument("--calpath", action="store", type=str,
@@ -206,7 +210,8 @@ def check_common_args(args,function_name,
                                        trange=[args.tmin,args.tmax],
                                        maxgap=args.maxgap,minexp=args.minexp,
                                        detsize=args.detsize,
-                                       retries=args.retries)
+                                       retries=args.retries,
+                                       skyrange=args.skyrange)
     else:
         """ If no coordinates specified then use a huge time range for
         now. """

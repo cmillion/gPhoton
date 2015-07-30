@@ -6,7 +6,7 @@ import gphoton_args as gargs
 
 def gFind(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1500.0,
 		  minexp=1.0, quiet=False, retries=20, skypos=None, trange=None,
-		  verbose=0,predicted=False):
+		  verbose=0,predicted=False,skyrange=None):
 	"""Primary program in the module. Prints time ranges to the screen and
     returns the total exposure time as a float.
 	"""
@@ -24,7 +24,7 @@ def gFind(band='both', detsize=1.25, exponly=False, gaper=False, maxgap=1500.0,
 		ranges = dbt.fGetTimeRanges(this_band,skypos,maxgap=maxgap,
 					    minexp=minexp,verbose=verbose,
 					    detsize=detsize,retries=retries,
-					    predicted=predicted, trange=trange)
+					    predicted=predicted, trange=trange, skyrange=skyrange)
 		if not len(ranges):
 			if not quiet:
 				print 'No {band} exposure time in database.'.format(band=this_band)
@@ -80,7 +80,7 @@ def __main__():
 		exponly=args.exponly, gaper=args.gaper, maxgap=args.maxgap,
 		minexp=args.minexp, quiet=args.quiet, retries=args.retries,
 		skypos=args.skypos, trange=args.trange, predicted=args.predicted,
-		verbose=args.verbose)
+		verbose=args.verbose,skyrange=args.skyrange)
 
 if __name__ == "__main__":
     try:

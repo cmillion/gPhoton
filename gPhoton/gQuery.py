@@ -11,7 +11,8 @@ tscale = 1000. # time in the database is "integer-ized" by multiplying by this
 formatted query to the MAST database. Don't change them unless you know what
 you're doing.
 """
-baseURL = 'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
+#baseURL = 'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
+baseURL = 'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
 baseDB = 'GPFCore.dbo'
 MCATDB = 'GR6Plus7.dbo'
 formatURL = ' -- '+str(time_id)+'&format=json&timeout={}'
@@ -376,5 +377,5 @@ def rect(band,ra0,dec0,t0,t1,ra,dec):
         repr(dec0+dec/2.)+','+str(long(t0*tscale))+','+
         str(long(t1*tscale))+',0)'+str(formatURL))
 
-def skyrect(band,ra0,dec0,t0,t1,ra,dec):
+def skyrect(band,ra0,dec0,t0,t1,ra,dec,detsize=1.1):
     return '{baseURL}select time,ra,dec,xi,eta,x,y from {baseDB}.fGetObjFromRect{band}AllColumns({ra_min},{ra_max},{dec_min},{dec_max},{t0},{t1},0){formatURL}'.format(baseURL=baseURL,baseDB=baseDB,band=band,ra_min=repr(ra0-ra/2.),ra_max=repr(ra0+ra/2.),dec_min=repr(dec0-dec/2.),dec_max=repr(dec0+dec/2.),t0=str(long(t0*tscale)),t1=str(long(t1*tscale)),formatURL=formatURL)
