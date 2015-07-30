@@ -81,7 +81,7 @@ def fGetTimeRanges(band,skypos,trange=None,detsize=1.1,verbose=0,
     if not len(times):
         return np.array([],dtype='float64')
     if verbose:
-        print_inline('Parsing '+str(len(times)-1)+' seconds of exposure.: ['+str(trange[0])+', '+str(trange[1])+']')
+        print_inline('Parsing ~'+str(len(times)-1)+' seconds of raw exposure.')
 
     # NOTE: The minimum meaningful maxgap is 1 second.
     if maxgap<1:
