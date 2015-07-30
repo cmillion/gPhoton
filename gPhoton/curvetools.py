@@ -362,7 +362,8 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
         columns = ['t0','t1','exptime','mag_bgsub_cheese','t_mean','t0_data',
                    't1_data','cps','counts','bg','mag','mag_bgsub',
                    'flux','flux_bgsub','flux_bgsub_cheese','bg_cheese']
-        test=pd.DataFrame({'t0':data['t0'],'t1':data['t1'],
+        try:
+            test=pd.DataFrame({'t0':data['t0'],'t1':data['t1'],
                            't_mean':data['t_mean'],'t0_data':data['t0_data'],
                            't1_data':data['t1_data'],'exptime':data['exptime'],
                            'cps':data['cps'],'counts':data['counts'],
@@ -373,10 +374,13 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                            'flux_bgsub':data['flux_bgsub'],
                            'flux_bgsub_cheese':data['flux_bgsub_cheese'],
                            'bg_cheese':data['bg']['cheese']})#,
+        except:
+            if verbose>1:
+                print 'Unable to build dataframe.'
         try:
             test.to_csv(csvfile,index=False,mode=iocode,columns=columns)
         except:
-            print 'Failed to write to: '+str(csvfile)
+            print 'Did not write to: '+str(csvfile)
     else:
         if verbose>2:
             print "No CSV file requested."
