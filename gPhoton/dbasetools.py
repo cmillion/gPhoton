@@ -78,6 +78,8 @@ def fGetTimeRanges(band,skypos,trange=None,detsize=1.1,verbose=0,
 	"""
     times = get_valid_times(band,skypos,trange=trange,detsize=detsize,
                             verbose=verbose,retries=retries,skyrange=skyrange)
+    if not len(times):
+        return np.array([],dtype='float64')
     if verbose:
         print_inline('Parsing '+str(len(times)-1)+' seconds of exposure.: ['+str(trange[0])+', '+str(trange[1])+']')
 
@@ -85,8 +87,8 @@ def fGetTimeRanges(band,skypos,trange=None,detsize=1.1,verbose=0,
     if maxgap<1:
         raise 'maxgap must be >=1 second'
     ix=np.where(times[1:]-times[:-1]>maxgap)
-    a = [-1] + list(ix[0]) + [len(times)-1]
-    tranges = [[times[a[i]+1],times[a[i+1]]] for i,b in enumerate(a[:-1])]
+    ixs = [-1] + list(ix[0]) + [len(times)-1]
+    tranges = [[times[ixs[i]+1],times[ixs[i+1]]] for i,b in enumerate(ixs[:-1])]
 
     ix = np.where(np.array(tranges)[:,1]-np.array(tranges)[:,0]>=minexp)
     tranges = np.array(tranges)[ix].tolist()
