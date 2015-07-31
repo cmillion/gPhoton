@@ -32,12 +32,11 @@ def gAperture(band,skypos,radius,csvfile=None,annulus=None, coadd=False,
         if photonfile:
             print "Using local photon file: {photonfile}".format(
                                                         photonfile=photonfile)
-    data = ct.write_curve(band, skypos[0], skypos[1], radius, csvfile=csvfile,
-                          annulus=annulus, stepsz=stepsz, verbose=verbose,
-                          overwrite=overwrite, trange=trange, tranges=tranges,
-                          coadd=coadd, minexp=minexp, maxgap=maxgap,
-                          iocode = iocode, maskdepth=maskdepth,
-                          maskradius=maskradius,detsize=detsize)
+    data = ct.write_curve(band.upper(), skypos[0], skypos[1], radius,
+        csvfile=csvfile, annulus=annulus, stepsz=stepsz, verbose=verbose,
+        overwrite=overwrite, trange=trange, tranges=tranges,coadd=coadd,
+        minexp=minexp, maxgap=maxgap, iocode = iocode, maskdepth=maskdepth,
+        maskradius=maskradius,detsize=detsize)
     return data
 
 def check_radius(args):

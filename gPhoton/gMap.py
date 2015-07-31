@@ -33,7 +33,7 @@ def gMap(band,cntfile=False,coadd=False,detsize=1.1,intfile=False,
 					  detsize=detsize,
 					  retries=retries,skyrange=skyrange)
 
-	write_images(band,skypos,trange,skyrange,width=False,height=False,
+	write_images(band.upper(),skypos,trange,skyrange,width=False,height=False,
 				 write_cnt=write_cnt,write_int=write_int,write_rr=write_rr,
 				 framesz=stepsz,overwrite=overwrite,verbose=verbose,
 				 memlight=memlight,coadd=coadd,retries=retries,
