@@ -24,8 +24,8 @@ def gMap(band,cntfile=False,coadd=False,detsize=1.1,intfile=False,
 	write_cnt_coadd = cntcoaddfile if cntcoaddfile else False
 	write_int_coadd = intcoaddfile if intcoaddfile else False
 
-	# If gMap is called via an import, and no trange is specified, then use a database
-	# call to get the appropriate time range.
+	# If gMap is called via an import, and no trange is specified,
+	# then use a database call to get the appropriate time range.
 	if trange is None:
 		trange=dbt.fGetTimeRanges(band, skypos,
 					  trange=[6.E8,11.E8],
@@ -133,6 +133,8 @@ def __main__():
 				a='Writing' if not args.coadd else 'Coadding', pos=args.skypos)
 		print '		of dimensions {w}x{h} degrees'.format(w=args.skyrange[0],
 														  h=args.skyrange[1])
+		print '		with a virtual detector {d} degrees across'.format(
+														d = args.detsize)
 		print '		in time range(s): {t}'.format(t=repr(args.trange))
 	gMap(band=args.band, cntfile=args.cntfile,
 		coadd=args.coadd, detsize=args.detsize, intfile=args.intfile,

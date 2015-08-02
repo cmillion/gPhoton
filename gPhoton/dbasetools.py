@@ -39,10 +39,12 @@ def get_valid_times(band,skypos,trange=None,detsize=1.1,verbose=0,retries=100.,
     # Assemble sky positions on a grid within the targeted region.
     skypos_list = [skypos]
     if skyrange:
-        for r in np.arange(skypos[0],skypos[0]+skyrange[0]/2.,detsize/2.):
-            for d in np.arange(skypos[1],skypos[1]+skyrange[1]/2.,detsize/2.):
-                #print r,d
-                skypos_list += [[r,d]] + [[-r,-d]] + [[-r,d]] + [[r,-d]]
+        for r in np.linspace(skypos[0]-skyrange[0]/2.,skypos[0]+skyrange[0]/2.,
+                    np.ceil(skyrange[0]/(detsize/2.)),endpoint=True):
+            for d in np.linspace(skypos[1]-skyrange[1]/2.,
+                    skypos[1]+skyrange[1]/2.,np.ceil(skyrange[1]/(detsize/2.)),
+                    endpoint=True):
+                skypos_list += [[r,d]]
 
     times = []
     for skypos in skypos_list:
