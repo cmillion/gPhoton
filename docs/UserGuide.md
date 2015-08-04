@@ -196,7 +196,7 @@ You can also import and work with _gAperture_ and its modules from within the Py
 
 ###gMap.py
 
-**NOTE: gMap is broken in v1.23.0. It will be fixed in v1.24.0.**
+**NOTE: As of v1.26.0, gMap does not apply any exposure time correction. The images (including intensity) should be used for sanity and assessment purposes, but not photometric analysis.**
 
 _gMap_ is the image creation tool. It can generate integrated count, intensity, and response (equivalent to GALEX _cnt_, _int_ and _rrhr_) maps of arbitrary size<sup>+</sup>, shape and depth, including coadds across epochs and survey designation. It can also create "movie" (time-binned, multi-plane) versions of such maps. _(Note that in v1.23.0, image creation is quite slow because it uses an older method of interpolating the response map from the flat rather than the new and faster method used by gAperture of weighting the photons directly by the flat. This will be fixed in v1.24.0)_
 
