@@ -66,9 +66,14 @@ def get_valid_times(band,skypos,trange=None,detsize=1.1,verbose=0,retries=100.,
 
     return np.sort(np.unique(times))
 
+def distinct_tranges(times,maxgap=1.):
+    ix=np.where(times[1:]-times[:-1]>maxgap)
+    ixs = [-1] + list(ix[0]) + [len(times)-1]
+    return [[times[ixs[i]+1],times[ixs[i+1]]] for i,b in enumerate(ixs[:-1])]
+
 def fGetTimeRanges(band,skypos,trange=None,detsize=1.1,verbose=0,
                    maxgap=1.,minexp=1.,retries=100.,predicted=False,
-                   skyrange=None):
+                   skyrange=None,maxgap_override=False):
     """Find the contiguous time ranges within a time range at a
     specific location.
 	minexp - Do not include exposure time less than this.
@@ -86,11 +91,9 @@ def fGetTimeRanges(band,skypos,trange=None,detsize=1.1,verbose=0,
         print_inline('Parsing ~'+str(len(times)-1)+' seconds of raw exposure.')
 
     # NOTE: The minimum meaningful maxgap is 1 second.
-    if maxgap<1:
+    if maxgap<1 and not maxgap_override:
         raise 'maxgap must be >=1 second'
-    ix=np.where(times[1:]-times[:-1]>maxgap)
-    ixs = [-1] + list(ix[0]) + [len(times)-1]
-    tranges = [[times[ixs[i]+1],times[ixs[i+1]]] for i,b in enumerate(ixs[:-1])]
+    tranges = distinct_tranges(times,maxgap=maxgap)
 
     ix = np.where(np.array(tranges)[:,1]-np.array(tranges)[:,0]>=minexp)
     tranges = np.array(tranges)[ix].tolist()
@@ -104,8 +107,23 @@ def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966):
     model = {'FUV':[-0.000386611005025,76.5419507472],
              'NUV':[-0.000417794996843,77.1516557638]}
     rawexpt = trange[1]-trange[0]
-    gcr = gQuery.getValue(gQuery.globalcounts(band,trange[0],trange[1]),
-                          verbose=verbose)/rawexpt
+    nonnullevents = gQuery.getValue(gQuery.deadtime1(band,trange[0],trange[1],
+                                                    flag=True),verbose=verbose)
+    try:
+        t = np.array(gQuery.getArray(gQuery.uniquetimes(band,
+                     trange[0],trange[1],flag=True),verbose=verbose),
+                     dtype='float64')[:,0]/gQuery.tscale
+    except IndexError: # Shutter this whole time range.
+        return trange[1]-trange[0]
+    times = np.sort(np.unique(np.append(t,trange)))
+    tranges = distinct_tranges(times,maxgap=0.05)
+    nullevents = 0
+    for trange in tranges:
+        nullevents += gQuery.getValue(
+                    gQuery.deadtime2(band,trange[0],trange[1]),verbose=verbose)
+    #gcr = gQuery.getValue(gQuery.globalcounts(band,trange[0],trange[1],
+    #                      flag=True),verbose=verbose)/rawexpt
+    gcr = (nonnullevents + nullevents)/rawexpt
     refrate = model[band][1]/feeclkratio
     scr = model[band][0]*gcr+model[band][1]
     return (1-scr/feeclkratio/refrate)
@@ -113,7 +131,7 @@ def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966):
 def compute_shutter(band,trange,verbose=0,retries=20,shutgap=0.05):
     try:
         t = np.array(gQuery.getArray(gQuery.uniquetimes(band,
-                     trange[0],trange[1]),verbose=verbose),
+                     trange[0],trange[1],flag=True),verbose=verbose),
                      dtype='float64')[:,0]/gQuery.tscale
     except IndexError: # Shutter this whole time range.
         return trange[1]-trange[0]
