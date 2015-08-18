@@ -82,7 +82,7 @@ def read_photons(photonfile,ra0,dec0,tranges,radius,verbose=0,
     return events
 
 # This should be moved to dbasetools.
-def query_photons(band,ra0,dec0,tranges,radius,verbose=0):
+def query_photons(band,ra0,dec0,tranges,radius,verbose=0,flag=0):
     """Retrieve photons within an aperture from the database."""
     stream = []
     if verbose:
@@ -93,8 +93,8 @@ def query_photons(band,ra0,dec0,tranges,radius,verbose=0):
             mc.print_inline(" and between "+str(trange[0])+" and "+
                             str(trange[1])+".")
         thisstream = gQuery.getArray(
-            gQuery.allphotons(band, ra0, dec0, trange[0], trange[1], radius),
-                              verbose=verbose,retries=100)
+            gQuery.allphotons(band, ra0, dec0, trange[0], trange[1], radius,
+                                        flag=flag), verbose=verbose,retries=100)
         stream.extend(thisstream)
     stream = np.array(stream, 'f8').T
     colnames = ['t', 'ra', 'dec', 'xi', 'eta', 'x', 'y']
@@ -105,13 +105,13 @@ def query_photons(band,ra0,dec0,tranges,radius,verbose=0):
     return events
 
 def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
-                photonfile=None):
+                photonfile=None, flag=0):
     if photonfile:
         events = read_photons(photonfile, ra0, dec0, tranges, radius,
                               verbose=verbose)
     else:
         events = query_photons(band, ra0, dec0, tranges, radius,
-                               verbose=verbose)
+                               verbose=verbose, flag=flag)
 
     events = hashresponse(band, events, verbose=verbose)
     return events
@@ -210,7 +210,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     # FIXME: allocate these from a dict of constructors
     lcurve_cols = ['counts', 'sources', 'bg_counts','responses',
                    'detxs', 'detys', 't0_data', 't1_data', 't_mean', 'racent',
-                   'deccent']
+                   'deccent', 'flags']
     lcurve = {'params':gphot_params(band,[ra0,dec0],radius,annulus=annulus,
                                     verbose=verbose,
                                     detsize=detsize,stepsz=stepsz,
