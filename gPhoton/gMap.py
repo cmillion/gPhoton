@@ -44,8 +44,9 @@ def gMap(band,cntfile=False,coadd=False,detsize=1.1,intfile=False,
 def setup_parser(iam='gmap'):
 	parser = argparse.ArgumentParser(description="Generate images / maps.")
 	parser = gargs.common_args(parser,iam)
-	parser.add_argument("--angle", action="store", type=float, dest="angle",
-		default=None, help="The angle subtended in both RA and DEC in degrees.")
+	parser.add_argument("--angle", "-a", action="store", type=float,
+		dest="angle", default=None,
+		help="The angle subtended in both RA and DEC in degrees.")
 	parser.add_argument("--raangle", action="store", type=float, dest="raangle",
 		help="The angle of sky in degrees that the right ascension subtends. "+
 		"Overrides --angle.",default=None)
