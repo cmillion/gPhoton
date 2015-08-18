@@ -1,6 +1,6 @@
 # This file defines common queries that are passed to the GALEX photon
 # database at MAST.
-from MCUtils import manage_requests
+from MCUtils import manage_requests, manage_requests2
 import CalUtils
 from galextools import isPostCSP
 from gPhoton import time_id
@@ -15,7 +15,7 @@ you're doing.
 baseURL = 'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
 baseDB = 'GPFCore.dbo'
 MCATDB = 'GR6Plus7.dbo'
-formatURL = ' -- '+str(time_id)+'&format=json&timeout={}'
+formatURL = ' -- '+str(time_id)+'&format=json'
 
 def hasNaN(query):
     """Check if there is NaN in a query (or any string) and, if so, raise an
@@ -31,8 +31,8 @@ def getValue(query,verbose=0,retries=20):
     if verbose>2:
         print query
     try:
-        out = float(manage_requests(query,
-                            maxcnt=retries).json()['Tables'][0]['Rows'][0][0])
+        out = float(manage_requests2(query,
+                    maxcnt=retries).json()['data']['Tables'][0]['Rows'][0][0])
     except:
         raise# RuntimeError('Connection timeout.')
     return out
@@ -43,7 +43,8 @@ def getArray(query,verbose=0,retries=20):
     if verbose>2:
         print query
     try:
-        out = manage_requests(query,maxcnt=retries).json()['Tables'][0]['Rows']
+        out = manage_requests2(query,
+                            maxcnt=retries).json()['data']['Tables'][0]['Rows']
     except:
         raise# RuntimeError('Connection timeout.')
     return out
@@ -205,12 +206,13 @@ def alltimes(band,t0,t1):
                 baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
                 t1=str(long(t1*tscale)), formatURL=formatURL)
 
-def uniquetimes(band,t0,t1,flag=False):
-    """Return the _unique_ timestamps for all non-NULLevents within trange."""
-    return ('{baseURL}select distinct time from {baseDB}.{band}PhotonsV '+
+def uniquetimes(band,t0,t1,flag=False,null=False):
+    """Return the _unique_ timestamps for events within trange."""
+    return ('{baseURL}select distinct time from {baseDB}.{band}Photons{null}V '+
             'where time >= {t0} and time < {t1}{flag} order by time'+
             '{formatURL}').format(baseURL=baseURL,
-                baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
+                baseDB=baseDB, band=band,
+                null='NULL' if null else '', t0=str(long(t0*tscale)),
                 t1=str(long(t1*tscale)), flag=' and flag=0' if flag else '',
                 formatURL=formatURL)
 
@@ -330,13 +332,14 @@ def centroid(band,ra0,dec0,t0,t1,radius):
         repr(ra0-radius)+' and ra < '+repr(ra0+radius)+' and dec >= '+
         repr(dec0-radius)+' and dec < '+repr(dec0+radius)+str(formatURL))
 
-def allphotons(band,ra0,dec0,t0,t1,radius):
+def allphotons(band,ra0,dec0,t0,t1,radius,flag=0):
     """Grab the major columns for all events within an aperture."""
-    return (str(baseURL)+
-        'select time,ra,dec,xi,eta,x,y from '+str(baseDB)+'.fGetNearbyObjEq'+
-        str(band)+'AllColumns('+repr(float(ra0))+','+repr(float(dec0))+','+
-        repr(radius)+','+
-        str(long(t0*tscale))+','+str(long(t1*tscale))+',0)'+str(formatURL))
+    return ('{baseURL}select time,ra,dec,xi,eta,x,y from '+
+        '{baseDB}.fGetNearbyObjEq{band}AllColumns({ra0},{dec0},{radius},{t0},'+
+        '{t1},{flag}){formatURL}').format(baseURL=baseURL,baseDB=baseDB,
+            band=band,ra0=repr(float(ra0)),dec0=repr(float(dec0)),
+            radius=radius,t0=str(long(t0*tscale)),t1=str(long(t1*tscale)),
+            flag=flag,formatURL=formatURL)
 
 # Shutter correction
 #  i.e. number of 0.05s gaps in data
@@ -389,25 +392,25 @@ def aspect_skypos(ra,dec,detsize=1.25):
 
 # Return data within a box centered on ra0, dec0 with sides of length 2*radius
 # TODO: deprecate this and rename it skybox()
-def box(band,ra0,dec0,t0,t1,radius):
+def box(band,ra0,dec0,t0,t1,radius,flag=0):
     return (str(baseURL)+
         'select time,ra,dec from '+str(baseDB)+'.'+str(band)+
         'PhotonsV where time >= '+
         str(long(t0*tscale))+' and time < '+str(long(t1*tscale))+
         ' and ra >= '+
         repr(ra0-radius)+' and ra < '+repr(ra0+radius)+' and dec >= '+
-        repr(dec0-radius)+' and dec < '+repr(dec0+radius)+' and flag=0'+
-        str(formatURL))
+        repr(dec0-radius)+' and dec < '+repr(dec0+radius)+' and flag='+
+        str(flag)+str(formatURL))
 
 # Return data within a rectangle centered on ra0, dec0
 # TODO: deprecate this and rename it skyrect()
-def rect(band,ra0,dec0,t0,t1,ra,dec):
+def rect(band,ra0,dec0,t0,t1,ra,dec,flag=0):
     #time,ra,dec,xi,eta,x,y
     return (str(baseURL)+
         'select time,ra,dec,xi,eta,x,y from '+str(baseDB)+'.fGetObjFromRect'+str(band)+'('+
         repr(ra0-ra/2.)+','+repr(ra0+ra/2.)+','+repr(dec0-dec/2.)+','+
         repr(dec0+dec/2.)+','+str(long(t0*tscale))+','+
-        str(long(t1*tscale))+',0)'+str(formatURL))
+        str(long(t1*tscale))+','+str(flag)+')'+str(formatURL))
 
-def skyrect(band,ra0,dec0,t0,t1,ra,dec,detsize=1.1):
-    return '{baseURL}select time,ra,dec,xi,eta,x,y from {baseDB}.fGetObjFromRect{band}AllColumns({ra_min},{ra_max},{dec_min},{dec_max},{t0},{t1},0){formatURL}'.format(baseURL=baseURL,baseDB=baseDB,band=band,ra_min=repr(ra0-ra/2.),ra_max=repr(ra0+ra/2.),dec_min=repr(dec0-dec/2.),dec_max=repr(dec0+dec/2.),t0=str(long(t0*tscale)),t1=str(long(t1*tscale)),formatURL=formatURL)
+def skyrect(band,ra0,dec0,t0,t1,ra,dec,detsize=1.1,flag=0):
+    return '{baseURL}select time,ra,dec,xi,eta,x,y from {baseDB}.fGetObjFromRect{band}AllColumns({ra_min},{ra_max},{dec_min},{dec_max},{t0},{t1},{flag}){formatURL}'.format(baseURL=baseURL,baseDB=baseDB,band=band,ra_min=repr(ra0-ra/2.),ra_max=repr(ra0+ra/2.),dec_min=repr(dec0-dec/2.),dec_max=repr(dec0+dec/2.),t0=str(long(t0*tscale)),t1=str(long(t1*tscale)),flag=flag,formatURL=formatURL)

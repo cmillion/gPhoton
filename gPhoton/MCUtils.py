@@ -42,6 +42,31 @@ def print_inline(text,blanks=60):
         stdout.flush()
         return
 
+def manage_requests2(query,maxcnt=100.,wait=10,timeout=60,verbose=0):
+	query = query.replace('json','extjs')
+	cnt = 0
+	while cnt < maxcnt:
+		r = requests.get(query,timeout=timeout)
+		if r.json()['status']=='EXECUTING':
+			if verbose:
+				print 'EXECUTING'
+			time.sleep(wait)
+			continue
+		elif r.json()['status']=='COMPLETE':
+			if verbose:
+				print 'COMPLETE'
+			break
+		elif r.json()['status']=='ERROR':
+			if verbose:
+				print 'ERROR'
+			raise ValueError('Unsuccessful query: {q}'.format(q=query))
+		else:
+			continue
+			#raise ValueERror 'Unknown error in query: {q}'.format(q=query)
+		cnt+=1
+	return r
+
+
 def manage_requests(query,maxcnt=100,wait=10,timeout=60):
 	""" Make simple 'requests' calls slightly more robust against network
     issues.
