@@ -100,27 +100,41 @@ def fGetTimeRanges(band,skypos,trange=None,detsize=1.1,verbose=0,
 
     return np.array(tranges,dtype='float64')
 
+def stimcount_shuttered(band,trange,verbose=0,retries=20.):
+    t = np.array(gQuery.getArray(gQuery.uniquetimes(band,trange[0],trange[1],
+            flag=True),verbose=verbose),dtype='float64')[:,0]/gQuery.tscale
+    times = np.sort(np.unique(np.append(t,trange)))
+    tranges = distinct_tranges(times,maxgap=0.05)
+    stimcount = 0
+    for trange in tranges:
+        stimcount += gQuery.getValue(gQuery.stimcount(band,trange[0],trange[1]))
+    return stimcount
+
 def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966):
     """Calculate empirical deadtime (per global count rate) using revised
-    formulas.
+    formulas. Restricts integration of global counts to non-shuttered time
+    periods.
     """
     model = {'FUV':[-0.000386611005025,76.5419507472],
              'NUV':[-0.000417794996843,77.1516557638]}
     rawexpt = trange[1]-trange[0]
-    nonnullevents = gQuery.getValue(gQuery.deadtime1(band,trange[0],trange[1],
-                                                    flag=True),verbose=verbose)
     try:
         t = np.array(gQuery.getArray(gQuery.uniquetimes(band,
                      trange[0],trange[1],flag=True),verbose=verbose),
                      dtype='float64')[:,0]/gQuery.tscale
     except IndexError: # Shutter this whole time range.
-        return trange[1]-trange[0]
+        if verbose:
+            print 'No data in {t0},{t1}'.format(t0=trange[0],t1=trange[1])
+        return 0
     times = np.sort(np.unique(np.append(t,trange)))
     tranges = distinct_tranges(times,maxgap=0.05)
-    nullevents = 0
+    nonnullevents,nullevents = 0,0
     for trange in tranges:
         nullevents += gQuery.getValue(
                     gQuery.deadtime2(band,trange[0],trange[1]),verbose=verbose)
+        nonnullevents += gQuery.getValue(gQuery.deadtime1(band,trange[0],
+                                        trange[1],flag=True),verbose=verbose)
+
     #gcr = gQuery.getValue(gQuery.globalcounts(band,trange[0],trange[1],
     #                      flag=True),verbose=verbose)/rawexpt
     gcr = (nonnullevents + nullevents)/rawexpt
