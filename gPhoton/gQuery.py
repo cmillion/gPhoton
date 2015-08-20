@@ -28,24 +28,22 @@ def hasNaN(query):
 def getValue(query,verbose=0,retries=20):
     """Manage a database call which returns a single value."""
     hasNaN(query)
-    if verbose>2:
-        print query
     try:
-        out = float(manage_requests2(query,
-                    maxcnt=retries).json()['data']['Tables'][0]['Rows'][0][0])
+        out = float(manage_requests2(query,maxcnt=retries,
+                verbose=verbose).json()['data']['Tables'][0]['Rows'][0][0])
     except:
+        print 'Failed: {q}'.format(q=query)
         raise# RuntimeError('Connection timeout.')
     return out
 
 def getArray(query,verbose=0,retries=20):
     """Manage a database call which returns an array of values."""
     hasNaN(query)
-    if verbose>2:
-        print query
     try:
         out = manage_requests2(query,
-                            maxcnt=retries).json()['data']['Tables'][0]['Rows']
+            maxcnt=retries,verbose=verbose).json()['data']['Tables'][0]['Rows']
     except:
+        print 'Failed: {q}'.format(q=query)
         raise# RuntimeError('Connection timeout.')
     return out
 

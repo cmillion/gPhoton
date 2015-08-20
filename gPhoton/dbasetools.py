@@ -110,7 +110,8 @@ def stimcount_shuttered(band,trange,verbose=0,retries=20.):
         stimcount += gQuery.getValue(gQuery.stimcount(band,trange[0],trange[1]))
     return stimcount
 
-def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966):
+def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966,
+    timestamplist=False):
     """Calculate empirical deadtime (per global count rate) using revised
     formulas. Restricts integration of global counts to non-shuttered time
     periods.
@@ -142,7 +143,8 @@ def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966):
     scr = model[band][0]*gcr+model[band][1]
     return (1-scr/feeclkratio/refrate)
 
-def compute_shutter(band,trange,verbose=0,retries=20,shutgap=0.05):
+def compute_shutter(band,trange,verbose=0,retries=20,shutgap=0.05,
+    timestamplist=False):
     try:
         t = np.array(gQuery.getArray(gQuery.uniquetimes(band,
                      trange[0],trange[1],flag=True),verbose=verbose),
@@ -163,7 +165,7 @@ def exposure(band,trange,verbose=0,retries=20):
     return (rawexpt-shutter)*(1.-deadtime)
 
 def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,
-                    retries=20,chunksz=10.e6,coadd=False):
+                    retries=20,coadd=False):
     """Compute the effective exposure time."""
     # FIXME: This skypos[] check appears to not work properly and leads
     #  to dramatic _underestimates_ of the exposure time.
@@ -178,15 +180,8 @@ def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,
             print 'Based on skypos {sp}'.format(sp=skypos)
     exptime = 0.
     for trange in tranges:
-        # Traverse the exposure ranges in manageable chunks to hopefully keep
-        # the query response time below the HTTP timeout...
-        chunks = (np.linspace(trange[0],trange[1],
-                             num=np.ceil((trange[1]-trange[0])/chunksz)) if
-                                 (trange[1]-trange[0])>chunksz else
-                                 np.array(trange))
-        for i,t in enumerate(chunks[:-1]):
-            exptime += exposure(band,[chunks[i],chunks[i+1]],verbose=verbose,
-                                retries=retries)
+        exptime += exposure(band,[trange[0],trange[1]],verbose=verbose,
+                                                            retries=retries)
     return exptime
 
 def get_mcat_data(skypos,rad):

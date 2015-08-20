@@ -46,24 +46,30 @@ def manage_requests2(query,maxcnt=100.,wait=10,timeout=60,verbose=0):
 	query = query.replace('json','extjs')
 	cnt = 0
 	while cnt < maxcnt:
-		r = requests.get(query,timeout=timeout)
-		if r.json()['status']=='EXECUTING':
+		try:
+			r = requests.get(query,timeout=timeout)
+		except:
 			if verbose:
-				print 'EXECUTING'
-			time.sleep(wait)
+				print 'bad query? {q}'.format(q=query)
+			cnt+=1
+			continue
+		if r.json()['status']=='EXECUTING':
+			if verbose>1:
+				print_inline('EXECUTING')
+			cnt=0
 			continue
 		elif r.json()['status']=='COMPLETE':
-			if verbose:
-				print 'COMPLETE'
+			if verbose>1:
+				print_inline('COMPLETE')
 			break
 		elif r.json()['status']=='ERROR':
-			if verbose:
-				print 'ERROR'
+			print 'ERROR'
 			raise ValueError('Unsuccessful query: {q}'.format(q=query))
 		else:
+			print 'Unknown return: {s}'.format(s=r.json()['status'])
+			cnt+=1
 			continue
 			#raise ValueERror 'Unknown error in query: {q}'.format(q=query)
-		cnt+=1
 	return r
 
 
