@@ -139,13 +139,13 @@ def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,
 	detsize=1.1):
 	"""Generate a movie (mov)."""
 	# Not defining stepsz creates a single full depth image.
-	if coadd or (len(tranges)==1 and not framesz):
+	print tranges
+	if coadd or (len(tranges)==1 and not framesz) or (not len(tranges)):
 		if verbose>2:
 			print 'Coadding across '+str(tranges)
 		mv = integrate_map(band,skypos,tranges,skyrange,width=width,
 			height=height,verbose=verbose,memlight=memlight,hdu=hdu,
 			retries=retries,response=response,detsize=detsize)
-		#rr.append(rrhr(band,skypos,tranges,skyrange,response=response,width=width,height=height,stepsz=1.,verbose=verbose,hdu=hdu,retries=retries)) if response else rr.append(np.ones(np.shape(mv)[1:]))
 	else:
 		for trange in tranges:
 			stepsz = framesz if framesz else trange[1]-trange[0]
@@ -168,7 +168,6 @@ def movie(band,skypos,tranges,skyrange,framesz=0,width=False,height=False,
 					mv.append(img)
 				except:
 					mv = [img]
-
 	return np.array(mv)
 
 def create_image(band,skypos,tranges,skyrange,framesz=0,width=False,
