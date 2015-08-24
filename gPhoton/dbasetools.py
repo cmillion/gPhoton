@@ -120,9 +120,10 @@ def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966,
              'NUV':[-0.000417794996843,77.1516557638]}
     rawexpt = trange[1]-trange[0]
     try:
-        t = np.array(gQuery.getArray(gQuery.uniquetimes(band,
-                     trange[0],trange[1],flag=True),verbose=verbose),
-                     dtype='float64')[:,0]/gQuery.tscale
+        t = (timestamplist if np.array(timestamplist).any() else
+                np.array(gQuery.getArray(
+                    gQuery.uniquetimes(band,trange[0],trange[1],flag=True),
+                        verbose=verbose),dtype='float64')[:,0]/gQuery.tscale)
     except IndexError: # Shutter this whole time range.
         if verbose:
             print 'No data in {t0},{t1}'.format(t0=trange[0],t1=trange[1])
@@ -136,8 +137,6 @@ def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966,
         nonnullevents += gQuery.getValue(gQuery.deadtime1(band,trange[0],
                                         trange[1],flag=True),verbose=verbose)
 
-    #gcr = gQuery.getValue(gQuery.globalcounts(band,trange[0],trange[1],
-    #                      flag=True),verbose=verbose)/rawexpt
     gcr = (nonnullevents + nullevents)/rawexpt
     refrate = model[band][1]/feeclkratio
     scr = model[band][0]*gcr+model[band][1]
@@ -146,9 +145,10 @@ def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966,
 def compute_shutter(band,trange,verbose=0,retries=20,shutgap=0.05,
     timestamplist=False):
     try:
-        t = np.array(gQuery.getArray(gQuery.uniquetimes(band,
-                     trange[0],trange[1],flag=True),verbose=verbose),
-                     dtype='float64')[:,0]/gQuery.tscale
+        t = (timestamplist if np.array(timestamplist).any() else
+                np.array(gQuery.getArray(
+                    gQuery.uniquetimes(band,trange[0],trange[1],flag=True),
+                        verbose=verbose),dtype='float64')[:,0]/gQuery.tscale)
     except IndexError: # Shutter this whole time range.
         return trange[1]-trange[0]
     t = np.sort(np.unique(np.append(t,trange)))
@@ -160,8 +160,18 @@ def exposure(band,trange,verbose=0,retries=20):
     rawexpt = trange[1]-trange[0]
     if rawexpt==0.:
         return 0.
-    shutter = compute_shutter(band,trange,verbose=verbose,retries=retries)
-    deadtime = empirical_deadtime(band,trange,verbose=verbose,retries=retries)
+    try:
+        t = np.array(gQuery.getArray(
+                gQuery.uniquetimes(band,trange[0],trange[1],flag=True),
+                verbose=verbose),dtype='float64')[:,0]/gQuery.tscale
+    except IndexError: # Shutter this whole time range.
+        if verbose:
+            print 'No data in {t0},{t1}'.format(t0=trange[0],t1=trange[1])
+        return 0
+    shutter = compute_shutter(band,trange,verbose=verbose,retries=retries,
+                              timestamplist=t)
+    deadtime = empirical_deadtime(band,trange,verbose=verbose,retries=retries,
+                                  timestamplist=t)
     return (rawexpt-shutter)*(1.-deadtime)
 
 def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,
