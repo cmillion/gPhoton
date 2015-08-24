@@ -363,7 +363,8 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
     if csvfile:
         columns = ['t0','t1','exptime','mag_bgsub_cheese','t_mean','t0_data',
                    't1_data','cps','counts','bg','mag','mag_bgsub',
-                   'flux','flux_bgsub','flux_bgsub_cheese','bg_cheese']
+                   'flux','flux_bgsub','flux_bgsub_cheese','bg_cheese',
+                   'detx','dety','detrad','response']
         try:
             test=pd.DataFrame({'t0':data['t0'],'t1':data['t1'],
                            't_mean':data['t_mean'],'t0_data':data['t0_data'],
@@ -375,7 +376,10 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                            'flux':data['flux'],
                            'flux_bgsub':data['flux_bgsub'],
                            'flux_bgsub_cheese':data['flux_bgsub_cheese'],
-                           'bg_cheese':data['bg']['cheese']})#,
+                           'bg_cheese':data['bg']['cheese'],
+                           'detx':data['detxs'],'dety':data['detys'],
+                           'detrad':data['detrad'],'response':data['responses']
+                           })
         except:
             if verbose>1:
                 print 'Unable to build dataframe.'
