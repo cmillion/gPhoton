@@ -33,6 +33,9 @@ def gMap(band,cntfile=False,coadd=False,detsize=1.1,intfile=False,
 					  detsize=detsize,
 					  retries=retries,skyrange=skyrange)
 
+	if len(np.array(trange).shape)==1:
+		trange=[trange]
+
 	write_images(band.upper(),skypos,trange,skyrange,width=False,height=False,
 				 write_cnt=write_cnt,write_int=write_int,write_rr=write_rr,
 				 framesz=stepsz,overwrite=overwrite,verbose=verbose,
