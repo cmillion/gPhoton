@@ -167,7 +167,7 @@ def deadtime2(band,t0,t1,flag=False):
             'time >= {t0} and time < {t1}'+
             '{flag}{formatURL}').format(baseURL=baseURL,
                 baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
-                t1=str(long(t1*tscale)), flag=' and flag=0' if flag else '',
+                t1=str(long(t1*tscale)), flag='',
                 formatURL=formatURL)
 
 def deadtime(band,t0,t1,feeclkratio=0.966,tec2fdead=5.52e-6):
@@ -206,13 +206,18 @@ def alltimes(band,t0,t1):
 
 def uniquetimes(band,t0,t1,flag=False,null=False):
     """Return the _unique_ timestamps for events within trange."""
-    return ('{baseURL}select distinct time from {baseDB}.{band}Photons{null}V '+
-            'where time >= {t0} and time < {t1}{flag} order by time'+
-            '{formatURL}').format(baseURL=baseURL,
-                baseDB=baseDB, band=band,
-                null='NULL' if null else '', t0=str(long(t0*tscale)),
-                t1=str(long(t1*tscale)), flag=' and flag=0' if flag else '',
-                formatURL=formatURL)
+    return ('{baseURL}select time from {baseDB}.{band}ShutterPOTimeV '+
+                'where time >= {t0} and time < {t1} order by '+
+                'time{formatURL}').format(baseURL=baseURL, baseDB=baseDB,band=band, t0=str(long(t0*tscale)), t1=str(long(t1*tscale)), formatURL=formatURL)
+    #else:
+    #    return ('{baseURL}select distinct time from {baseDB}.{band}Photons{null}V '+
+    #        'where time >= {t0} and time < {t1}{flag} order by time'+
+    #        '{formatURL}').format(baseURL=baseURL,
+    #            baseDB=baseDB, band=band,
+    #            null='NULL' if null else '', t0=str(long(t0*tscale)),
+    #            t1=str(long(t1*tscale)), flag=' and flag=0' if flag else '',
+    #            formatURL=formatURL)
+    #return URL
 
 def boxcount(band,t0,t1,xr,yr):
     """Find the number of events inside of a box defined by [xy] range in
