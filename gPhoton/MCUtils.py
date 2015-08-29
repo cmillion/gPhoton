@@ -43,7 +43,7 @@ def print_inline(text,blanks=60):
         return
 
 def manage_requests2(query,maxcnt=100.,wait=10,timeout=60,verbose=0):
-	query = query.replace('json','extjs')
+	query = query.replace('json','extjs') # temporary hack for testing
 	cnt = 0
 	while cnt < maxcnt:
 		try:
@@ -69,9 +69,7 @@ def manage_requests2(query,maxcnt=100.,wait=10,timeout=60,verbose=0):
 			print 'Unknown return: {s}'.format(s=r.json()['status'])
 			cnt+=1
 			continue
-			#raise ValueERror 'Unknown error in query: {q}'.format(q=query)
 	return r
-
 
 def manage_requests(query,maxcnt=100,wait=10,timeout=60):
 	""" Make simple 'requests' calls slightly more robust against network
