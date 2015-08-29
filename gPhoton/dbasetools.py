@@ -100,25 +100,28 @@ def fGetTimeRanges(band,skypos,trange=None,detsize=1.1,verbose=0,
 
     return np.array(tranges,dtype='float64')
 
-def stimcount_shuttered(band,trange,verbose=0,retries=20.):
-    t = np.array(gQuery.getArray(gQuery.uniquetimes(band,trange[0],trange[1],
-            flag=True),verbose=verbose),dtype='float64')[:,0]/gQuery.tscale
+def stimcount_shuttered(band,trange,verbose=0,retries=20.,timestamplist=False):
+    try:
+        t = (timestamplist if np.array(timestamplist).any() else
+                np.array(gQuery.getArray(
+                    gQuery.uniquetimes(band,trange[0],trange[1]),
+                        verbose=verbose),dtype='float64')[:,0]/gQuery.tscale)
+    except IndexError: # Shutter this whole time range.
+        if verbose:
+            print 'No data in {t0},{t1}'.format(t0=trange[0],t1=trange[1])
+        return 0
+
     times = np.sort(np.unique(np.append(t,trange)))
     tranges = distinct_tranges(times,maxgap=0.05)
     stimcount = 0
     for trange in tranges:
-        stimcount += gQuery.getValue(gQuery.stimcount(band,trange[0],trange[1]))
+        stimcount += gQuery.getValue(gQuery.stimcount(band,trange[0],trange[1]),
+                                        verbose=verbose)+gQuery.getValue(
+                                     gQuery.stimcount(band,trange[0],trange[1],
+                                        null=False),verbose=verbose)
     return stimcount
 
-def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966,
-    timestamplist=False):
-    """Calculate empirical deadtime (per global count rate) using revised
-    formulas. Restricts integration of global counts to non-shuttered time
-    periods.
-    """
-    model = {'FUV':[-0.000386611005025,76.5419507472],
-             'NUV':[-0.000417794996843,77.1516557638]}
-    rawexpt = trange[1]-trange[0]
+def globalcount_shuttered(band,trange,verbose=0,timestamplist=False):
     try:
         t = (timestamplist if np.array(timestamplist).any() else
                 np.array(gQuery.getArray(
@@ -135,12 +138,9 @@ def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966,
         nullevents += gQuery.getValue(
                     gQuery.deadtime2(band,trange[0],trange[1]),verbose=verbose)
         nonnullevents += gQuery.getValue(gQuery.deadtime1(band,trange[0],
-                                        trange[1],flag=True),verbose=verbose)
+                                        trange[1]),verbose=verbose)
 
-    gcr = (nonnullevents + nullevents)/rawexpt
-    refrate = model[band][1]/feeclkratio
-    scr = model[band][0]*gcr+model[band][1]
-    return (1-scr/feeclkratio/refrate)
+    return nullevents+nonnullevents
 
 def compute_shutter(band,trange,verbose=0,retries=20,shutgap=0.05,
     timestamplist=False):
@@ -154,7 +154,21 @@ def compute_shutter(band,trange,verbose=0,retries=20,shutgap=0.05,
     t = np.sort(np.unique(np.append(t,trange)))
     ix = np.where(t[1:]-t[:-1]>=shutgap)
     return np.array(t[1:]-t[:-1])[ix].sum()
-    #return len(ix[0])*shutgap
+
+def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966,
+    timestamplist=False):
+    """Calculate empirical deadtime (per global count rate) using revised
+    formulas. Restricts integration of global counts to non-shuttered time
+    periods.
+    """
+    model = {'FUV':[-0.000410118920433,76.3161728023],
+             'NUV':[-0.00043674790659,77.0751119568]}
+    rawexpt = trange[1]-trange[0]-compute_shutter(band,trange,
+        timestamplist=timestamplist)
+    gcr = globalcount_shuttered(band,trange,timestamplist=timestamplist)/rawexpt
+    refrate = model[band][1]/feeclkratio
+    scr = model[band][0]*gcr+model[band][1]
+    return (1-scr/feeclkratio/refrate)
 
 def exposure(band,trange,verbose=0,retries=20):
     rawexpt = trange[1]-trange[0]
