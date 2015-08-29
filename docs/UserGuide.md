@@ -195,6 +195,8 @@ For any command, you can always request more information be printed to the termi
 
 **Note on the column naming convention:** The _bgsub suffix in a column definition means that the value is background subtracted using an estimate based on an unmasked annulus. The _bgsub_cheese suffix means that the value is background subtracted using an estimate based on a "swiss cheese" style mask of the annulus. Column names which don't have these suffixes do not contain background corrected.
 
+**What does "treated with caution" mean?** The photon level data has been so little explored that we're still in the process of identifying pitfalls and gotchas but, in general, it has been our experience that if your source brightness correlates as a function of time with something that it _should not_ (like detector position, response, or effect exposure depth), then something is probably wrong. It's also a good idea to make a gMap movie of variable sources to sanity check them by eye, and also to generate the light curve at two or more time bins that are not integer multiples (to tease out aliasing).
+
 ####Calling from within the Python Interpreter
 You can also import and work with _gAperture_ and its modules from within the Python interpeter.
 
