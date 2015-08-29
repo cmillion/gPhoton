@@ -37,6 +37,7 @@ def xieta2colrow(xi, eta, band, detsize=1.25):
     #cut = ((col > 0.) & (col < flat.shape[0]-1) &
     #       (row > 0.) & (row < flat.shape[1]-1))
     #cut = np.where(ix == True)
+    #ix = np.where((1.25/800.)*mc.distance(col,row,400,400)=detsize)
     return col, row
 
 def hashresponse(band,events,verbose=0):
@@ -81,7 +82,7 @@ def read_photons(photonfile,ra0,dec0,tranges,radius,verbose=0,
     return events
 
 # This should be moved to dbasetools.
-def query_photons(band,ra0,dec0,tranges,radius,verbose=0):
+def query_photons(band,ra0,dec0,tranges,radius,verbose=0,flag=0):
     """Retrieve photons within an aperture from the database."""
     stream = []
     if verbose:
@@ -92,8 +93,8 @@ def query_photons(band,ra0,dec0,tranges,radius,verbose=0):
             mc.print_inline(" and between "+str(trange[0])+" and "+
                             str(trange[1])+".")
         thisstream = gQuery.getArray(
-            gQuery.allphotons(band, ra0, dec0, trange[0], trange[1], radius),
-                              verbose=verbose,retries=100)
+            gQuery.allphotons(band, ra0, dec0, trange[0], trange[1], radius,
+                                        flag=flag), verbose=verbose,retries=100)
         stream.extend(thisstream)
     stream = np.array(stream, 'f8').T
     colnames = ['t', 'ra', 'dec', 'xi', 'eta', 'x', 'y']
@@ -104,13 +105,13 @@ def query_photons(band,ra0,dec0,tranges,radius,verbose=0):
     return events
 
 def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
-                photonfile=None):
+                photonfile=None, flag=0):
     if photonfile:
         events = read_photons(photonfile, ra0, dec0, tranges, radius,
                               verbose=verbose)
     else:
         events = query_photons(band, ra0, dec0, tranges, radius,
-                               verbose=verbose)
+                               verbose=verbose, flag=flag)
 
     events = hashresponse(band, events, verbose=verbose)
     return events
@@ -209,7 +210,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     # FIXME: allocate these from a dict of constructors
     lcurve_cols = ['counts', 'sources', 'bg_counts','responses',
                    'detxs', 'detys', 't0_data', 't1_data', 't_mean', 'racent',
-                   'deccent']
+                   'deccent', 'flags']
     lcurve = {'params':gphot_params(band,[ra0,dec0],radius,annulus=annulus,
                                     verbose=verbose,
                                     detsize=detsize,stepsz=stepsz,
@@ -298,12 +299,14 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
 def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
              trange=None, tranges=None, verbose=0, coadd=False, minexp=1.,
              maxgap=1., maskdepth=20, maskradius=1.5,
-             photonfile=None):
+             photonfile=None, detsize=1.1):
+    skyrange = [np.array(annulus).max().tolist() if annulus else radius,
+                np.array(annulus).max().tolist() if annulus else radius,]
     if verbose:
         mc.print_inline("Getting exposure ranges.")
     if tranges is None:
         tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
-                                 maxgap=maxgap, minexp=minexp, verbose=verbose)
+                maxgap=maxgap, minexp=minexp, verbose=verbose, detsize=detsize)
     elif not np.array(tranges).shape:
         print "No exposure time at this location: [{ra},{dec}]".format(
                                                             ra=ra0,dec=dec0)
@@ -349,19 +352,21 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
 
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                 stepsz=None, trange=None, tranges=None, verbose=0, coadd=False,
-                iocode='wb',detsize=1.25,overwrite=False,
+                iocode='wb',detsize=1.1,overwrite=False,
                 minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,
                 photonfile=None):
     data = getcurve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
                     trange=trange, tranges=tranges, verbose=verbose,
                     coadd=coadd, minexp=minexp, maxgap=maxgap,
                     maskdepth=maskdepth, maskradius=maskradius,
-                    photonfile=photonfile)
+                    photonfile=photonfile, detsize=detsize)
     if csvfile:
         columns = ['t0','t1','exptime','mag_bgsub_cheese','t_mean','t0_data',
                    't1_data','cps','counts','bg','mag','mag_bgsub',
-                   'flux','flux_bgsub','flux_bgsub_cheese','bg_cheese']
-        test=pd.DataFrame({'t0':data['t0'],'t1':data['t1'],
+                   'flux','flux_bgsub','flux_bgsub_cheese','bg_cheese',
+                   'detx','dety','detrad','response']
+        try:
+            test=pd.DataFrame({'t0':data['t0'],'t1':data['t1'],
                            't_mean':data['t_mean'],'t0_data':data['t0_data'],
                            't1_data':data['t1_data'],'exptime':data['exptime'],
                            'cps':data['cps'],'counts':data['counts'],
@@ -371,11 +376,17 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                            'flux':data['flux'],
                            'flux_bgsub':data['flux_bgsub'],
                            'flux_bgsub_cheese':data['flux_bgsub_cheese'],
-                           'bg_cheese':data['bg']['cheese']})#,
+                           'bg_cheese':data['bg']['cheese'],
+                           'detx':data['detxs'],'dety':data['detys'],
+                           'detrad':data['detrad'],'response':data['responses']
+                           })
+        except:
+            if verbose>1:
+                print 'Unable to build dataframe.'
         try:
             test.to_csv(csvfile,index=False,mode=iocode,columns=columns)
         except:
-            print 'Failed to write to: '+str(csvfile)
+            print 'Did not write to: '+str(csvfile)
     else:
         if verbose>2:
             print "No CSV file requested."

@@ -45,6 +45,8 @@ Advanced users and developers will want more control over their installation and
 #####Obtaining the Source Code
 **For developers:** Obtain the source code by cloning the master branch of the [gPhoton repository on Github](https://github.com/cmillion/gPhoton). Instructions for getting started using Github can be found [here](https://help.github.com/categories/54/articles), and instructions specifically for cloning repositories can be found [here](https://help.github.com/articles/which-remote-url-should-i-use#cloning-with-ssh). Once you've cloned the repository, it will be straightforward for your to update your local version when we make updates to the master version.
 
+Note: If you want to run the command line scripts (`gMap`, `gAperture`, `gFind`, and `gPipeline`) from your github checkout, you'll need to move them into the correct directory relative to the main module. They currently reside in the _bin_ directory directly under the repo (from which the PyPI installation puts them into _/usr/bin/_). You should copy them to the top level directory (which contains _gPhoton_, _docs_, etc.) and run them as scripts from there. (Running the scripts straight from _bin_ will result in an error like "ValueError: Attempted relative import beyond toplevel package")
+
 #####Managing dependencies
 You will need to install _python2.7_, _numpy_, _scipy_, _astropy_, _requests_ and _pandas_. The recommended commands for doing this appear below under the appropriate operating system.
 
@@ -173,12 +175,12 @@ For any command, you can always request more information be printed to the termi
 1. t0 - Start time of observation bin in GALEX seconds.
 2. t1 - End time of observation bin in GALEX seconds.
 3. exptime - Effect exposure time in seconds. (Note: This is corrected for dead time and shutter effects and so is not equal to t0-t1.)
-4. mag_bgsub_cheese - The calibrated AB magnitude within the bin using the best implemented background subtracted method ("swiss cheese").
-5. t_mean - The mean time of data within the bin in GALEX seconds.
-6. t0_data - The minimum time of data within the bin in GALEX seconds.
-7. t1_data - The maximum time of data within the bin in GALEX seconds.
-8. cps - The counts per second with no background subtraction.
-9. counts - The number of counts within the aperture. (Not background subtracted.)
+4. mag_bgsub_cheese - The calibrated AB magnitude within the bin using the "swiss cheese" background subtraction method where known MCAT sources are masked from the background annulus prior to surface flux estimation.
+5. t_mean - The mean timestamp of all photon data within the time bin, in GALEX seconds.
+6. t0_data - The minimum timestamp of data within the time bin, in GALEX seconds.
+7. t1_data - The maximum timestamp of data within the time bin, in GALEX seconds.
+8. cps - The counts per second within the aperture with no background subtraction.
+9. counts - The total number of counts within the aperture. (Within the time bin, and not background subtracted.)
 10. bg - The estimated number of counts within the aperture based upon the measured rates of counts within an unmasked annulus.
 11. mag - The AB magnitude of the source with no background subtraction.
 12. mag_bgsub - The AB magnitude of the source using the unmasked background subtraction.
@@ -186,8 +188,14 @@ For any command, you can always request more information be printed to the termi
 14. flux_bgsub - The flux of the source using the unmasked annulus background subtraction.
 15. flux_bgsub_cheese - The flux of the source using the swiss cheese background subtraction.
 16. bg_cheese - The estimated number of background counts in the aperture based upon the background measured using the swiss cheese method.
+17. detx - The mean detector x pixel position of all events within the aperture and time bin, assuming an 800 x 800 pixel FoV (identical to the dimensions of the flat).
+18. dety - The mean detector y pixel position of all events within the aperture and time bin, assuming an 800 x 800 pixel FoV.
+19. detrad - The mean cartesian pixel distance of all events within the aperture and time bin from the center of the detector FoV, assuming an 800 x 800 pixel FoV. Observations near the detector edge (detrad ~=400) should be treated with caution.
+20. response - The mean response (flat) value assigned to all events within the aperture and time bin. Observations with a low response (~< 80) should be treated with caution.
 
 **Note on the column naming convention:** The _bgsub suffix in a column definition means that the value is background subtracted using an estimate based on an unmasked annulus. The _bgsub_cheese suffix means that the value is background subtracted using an estimate based on a "swiss cheese" style mask of the annulus. Column names which don't have these suffixes do not contain background corrected.
+
+**What does "treated with caution" mean?** The photon level data has been so little explored that we're still in the process of identifying pitfalls and gotchas but, in general, it has been our experience that if your source brightness correlates as a function of time with something that it _should not_ (like detector position, response, or effect exposure depth), then something is probably wrong. It's also a good idea to make a gMap movie of variable sources to sanity check them by eye, and also to generate the light curve at two or more time bins that are not integer multiples (to tease out aliasing).
 
 ####Calling from within the Python Interpreter
 You can also import and work with _gAperture_ and its modules from within the Python interpeter.
