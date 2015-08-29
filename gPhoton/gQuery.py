@@ -161,14 +161,12 @@ def deadtime1(band,t0,t1,flag=False):
                 t1=str(long(t1*tscale)), flag=' and flag=0' if flag else '',
                 formatURL=formatURL)
 
-def deadtime2(band,t0,t1,flag=False):
+def deadtime2(band,t0,t1):
     """Return the global counts for NULL data."""
     return ('{baseURL}select count(*) from {baseDB}.{band}PhotonsNULLV where '+
-            'time >= {t0} and time < {t1}'+
-            '{flag}{formatURL}').format(baseURL=baseURL,
+            'time >= {t0} and time < {t1}{formatURL}').format(baseURL=baseURL,
                 baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
-                t1=str(long(t1*tscale)), flag='',
-                formatURL=formatURL)
+                t1=str(long(t1*tscale)), formatURL=formatURL)
 
 def deadtime(band,t0,t1,feeclkratio=0.966,tec2fdead=5.52e-6):
     """Return the emperically determined deadtime correction based upon the
@@ -241,20 +239,21 @@ def detbox(band,t0,t1,xr,yr):
 
 # FIXME: convert t0 to eclipse
 def stimcount(band,t0,t1,margin=[90.01,90.01],aspum=68.754932/1000.,
-              eclipse=None):
+              eclipse=None,null=True):
     """Return stim counts."""
     if not eclipse:
         eclipse = 55000 if isPostCSP(t0) else 30000
     if isPostCSP(t0):
         margin[1]=180.02
     avgstim = CalUtils.avg_stimpos(band,eclipse)
-    return ('{baseURL}select count(*) from {baseDB}.{band}PhotonsNULLV '+
+    return ('{baseURL}select count(*) from {baseDB}.{band}Photons{N}V '+
             'where time >= {t0} and time < {t1} and ('+
             '((x >= {x10} and x < {x11}) and (y >= {y10} and y < {y11})) or '+
             '((x >= {x20} and x < {x21}) and (y >= {y20} and y < {y21})) or '+
             '((x >= {x30} and x < {x31}) and (y >= {y30} and y < {y31})) or '+
             '((x >= {x40} and x < {x41}) and (y >= {y40} and y < {y41}))'+
             '){formatURL}').format(baseURL=baseURL, baseDB=baseDB, band=band,
+                N='NULL' if null else '',
                 t0=str(long(t0*tscale)), t1=str(long(t1*tscale)),
                 x10=(avgstim['x1']-margin[0])/aspum,
                 x11=(avgstim['x1']+margin[0])/aspum,
@@ -271,7 +270,8 @@ def stimcount(band,t0,t1,margin=[90.01,90.01],aspum=68.754932/1000.,
                 x40=(avgstim['x4']-margin[0])/aspum,
                 x41=(avgstim['x4']+margin[0])/aspum,
                 y40=(avgstim['y4']-margin[1])/aspum,
-                y41=(avgstim['y4']+margin[1])/aspum,formatURL=formatURL)
+                y41=(avgstim['y4']+margin[1])/aspum,
+                formatURL=formatURL)
 
 def stimtimes(band,t0,t1,margin=[90.01,90.01],aspum=68.754932/1000.,
               eclipse=None):
