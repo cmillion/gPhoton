@@ -42,9 +42,9 @@ def common_args(parser,function_name,
         help="Center Declination position in decimal degrees. "
              "Must be 0 < DEC < 90.")
     parser.add_argument("--detsize", action="store", type=float,
-        dest="detsize", default=1.25,
+        dest="detsize", default=1.1,
         help="Set the effective field diameter in degrees for the "
-             "exposure search.  Default = 1.25.")
+             "exposure search.  Default = 1.1.")
     parser.add_argument("-g", "--gap", "--maxgap", action="store",
         type=float, dest="maxgap", default=1500.,
         help="Maximum gap size in seconds for data to be considered "
@@ -83,6 +83,10 @@ def common_args(parser,function_name,
              "The includes recenting on the nearest MCAT source. This flag"+
              "will clobber other annuli and aperture radii parameters.",
         default=False)
+    parser.add_argument("--skyrange", action="store", dest="skyrange",
+    	type=ast.literal_eval, help="Two element list of ra and dec ranges. "+
+    		"Equivalent to separately setting --raangle and decangle.")
+
 
     if function_name in ['gaperture','gmap']:
         parser.add_argument("--calpath", action="store", type=str,
@@ -95,7 +99,7 @@ def common_args(parser,function_name,
         parser.add_argument("--overwrite", "--ow", "--clobber",
             action="store_true", dest="overwrite", help="Overwrite existing "+
             "output files?  Default = False.", default=False)
-        parser.add_argument("-s", "--step", "--frame", action="store",
+        parser.add_argument("-s","--step","--stepsz","--frame", action="store",
             type=float, dest="stepsz", help="Step size for lightcurve or "+
             "movie in seconds.  Default = 0. (no binning).", default=0.)
 
@@ -206,7 +210,8 @@ def check_common_args(args,function_name,
                                        trange=[args.tmin,args.tmax],
                                        maxgap=args.maxgap,minexp=args.minexp,
                                        detsize=args.detsize,
-                                       retries=args.retries)
+                                       retries=args.retries,
+                                       skyrange=args.skyrange)
     else:
         """ If no coordinates specified then use a huge time range for
         now. """

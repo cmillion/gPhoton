@@ -27,8 +27,53 @@ def get_aspect(band,skypos,trange=[6e8,11e8],verbose=0,
         data[key] = data[key][ix]
     return data
 
-def fGetTimeRanges(band,skypos,trange=None,detsize=1.25,verbose=0,
-                   maxgap=1.,minexp=1.,retries=100.,predicted=False):
+def get_valid_times(band,skypos,trange=None,detsize=1.1,verbose=0,retries=100.,
+                    skyrange=None):
+    if not np.array(trange).tolist():
+        trange = [1,1000000000000]
+    if len(np.shape(trange))==2:
+        trange=trange[0]
+
+    # FIXME: This is probably not an optimally efficient way to check an entire
+    #  region of sky for data, but it's not hugely dumb and does work...
+    # Assemble sky positions on a grid within the targeted region.
+    skypos_list = [skypos]
+    if skyrange:
+        for r in np.linspace(skypos[0]-skyrange[0]/2.,skypos[0]+skyrange[0]/2.,
+                    np.ceil(skyrange[0]/(detsize/2.)),endpoint=True):
+            for d in np.linspace(skypos[1]-skyrange[1]/2.,
+                    skypos[1]+skyrange[1]/2.,np.ceil(skyrange[1]/(detsize/2.)),
+                    endpoint=True):
+                skypos_list += [[r,d]]
+
+    times = []
+    for skypos in skypos_list:
+        try:
+            times = (list(times) +
+                list(np.array(gQuery.getArray(gQuery.exposure_ranges(
+                    band,skypos[0],skypos[1],t0=trange[0],t1=trange[1],
+                    detsize=detsize),verbose=verbose,retries=retries),
+                    dtype='float64')[:,0]/tscale))
+        except IndexError:
+            if verbose:
+                print "No exposure time available at {pos}".format(pos=skypos)
+                return np.array([],dtype='float64')
+        except TypeError:
+            print "Is one of the inputs malformed?"
+            raise
+        except:
+            raise
+
+    return np.sort(np.unique(times))
+
+def distinct_tranges(times,maxgap=1.):
+    ix=np.where(times[1:]-times[:-1]>maxgap)
+    ixs = [-1] + list(ix[0]) + [len(times)-1]
+    return [[times[ixs[i]+1],times[ixs[i+1]]] for i,b in enumerate(ixs[:-1])]
+
+def fGetTimeRanges(band,skypos,trange=None,detsize=1.1,verbose=0,
+                   maxgap=1.,minexp=1.,retries=100.,predicted=False,
+                   skyrange=None,maxgap_override=False):
     """Find the contiguous time ranges within a time range at a
     specific location.
 	minexp - Do not include exposure time less than this.
@@ -38,92 +83,113 @@ def fGetTimeRanges(band,skypos,trange=None,detsize=1.25,verbose=0,
     predicted - Use the aspect solutions to estimate what exposure will be
     available once the database is fully populated.
 	"""
-    try:
-        if not np.array(trange).tolist():
-            trange = [1,1000000000000]
-        if len(np.shape(trange))==2:
-            trange=trange[0]
-        if verbose and predicted:
-            print "Querying coverage of GR6/7. (Not current database.)"
-        times = (np.array(gQuery.getArray(gQuery.exposure_ranges(band,
-            skypos[0],skypos[1],t0=trange[0],t1=trange[1],detsize=detsize),
-            verbose=verbose,retries=retries),
-                                                dtype='float64')[:,0]/tscale
-            if not predicted else get_aspect(band,skypos,trange,detsize=detsize,
-                                        verbose=verbose)['t'])
-    except IndexError:
-        if verbose:
-            print "No exposure time available at {pos}".format(pos=skypos)
+    times = get_valid_times(band,skypos,trange=trange,detsize=detsize,
+                            verbose=verbose,retries=retries,skyrange=skyrange)
+    if not len(times):
         return np.array([],dtype='float64')
-    except TypeError:
-        print "Is one of the inputs malformed?"
-        raise
-    except:
-        raise
     if verbose:
-        print_inline('Parsing '+str(len(times)-1)+' seconds of exposure.: ['+str(trange[0])+', '+str(trange[1])+']')
-    blah = []
-    for i in xrange(len(times[0:-1])):
-        blah.append(times[i+1]-times[i])
-    # A drop in data with duration greater than maxgap initiates a
-    #  new exposure
-    gaps = np.where(np.array(blah)>maxgap)
-    ngaps = len(gaps[0])
-    chunks = []
-    for i in range(ngaps):
-        if not i:
-            chunk = [times[0],times[gaps[0][i]]]
-        elif i==ngaps-1:
-            chunk = [times[gaps[0][i]+1],times[-1]]
-        else:
-            chunk = [times[gaps[0][i]+1],times[gaps[0][i+1]]]
-        # If the duration of this slice is less than minexp, do not
-        #  count it as valid exposure.
-        if chunk[1]-chunk[0]<minexp:
-            continue
-        else:
-            chunks.append(chunk)
-    if not ngaps:
-        if times.min()==times.max():
-            chunks.append([times.min(),times.min()+1])
-        else:
-            chunks.append([times.min(),times.max()])
+        print_inline('Parsing ~'+str(len(times)-1)+' seconds of raw exposure.')
 
-    return np.array(chunks,dtype='float64')
+    # NOTE: The minimum meaningful maxgap is 1 second.
+    if maxgap<1 and not maxgap_override:
+        raise 'maxgap must be >=1 second'
+    tranges = distinct_tranges(times,maxgap=maxgap)
 
-def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966):
+    ix = np.where(np.array(tranges)[:,1]-np.array(tranges)[:,0]>=minexp)
+    tranges = np.array(tranges)[ix].tolist()
+
+    return np.array(tranges,dtype='float64')
+
+def stimcount_shuttered(band,trange,verbose=0,retries=20.,timestamplist=False):
+    try:
+        t = (timestamplist if np.array(timestamplist).any() else
+                np.array(gQuery.getArray(
+                    gQuery.uniquetimes(band,trange[0],trange[1]),
+                        verbose=verbose),dtype='float64')[:,0]/gQuery.tscale)
+    except IndexError: # Shutter this whole time range.
+        if verbose:
+            print 'No data in {t0},{t1}'.format(t0=trange[0],t1=trange[1])
+        return 0
+
+    times = np.sort(np.unique(np.append(t,trange)))
+    tranges = distinct_tranges(times,maxgap=0.05)
+    stimcount = 0
+    for trange in tranges:
+        stimcount += gQuery.getValue(gQuery.stimcount(band,trange[0],trange[1]),
+                                        verbose=verbose)+gQuery.getValue(
+                                     gQuery.stimcount(band,trange[0],trange[1],
+                                        null=False),verbose=verbose)
+    return stimcount
+
+def globalcount_shuttered(band,trange,verbose=0,timestamplist=False):
+    try:
+        t = (timestamplist if np.array(timestamplist).any() else
+                np.array(gQuery.getArray(
+                    gQuery.uniquetimes(band,trange[0],trange[1],flag=True),
+                        verbose=verbose),dtype='float64')[:,0]/gQuery.tscale)
+    except IndexError: # Shutter this whole time range.
+        if verbose:
+            print 'No data in {t0},{t1}'.format(t0=trange[0],t1=trange[1])
+        return 0
+    times = np.sort(np.unique(np.append(t,trange)))
+    tranges = distinct_tranges(times,maxgap=0.05)
+    nonnullevents,nullevents = 0,0
+    for trange in tranges:
+        nullevents += gQuery.getValue(
+                    gQuery.deadtime2(band,trange[0],trange[1]),verbose=verbose)
+        nonnullevents += gQuery.getValue(gQuery.deadtime1(band,trange[0],
+                                        trange[1]),verbose=verbose)
+
+    return nullevents+nonnullevents
+
+def compute_shutter(band,trange,verbose=0,retries=20,shutgap=0.05,
+    timestamplist=False):
+    try:
+        t = (timestamplist if np.array(timestamplist).any() else
+                np.array(gQuery.getArray(
+                    gQuery.uniquetimes(band,trange[0],trange[1],flag=True),
+                        verbose=verbose),dtype='float64')[:,0]/gQuery.tscale)
+    except IndexError: # Shutter this whole time range.
+        return trange[1]-trange[0]
+    t = np.sort(np.unique(np.append(t,trange)))
+    ix = np.where(t[1:]-t[:-1]>=shutgap)
+    return np.array(t[1:]-t[:-1])[ix].sum()
+
+def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966,
+    timestamplist=False):
     """Calculate empirical deadtime (per global count rate) using revised
-    formulas.
+    formulas. Restricts integration of global counts to non-shuttered time
+    periods.
     """
-    model = {'FUV':[-0.000386611005025,76.5419507472],
-             'NUV':[-0.000417794996843,77.1516557638]}
-    rawexpt = trange[1]-trange[0]
-    gcr = gQuery.getValue(gQuery.globalcounts(band,trange[0],trange[1]),
-                          verbose=verbose)/rawexpt
+    model = {'FUV':[-0.000410118920433,76.3161728023],
+             'NUV':[-0.00043674790659,77.0751119568]}
+    rawexpt = trange[1]-trange[0]-compute_shutter(band,trange,
+        timestamplist=timestamplist)
+    gcr = globalcount_shuttered(band,trange,timestamplist=timestamplist)/rawexpt
     refrate = model[band][1]/feeclkratio
     scr = model[band][0]*gcr+model[band][1]
     return (1-scr/feeclkratio/refrate)
-
-def compute_shutter(band,trange,verbose=0,retries=20,shutgap=0.05):
-    try:
-        t = np.sort(np.array(gQuery.getArray(gQuery.uniquetimes(
-                    band,trange[0],trange[1]),verbose=verbose),
-                    dtype='float64')[:,0]/gQuery.tscale)
-    except IndexError: # Shutter this whole time range.
-        return trange[1]-trange[0]
-    ix = np.where(t[1:]-t[:-1]>=shutgap)
-    return len(ix[0])*shutgap
 
 def exposure(band,trange,verbose=0,retries=20):
     rawexpt = trange[1]-trange[0]
     if rawexpt==0.:
         return 0.
-    shutter = compute_shutter(band,trange,verbose=verbose,retries=retries)
-    deadtime = empirical_deadtime(band,trange,verbose=verbose,retries=retries)
+    try:
+        t = np.array(gQuery.getArray(
+                gQuery.uniquetimes(band,trange[0],trange[1],flag=True),
+                verbose=verbose),dtype='float64')[:,0]/gQuery.tscale
+    except IndexError: # Shutter this whole time range.
+        if verbose:
+            print 'No data in {t0},{t1}'.format(t0=trange[0],t1=trange[1])
+        return 0
+    shutter = compute_shutter(band,trange,verbose=verbose,retries=retries,
+                              timestamplist=t)
+    deadtime = empirical_deadtime(band,trange,verbose=verbose,retries=retries,
+                                  timestamplist=t)
     return (rawexpt-shutter)*(1.-deadtime)
 
 def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,
-                    retries=20,chunksz=10.e6,coadd=False):
+                    retries=20,coadd=False):
     """Compute the effective exposure time."""
     # FIXME: This skypos[] check appears to not work properly and leads
     #  to dramatic _underestimates_ of the exposure time.
@@ -138,15 +204,8 @@ def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,
             print 'Based on skypos {sp}'.format(sp=skypos)
     exptime = 0.
     for trange in tranges:
-        # Traverse the exposure ranges in manageable chunks to hopefully keep
-        # the query response time below the HTTP timeout...
-        chunks = (np.linspace(trange[0],trange[1],
-                             num=np.ceil((trange[1]-trange[0])/chunksz)) if
-                                 (trange[1]-trange[0])>chunksz else
-                                 np.array(trange))
-        for i,t in enumerate(chunks[:-1]):
-            exptime += exposure(band,[chunks[i],chunks[i+1]],verbose=verbose,
-                                retries=retries)
+        exptime += exposure(band,[trange[0],trange[1]],verbose=verbose,
+                                                            retries=retries)
     return exptime
 
 def get_mcat_data(skypos,rad):

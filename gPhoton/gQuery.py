@@ -1,6 +1,6 @@
 # This file defines common queries that are passed to the GALEX photon
 # database at MAST.
-from MCUtils import manage_requests
+from MCUtils import manage_requests, manage_requests2
 import CalUtils
 from galextools import isPostCSP
 from gPhoton import time_id
@@ -11,10 +11,11 @@ tscale = 1000. # time in the database is "integer-ized" by multiplying by this
 formatted query to the MAST database. Don't change them unless you know what
 you're doing.
 """
-baseURL = 'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
+#baseURL = 'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
+baseURL = 'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
 baseDB = 'GPFCore.dbo'
 MCATDB = 'GR6Plus7.dbo'
-formatURL = ' -- '+str(time_id)+'&format=json&timeout={}'
+formatURL = ' -- '+str(time_id)+'&format=json'
 
 def hasNaN(query):
     """Check if there is NaN in a query (or any string) and, if so, raise an
@@ -27,23 +28,22 @@ def hasNaN(query):
 def getValue(query,verbose=0,retries=20):
     """Manage a database call which returns a single value."""
     hasNaN(query)
-    if verbose>2:
-        print query
     try:
-        out = float(manage_requests(query,
-                            maxcnt=retries).json()['Tables'][0]['Rows'][0][0])
+        out = float(manage_requests2(query,maxcnt=retries,
+                verbose=verbose).json()['data']['Tables'][0]['Rows'][0][0])
     except:
+        print 'Failed: {q}'.format(q=query)
         raise# RuntimeError('Connection timeout.')
     return out
 
 def getArray(query,verbose=0,retries=20):
     """Manage a database call which returns an array of values."""
     hasNaN(query)
-    if verbose>2:
-        print query
     try:
-        out = manage_requests(query,maxcnt=retries).json()['Tables'][0]['Rows']
+        out = manage_requests2(query,
+            maxcnt=retries,verbose=verbose).json()['data']['Tables'][0]['Rows']
     except:
+        print 'Failed: {q}'.format(q=query)
         raise# RuntimeError('Connection timeout.')
     return out
 
@@ -152,12 +152,14 @@ def aperture(band,ra0,dec0,t0,t1,radius):
         ','+str(radius)+','+str(long(t0*tscale))+','+
         str(long(t1*tscale))+',0)'+str(formatURL))
 
-def deadtime1(band,t0,t1):
+def deadtime1(band,t0,t1,flag=False):
     """Return the global counts of non-NULL data."""
     return ('{baseURL}select count(*) from {baseDB}.{band}PhotonsV where '+
-            'time >= {t0} and time < {t1}{formatURL}').format(baseURL=baseURL,
+            'time >= {t0} and time < {t1}'+
+            '{flag}{formatURL}').format(baseURL=baseURL,
                 baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
-                t1=str(long(t1*tscale)), formatURL=formatURL)
+                t1=str(long(t1*tscale)), flag=' and flag=0' if flag else '',
+                formatURL=formatURL)
 
 def deadtime2(band,t0,t1):
     """Return the global counts for NULL data."""
@@ -180,15 +182,16 @@ def deadtime(band,t0,t1,feeclkratio=0.966,tec2fdead=5.52e-6):
         'PhotonsV where time >= '+str(long(t0*tscale))+' and time < '+
         str(long(t1*tscale))+') x'+str(formatURL))
 
-def globalcounts(band,t0,t1):
+def globalcounts(band,t0,t1,flag=False):
     """Return the total number of detector events within a time range."""
-    return ('{baseURL}select count(t) from (select time as t from {baseDB}.{band}PhotonsV '+
-            'where time >= {t0} and time < {t1} union all select time as t '+
-            'from {baseDB}.{band}PhotonsNULLV where time >= '+
+    return ('{baseURL}select count(t) from '+
+            '(select time as t from {baseDB}.{band}PhotonsV '+
+            'where time >= {t0} and time < {t1}{flag} union all '+
+            'select time as t from {baseDB}.{band}PhotonsNULLV where time >= '+
             '{t0} and time < {t1}) x{formatURL}').format(baseURL=baseURL,
                 baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
-                t1=str(long(t1*tscale)), formatURL=formatURL)
-
+                t1=str(long(t1*tscale)), flag=' and flag=0' if flag else '',
+                formatURL=formatURL)
 
 def alltimes(band,t0,t1):
     """Return the time stamps of every detector event within a time range."""
@@ -199,15 +202,20 @@ def alltimes(band,t0,t1):
                 baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
                 t1=str(long(t1*tscale)), formatURL=formatURL)
 
-def uniquetimes(band,t0,t1):
-    """Return the _unique_ timestamps for all detector events within range."""
-    return ('{baseURL}select distinct t from (select time as t from {baseDB}.{band}PhotonsV '+
-            'where time >= {t0} and time < {t1} union all select time as t '+
-            'from {baseDB}.{band}PhotonsNULLV where time >= '+
-            '{t0} and time < {t1}) x{formatURL}').format(baseURL=baseURL,
-                baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
-                t1=str(long(t1*tscale)), formatURL=formatURL)
-
+def uniquetimes(band,t0,t1,flag=False,null=False):
+    """Return the _unique_ timestamps for events within trange."""
+    return ('{baseURL}select time from {baseDB}.{band}ShutterPOTimeV '+
+                'where time >= {t0} and time < {t1} order by '+
+                'time{formatURL}').format(baseURL=baseURL, baseDB=baseDB,band=band, t0=str(long(t0*tscale)), t1=str(long(t1*tscale)), formatURL=formatURL)
+    #else:
+    #    return ('{baseURL}select distinct time from {baseDB}.{band}Photons{null}V '+
+    #        'where time >= {t0} and time < {t1}{flag} order by time'+
+    #        '{formatURL}').format(baseURL=baseURL,
+    #            baseDB=baseDB, band=band,
+    #            null='NULL' if null else '', t0=str(long(t0*tscale)),
+    #            t1=str(long(t1*tscale)), flag=' and flag=0' if flag else '',
+    #            formatURL=formatURL)
+    #return URL
 
 def boxcount(band,t0,t1,xr,yr):
     """Find the number of events inside of a box defined by [xy] range in
@@ -231,6 +239,41 @@ def detbox(band,t0,t1,xr,yr):
 
 # FIXME: convert t0 to eclipse
 def stimcount(band,t0,t1,margin=[90.01,90.01],aspum=68.754932/1000.,
+              eclipse=None,null=True):
+    """Return stim counts."""
+    if not eclipse:
+        eclipse = 55000 if isPostCSP(t0) else 30000
+    if isPostCSP(t0):
+        margin[1]=180.02
+    avgstim = CalUtils.avg_stimpos(band,eclipse)
+    return ('{baseURL}select count(*) from {baseDB}.{band}Photons{N}V '+
+            'where time >= {t0} and time < {t1} and ('+
+            '((x >= {x10} and x < {x11}) and (y >= {y10} and y < {y11})) or '+
+            '((x >= {x20} and x < {x21}) and (y >= {y20} and y < {y21})) or '+
+            '((x >= {x30} and x < {x31}) and (y >= {y30} and y < {y31})) or '+
+            '((x >= {x40} and x < {x41}) and (y >= {y40} and y < {y41}))'+
+            '){formatURL}').format(baseURL=baseURL, baseDB=baseDB, band=band,
+                N='NULL' if null else '',
+                t0=str(long(t0*tscale)), t1=str(long(t1*tscale)),
+                x10=(avgstim['x1']-margin[0])/aspum,
+                x11=(avgstim['x1']+margin[0])/aspum,
+                y10=(avgstim['y1']-margin[1])/aspum,
+                y11=(avgstim['y1']+margin[1])/aspum,
+                x20=(avgstim['x2']-margin[0])/aspum,
+                x21=(avgstim['x2']+margin[0])/aspum,
+                y20=(avgstim['y2']-margin[1])/aspum,
+                y21=(avgstim['y2']+margin[1])/aspum,
+                x30=(avgstim['x3']-margin[0])/aspum,
+                x31=(avgstim['x3']+margin[0])/aspum,
+                y30=(avgstim['y3']-margin[1])/aspum,
+                y31=(avgstim['y3']+margin[1])/aspum,
+                x40=(avgstim['x4']-margin[0])/aspum,
+                x41=(avgstim['x4']+margin[0])/aspum,
+                y40=(avgstim['y4']-margin[1])/aspum,
+                y41=(avgstim['y4']+margin[1])/aspum,
+                formatURL=formatURL)
+
+def stimtimes(band,t0,t1,margin=[90.01,90.01],aspum=68.754932/1000.,
               eclipse=None):
     """Return stim counts."""
     if not eclipse:
@@ -238,7 +281,7 @@ def stimcount(band,t0,t1,margin=[90.01,90.01],aspum=68.754932/1000.,
     if isPostCSP(t0):
         margin[1]=180.02
     avgstim = CalUtils.avg_stimpos(band,eclipse)
-    return ('{baseURL}select count(*) from {baseDB}.{band}PhotonsNULLV '+
+    return ('{baseURL}select time from {baseDB}.{band}PhotonsNULLV '+
             'where time >= {t0} and time < {t1} and ('+
             '((x >= {x10} and x < {x11}) and (y >= {y10} and y < {y11})) or '+
             '((x >= {x20} and x < {x21}) and (y >= {y20} and y < {y21})) or '+
@@ -292,13 +335,14 @@ def centroid(band,ra0,dec0,t0,t1,radius):
         repr(ra0-radius)+' and ra < '+repr(ra0+radius)+' and dec >= '+
         repr(dec0-radius)+' and dec < '+repr(dec0+radius)+str(formatURL))
 
-def allphotons(band,ra0,dec0,t0,t1,radius):
+def allphotons(band,ra0,dec0,t0,t1,radius,flag=0):
     """Grab the major columns for all events within an aperture."""
-    return (str(baseURL)+
-        'select time,ra,dec,xi,eta,x,y from '+str(baseDB)+'.fGetNearbyObjEq'+
-        str(band)+'AllColumns('+repr(float(ra0))+','+repr(float(dec0))+','+
-        repr(radius)+','+
-        str(long(t0*tscale))+','+str(long(t1*tscale))+',0)'+str(formatURL))
+    return ('{baseURL}select time,ra,dec,xi,eta,x,y from '+
+        '{baseDB}.fGetNearbyObjEq{band}AllColumns({ra0},{dec0},{radius},{t0},'+
+        '{t1},{flag}){formatURL}').format(baseURL=baseURL,baseDB=baseDB,
+            band=band,ra0=repr(float(ra0)),dec0=repr(float(dec0)),
+            radius=radius,t0=str(long(t0*tscale)),t1=str(long(t1*tscale)),
+            flag=flag,formatURL=formatURL)
 
 # Shutter correction
 #  i.e. number of 0.05s gaps in data
@@ -351,25 +395,25 @@ def aspect_skypos(ra,dec,detsize=1.25):
 
 # Return data within a box centered on ra0, dec0 with sides of length 2*radius
 # TODO: deprecate this and rename it skybox()
-def box(band,ra0,dec0,t0,t1,radius):
+def box(band,ra0,dec0,t0,t1,radius,flag=0):
     return (str(baseURL)+
         'select time,ra,dec from '+str(baseDB)+'.'+str(band)+
         'PhotonsV where time >= '+
         str(long(t0*tscale))+' and time < '+str(long(t1*tscale))+
         ' and ra >= '+
         repr(ra0-radius)+' and ra < '+repr(ra0+radius)+' and dec >= '+
-        repr(dec0-radius)+' and dec < '+repr(dec0+radius)+' and flag=0'+
-        str(formatURL))
+        repr(dec0-radius)+' and dec < '+repr(dec0+radius)+' and flag='+
+        str(flag)+str(formatURL))
 
 # Return data within a rectangle centered on ra0, dec0
 # TODO: deprecate this and rename it skyrect()
-def rect(band,ra0,dec0,t0,t1,ra,dec):
+def rect(band,ra0,dec0,t0,t1,ra,dec,flag=0):
     #time,ra,dec,xi,eta,x,y
     return (str(baseURL)+
         'select time,ra,dec,xi,eta,x,y from '+str(baseDB)+'.fGetObjFromRect'+str(band)+'('+
         repr(ra0-ra/2.)+','+repr(ra0+ra/2.)+','+repr(dec0-dec/2.)+','+
         repr(dec0+dec/2.)+','+str(long(t0*tscale))+','+
-        str(long(t1*tscale))+',0)'+str(formatURL))
+        str(long(t1*tscale))+','+str(flag)+')'+str(formatURL))
 
-def skyrect(band,ra0,dec0,t0,t1,ra,dec):
-    return '{baseURL}select time,ra,dec,xi,eta,x,y from {baseDB}.fGetObjFromRect{band}AllColumns({ra_min},{ra_max},{dec_min},{dec_max},{t0},{t1},0){formatURL}'.format(baseURL=baseURL,baseDB=baseDB,band=band,ra_min=repr(ra0-ra/2.),ra_max=repr(ra0+ra/2.),dec_min=repr(dec0-dec/2.),dec_max=repr(dec0+dec/2.),t0=str(long(t0*tscale)),t1=str(long(t1*tscale)),formatURL=formatURL)
+def skyrect(band,ra0,dec0,t0,t1,ra,dec,detsize=1.1,flag=0):
+    return '{baseURL}select time,ra,dec,xi,eta,x,y from {baseDB}.fGetObjFromRect{band}AllColumns({ra_min},{ra_max},{dec_min},{dec_max},{t0},{t1},{flag}){formatURL}'.format(baseURL=baseURL,baseDB=baseDB,band=band,ra_min=repr(ra0-ra/2.),ra_max=repr(ra0+ra/2.),dec_min=repr(dec0-dec/2.),dec_max=repr(dec0+dec/2.),t0=str(long(t0*tscale)),t1=str(long(t1*tscale)),flag=flag,formatURL=formatURL)

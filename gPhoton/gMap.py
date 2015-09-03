@@ -7,7 +7,7 @@ import dbasetools as dbt
 import gphoton_args as gargs
 import numpy as np
 
-def gMap(band,cntfile=False,coadd=False,detsize=1.25,intfile=False,
+def gMap(band,cntfile=False,coadd=False,detsize=1.1,intfile=False,
 		 rrfile=False,skypos=None,maxgap=1500.,memlight=100.,minexp=1.,
 		 overwrite=False,retries=20,skyrange=None,stepsz=0.,trange=None,
 		 verbose=0,cntcoaddfile=False,intcoaddfile=False):
@@ -24,27 +24,32 @@ def gMap(band,cntfile=False,coadd=False,detsize=1.25,intfile=False,
 	write_cnt_coadd = cntcoaddfile if cntcoaddfile else False
 	write_int_coadd = intcoaddfile if intcoaddfile else False
 
-	# If gMap is called via an import, and no trange is specified, then use a database
-	# call to get the appropriate time range.
+	# If gMap is called via an import, and no trange is specified,
+	# then use a database call to get the appropriate time range.
 	if trange is None:
 		trange=dbt.fGetTimeRanges(band, skypos,
 					  trange=[6.E8,11.E8],
 					  maxgap=maxgap, minexp=minexp,
 					  detsize=detsize,
-					  retries=retries)
+					  retries=retries,skyrange=skyrange)
 
-	write_images(band,skypos,trange,skyrange,width=False,height=False,
+	if len(np.array(trange).shape)==1:
+		trange=[trange]
+
+	write_images(band.upper(),skypos,trange,skyrange,width=False,height=False,
 				 write_cnt=write_cnt,write_int=write_int,write_rr=write_rr,
 				 framesz=stepsz,overwrite=overwrite,verbose=verbose,
 				 memlight=memlight,coadd=coadd,retries=retries,
 				 write_cnt_coadd=write_cnt_coadd,
-				 write_int_coadd=write_int_coadd)
+				 write_int_coadd=write_int_coadd,
+				 detsize=detsize)
 
 def setup_parser(iam='gmap'):
 	parser = argparse.ArgumentParser(description="Generate images / maps.")
 	parser = gargs.common_args(parser,iam)
-	parser.add_argument("--angle", action="store", type=float, dest="angle",
-		default=None, help="The angle subtended in both RA and DEC in degrees.")
+	parser.add_argument("--angle", "-a", action="store", type=float,
+		dest="angle", default=None,
+		help="The angle subtended in both RA and DEC in degrees.")
 	parser.add_argument("--raangle", action="store", type=float, dest="raangle",
 		help="The angle of sky in degrees that the right ascension subtends. "+
 		"Overrides --angle.",default=None)
@@ -52,9 +57,6 @@ def setup_parser(iam='gmap'):
 		dest="decangle", default=None,
 		help="The angle of sky in degrees that the declination subtends. "+
 		"Overrides --angle.")
-	parser.add_argument("--skyrange", action="store", dest="skyrange",
-		type=ast.literal_eval, help="Two element list of ra and dec ranges. "+
-		"Equivalent to separately setting --raangle and decangle.")
 	parser.add_argument("--count", action="store", type=str, dest="cntfile",
 		default=None, help="File name (full path) for the count image.")
 	parser.add_argument("--intensity", action="store", type=str, dest="intfile",
@@ -135,7 +137,9 @@ def __main__():
 				a='Writing' if not args.coadd else 'Coadding', pos=args.skypos)
 		print '		of dimensions {w}x{h} degrees'.format(w=args.skyrange[0],
 														  h=args.skyrange[1])
-		print '		in time range(s): {t}'.format(t=args.trange)
+		print '		with a virtual detector {d} degrees across'.format(
+														d = args.detsize)
+		print '		in time range(s): {t}'.format(t=repr(args.trange))
 	gMap(band=args.band, cntfile=args.cntfile,
 		coadd=args.coadd, detsize=args.detsize, intfile=args.intfile,
 		rrfile=args.rrfile, skypos=args.skypos, maxgap=args.maxgap,

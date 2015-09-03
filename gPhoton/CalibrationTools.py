@@ -234,10 +234,11 @@ def compute_exposure(t,x,y,flags,band,eclipse,trange=[[],[]]):
 #
 #	return exptcorr
 
-def create_rr(csvfile,band,eclipse,aspfile=0.,expstart=0.,expend=0.,retries=20):
-	"""Creates a relative response map for an eclipse, given a photon list."""
-	detsize = 1.25
-	pltscl = 68.754932
+def create_rr(csvfile,band,eclipse,aspfile=0.,expstart=0.,expend=0.,retries=20,
+			  detsize=1.25,pltscl=68.754932):
+	"""DEPRECATED: Creates a relative response map for an eclipse, given a
+	photon list.
+	"""
 	aspum = pltscl/1000.0
 
 	print "Loading flat file..."

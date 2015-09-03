@@ -14,7 +14,7 @@ from gPhoton import __version__
 def gAperture(band,skypos,radius,csvfile=None,annulus=None, coadd=False,
               stepsz=False,verbose=0,overwrite=False,trange=None,tranges=None,
               minexp=1.,maxgap=1500.,maskdepth=20.,maskradius=1.5,iocode='wb',
-              photonfile=None):
+              photonfile=None,detsize=1.1):
     """Runs gAperture and returns the data in a python dict() and as
     a CSV file if outfile is specified. Can be called from the interpreter.
     """
@@ -32,12 +32,11 @@ def gAperture(band,skypos,radius,csvfile=None,annulus=None, coadd=False,
         if photonfile:
             print "Using local photon file: {photonfile}".format(
                                                         photonfile=photonfile)
-    data = ct.write_curve(band, skypos[0], skypos[1], radius, csvfile=csvfile,
-                          annulus=annulus, stepsz=stepsz, verbose=verbose,
-                          overwrite=overwrite, trange=trange, tranges=tranges,
-                          coadd=coadd, minexp=minexp, maxgap=maxgap,
-                          iocode = iocode, maskdepth=maskdepth,
-                          maskradius=maskradius)
+    data = ct.write_curve(band.upper(), skypos[0], skypos[1], radius,
+        csvfile=csvfile, annulus=annulus, stepsz=stepsz, verbose=verbose,
+        overwrite=overwrite, trange=trange, tranges=tranges,coadd=coadd,
+        minexp=minexp, maxgap=maxgap, iocode = iocode, maskdepth=maskdepth,
+        maskradius=maskradius,detsize=detsize)
     return data
 
 def check_radius(args):
@@ -169,7 +168,7 @@ def __main__():
                      trange=[args.tmin,args.tmax], tranges=args.trange,
                      coadd=args.coadd, minexp=args.minexp, maxgap=args.maxgap,
                      iocode=args.iocode, maskdepth=args.maskdepth,
-                     maskradius=args.maskradius)
+                     maskradius=args.maskradius,detsize=args.detsize)
 
 if __name__ == "__main__":
     try:
