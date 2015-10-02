@@ -321,27 +321,35 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
                           maskdepth=maskdepth,
                           maskradius=maskradius,photonfile=photonfile)
         lcurve['cps'] = lcurve['sources']/lcurve['exptime']
+        lcurve['cps_err'] = np.sqrt(lcurve['sources'])/lcurve['exptime']
         lcurve['cps_bgsub'] = (lcurve['sources']-
                                lcurve['bg']['simple'])/lcurve['exptime']
         lcurve['cps_bgsub_cheese'] = (lcurve['sources']-
                                lcurve['bg']['cheese'])/lcurve['exptime']
         lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
+        lcurve['mag_err_1'] = (lcurve['mag'] - gxt.counts2mag(lcurve['cps'] + lcurve['cps_err'],band))
+        lcurve['mag_err_2'] = gxt.counts2mag(lcurve['cps'] - lcurve['cps_err'],band) - lcurve['mag']
         lcurve['mag_bgsub'] = gxt.counts2mag(lcurve['cps_bgsub'],band)
         lcurve['mag_bgsub_cheese'] = gxt.counts2mag(
                                             lcurve['cps_bgsub_cheese'],band)
         lcurve['flux'] = gxt.counts2flux(lcurve['cps'],band)
+        lcurve['flux_err'] = gxt.counts2flux(lcurve['cps_err'],band)
         lcurve['flux_bgsub'] = gxt.counts2flux(lcurve['cps_bgsub'],band)
         lcurve['flux_bgsub_cheese'] = gxt.counts2flux(
                                             lcurve['cps_bgsub_cheese'],band)
         lcurve['detrad'] = mc.distance(lcurve['detxs'],lcurve['detys'],400,400)
     except ValueError:
         lcurve['cps']=[]
+        lcurve['cps_err']=[]
         lcurve['cps_bgsub']=[]
         lcurve['cps_bgsub_cheese']=[]
         lcurve['mag']=[]
+        lcurve['mag_err_1']=[]
+        lcurve['mag_err_2']=[]
         lcurve['mag_bgsub']=[]
         lcurve['mag_bgsub_cheese']=[]
         lcurve['flux']=[]
+        lcurve['flux_err']=[]
         lcurve['flux_bgsub']=[]
         lcurve['flux_bgsub_cheese']=[]
         lcurve['detrad']=[]
@@ -362,18 +370,23 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                     photonfile=photonfile, detsize=detsize)
     if csvfile:
         columns = ['t0','t1','exptime','mag_bgsub_cheese','t_mean','t0_data',
-                   't1_data','cps','counts','bg','mag','mag_bgsub',
-                   'flux','flux_bgsub','flux_bgsub_cheese','bg_cheese',
-                   'detx','dety','detrad','response']
+                   't1_data','cps', 'cps_err','counts','bg','mag', 'mag_err_1',
+                   'mag_err_2', 'mag_bgsub', 'flux','flux_err','flux_bgsub',
+                   'flux_bgsub_cheese','bg_cheese','detx','dety','detrad',
+                   'response']
         try:
             test=pd.DataFrame({'t0':data['t0'],'t1':data['t1'],
                            't_mean':data['t_mean'],'t0_data':data['t0_data'],
                            't1_data':data['t1_data'],'exptime':data['exptime'],
-                           'cps':data['cps'],'counts':data['counts'],
+                           'cps':data['cps'],'cps_err':data['cps_err'],
+                           'counts':data['counts'],
                            'bg':data['bg']['simple'],'mag':data['mag'],
+                           'mag_err_1':data['mag_err_1'],
+                           'mag_err_2':data['mag_err_2'],
                            'mag_bgsub':data['mag_bgsub'],
                            'mag_bgsub_cheese':data['mag_bgsub_cheese'],
                            'flux':data['flux'],
+                           'flux_err':data['flux_err'],
                            'flux_bgsub':data['flux_bgsub'],
                            'flux_bgsub_cheese':data['flux_bgsub_cheese'],
                            'bg_cheese':data['bg']['cheese'],
