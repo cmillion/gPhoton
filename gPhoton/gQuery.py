@@ -85,7 +85,8 @@ def mcat_visit_sources(ra0,dec0,radius):
     [0,objid],[1,ra],[2,dec],[3,NUV_mag],[4,FUV_mag],[5,FoV_radius],
     [6,NUV_skybg],[7,FUV_skybg],[8,NUV_FWHM],[9,FUV_FWHM],[10,FUV_expt],
     [11,NUV_expt],[12:18,FUV_mag_aper_1:7],[19:25,NUV_mag_aper_1:7],
-    [26:32,FUV_magerr_aper_1:7],[33:39,NUV_magerr_aper_1:7]
+    [26:32,FUV_magerr_aper_1:7],[33:39,NUV_magerr_aper_1:7],[40,Nobssecs],
+    [41,Fobssecs],[42,NUV_artifact],[43,FUV_artifact]
     '''
     return (str(baseURL)+
         'select vpo.objid, ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg,'
@@ -98,7 +99,8 @@ def mcat_visit_sources(ra0,dec0,radius):
         ' fuv_magerr_aper_4, fuv_magerr_aper_5, fuv_magerr_aper_6,'
         ' fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2,'
         ' nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5,'
-        ' nuv_magerr_aper_6, nuv_magerr_aper_7'
+        ' nuv_magerr_aper_6, nuv_magerr_aper_7, nobssecs, fobssecs,'
+        ' nuv_artifact, fuv_artifact'
         ' from '+str(MCATDB)+'.visitphotoobjall as vpo'
         ' inner join '+str(MCATDB)+'.visitphotoextract'
         ' as vpe on vpo.photoextractid=vpe.photoextractid inner join'
@@ -204,18 +206,17 @@ def alltimes(band,t0,t1):
 
 def uniquetimes(band,t0,t1,flag=False,null=False):
     """Return the _unique_ timestamps for events within trange."""
-    return ('{baseURL}select time from {baseDB}.{band}ShutterPOTimeV '+
+    if not null:
+        return ('{baseURL}select time from {baseDB}.{band}ShutterPOTimeV '+
                 'where time >= {t0} and time < {t1} order by '+
                 'time{formatURL}').format(baseURL=baseURL, baseDB=baseDB,band=band, t0=str(long(t0*tscale)), t1=str(long(t1*tscale)), formatURL=formatURL)
-    #else:
-    #    return ('{baseURL}select distinct time from {baseDB}.{band}Photons{null}V '+
-    #        'where time >= {t0} and time < {t1}{flag} order by time'+
-    #        '{formatURL}').format(baseURL=baseURL,
-    #            baseDB=baseDB, band=band,
-    #            null='NULL' if null else '', t0=str(long(t0*tscale)),
-    #            t1=str(long(t1*tscale)), flag=' and flag=0' if flag else '',
-    #            formatURL=formatURL)
-    #return URL
+    else:
+        return ('{baseURL}select distinct time from '+
+            '{baseDB}.{band}PhotonsNULLV where '+
+            'time >= {t0} and time < {t1} order by time'+
+            '{formatURL}').format(baseURL=baseURL,
+                baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
+                t1=str(long(t1*tscale)), formatURL=formatURL)
 
 def boxcount(band,t0,t1,xr,yr):
     """Find the number of events inside of a box defined by [xy] range in
