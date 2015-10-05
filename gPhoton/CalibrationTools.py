@@ -139,101 +139,6 @@ def compute_exposure(t,x,y,flags,band,eclipse,trange=[[],[]]):
 
 	return exptime-deadtime-shutter
 
-# FIXME: This doesn't get used anywhere.
-#def compute_exposure2(csvfile,band,eclipse):
-#	"""This function only still exists for reference."""
-	# This computation is done a big, terrible, slow loop because
-	#  NUV csv files are too big to hold in memory on most machines
-	#  so I can't just use the numpy functions.
-	# I need the min and max photon times before computing deadtime
-	#  so that I can create the correct bins for the histograms below
-#	print "Computing exposure from ",csvfile
-#	print "		band=",band,"	eclipse=",eclipse
-#	print "Finding min/max photon times..."
-#	mint,maxt,tot=0.,0.,0.
-#	reader = csv.reader(open(csvfile,'rb'),delimiter=',',quotechar='|')
-#	for row in reader:
-#		tot+=1
-#		if (float(row[10])!=7) and (float(row[10])!=12):
-#			t = float(row[0])/1000.
-#			if mint==0 or t<mint:
-#				mint=t
-#			if maxt==0 or t>maxt:
-#				maxt=t
-#
-#	print "		Total photos: "+str(tot)
-#	print "		Time range:    ["+str(mint)+","+str(maxt)+"]"
-#	exptime=maxt-mint
-#	print "		Raw exposure: "+str(exptime)
-#
-#	print "Computing dead time and shutter corrections..."
-#	tstep=1. # seconds; time resolution of the dead time correction
-#	t,x,y,flags=[],[],[],[]
-#	cnt,chunk,n,shutter=0,0,0,0
-#	matchtimes=0 # Placeholder for restrictinng the time range
-#	chunksz=1000000 # Load values into memory in this size chunk
-#	bins = np.linspace(0.,exptime-exptime%tstep,exptime//tstep+1)
-#	h1,h2 = np.zeros(len(bins)-1),np.zeros(len(bins)-1)
-#	reader = csv.reader(open(csvfile,'rb'),delimiter=',',quotechar='|')
-#	for row in reader:
-#		n+=1
-#		cnt+=1
-#		if cnt<chunksz and not (chunk*chunksz+cnt==tot):
-#			t.append(float(row[0])/1000.)
-#			x.append(float(row[1]))
-#			y.append(float(row[2]))
-#			flags.append(float(row[10]))
-#		elif cnt==chunksz or (chunk*chunksz+cnt)==tot:
-#			t,x,y,flags=np.array(t),np.array(x),np.array(y),np.array(flags)
-#			chunk+=1
-#			print_inline(str(chunk*chunksz)+"/"+str(tot))
-#			ix = ((flags!=7) & (flags!=12)).nonzero()[0]
-#			stimt,stimx_as,stimy_as,stimix=find_stims(t[ix],x[ix],y[ix],band,eclipse)
-#			h,xh = np.histogram(t[ix]-mint,bins=bins)
-#			h1+=h
-#			h,xh = np.histogram(stimt-mint,bins=bins)
-#			h2+=h
-#			ix = (flags==0).nonzero()[0]
-#			if len(ix)>0:
-#				shutter+=compute_shutter(t[ix])
-#			t,x,y,flags=[],[],[],[]
-#			cnt=0
-#
-#	print_inline("		Processed "+str(n)+" total events.")
-#
-#	print "		Shutter correction is "+str(shutter)+" seconds."
-#
-#	refrate = 79.0 # counts per second
-#	minrate = refrate*.4
-#	maxrate = refrate+2.
-#	maxdiff = 0.1
-#	feeclkratio = 0.966
-#	tstep = 1. # seconds
-#	tec2fdead = 5.52e-6 # conversion from TEC to deadtime correction
-#
-#	# Compute using an empirical formula -- Method 1
-#	dead0 = tec2fdead*(tot/exptime)/feeclkratio
-#	print "		Simple dead time correction w/ Method 1: "+str(dead0)
-#
-#	# Compute using an advanced version of the empirical formula -- Method 1+
-#	# This doesn't work correctly right now for some reason
-#	dead1 = (tec2fdead*(h1/tstep)/feeclkratio).mean()
-#	print "		Dead time correction w/ Method 1: "+str(dead1)
-#
-#	# Perform the computation "correctly." -- Method 2
-#	#  This should more or less match Method 1 above.
-#	ix = ((h2<=maxrate) & (h2>=minrate)).nonzero()[0]
-#	dead2 = (1.-((h2[ix]/tstep)/feeclkratio)/refrate).mean()
-#	print "		Dead time correction w/ Method 2: "+str(dead2)
-#
-#	if abs(dead2-dead0)>maxdiff:
-#		print "Warning: The deadtime correction is suspect."
-#
-#	exptcorr = exptime-(exptime*dead2)-shutter
-#	print "Corrected exposure time: "+str(exptcorr)+" seconds ("+str(exptcorr/60.)+" min.)"
-#
-#	return exptcorr
-
 def create_rr(csvfile,band,eclipse,aspfile=0.,expstart=0.,expend=0.,retries=20,
 			  detsize=1.25,pltscl=68.754932):
 	"""DEPRECATED: Creates a relative response map for an eclipse, given a
@@ -306,7 +211,8 @@ def create_rr(csvfile,band,eclipse,aspfile=0.,expstart=0.,expend=0.,retries=20,
 
 	return rr*flat_scale*(1-deadt),exp
 
-def write_rr(csvfile,band,eclipse,rrfile,outfile,aspfile=0,expstart=0.,expend=0.,exptime=0.,imsz=960.,retries=20):
+def write_rr(csvfile,band,eclipse,rrfile,outfile,aspfile=0,expstart=0.,
+	expend=0.,exptime=0.,imsz=960.,retries=20):
 	"""Creates a relative response map for an eclipse, given a photon list file,
 	and writes it to a FITS file.
 	"""

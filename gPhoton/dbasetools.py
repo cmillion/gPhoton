@@ -149,7 +149,7 @@ def compute_shutter(band,trange,verbose=0,retries=20,shutgap=0.05,
                 np.array(gQuery.getArray(
                     gQuery.uniquetimes(band,trange[0],trange[1],flag=True),
                         verbose=verbose),dtype='float64')[:,0]/gQuery.tscale)
-    except IndexError: # Shutter this whole time range.
+    except IndexError: # Shutter this whole time range if there's no data
         return trange[1]-trange[0]
     t = np.sort(np.unique(np.append(t,trange)))
     ix = np.where(t[1:]-t[:-1]>=shutgap)

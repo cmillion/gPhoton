@@ -55,7 +55,26 @@ def hashresponse(band,events,verbose=0):
     events['response'] = (events['flat']*events['scale'])
     return events
 
-# Thould this be moved to dbasetools?
+def maskwarning(band,events,verbose=0,mapkey='H'):
+    # Test if any given events are _near_ a masked detector region.
+    maps = {'H':cal.mask,'E':cal.flat}
+    img,_ = maps[mapkey](band,buffer=True)
+    events['col'],events['row'] = xieta2colrow(events['xi'],events['eta'],band)
+    ix = np.where(img[np.array(events['col'],dtype='int16'),
+                                    np.array(events['row'],dtype='int16')]==0)
+    return True if len(ix[0]) else False
+
+def getflags(band,events,verbose=0):
+    """Pass flags if data meets conditions that are likely to create
+    misleading photometry.
+    H = coincident with a masked hotspot.
+    E = overlaps the edge of the detector.
+    """
+    return '{H}{E}'.format(
+        H='H' if maskwarning(band,events,mapkey='H',verbose=verbose) else '',
+        E='E' if maskwarning(band,events,mapkey='E',verbose=verbose) else '')
+
+# Should this be moved to dbasetools?
 def read_photons(photonfile,ra0,dec0,tranges,radius,verbose=0,
         colnames=['t','x','y','xa','ya','q','xi','eta','ra','dec','flags']):
     """Read a photon list file and return a python dict() with the expected
@@ -218,6 +237,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
                                     maskradius=maskradius)}
     for col in lcurve_cols:
         lcurve[col] = np.zeros(len(bins)-1)
+        if col is 'flags':
+            lcurve[col]=np.array(lcurve[col],dtype='string')
     # FIXME: Bottleneck. There's probably a way to do this without looping.
     # Don't bother looping through anything with no data.
     lcurve['bg'] = {'simple':np.zeros(len(bins)-1),
@@ -256,6 +277,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         lcurve['detys'][i-1] = data['row'][rad_ix].mean()
         lcurve['racent'][i-1] = data['ra'][rad_ix].mean()
         lcurve['deccent'][i-1] = data['dec'][rad_ix].mean()
+        lcurve['flags'][i-1] = getflags(band,
+            {'xi':data['xi'][rad_ix],'eta':data['eta'][rad_ix]},verbose=verbose)
         if annulus is not None:
             ann_ix = np.where((angSep > annulus[0]) &
                               (angSep <= annulus[1]) & (ix == i))
@@ -324,34 +347,34 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
         lcurve['cps_err'] = np.sqrt(lcurve['sources'])/lcurve['exptime']
         lcurve['cps_bgsub'] = (lcurve['sources']-
                                lcurve['bg']['simple'])/lcurve['exptime']
-        lcurve['cps_bgsub_cheese'] = (lcurve['sources']-
-                               lcurve['bg']['cheese'])/lcurve['exptime']
+        #lcurve['cps_bgsub_cheese'] = (lcurve['sources']-
+        #                       lcurve['bg']['cheese'])/lcurve['exptime']
         lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
         lcurve['mag_err_1'] = (lcurve['mag'] - gxt.counts2mag(lcurve['cps'] + lcurve['cps_err'],band))
         lcurve['mag_err_2'] = gxt.counts2mag(lcurve['cps'] - lcurve['cps_err'],band) - lcurve['mag']
         lcurve['mag_bgsub'] = gxt.counts2mag(lcurve['cps_bgsub'],band)
-        lcurve['mag_bgsub_cheese'] = gxt.counts2mag(
-                                            lcurve['cps_bgsub_cheese'],band)
+        #lcurve['mag_bgsub_cheese'] = gxt.counts2mag(
+        #                                    lcurve['cps_bgsub_cheese'],band)
         lcurve['flux'] = gxt.counts2flux(lcurve['cps'],band)
         lcurve['flux_err'] = gxt.counts2flux(lcurve['cps_err'],band)
         lcurve['flux_bgsub'] = gxt.counts2flux(lcurve['cps_bgsub'],band)
-        lcurve['flux_bgsub_cheese'] = gxt.counts2flux(
-                                            lcurve['cps_bgsub_cheese'],band)
+        #lcurve['flux_bgsub_cheese'] = gxt.counts2flux(
+        #                                    lcurve['cps_bgsub_cheese'],band)
         lcurve['detrad'] = mc.distance(lcurve['detxs'],lcurve['detys'],400,400)
     except ValueError:
         lcurve['cps']=[]
         lcurve['cps_err']=[]
         lcurve['cps_bgsub']=[]
-        lcurve['cps_bgsub_cheese']=[]
+        #lcurve['cps_bgsub_cheese']=[]
         lcurve['mag']=[]
         lcurve['mag_err_1']=[]
         lcurve['mag_err_2']=[]
         lcurve['mag_bgsub']=[]
-        lcurve['mag_bgsub_cheese']=[]
+        #lcurve['mag_bgsub_cheese']=[]
         lcurve['flux']=[]
         lcurve['flux_err']=[]
         lcurve['flux_bgsub']=[]
-        lcurve['flux_bgsub_cheese']=[]
+        #lcurve['flux_bgsub_cheese']=[]
         lcurve['detrad']=[]
     if verbose:
         mc.print_inline("Done.")
@@ -369,11 +392,10 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                     maskdepth=maskdepth, maskradius=maskradius,
                     photonfile=photonfile, detsize=detsize)
     if csvfile:
-        columns = ['t0','t1','exptime','mag_bgsub_cheese','t_mean','t0_data',
-                   't1_data','cps', 'cps_err','counts','bg','mag', 'mag_err_1',
-                   'mag_err_2', 'mag_bgsub', 'flux','flux_err','flux_bgsub',
-                   'flux_bgsub_cheese','bg_cheese','detx','dety','detrad',
-                   'response']
+        columns = ['t0','t1','exptime','t_mean','t0_data','t1_data','cps',
+                   'cps_err','counts','bg','mag', 'mag_err_1','mag_err_2',
+                   'mag_bgsub', 'flux','flux_err','flux_bgusb','detx','dety',
+                   'detrad','response','flags']
         try:
             test=pd.DataFrame({'t0':data['t0'],'t1':data['t1'],
                            't_mean':data['t_mean'],'t0_data':data['t0_data'],
@@ -384,14 +406,12 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                            'mag_err_1':data['mag_err_1'],
                            'mag_err_2':data['mag_err_2'],
                            'mag_bgsub':data['mag_bgsub'],
-                           'mag_bgsub_cheese':data['mag_bgsub_cheese'],
                            'flux':data['flux'],
                            'flux_err':data['flux_err'],
                            'flux_bgsub':data['flux_bgsub'],
-                           'flux_bgsub_cheese':data['flux_bgsub_cheese'],
-                           'bg_cheese':data['bg']['cheese'],
                            'detx':data['detxs'],'dety':data['detys'],
-                           'detrad':data['detrad'],'response':data['responses']
+                           'detrad':data['detrad'],'response':data['responses'],
+                           'flags':data['flags']
                            })
         except:
             if verbose>1:
