@@ -72,7 +72,7 @@ def distinct_tranges(times,maxgap=1.):
     return [[times[ixs[i]+1],times[ixs[i+1]]] for i,b in enumerate(ixs[:-1])]
 
 def fGetTimeRanges(band,skypos,trange=None,detsize=1.1,verbose=0,
-                   maxgap=1.,minexp=1.,retries=100.,predicted=False,
+                   maxgap=1.,minexp=1.,retries=100.,
                    skyrange=None,maxgap_override=False):
     """Find the contiguous time ranges within a time range at a
     specific location.
@@ -80,8 +80,6 @@ def fGetTimeRanges(band,skypos,trange=None,detsize=1.1,verbose=0,
 	maxgap - Gaps in exposure longer than this initiate a new time range.
 	detsize - Fiddle with this if you want to exlude the edges of the
     detector.
-    predicted - Use the aspect solutions to estimate what exposure will be
-    available once the database is fully populated.
 	"""
     times = get_valid_times(band,skypos,trange=trange,detsize=detsize,
                             verbose=verbose,retries=retries,skyrange=skyrange)
