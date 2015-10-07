@@ -91,7 +91,7 @@ _gFind_ is the data location tool. Given a target sky position (and, optionally,
 This should report 2802.0 seconds of "raw" exposure time in five exposures along with the time ranges (in "GALEX Time") of those observations.
 
 ####Tweaking Search Parameters
-The default allowable gap between two time stamps for them to be considered contiguous for the purposes of a _gFind_ estimate is one second. This is a reasonable minimum gap because it is the default spacing between adjacent entries in the aspect table. This parameter is adjustable, however, with the --maxgap` parameter. To consider data with gaps of as much as 100 seconds to be contiguous--a reasonable value if you want to treat all data in the same eclipse as part of the same observation--try the following command.
+The allowable gap between two time stamps for them to be considered "contiguous" is adjustable with the `--maxgap` parameter. Because MIS-depth GALEX observations are ~1600 seconds long, a good way to get time ranges that approximate the mission bookkeping of "visits" would be to set `--maxgap 1600`, and this is the default for this parameter in _gFind_. If you wanted only time ranges with no gaps, then a reasonable setting would be for one second,  because that is the default spacing between adjacent entries in the aspect table. As an example, try the following command to consider data with gaps of as much as 100 seconds to be contiguous.
 
     gFind -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --maxgap 100
 
@@ -103,7 +103,7 @@ And, naturally, the `--gap` and `--minexp` parameters can be used in conjunction
 
     gFind -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --maxgap 100 --minexp 200
 
-If you want to exclude times when the source is on the edge of the detector, you can adjust the `--detsize` parameter to the desired effective detector _width_ (default = 1.25 degrees).
+If you want to exclude times when the source is on the edge of the detector, you can adjust the `--detsize` parameter to the desired effective detector _width_ (default = 1.1 degrees, to exclude the edges with a wide buffer).
 
     gFind -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --detsize 0.5
 
