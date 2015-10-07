@@ -1,0 +1,7 @@
+To compile the latex:
+    latex gphoton.tex
+    latex gphoton.tex
+    bibtex gphoton.aux
+    latex gphoton.tex
+    dvips gphoton.dvi
+    (can convert from ps to pdf however you like, e.g., ps2pdf)

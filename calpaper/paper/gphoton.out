@@ -1,0 +1,24 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{GALEX Overview}{section.1}% 2
+\BOOKMARK [1][-]{section.2}{Motivation}{}% 3
+\BOOKMARK [1][-]{section.3}{Description of the Database}{}% 4
+\BOOKMARK [2][-]{subsection.3.1}{Description of Data Products from the Mission Pipeline Used By gPhoton}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.2}{Construction of the Database}{section.3}% 6
+\BOOKMARK [1][-]{section.4}{Description of the Software Tools}{}% 7
+\BOOKMARK [2][-]{subsection.4.1}{gPhotonPipe}{section.4}% 8
+\BOOKMARK [2][-]{subsection.4.2}{gFind}{section.4}% 9
+\BOOKMARK [2][-]{subsection.4.3}{gAperture}{section.4}% 10
+\BOOKMARK [2][-]{subsection.4.4}{gMap}{section.4}% 11
+\BOOKMARK [1][-]{section.5}{Implementation Challenges and Solutions}{}% 12
+\BOOKMARK [2][-]{subsection.5.1}{Exposure Dead Time}{section.5}% 13
+\BOOKMARK [2][-]{subsection.5.2}{Effective Exposure Time}{section.5}% 14
+\BOOKMARK [2][-]{subsection.5.3}{Background Correction}{section.5}% 15
+\BOOKMARK [2][-]{subsection.5.4}{Relative Response Correction}{section.5}% 16
+\BOOKMARK [2][-]{subsection.5.5}{Flux Uncertainties}{section.5}% 17
+\BOOKMARK [1][-]{section.6}{Calibration Tests}{}% 18
+\BOOKMARK [2][-]{subsection.6.1}{Astrometric Solutions}{section.6}% 19
+\BOOKMARK [2][-]{subsection.6.2}{Relative Flux Precision}{section.6}% 20
+\BOOKMARK [2][-]{subsection.6.3}{Absolute Flux Precision}{section.6}% 21
+\BOOKMARK [1][-]{section.7}{Example Science Application - Stellar Flares From CR Draconis}{}% 22
+\BOOKMARK [1][-]{section.8}{Conclusion}{}% 23
+\BOOKMARK [1][-]{section.9}{Acknowledgements}{}% 24

@@ -1,0 +1,47 @@
+This is BibTeX, Version 0.99d (TeX Live 2014/MacPorts 2014_9)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: gphoton.aux
+The style file: model2-names.bst.bst
+Database file #1: gphoton.bib
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+You've used 4 entries,
+            2990 wiz_defined-function locations,
+            762 strings with 8429 characters,
+and the built_in function-call counts, 7282 in all, are:
+= -- 369
+> -- 728
+< -- 1
++ -- 276
+- -- 270
+* -- 1094
+:= -- 1106
+add.period$ -- 16
+call.type$ -- 4
+change.case$ -- 109
+chr.to.int$ -- 4
+cite$ -- 4
+duplicate$ -- 362
+empty$ -- 270
+format.name$ -- 282
+if$ -- 1207
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 118
+newline$ -- 39
+num.names$ -- 16
+pop$ -- 143
+preamble$ -- 1
+purify$ -- 106
+quote$ -- 0
+skip$ -- 56
+stack$ -- 0
+substring$ -- 100
+swap$ -- 467
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 36
+warning$ -- 0
+while$ -- 15
+width$ -- 0
+write$ -- 80
