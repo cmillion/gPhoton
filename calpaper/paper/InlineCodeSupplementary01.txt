@@ -1,0 +1,15 @@
+from gPhoton.gMap import gMap
+
+def main():
+    # Create "count" image and cube for CR Draconis, using all available NUV
+    # photon events, using gPhoton's gMap module.
+
+    # "skypos" is set to the ICRS coordinates from Simbad for CR Draconis
+    # "stepsz" makes each frame in the image cube a 30-second bin
+    # "skyrange" makes both the coadd and cube field-of-view 2x2 arcminutes
+    # "cntfile" is the name for the image cube to be made
+    # "cntcoaddfile" is the name for the deep coadd image to be made
+    gMap(band='NUV', skypos=[244.27246917, 55.26919386], stepsz=30., skyrange=[0.0333333333333,0.0333333333333], cntfile='cr_dra_count_cube.fits', cntcoaddfile='cr_dra_count_coadd.fits', overwrite=True)
+
+if __name__ == '__main__':
+    main()

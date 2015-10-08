@@ -1,4 +1,4 @@
-\begin{thebibliography}{4}
+\begin{thebibliography}{9}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -11,6 +11,12 @@
 \providecommand{\Pubmed}[1]{\href{pmid:#1}{\path{#1}}}
 \providecommand{\bibinfo}[2]{#2}
 \ifx\xfnm\relax \def\xfnm[#1]{\unskip,\space#1}\fi
+%Type = Article
+\bibitem[{{Cristaldi} and {Rodon{\`o}}(1970)}]{cri1970}
+\bibinfo{author}{{Cristaldi}, S.}, \bibinfo{author}{{Rodon{\`o}}, M.},
+  \bibinfo{year}{1970}.
+\newblock \bibinfo{title}{{Photoelectric observations of flare stars. I}}.
+\newblock \bibinfo{journal}{A\&AS} \bibinfo{volume}{2}, \bibinfo{pages}{223}.
 %Type = Techreport
 \bibitem[{Gray et~al.(2006)Gray, Nieto-Santisteban and Szalay}]{gra2006}
 \bibinfo{author}{Gray, J.}, \bibinfo{author}{Nieto-Santisteban, M.A.},
@@ -100,5 +106,56 @@
   \bibinfo{pages}{L7--L10}.
 \newblock \DOIprefix\doi{10.1086/424734},
   \href{http://arxiv.org/abs/astro-ph/0411310}{\tt arXiv:astro-ph/0411310}.
+%Type = Article
+\bibitem[{{Ramsay} et~al.(2013){Ramsay}, {Doyle}, {Hakala}, {Garcia-Alvarez},
+  {Brooks}, {Barclay} and {Still}}]{ram2013}
+\bibinfo{author}{{Ramsay}, G.}, \bibinfo{author}{{Doyle}, J.G.},
+  \bibinfo{author}{{Hakala}, P.}, \bibinfo{author}{{Garcia-Alvarez}, D.},
+  \bibinfo{author}{{Brooks}, A.}, \bibinfo{author}{{Barclay}, T.},
+  \bibinfo{author}{{Still}, M.}, \bibinfo{year}{2013}.
+\newblock \bibinfo{title}{{Short-duration high-amplitude flares detected on the
+  M dwarf star KIC 5474065}}.
+\newblock \bibinfo{journal}{MNRAS} \bibinfo{volume}{434},
+  \bibinfo{pages}{2451--2457}.
+\newblock \DOIprefix\doi{10.1093/mnras/stt1182},
+  \href{http://arxiv.org/abs/1306.5938}{\tt arXiv:1306.5938}.
+%Type = Article
+\bibitem[{{Tamazian} et~al.(2008){Tamazian}, {Docobo}, {Balega}, {Melikian},
+  {Maximov} and {Malogolovets}}]{tam2008}
+\bibinfo{author}{{Tamazian}, V.S.}, \bibinfo{author}{{Docobo}, J.A.},
+  \bibinfo{author}{{Balega}, Y.Y.}, \bibinfo{author}{{Melikian}, N.D.},
+  \bibinfo{author}{{Maximov}, A.F.}, \bibinfo{author}{{Malogolovets}, E.V.},
+  \bibinfo{year}{2008}.
+\newblock \bibinfo{title}{{Preliminary Orbit and Differential Photometry of the
+  Nearby Flare Star CR Dra}}.
+\newblock \bibinfo{journal}{AJ} \bibinfo{volume}{136},
+  \bibinfo{pages}{974--979}.
+\newblock \DOIprefix\doi{10.1088/0004-6256/136/3/974}.
+%Type = Article
+\bibitem[{{Welsh} et~al.(2006){Welsh}, {Wheatley}, {Browne}, {Siegmund},
+  {Doyle}, {O'Shea}, {Antonova}, {Forster}, {Seibert}, {Morrissey} and
+  {Taroyan}}]{wel2006}
+\bibinfo{author}{{Welsh}, B.Y.}, \bibinfo{author}{{Wheatley}, J.},
+  \bibinfo{author}{{Browne}, S.E.}, \bibinfo{author}{{Siegmund}, O.H.W.},
+  \bibinfo{author}{{Doyle}, J.G.}, \bibinfo{author}{{O'Shea}, E.},
+  \bibinfo{author}{{Antonova}, A.}, \bibinfo{author}{{Forster}, K.},
+  \bibinfo{author}{{Seibert}, M.}, \bibinfo{author}{{Morrissey}, P.},
+  \bibinfo{author}{{Taroyan}, Y.}, \bibinfo{year}{2006}.
+\newblock \bibinfo{title}{{GALEX high time-resolution ultraviolet observations
+  of dMe flare events}}.
+\newblock \bibinfo{journal}{A\&A} \bibinfo{volume}{458},
+  \bibinfo{pages}{921--930}.
+\newblock \DOIprefix\doi{10.1051/0004-6361:20065304},
+  \href{http://arxiv.org/abs/astro-ph/0608254}{\tt arXiv:astro-ph/0608254}.
+%Type = Article
+\bibitem[{{Wheatley} et~al.(2008){Wheatley}, {Welsh} and {Browne}}]{whe2008}
+\bibinfo{author}{{Wheatley}, J.M.}, \bibinfo{author}{{Welsh}, B.Y.},
+  \bibinfo{author}{{Browne}, S.E.}, \bibinfo{year}{2008}.
+\newblock \bibinfo{title}{{The Second Galex Ultraviolet Variability (GUVV-2)
+  Catalog}}.
+\newblock \bibinfo{journal}{AJ} \bibinfo{volume}{136},
+  \bibinfo{pages}{259--266}.
+\newblock \DOIprefix\doi{10.1088/0004-6256/136/1/259},
+  \href{http://arxiv.org/abs/0805.2987}{\tt arXiv:0805.2987}.
 
 \end{thebibliography}
