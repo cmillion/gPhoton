@@ -196,8 +196,17 @@ def maskwarning(band,bin_ix,events,verbose=0,mapkey='H'):
     # Test if any given events are _near_ a masked detector region.
     maps = {'H':cal.mask,'E':cal.flat}
     img,_ = maps[mapkey](band,buffer=True)
-    ix = np.where(img[np.array(events['col'][bin_ix],dtype='int16'),
-                            np.array(events['row'][bin_ix],dtype='int16')]==0)
+    ix = np.where(img[np.array(events['photons']['col'][bin_ix],dtype='int16'),
+                np.array(events['photons']['row'][bin_ix],dtype='int16')]==0)
+    return True if len(ix[0]) else False
+
+def timewarning(bin_ix,events,verbose=0,ratio=50):
+    ix = np.where(events['exptime'][bin_ix]/
+                            (events['t1'][bin_ix]-events['t0'][bin_ix])<ratio)
+    return True if len(ix[0]) else False
+
+def lowresponsewarning(bin_ix,events,verbose=0,ratio=0.7):
+    ix = np.where(events['photons']['response']<0.7)
     return True if len(ix[0]) else False
 
 def getflags(band,bin_ix,events,verbose=0):
@@ -211,11 +220,13 @@ def getflags(band,bin_ix,events,verbose=0):
     for i,b in enumerate(bin_num):
         try:
             ix = bin_ix[np.where(bin_ix==bin)]
-            output[i] = '{H}{E}'.format(
+            output[i] = '{H}{E}{T}'.format(
                 H='H' if maskwarning(band,ix,events,mapkey='H',
                                                     verbose=verbose) else '',
                 E='E' if maskwarning(band,ix,events,mapkey='E',
-                                                    verbose=verbose) else '')
+                                                    verbose=verbose) else '',
+                T='T' if timewarning(ix,events,verbose=verbose) else '',
+                r='r' if lowresponsewarning(ix,events,verbose=verbose) else '')
         except:
             raise
     return np.array(output)
@@ -283,9 +294,10 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
             verbose=verbose,coadd=coadd)
                 for trange in zip(lcurve['t0'],lcurve['t1'])])
 
-    lcurve['flags'] = getflags(band,bin_ix,data,verbose=verbose)
-
     lcurve['photons'] = data
+
+    lcurve['flags'] = getflags(band,bin_ix,lcurve,verbose=verbose)
+
     return lcurve
 
 def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
@@ -307,16 +319,18 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     if verbose:
         mc.print_inline("Moving to photon level operations.")
     # FIXME: This error handling is hideous.
+    lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
+                              stepsz=stepsz, verbose=verbose, coadd=coadd)
     try:
-        lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
-                          stepsz=stepsz, verbose=verbose, coadd=coadd)
         lcurve['cps'] = lcurve['flat_counts']/lcurve['exptime']
         lcurve['cps_err'] = np.sqrt(lcurve['flat_counts'])/lcurve['exptime']
         lcurve['cps_bgsub'] = (lcurve['flat_counts']-
                                lcurve['bg'])/lcurve['exptime']
         lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
-        lcurve['mag_err_1'] = (lcurve['mag'] - gxt.counts2mag(lcurve['cps'] + lcurve['cps_err'],band))
-        lcurve['mag_err_2'] = gxt.counts2mag(lcurve['cps'] - lcurve['cps_err'],band) - lcurve['mag']
+        lcurve['mag_err_1'] = (lcurve['mag'] -
+                        gxt.counts2mag(lcurve['cps'] + lcurve['cps_err'],band))
+        lcurve['mag_err_2'] = (gxt.counts2mag(lcurve['cps'] -
+                                    lcurve['cps_err'],band) - lcurve['mag'])
         lcurve['mag_bgsub'] = gxt.counts2mag(lcurve['cps_bgsub'],band)
         lcurve['flux'] = gxt.counts2flux(lcurve['cps'],band)
         lcurve['flux_err'] = gxt.counts2flux(lcurve['cps_err'],band)
@@ -334,6 +348,8 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
         lcurve['flux_err']=[]
         lcurve['flux_bgsub']=[]
         lcurve['detrad']=[]
+        lcurve['flags']=[]
+
     if verbose:
         mc.print_inline("Done.")
         mc.print_inline("")
