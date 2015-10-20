@@ -9,14 +9,12 @@ import dbasetools as dbt # fGetTimeRanges(), compute_exptime()
 import galextools as gxt # compute_flat_scale()
 import cal
 
-def gphot_params(band,skypos,radius,annulus=None,
-                 verbose=0.,detsize=1.25,stepsz=None,
-                 trange=None,maskdepth=None,maskradius=None):
+def gphot_params(band,skypos,radius,annulus=None,verbose=0.,detsize=1.25,
+    stepsz=None,trange=None):
     """Populate a dict() with parameters that are constant over all bins."""
     return {'band':band,'ra0':skypos[0],'dec0':skypos[1],'skypos':skypos,
             'trange':trange,'radius':radius,'annulus':annulus,
-            'stepsz':stepsz,'verbose':verbose,
-            'maskdepth':maskdepth,'maskradius':maskradius,'detsize':detsize,
+            'stepsz':stepsz,'verbose':verbose,'detsize':detsize,
             'apcorrect1':gxt.apcorrect1(radius,band),
             'apcorrect2':gxt.apcorrect2(radius,band),
             'detbg':gxt.detbg(mc.area(radius),band)}
@@ -90,8 +88,8 @@ def query_photons(band,ra0,dec0,tranges,radius,verbose=0,flag=0):
                                                         rad=radius,r=ra0,d=dec0)
     for trange in tranges:
         if verbose:
-            mc.print_inline(" and between "+str(trange[0])+" and "+
-                            str(trange[1])+".")
+            mc.print_inline((" and between {t0} and {t1}.").format(
+                                                    t0=trange[0],t1=trange[1]))
         thisstream = gQuery.getArray(
             gQuery.allphotons(band, ra0, dec0, trange[0], trange[1], radius,
                                         flag=flag), verbose=verbose,retries=100)
@@ -116,14 +114,13 @@ def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
     events = hashresponse(band, events, verbose=verbose)
     return events
 
-def bg_sources(band,ra0,dec0,radius,maskdepth=20.0,maskradius=1.5,margin=0.001):
+def bg_sources(band,ra0,dec0,radius,margin=0.001):
     sources = gQuery.getArray(gQuery.mcat_sources(band,ra0,dec0,radius+margin,
                                                       maglimit=maskdepth))
     try:
         return {'ra':np.float32(np.array(sources)[:,0]),
                 'dec':np.float32(np.array(sources)[:,1]),
                 'fwhm':np.float32(np.array(sources)[:,7:9]),
-                'maskdepth':maskdepth,'maskradius':maskradius,
                 'radius':radius}
     except IndexError:
         return {'ra':np.array([]),'dec':np.array([]),
@@ -200,14 +197,20 @@ def maskwarning(band,bin_ix,events,verbose=0,mapkey='H'):
                 np.array(events['photons']['row'][bin_ix],dtype='int16')]==0)
     return True if len(ix[0]) else False
 
-def timewarning(bin_ix,events,verbose=0,ratio=50):
-    ix = np.where(events['exptime'][bin_ix]/
-                            (events['t1'][bin_ix]-events['t0'][bin_ix])<ratio)
+def lowresponsewarning(bin_ix,events,verbose=0,ratio=0.7):
+    ix = np.where(events['photons']['response'][bin_ix]<0.7)
     return True if len(ix[0]) else False
 
-def lowresponsewarning(bin_ix,events,verbose=0,ratio=0.7):
-    ix = np.where(events['photons']['response']<0.7)
-    return True if len(ix[0]) else False
+def exptimewarning(bin_ix,events,verbose=0,ratio=0.5):
+    return (events['exptime'][bin_ix]/
+                            (events['t1'][bin_ix]-events['t0'][bin_ix])<ratio)
+
+def nonlinearitywarning(band,bin_ix,events,verbose=0):
+    # Flags countrates above the 10% local nonlinearty dropoff per the
+    # calibration paper.
+    cps_10p_rolloff = {'NUV':311,'FUV':109}
+    cps = events['flat_counts'][bin_ix]/events['exptime'][bin_ix]
+    return True if cps>=cps_10p_rolloff[band] else False
 
 def getflags(band,bin_ix,events,verbose=0):
     """Pass flags if data meets conditions that are likely to create
@@ -216,24 +219,25 @@ def getflags(band,bin_ix,events,verbose=0):
     E = overlaps the edge of the detector.
     """
     bin_num = np.unique(bin_ix)
-    output = np.empty(len(bin_num),dtype='string')
+    flags = np.empty(len(bin_num),dtype='string')
     for i,b in enumerate(bin_num):
         try:
             ix = bin_ix[np.where(bin_ix==bin)]
-            output[i] = '{H}{E}{T}'.format(
+            flags[i] = '{H}{E}{T}{r}{N}'.format(
                 H='H' if maskwarning(band,ix,events,mapkey='H',
                                                     verbose=verbose) else '',
                 E='E' if maskwarning(band,ix,events,mapkey='E',
                                                     verbose=verbose) else '',
-                T='T' if timewarning(ix,events,verbose=verbose) else '',
-                r='r' if lowresponsewarning(ix,events,verbose=verbose) else '')
+                T='T' if exptimewarning(i,events,verbose=verbose) else '',
+                r='r' if lowresponsewarning(ix,events,verbose=verbose) else '',
+                N='N' if nonlinearitywarning(band,i,events,
+                                                    verbose=verbose) else '')
         except:
             raise
-    return np.array(output)
+    return np.array(flags)
 
 def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
-             stepsz=None, verbose=0, maskdepth=20.0,
-             maskradius=1.5,detsize=1.25,coadd=False, photonfile=None):
+             stepsz=None, verbose=0,detsize=1.25,coadd=False, photonfile=None):
     if verbose:
         mc.print_inline("Retrieving all of the target events.")
     searchradius = radius if annulus is None else annulus[1]
@@ -253,11 +257,12 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     lcurve = {'params':gphot_params(band,[ra0,dec0],radius,annulus=annulus,
                                     verbose=verbose,
                                     detsize=detsize,stepsz=stepsz,
-                                    trange=trange,maskdepth=maskdepth,
-                                    maskradius=maskradius)}
+                                    trange=trange)}
 
-    # This is equivalent in function to np.digitize(data['t'],bins) except
-    # that it's much, much faster. See numpy issue #2656.
+    """This is equivalent in function to np.digitize(data['t'],bins) except
+    that it's much, much faster. See numpy issue #2656 at
+    https://github.com/numpy/numpy/issues/2656
+    """
     bin_ix = np.searchsorted(bins,data['t'],"right")
     angSep = mc.angularSeparation(ra0, dec0, data['ra'], data['dec'])
 
@@ -274,6 +279,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     lcurve['responses']=reduce_lcurve(bin_ix,aper_ix,data['response'],np.mean)
     lcurve['detxs']=reduce_lcurve(bin_ix,aper_ix,data['col'],np.mean)
     lcurve['detys']=reduce_lcurve(bin_ix,aper_ix,data['row'],np.mean)
+    lcurve['detrad'] = mc.distance(lcurve['detxs'],lcurve['detys'],400,400)
     lcurve['racent']=reduce_lcurve(bin_ix,aper_ix,data['ra'],np.mean)
     lcurve['deccent']=reduce_lcurve(bin_ix,aper_ix,data['dec'],np.mean)
 
@@ -294,6 +300,23 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
             verbose=verbose,coadd=coadd)
                 for trange in zip(lcurve['t0'],lcurve['t1'])])
 
+    lcurve['cps'] = lcurve['flat_counts']/lcurve['exptime']
+    lcurve['cps_err'] = np.sqrt(lcurve['flat_counts'])/lcurve['exptime']
+    lcurve['cps_bgsub'] = (lcurve['flat_counts']-
+                                            lcurve['bg'])/lcurve['exptime']
+    lcurve['flux'] = gxt.counts2flux(lcurve['cps'],band)
+    lcurve['flux_err'] = gxt.counts2flux(lcurve['cps_err'],band)
+    lcurve['flux_bgsub'] = gxt.counts2flux(lcurve['cps_bgsub'],band)
+
+    # NOTE: These conversions to mag can throw logarithm warnings if the
+    # background is brighter than the source, resuling in a negative cps.
+    lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
+    lcurve['mag_err_1'] = (lcurve['mag'] -
+                        gxt.counts2mag(lcurve['cps'] + lcurve['cps_err'],band))
+    lcurve['mag_err_2'] = (gxt.counts2mag(lcurve['cps'] -
+                                    lcurve['cps_err'],band) - lcurve['mag'])
+    lcurve['mag_bgsub'] = gxt.counts2mag(lcurve['cps_bgsub'],band)
+
     lcurve['photons'] = data
 
     lcurve['flags'] = getflags(band,bin_ix,lcurve,verbose=verbose)
@@ -302,8 +325,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
 
 def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
              trange=None, tranges=None, verbose=0, coadd=False, minexp=1.,
-             maxgap=1., maskdepth=20, maskradius=1.5,
-             photonfile=None, detsize=1.1):
+             maxgap=1.,photonfile=None, detsize=1.1):
     skyrange = [np.array(annulus).max().tolist() if annulus else radius,
                 np.array(annulus).max().tolist() if annulus else radius,]
     if verbose:
@@ -314,41 +336,8 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     elif not np.array(tranges).shape:
         print "No exposure time at this location: [{ra},{dec}]".format(
                                                             ra=ra0,dec=dec0)
-    # FIXME: Everything goes to hell if no exposure time is available...
-    # TODO: Add an ability to specify or exclude specific time ranges
-    if verbose:
-        mc.print_inline("Moving to photon level operations.")
-    # FIXME: This error handling is hideous.
     lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
                               stepsz=stepsz, verbose=verbose, coadd=coadd)
-    try:
-        lcurve['cps'] = lcurve['flat_counts']/lcurve['exptime']
-        lcurve['cps_err'] = np.sqrt(lcurve['flat_counts'])/lcurve['exptime']
-        lcurve['cps_bgsub'] = (lcurve['flat_counts']-
-                               lcurve['bg'])/lcurve['exptime']
-        lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
-        lcurve['mag_err_1'] = (lcurve['mag'] -
-                        gxt.counts2mag(lcurve['cps'] + lcurve['cps_err'],band))
-        lcurve['mag_err_2'] = (gxt.counts2mag(lcurve['cps'] -
-                                    lcurve['cps_err'],band) - lcurve['mag'])
-        lcurve['mag_bgsub'] = gxt.counts2mag(lcurve['cps_bgsub'],band)
-        lcurve['flux'] = gxt.counts2flux(lcurve['cps'],band)
-        lcurve['flux_err'] = gxt.counts2flux(lcurve['cps_err'],band)
-        lcurve['flux_bgsub'] = gxt.counts2flux(lcurve['cps_bgsub'],band)
-        lcurve['detrad'] = mc.distance(lcurve['detxs'],lcurve['detys'],400,400)
-    except ValueError:
-        lcurve['cps']=[]
-        lcurve['cps_err']=[]
-        lcurve['cps_bgsub']=[]
-        lcurve['mag']=[]
-        lcurve['mag_err_1']=[]
-        lcurve['mag_err_2']=[]
-        lcurve['mag_bgsub']=[]
-        lcurve['flux']=[]
-        lcurve['flux_err']=[]
-        lcurve['flux_bgsub']=[]
-        lcurve['detrad']=[]
-        lcurve['flags']=[]
 
     if verbose:
         mc.print_inline("Done.")
@@ -358,18 +347,16 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                 stepsz=None, trange=None, tranges=None, verbose=0, coadd=False,
                 iocode='wb',detsize=1.1,overwrite=False,
-                minexp=1.,maxgap=1.,maskdepth=20.,maskradius=1.5,
-                photonfile=None):
+                minexp=1.,maxgap=1.,photonfile=None):
     data = getcurve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
                     trange=trange, tranges=tranges, verbose=verbose,
                     coadd=coadd, minexp=minexp, maxgap=maxgap,
-                    maskdepth=maskdepth, maskradius=maskradius,
                     photonfile=photonfile, detsize=detsize)
     if csvfile:
         columns = ['t0','t1','exptime','t_mean','t0_data','t1_data','cps',
                    'cps_err','cps_bgsub','counts','flat_counts','bg',
                    'mag','mag_err_1','mag_err_2','mag_bgsub','flux',
-                   'flux_err','flux_bgusb','detx','dety','detrad','response',
+                   'flux_err','flux_bgsub','detx','dety','detrad','response',
                    'flags']
         try:
             test=pd.DataFrame({'t0':data['t0'],'t1':data['t1'],
