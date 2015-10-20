@@ -212,26 +212,36 @@ def nonlinearitywarning(band,bin_ix,events,verbose=0):
     cps = events['flat_counts'][bin_ix]/events['exptime'][bin_ix]
     return True if cps>=cps_10p_rolloff[band] else False
 
+def detedgewarning(bin_ix,events,verbose=0,valid_detrad=0.5):
+    ix=np.where(mc.distance(events['photons']['col'][bin_ix],
+        events['photons']['row'][bin_ix],400,400)*gxt.aper2deg(4)>=valid_detrad)
+    return True if len(ix[0]) else False
+
 def getflags(band,bin_ix,events,verbose=0):
     """Pass flags if data meets conditions that are likely to create
-    misleading photometry.
-    H = coincident with a masked hotspot.
-    E = overlaps the edge of the detector.
+    misleading photometry. The flags are binary, with bins set as follows:
+    1 - "hotspot" - events in pixels contiguous to a hotspot masked region
+    2 - "mask edge" - events in pixels contiguous to the detector edge
+    4 - "exptime" - bin contains < 50% exposure time coverage
+    8 - "respose" - events weighted with response < 0.7
+    16 - "nonlinearity" - local countrate exceeds 10% response dropoff
+    32 - "detector edge" - events outside of 0.55 degrees of detector center
+
     """
     bin_num = np.unique(bin_ix)
-    flags = np.empty(len(bin_num),dtype='string')
+    flags = np.zeros(len(bin_num))
     for i,b in enumerate(bin_num):
         try:
             ix = bin_ix[np.where(bin_ix==bin)]
-            flags[i] = '{H}{E}{T}{r}{N}'.format(
-                H='H' if maskwarning(band,ix,events,mapkey='H',
-                                                    verbose=verbose) else '',
-                E='E' if maskwarning(band,ix,events,mapkey='E',
-                                                    verbose=verbose) else '',
-                T='T' if exptimewarning(i,events,verbose=verbose) else '',
-                r='r' if lowresponsewarning(ix,events,verbose=verbose) else '',
-                N='N' if nonlinearitywarning(band,i,events,
-                                                    verbose=verbose) else '')
+            flags[i]+=1 if maskwarning(band,ix,events,mapkey='H',
+                                                    verbose=verbose) else 0
+            flags[i]+=2 if maskwarning(band,ix,events,mapkey='E',
+                                                    verbose=verbose) else 0
+            flags[i]+=4 if exptimewarning(i,events,verbose=verbose) else 0
+            flags[i]+=8 if lowresponsewarning(ix,events,verbose=verbose) else 0
+            flags[i]+=16 if nonlinearitywarning(band,i,events,
+                                                    verbose=verbose) else 0
+            flags[i]+=32 if detedgewarning(ix,events,verbose=verbose) else 0
         except:
             raise
     return np.array(flags)

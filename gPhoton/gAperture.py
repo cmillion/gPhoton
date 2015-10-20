@@ -13,8 +13,7 @@ from gPhoton import __version__
 
 def gAperture(band,skypos,radius,csvfile=None,annulus=None, coadd=False,
               stepsz=False,verbose=0,overwrite=False,trange=None,tranges=None,
-              minexp=1.,maxgap=1500.,maskdepth=20.,maskradius=1.5,iocode='wb',
-              photonfile=None,detsize=1.1):
+              minexp=1.,maxgap=1500.,iocode='wb',photonfile=None,detsize=1.1):
     """Runs gAperture and returns the data in a python dict() and as
     a CSV file if outfile is specified. Can be called from the interpreter.
     """
@@ -35,8 +34,7 @@ def gAperture(band,skypos,radius,csvfile=None,annulus=None, coadd=False,
     data = ct.write_curve(band.upper(), skypos[0], skypos[1], radius,
         csvfile=csvfile, annulus=annulus, stepsz=stepsz, verbose=verbose,
         overwrite=overwrite, trange=trange, tranges=tranges,coadd=coadd,
-        minexp=minexp, maxgap=maxgap, iocode = iocode, maskdepth=maskdepth,
-        maskradius=maskradius,detsize=detsize)
+        minexp=minexp, maxgap=maxgap, iocode = iocode, detsize=detsize)
     return data
 
 def check_radius(args):
@@ -90,10 +88,10 @@ def setup_parser(iam='gaperture'):
         help="The iocode to be passed to the cvs writer. Don't mess with this.",
         type=str)
     parser.add_argument("--bgmaskdepth", action="store", dest="maskdepth",
-        help="Depth of the background mask in AB Magnitudes.",
+        help="DEPRECATED. Depth of the background mask in AB Magnitudes.",
         type=float, default=20.0)
     parser.add_argument("--bgmaskradius", action="store", dest="maskradius",
-        help="Radius of background mask in n sigmas (assuming Gaussians)",
+        help="DEPRECATED. Radius of background mask in n sigmas (assuming Gaussians)",
         type=float, default=1.5)
     return parser
 
@@ -167,8 +165,7 @@ def __main__():
                      verbose=args.verbose, overwrite=args.overwrite,
                      trange=[args.tmin,args.tmax], tranges=args.trange,
                      coadd=args.coadd, minexp=args.minexp, maxgap=args.maxgap,
-                     iocode=args.iocode, maskdepth=args.maskdepth,
-                     maskradius=args.maskradius,detsize=args.detsize)
+                     iocode=args.iocode, detsize=args.detsize)
 
 if __name__ == "__main__":
     try:
