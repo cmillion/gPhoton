@@ -23,9 +23,9 @@ def file_setup(outfile):
         # Initialize the file with a header
         with open(outfile, 'wb') as csvfile:
             cols = ['objid','t0','t1','t_raw','t_eff','ra','dec','racent',
-                    'deccent','aper4','aper4_err','mag_bgsub_cheese',
+                    'deccent','aper4','aper4_err',
                     'mag_bgsub','mag','distance','response','skybg',
-                    'bg','bg_cheese','bg_eff_area']
+                    'bg','flags']
             spreadsheet = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             spreadsheet.writerow(cols)
     return extant_objids
@@ -38,12 +38,10 @@ def construct_row(i,band,objid,mcat,data):
             mcat['ra'][i], mcat['dec'][i],
             data['racent'][0], data['deccent'][0],
             mcat[band][4]['mag'][i], mcat[band][4]['err'][i],
-            data['mag_bgsub_cheese'][0],
             data['mag_bgsub'][0], data['mag'][0],
             mc.distance(data['detxs'],data['detys'],400,400)[0],
-            data['responses'][0], mcat[band]['skybg'][i],
-            data['bg']['simple'][0], data['bg']['cheese'][0],
-            data['bg']['eff_area'])
+            data['responses'][0], mcat[band]['skybg'][i],data['bg'][0],
+            data['flags'][0])
 
 def datamaker(band,skypos,outfile,maglimit=20.,margin=0.005,searchradius=0.1,
               radius=gt.aper2deg(4),annulus=[0.0083,0.025]):
@@ -72,15 +70,12 @@ def datamaker(band,skypos,outfile,maglimit=20.,margin=0.005,searchradius=0.1,
                 continue
             data = gAperture(band,[mcat['ra'][i],mcat['dec'][i]],radius,
                              annulus=annulus,verbose=0,coadd=True,
-                             trange=[exp[band]['t0'],exp[band]['t1']])
-            if (data['mag_bgsub_cheese'] and
-                                        np.isfinite(data['mag_bgsub_cheese'])):
-                csv_construct = construct_row(i,band,objid,mcat,data)
-                print csv_construct
-                with open(outfile,'ab') as csvfile:
-                    spreadsheet = csv.writer(csvfile, delimiter=',',
+                             trange=[exp[band]['t0'],exp[band]['t1']],
+                             detsize=1.25)
+            csv_construct = construct_row(i,band,objid,mcat,data)
+            print csv_construct
+            with open(outfile,'ab') as csvfile:
+                spreadsheet = csv.writer(csvfile, delimiter=',',
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                    spreadsheet.writerow(csv_construct)
-            else:
-                print 'no exp'
+                spreadsheet.writerow(csv_construct)
     return

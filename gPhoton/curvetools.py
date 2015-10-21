@@ -185,6 +185,8 @@ def reduce_lcurve(bin_ix,region_ix,data,function,dtype='float64'):
             output[i] = function(data[np.where(bin_ix[region_ix]==b)])
         except ValueError:
             output[i] = np.nan
+        except IndexError:
+            output[i] = np.nan
         except:
             raise
     return np.array(output,dtype=dtype)
@@ -242,6 +244,8 @@ def getflags(band,bin_ix,events,verbose=0):
             flags[i]+=16 if nonlinearitywarning(band,i,events,
                                                     verbose=verbose) else 0
             flags[i]+=32 if detedgewarning(ix,events,verbose=verbose) else 0
+        except IndexError:
+            return np.array([np.nan])
         except:
             raise
     return np.array(flags)
@@ -274,10 +278,21 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     https://github.com/numpy/numpy/issues/2656
     """
     bin_ix = np.searchsorted(bins,data['t'],"right")
-    angSep = mc.angularSeparation(ra0, dec0, data['ra'], data['dec'])
+    try:
+        lcurve['t0'] = bins[np.unique(bin_ix)-1]
+        lcurve['t1'] = bins[np.unique(bin_ix)]
+        lcurve['exptime'] = np.array(
+            [dbt.compute_exptime(band,trange,skypos=[ra0,dec0],
+                verbose=verbose,coadd=coadd)
+                    for trange in zip(lcurve['t0'],lcurve['t1'])])
+    except IndexError:
+        if np.isnan(data['t']):
+            print "No valid data available in {t}".format(t=tranges)
+        lcurve['t0'] = np.array([np.nan])
+        lcurve['t1'] = np.array([np.nan])
+        lcurve['exptime'] = np.array([0])
 
-    lcurve['t0'] = bins[np.unique(bin_ix)-1]
-    lcurve['t1'] = bins[np.unique(bin_ix)]
+    angSep = mc.angularSeparation(ra0, dec0, data['ra'], data['dec'])
 
     aper_ix = np.where(angSep <= radius)
     lcurve['t0_data']=reduce_lcurve(bin_ix,aper_ix,data['t'],np.min)
@@ -304,11 +319,6 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         lcurve['bg_counts'] = np.zeros(len(lcurve['counts']))
         lcurve['bg_flat_counts'] = np.zeros(len(lcurve['counts']))
         lcurve['bg'] = np.zeros(len(lcurve['counts']))
-
-    lcurve['exptime'] = np.array(
-        [dbt.compute_exptime(band,trange,skypos=[ra0,dec0],
-            verbose=verbose,coadd=coadd)
-                for trange in zip(lcurve['t0'],lcurve['t1'])])
 
     lcurve['cps'] = lcurve['flat_counts']/lcurve['exptime']
     lcurve['cps_err'] = np.sqrt(lcurve['flat_counts'])/lcurve['exptime']
