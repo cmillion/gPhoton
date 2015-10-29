@@ -44,7 +44,7 @@ def construct_row(i,band,objid,mcat,data):
             data['flags'][0])
 
 def datamaker(band,skypos,outfile,maglimit=20.,margin=0.005,searchradius=0.1,
-              radius=gt.aper2deg(4),annulus=[0.0083,0.025]):
+              radius=gt.aper2deg(4),annulus=[0.0083,0.025],verbose=0):
     extant_objids = file_setup(outfile)
     if extant_objids==False:
         print 'NOT RUNNING!!*!'
@@ -68,6 +68,8 @@ def datamaker(band,skypos,outfile,maglimit=20.,margin=0.005,searchradius=0.1,
             if exp[band]['t0']<0:
                 print 'skip'
                 continue
+            print [mcat['ra'][i],mcat['dec'][i]]
+            print [exp[band]['t0'],exp[band]['t1']]
             data = gAperture(band,[mcat['ra'][i],mcat['dec'][i]],radius,
                              annulus=annulus,verbose=0,coadd=True,
                              trange=[exp[band]['t0'],exp[band]['t1']],

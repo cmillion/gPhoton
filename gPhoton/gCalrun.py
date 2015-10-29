@@ -35,7 +35,7 @@ def calrun(outfile,band,nsamples=10,seed=323,rarange=[0,360],decrange=[-90,90],
         expt = gFind.gFind(skypos=skypos,band=band,quiet=True)[band]['expt']
         if exprange[0]<=expt<=exprange[1]:
             print skypos, expt, True
-            datamaker(band,skypos,outfile,maglimit=maglimit)
+            datamaker(band,skypos,outfile,maglimit=maglimit,verbose=verbose)
         else:
             print skypos, expt, False
     return

@@ -260,7 +260,10 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     if verbose:
         mc.print_inline("Binning data according to requested depth.")
     # Multiple ways of defining bins
-    trange = [np.array(tranges).min(),np.array(tranges).max()]
+    try:
+        trange = [np.array(tranges).min(),np.array(tranges).max()]
+    except ValueError:
+        trange = tranges
     if coadd:
         bins = np.array(trange)
     elif stepsz:
