@@ -1,9 +1,0 @@
-{\rtf1\ansi\ansicpg1252\cocoartf1347\cocoasubrtf570
-{\fonttbl\f0\fnil\fcharset0 Cochin;}
-{\colortbl;\red255\green255\blue255;}
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\fi360\sl288\slmult1\pardirnatural
-
-\f0\b\fs28 \cf0 Photon Database
-\b0 \
-To maximize flexibility of the high time resolution data, photon list files produced by running gPhotonPipe on the full corpus of GR6/7 were ingested into databases at MAST, used by gFind, gAperture, and gMap. For performance optimization purposes, the event level data is spread over multiple databases. The non-NULL (aspect corrected) data are spread across ten different databases based on declination, with bounding ranges selected to approximately balance the number of rows per database. Each database is then further divided into \'93zones\'94 or strips of 30\'94 declination. We make use of the fast zone matching algorithm described in [Gray 2006] for loading and querying the database. The distribution of the ten databases on the sky is shown in [Figure] along with the specific declination ranges of each. The assignment to a database or partition is strict, leaving open the possibility that data from a single observation might be spread across two tables. The majority of normal queries access only a single database, but queries spanning database are handled on the server side, transparent to both the software and end users. NULL data which were not aspect corrected reside in a single database.\
-[What are the indexes of the databases?]}

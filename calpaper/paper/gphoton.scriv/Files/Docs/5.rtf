@@ -1,9 +1,0 @@
-{\rtf1\ansi\ansicpg1252\cocoartf1347\cocoasubrtf570
-{\fonttbl\f0\fnil\fcharset0 Cochin;}
-{\colortbl;\red255\green255\blue255;}
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\fi360\sl288\slmult1\pardirnatural
-
-\f0\b\fs28 \cf0 Effective Exposure Time
-\b0 \
-The effective exposure time is computed as the raw exposure time (the difference between the observation start and end time) less any amount of time considered \'93shuttered\'94 and then scaled by the global dead time. Shuttered periods are those periods of significant length \'97 for our purposes, considered to be 0.05 seconds or more \'97 during which no valid observational data is available. These might be periods during which the spacecraft was not actually observing the requested region of sky, but can also include data dropouts or periods during which a valid aspect solution is not available for any number of reasons which might include being near the beginning or end of an observation or a failure of the aspect refinement stage of the mission pipeline.\
-For aperture photometry, the effective exposure is computed at the requested sky position, and then applied uniformly across all events in both the aperture and background annulus. This approximation is more efficient than calculating the exposure across the whole region and fails only when the annulus or background contains a masked part of the detector (e.g. hotspots as described below) or crosses the edge of the effective FOV.}
