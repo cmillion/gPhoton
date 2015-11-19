@@ -254,13 +254,33 @@ As a test of the relative photometric precision from gPhoton, we plot the differ
 We plot these comparisons for the FUV and NUV bands in Figs.\ \ref{fuvrelphot} and \ref{nuvrelphot}, respectively.  We find that {\color{red}XXXX\%} of sources agree to within 0.1 magnitudes.  {\color{red}We need to discuss why there might be a difference between the two, and also why bright sources in the MCAT are fainter in gPhoton.}  The fluxes shown in the comparison plots make use of the aperture-method for background subtraction.  We note that comparisons using the MCAT-values-method for background subtraction look quite similar.
 
 \begin{figure}
-\includegraphics[scale=0.35]{FigRelPhotFUV.eps}
-\caption{Comparison between MCAT and gPhoton FUV fluxes for {\color{red}XXXX} randomly selected MCAT sources with exposure times $100 \leq t \leq 5000$. \label{fuvrelphot}}
+\includegraphics[scale=0.32]{FigRelPhotFUV-no_bg.eps}
+\caption{Comparison between MCAT and gPhoton FUV fluxes, with \emph(no) background subtraction, for {\color{red}XXXX} randomly selected MCAT sources with exposure times $100 \leq t \leq 5000$. \label{fuvrelphot}}
 \end{figure}
 
 \begin{figure}
-\includegraphics[scale=0.35]{FigRelPhotNUV.eps}
-\caption{Comparison between MCAT and gPhoton NUV fluxes for {\color{red}XXXX} randomly selected MCAT sources with exposure times $100 \leq t \leq 5000$. \label{nuvrelphot}}
+\includegraphics[scale=0.32]{FigRelPhotNUV-no_bg.eps}
+\caption{Comparison between MCAT and gPhoton NUV fluxes, with \emph{no} background subtraction, for {\color{red}XXXX} randomly selected MCAT sources with exposure times $100 \leq t \leq 5000$. \label{nuvrelphot}}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.32]{FigRelPhotFUV-annulus_bg.eps}
+\caption{Comparison between MCAT and gPhoton FUV fluxes, using backgrounds estimated from unmasked annuli, for {\color{red}XXXX} randomly selected MCAT sources with exposure times $100 \leq t \leq 5000$. \label{fuvrelphot}}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.32]{FigRelPhotNUV-annulus_bg.eps}
+\caption{Comparison between MCAT and gPhoton NUV fluxes, using background estimated from unmasked annuli, for {\color{red}XXXX} randomly selected MCAT sources with exposure times $100 \leq t \leq 5000$. \label{nuvrelphot}}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.32]{FigRelPhotFUV-mcat_bg.eps}
+\caption{Comparison between MCAT and gPhoton FUV fluxes, using MCAT estimated backgrounds, for {\color{red}XXXX} randomly selected MCAT sources with exposure times $100 \leq t \leq 5000$. \label{fuvrelphot}}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.32]{FigRelPhotNUV-mcat_bg.eps}
+\caption{Comparison between MCAT and gPhoton NUV fluxes, using MCAT estimated backgrounds, for {\color{red}XXXX} randomly selected MCAT sources with exposure times $100 \leq t \leq 5000$. \label{nuvrelphot}}
 \end{figure}
 
 
@@ -269,7 +289,7 @@ As described in \citet{mor2007}, the calibration standard star of choice for GAL
 
 \begin{figure}
 \includegraphics[scale=0.35]{FigAbsPhotLDS.eps}
-\caption{Comparison between MCAT and gPhoton fluxes for LDS 749B in the FUV (green) and NUV (red). \label{ldsabsphot}}
+\caption{Comparison between MCAT and gPhoton fluxes for LDS749B in the FUV (green) and NUV (red). \label{ldsabsphot}}
 \end{figure}
 
 \section{Example Science Application - Stellar Flares From CR Draconis}
