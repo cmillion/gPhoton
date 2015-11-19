@@ -2,6 +2,7 @@
 %\documentclass[review]{elsarticle}
 \documentclass[5p]{elsarticle}
 \usepackage{lineno,hyperref}
+\usepackage{tabularx}
 \modulolinenumbers[5]
 %\bibliographystyle{elsarticle-num}
 \bibliographystyle{model2-names.bst}
@@ -12,6 +13,8 @@
 \usepackage{color}
 \usepackage{graphicx}
 \usepackage{epstopdf}
+
+\usepackage{caption}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
@@ -95,12 +98,38 @@ A large fraction of data are not aspect-correctable because they fall in time ra
 
 For performance optimization purposes, the event-level data is distributed over multiple databases. The non-null (aspect corrected) data are spread across ten different databases organized by celestial declination, with bounding ranges selected to approximately balance the number of rows per database.  The ten database tables are further divided into a total of 999 partitions. Each partition is then further divided into ``zones'' of $30''$. We make use of the fast zone matching algorithm described in \citet{gra2006} for loading and querying the database.  Both the database boundaries and the number of $30''$ zones assigned to each partition were defined so that the databases are of similar sizes.  This was accomplished by assuming the total number of photon events in a given eclipse is distributed evenly across that eclipse's footprint.  Then, the cross-section of that eclipse's footprint against the zone boundaries is calculated to determine which zones that eclipse overlaps.  The number of photons in each zone from this eclipse is estimated based on the cross-sectional area, e.g., if a given eclipse spans two zones, but only 10\% of the eclipse's footprint is in one of the zones, 90\% of its total photon events would be considered to belong to the first zone, and 10\% to the other.
 
+<<<<<<< HEAD
 This method of estimating photon events in each zone is not precise, since it assumes photon events are evenly distributed across the eclipse, but it does serve as a quick approximation to define the database boundaries and partition assignments by not requiring to actually compute the zone membership for all 1.1 trillion photon events beforehand.  The distribution of the ten databases on the sky is shown in Fig.\ \ref{dbdist}, along with a table summarizing the declination ranges and number of photon events in each database {\color{red}Scott will make this table once Bernie gets him the numbers.  Bernie, I would need number of non-null photons in each database for FUV and NUV (separately).  Also, if there are some events in the null table that we will be moving into the non-null table, it would be good to include thos in this count.}. The assignment to a database or partition is strict, leaving open the possibility that a user's query spans two databases. The majority of normal queries access only a single database, but queries that do span multiple databases are handled on the server, transparent to both the software and end users. Null data which were not aspect corrected reside in a single database.  {\color{red}How are the non-null and null tables indexed (which columns)?}
+=======
+This method of estimating photon events in each zone is not precise, since it assumes photon events are evenly distributed across the eclipse, but it does serve as a quick approximation to define the database boundaries and partition assignments by not requiring to actually compute the zone membership for all 1.1 trillion photon events beforehand.  The distribution of the ten databases on the sky is shown in Fig.\ \ref{dbdist}, along with a table summarizing the declination ranges and number of photon events in each database (Table \ref{dbcounts}). The assignment to a database or partition is strict, leaving open the possibility that a user's query spans two databases. The majority of normal queries access only a single database, but queries that do span multiple databases are handled on the server, transparent to both the software and end users. Null data which were not aspect corrected reside in a single database.  {\color{red}How are the non-null and null tables indexed (which columns)?}
+>>>>>>> 0cf43c8b5c9c209f91afd99b16f5fb446298f1e4
 
 \begin{figure}
 \includegraphics[scale=0.48]{FigDBDist.eps}
 \caption{The DEC boundaries of the ten databases that comprise gPhoton.  There are a total of 999 partitions across the ten databases, each with a variable number of $30''$ zones (stripes of DEC).  The number of zones in each partition, and the number of partitions in each database, were assigned so that the size of the ten databases would be roughly equal to each other. \label{dbdist}}
 \end{figure}
+
+
+\begin{table}
+\caption{Non-Null Photon Events Per Database\label{dbcounts}}
+\begin{tabularx}{.47\textwidth}{lllXX}
+\hline\hline
+DB & min $\delta$ & max $\delta$ & N\_FUV & N\_NUV\\
+   & deg          & deg          & x$10^9$ & x$10^9$\\
+\hline
+1 & -90.00 & -41.60 &   6.257390699 &  86.634587040\\
+2 & -41.60 & -23.21 &   6.381213422 &  86.548536265\\
+3 & -23.21 &  -6.32 &   6.581269082 &  86.661438444\\
+4 &  -6.32 &  -0.16 &   5.855815141 &  86.824342990\\
+5 &  -0.16 &   3.28 &   5.918115466 &  87.675967291\\
+6 &   3.28 &  13.12 &   6.431868719 &  86.895361749\\
+7 &  13.12 &  26.46 &   6.230197521 &  87.197846131\\
+8 &  26.46 &  40.20 &   5.392882518 &  86.855190790\\
+9 &  40.20 &  52.50 &   5.394019934 &  86.683794328\\
+10 &  52.50 &  90.00 &   6.540819967 & 100.482179843\\
+\hline
+\end{tabularx}
+\end{table}
 
 \section{Description of the Software Tools}
 \label{softwaretools}
