@@ -1,0 +1,177 @@
+<html>
+
+<head>
+<title>gphoton</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+	body {background-color: #bac0c7}
+    p.binderItem {margin: 10.0px 0.0px 0.0px 05.0px; font-family:Cochin, Times, Courier, Arial, serif; font-size:14.0px;}
+    .page {border: 1px solid #727272; background: #fff}
+    hr {
+      border-top: 1px dashed #000;
+      border-bottom: 0px solid #fff;
+      color: #fff;
+      background-color: #fff;
+      height: 0px;
+  </style>
+</head>
+
+<body>
+
+<table border="0" width="100%" cellspacing="3">
+<tr>
+<td>
+
+<table class="page" width="100%" cellspacing="10" cellpadding="2">
+<tr>
+<td valign="top">
+
+<ul>
+<li>
+<p class="binderItem"><strong>Abstract</strong><br/>Abstract<br/>
+We describe gPhoton, which enables more flexible analysis of GALEX ultraviolet data, including high time resolution photometric analyses, by sky projecting and hosting approximately 1.1 trillion individual photon events and providing a tool set for generating calibrated light curves and images with a large large number of user-definable parameters. The project includes a standalone, pure-Python calibration pipeline that reproduces core functionality of the original mission pipeline, an ...</p>
+</li>
+<li>
+<p class="binderItem"><strong>Introduction</strong><br/>Introduction<br/>
+ The Galaxy Evolution Explorer (GALEX) was a NASA Small Explorer (SMEX) telescope that surveyed the sky in the ultraviolet over approximately ten years, between launch on 28 April 2003 and spacecraft termination on 28 June 2013. The spacecraft, instruments, data and calibration are well described in previous publications [CITE] and the mission’s technical documentation. [CITE] We will restrict discussion to topics which have not appeared elsewhere in the literature, are of particula...</p>
+</li>
+<li>
+<p class="binderItem"><strong>Call To Action</strong><br/> Advances in storage and processing capabilities since the beginning of the mission over fifteen years ago now make storage, distribution, and analysis of the photon level data technologically feasible. But by the end of the mission, the GALEX calibration pipeline software (“mission pipeline”) had grown to sufficient complexity and dependence on its operating environment that attempts by multiple parties to get the software to run outside of the aging GALEX network of computers upon which it had...</p>
+</li>
+<li>
+<p class="binderItem"><strong>"Course Sun Point"</strong><br/>“Course Sun Point”<br/>
+ The FUV detector failed in May of 2009. On 4 May 2010, an event referred to by the mission team as “the Course Sun Point anomaly” (or CSP, referring to the safe mode entered by the spacecraft at that time) resulted in image degredation of the NUV detector, manifest as severe streaking in the detector Y-direction, most probably due to a failed capacitor. Although the effect was largely corrected through subsequent calibration and onboard adjustments [CITE], observations taken ...</p>
+</li>
+<li>
+<p class="binderItem"><strong>CAUSE</strong><br/>CAUSE Phase<br/>
+ NASA support for the mission ended in February of 2011. At that time, ownership of the spacecraft was transferred to the California Institute of Technology for a mission phase called the “Complete the All-sky UV Survey Extension” (CAUSE), during which operating costs were solicited from individuals or institutions and detector field and source brightness were relaxed, enabling substantial additional observations of bright regions of the sky not observable during the primary mission,...</p>
+</li>
+<li>
+<p class="binderItem"><strong>Mission Pipeline</strong><br/>Data were downlinked from the spacecraft and assembled into monolithic telemetry files (-tlm). The ingest stage of the pipeline split these into various types of encoded raw detector event and spacecraft state (-scst) data which inluded coarse aspect solutions from the onboard star tracker at 1 second resolution as well as spacecraft houskeeping records. The most important class of encoded raw detector data for our purposes, containing nominal scientific observations, were the -raw6 files. The -...</p>
+</li>
+<li>
+<p class="binderItem"><strong>The gPhoton Toolkit</strong><br/>The gPhoton Toolkit<br/>
+The gPhoton project comprises four major software tools and a publicly accessible database at MAST, described in detail below.</p>
+</li>
+<hr/>
+<ul>
+<li>
+<p class="binderItem"><strong>gPhotonPipe</strong><br/>gPhotonPipe<br/>
+The gPhotonPipe standalone calibration pipeline implements a subset of features from the full mission pipeline to perform lower (detector) level calibration and aspect correction of detector events. This command line function accepts the raw scientific data file (-raw6), the spacecraft state file (-scst), and one or more refined aspect solution files (-asprta). It returns a “photon list file” in comma seperated value (CSV) format in which each row corresponds to a detector event and ...</p>
+</li>
+<li>
+<p class="binderItem"><strong>gFind</strong><br/>gFind<br/>
+gFind is a search tool that provides a mechanism for the user to query the available in-database coverage depth (if any) of a particular target. Given a target position, gFind returns the estimated (raw) exposure depth of available data over the whole mission, broken down into time ranges corresponding roughly to discrete observations of the target. Rather than using the visit-based bookkeeping of the mission — which distinguished between observation modes and survey type — gFind attempts ...</p>
+</li>
+<li>
+<p class="binderItem"><strong>gAperture</strong><br/>gAperture<br/>
+gAperture extracts and calibrates event level data from the database to produce photometry and light curves given a host of user-specified parameters including target position, extraction aperture, background annulus, integration depth, and time ranges. Rather than performing photometric measurements on pixelized and integrated images, as the mission pipeline did, gAperture conducts cone searches on the sky positions of individual photon events for the purposes of aperture photometry a...</p>
+</li>
+<hr/>
+<ul>
+<li>
+<p class="binderItem"><strong>Exposure Time</strong><br/>Effective Exposure Time<br/>
+The effective exposure time is computed as the raw exposure time (the difference between the observation start and end time) less any amount of time considered “shuttered” and then scaled by the global dead time. Shuttered periods are those periods of significant length — for our purposes, considered to be 0.05 seconds or more — during which no valid observational data is available. These might be periods during which the spacecraft was not actually observing the requeste...</p>
+</li>
+<hr/>
+<ul>
+<li>
+<p class="binderItem"><strong>Emperical Dead Time Correction</strong><br/>Exposure Dead Time <br/>
+Micro channel plates are subject to a global exposure “dead time” effect caused by the inability of the detector to process more than one event at a time. The effect therefore scales as a function of total global detector count rates: as count rates go up, the fraction of exposure lost to dead time likewise increases. The effect is linear as a function of global count rate up to approximately [rates in NUV and FUV]. Other MCP instruments have used this global count rate relat...</p>
+</li>
+</ul>
+<hr/>
+<li>
+<p class="binderItem"><strong>Relative Response</strong><br/>Within the misison pipeline, the detector flat was projected into the sky according to the spacecraft aspect solution and then integrated and interpolated into a high resolution relative response (rrhr) map which could then be applied to the integrated count maps to correct for detector response and effective exposure (as a function of sky position), as well as any static or dynamic masking (of hotspots, ghosts, or edge reflections). The gPhoton pipeline, instead, applies the detector flat at th...</p>
+</li>
+<li>
+<p class="binderItem"><strong>Sky Background</strong><br/>(1) The first method is a simple annulus estimation method where the total surface flux within an annulus surrounding the extraction aperture as scaled to the area of the aperture and subtracted. This method can be bias by the presence of relatively bright sources either within or near the annulus, although the bias can sometimes be mitigated by careful selection of annulus parameters (and assuming that the field is not crowded). The direct annulus method has the benefit of correcting for changi...</p>
+</li>
+</ul>
+<hr/>
+<li>
+<p class="binderItem"><strong>gMap</strong><br/>gMap<br/>
+gMap creates integrated images or movies for targeted regions of sky and specific time ranges up to and including full depth coadds. Users can request either “count” images — which have not been corrected for exposure time or response, and can be used for astrometry or diagnostics — or “intensity” images — which are fully calibrated and suitable for photometric analysis. The images produced by gMap are analogous to the imaging data products of the same name that were produced by the mission...</p>
+</li>
+<li>
+<p class="binderItem"><strong>Photon Database</strong><br/>Photon Database<br/>
+To maximize flexibility of the high time resolution data, photon list files produced by running gPhotonPipe on the full corpus of GR6/7 were ingested into databases at MAST, used by gFind, gAperture, and gMap. For performance optimization purposes, the event level data is spread over multiple databases. The non-NULL (aspect corrected) data are spread across ten different databases based on declination, with bounding ranges selected to approximately balance the number of rows per ...</p>
+</li>
+</ul>
+<hr/>
+<li>
+<p class="binderItem"><strong>Standard Practices</strong><br/>Sky positions are always reported as a two element vector where the first value reports right ascension and the second value reports declination, both in (J2000?) decimal degrees. Time ranges (or “bins”) are defined as two element vectors where the first element is the start time and the second element is the end time. The gPhoton project uses the concept of “GALEX time” throughout, defined in seconds as UNIX Time - 315964800. Search ranges (in both space and time) are generally taken to be incl...</p>
+</li>
+<li>
+<p class="binderItem"><strong>Calibration Tests</strong><br/>As explained above, the gPhoton calibration and data reduction is not identical to that of the mission pipeline in all respects. As such, we should not expect perfect agreement.</p>
+</li>
+<hr/>
+<ul>
+<li>
+<p class="binderItem"><strong>Absolute Flux Precision</strong><br/>Absolute Photometric Precision</p>
+</li>
+<hr/>
+<ul>
+<li>
+<p class="binderItem"><strong>LDS749B</strong><br/>LDS749B<br/>
+As described in [Morrissey], the calibration standard star of choice for GALEX was the white dwarf LDS749B. A total of [amount] of exposure depth in observations were made of this source. We use gAperture to compute magnitudes for all of these observations in both bands and compare them against the standard magnitudes used by GALEX. We have good agreement in general. And then compare again with only long exposures near the center of the detector.<br/>
+</p>
+</li>
+<li>
+<p class="binderItem"><strong>Other White Dwarfs</strong><br/>Other White Dwarfs</p>
+</li>
+</ul>
+<hr/>
+<li>
+<p class="binderItem"><strong>Relative Flux Precision</strong><br/>Relative Photometric Precision<br/>
+We plot the difference in gAperture magnitude and MCAT magnitude against the MCAT magnitude for [some number of sources]. All gAperture measurements were done at source positions and over time ranges as reported in the MCAT, with an aperture radius of 0.1 arcminutes (equivalent to APER4 in the MCAT). To ensure sufficient signal to noise, only observations with depths of greater than 100 seconds were used. To prevent any particularly deep fields or exposures from do...</p>
+</li>
+<li>
+<p class="binderItem"><strong>Astrometric Accuracy</strong><br/>Astrometric Accuracy<br/>
+We compare the mean photon position within the aperture to the MCAT source position. One source of uncertainty here is that the CoB was calculated by the mission pipeline on a pixel-based map, whereas gPhoton used the photons directly. Another possible source of error is that you should really fit a 2D Gaussian bounded by an off-center circle to find the CoB (and maybe the analysis should be redone like this).<br/>
+</p>
+</li>
+</ul>
+<hr/>
+<li>
+<p class="binderItem"><strong>Example Science Applications</strong></p>
+</li>
+<hr/>
+<ul>
+<li>
+<p class="binderItem"><strong>M Dwarf Flares</strong></p>
+</li>
+<li>
+<p class="binderItem"><strong>AGN</strong></p>
+</li>
+<li>
+<p class="binderItem"><strong>CVs</strong></p>
+</li>
+<li>
+<p class="binderItem"><strong>EBs</strong></p>
+</li>
+</ul>
+<hr/>
+<li>
+<p class="binderItem"><strong>Conclusion</strong></p>
+</li>
+<hr/>
+<ul>
+<li>
+<p class="binderItem"><strong>Philosophy</strong><br/>The calibration and reduction of data imprints, a priori, the assumptions, limitations, and biases of the data preparers onto the final (higher level) products. Even when the preparation of the higher level data is well documented and understood by future researchers, the priorities or interests of those end users may not be the same as the data creators or archivists. In such cases, of course, their recourse would be to go back to the raw or minimally reduced data and create a modified or wholl...</p>
+</li>
+</ul>
+</ul>
+
+</td>
+<td width="8">
+</td>
+</tr>
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>

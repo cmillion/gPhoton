@@ -1,0 +1,16 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1347\cocoasubrtf570
+{\fonttbl\f0\fnil\fcharset0 Cochin;}
+{\colortbl;\red255\green255\blue255;}
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\fi360\sl288\slmult1\pardirnatural
+
+\f0\fs28 \cf0 Data were downlinked from the spacecraft and assembled into monolithic telemetry files (
+\i -tlm
+\i0 ). The 
+\i ingest
+\i0  stage of the pipeline split these into various types of encoded raw detector event and spacecraft state (
+\i -scst
+\i0 ) data which inluded coarse aspect solutions from the onboard star tracker at 1 second resolution as well as spacecraft houskeeping records. The most important class of encoded raw detector data for our purposes, containing nominal scientific observations, were the 
+\i -raw6
+\i0  files. The -raw6 were decoded with a sequence of bitwise manipulationsinto lists of raw detector positions (x and y) with timestamps for all detector events. These raw positions were futher adjusted with \'93static\'94 (detector-space) calibrations for wiggle, walk, nonlinearity and distortion (described more completely in 
+\i Morrissey
+\i0 ). For post-CSP data (after eclipse number 37460), the calibration was slightly modified both because several onboard detector constants changed or were modified and because an additional processing step was added for the \'93YA\'94 value of the raw position data to correct for detector streaking caused by this anomaly. [Describe the post-CSP corrections better.]}
