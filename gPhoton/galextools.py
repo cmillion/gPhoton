@@ -124,6 +124,16 @@ def counts2flux(cps,band):
 # END
 #
 
+def local_nl_correction(mr,band):
+    """Measured counts per second to predicted counts per sectond.
+    Attempts to correct a measured count rate for nonlinearity per the formula
+    given in Fig. 8 of Morrissey 2007.
+    """
+    coeffs = {'NUV':[-0.314,1.365,-0.103],
+              'FUV':[-0.531,1.696,-0.225]}
+    C0,C1,C2=coeffs[band]
+    return 10**np.roots([C2,C1,C0-np.log10(MR)])[1]
+
 def deg2pix(skypos,skyrange,pixsz=0.000416666666666667):
 	"""Converts degrees to GALEX pixels rounded up to the nearest pixel
 	so that the number of degrees specified will fully fit into the frame.
