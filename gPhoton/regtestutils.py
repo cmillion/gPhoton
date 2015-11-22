@@ -23,7 +23,8 @@ def file_setup(outfile):
         # Initialize the file with a header
         with open(outfile, 'wb') as csvfile:
             cols = ['objid','t0','t1','t_raw','t_eff','ra','dec','racent',
-                    'deccent','aper4','aper4_err',
+                    'deccent','aper4','aper4_err','cps_bgsub','cps',
+                    'flux_bgsub','flux',
                     'mag_bgsub','mag','distance','response','skybg',
                     'bg','flags']
             spreadsheet = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -35,9 +36,13 @@ def construct_row(i,band,objid,mcat,data):
     #       where as gPhoton is reporting cps over the aperture area.
     return (objid, data['t0'][0], data['t1'][0],
             mcat[band]['expt'][i], data['exptime'][0],
-            mcat['ra'][i], mcat['dec'][i],
-            data['racent'][0], data['deccent'][0],
+            np.array(mcat['ra'][i],dtype='float32'),
+            np.array(mcat['dec'][i],dtype='float32'),
+            np.array(data['racent'][0],dtype='float32'),
+            np.array(data['deccent'][0],dtype='float32'),
             mcat[band][4]['mag'][i], mcat[band][4]['err'][i],
+            data['cps_bgsub'][0], data['cps'][0],
+            data['flux_bgsub'][0], data['flux'][0],
             data['mag_bgsub'][0], data['mag'][0],
             mc.distance(data['detxs'],data['detys'],400,400)[0],
             data['responses'][0], mcat[band]['skybg'][i],data['bg'][0],

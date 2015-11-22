@@ -114,6 +114,9 @@ def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
     events = hashresponse(band, events, verbose=verbose)
     return events
 
+def aperture_error(counts,expt,bgcounts=0):
+    return np.sqrt(counts/expt**2+bgcounts/expt**2)
+
 def bg_sources(band,ra0,dec0,radius,margin=0.001):
     sources = gQuery.getArray(gQuery.mcat_sources(band,ra0,dec0,radius+margin,
                                                       maglimit=maskdepth))
@@ -311,6 +314,10 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     lcurve['racent']=reduce_lcurve(bin_ix,aper_ix,data['ra'],np.mean)
     lcurve['deccent']=reduce_lcurve(bin_ix,aper_ix,data['dec'],np.mean)
 
+    # FIXME: This just uses the average background over all visits until
+    # the MCAT query gets fixed to return the time ranges.
+    lcurve['mcat_bg']=lcurve['exptime']*(np.ones(len(lcurve['counts']))*
+                        dbt.mcat_skybg(band,[ra0,dec0],radius,verbose=verbose))
     if annulus is not None:
         annu_ix = np.where((angSep > annulus[0]) & (angSep <= annulus[1]))
         lcurve['bg_counts'] = reduce_lcurve(bin_ix,annu_ix,data['t'],len)
@@ -324,21 +331,42 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
         lcurve['bg'] = np.zeros(len(lcurve['counts']))
 
     lcurve['cps'] = lcurve['flat_counts']/lcurve['exptime']
-    lcurve['cps_err'] = np.sqrt(lcurve['flat_counts'])/lcurve['exptime']
+    lcurve['cps_err'] = aperture_error(lcurve['flat_counts'],lcurve['exptime'])
     lcurve['cps_bgsub'] = (lcurve['flat_counts']-
                                             lcurve['bg'])/lcurve['exptime']
+    lcurve['cps_bgsub_err'] = aperture_error(
+        lcurve['flat_counts'],lcurve['exptime'],bgcounts=lcurve['bg'])
+    lcurve['cps_mcatbgsub'] = (lcurve['flat_counts']-
+                                        lcurve['mcat_bg'])/lcurve['exptime']
+    lcurve['cps_mcatbgsub_err'] = aperture_error(
+        lcurve['flat_counts'],lcurve['exptime'],bgcounts=lcurve['mcat_bg'])
     lcurve['flux'] = gxt.counts2flux(lcurve['cps'],band)
     lcurve['flux_err'] = gxt.counts2flux(lcurve['cps_err'],band)
     lcurve['flux_bgsub'] = gxt.counts2flux(lcurve['cps_bgsub'],band)
+    lcurve['flux_bgsub_err'] = gxt.counts2flux(lcurve['cps_bgsub_err'],band)
+    lcurve['flux_mcatbgsub'] = gxt.counts2flux(lcurve['cps_mcatbgsub'],band)
+    lcurve['flux_mcatbgsub_err'] = gxt.counts2flux(
+                                            lcurve['cps_mcatbgsub_err'],band)
 
     # NOTE: These conversions to mag can throw logarithm warnings if the
-    # background is brighter than the source, resuling in a negative cps.
+    # background is brighter than the source, resuling in a negative cps which
+    # then gets propagated as a magnitude of NaN.
     lcurve['mag'] = gxt.counts2mag(lcurve['cps'],band)
     lcurve['mag_err_1'] = (lcurve['mag'] -
                         gxt.counts2mag(lcurve['cps'] + lcurve['cps_err'],band))
     lcurve['mag_err_2'] = (gxt.counts2mag(lcurve['cps'] -
                                     lcurve['cps_err'],band) - lcurve['mag'])
     lcurve['mag_bgsub'] = gxt.counts2mag(lcurve['cps_bgsub'],band)
+    lcurve['mag_bgsub_err_1'] = (lcurve['mag_bgsub'] -
+            gxt.counts2mag(lcurve['cps_bgsub'] + lcurve['cps_bgsub_err'],band))
+    lcurve['mag_bgsub_err_2'] = (gxt.counts2mag(lcurve['cps_bgsub'] -
+                            lcurve['cps_bgsub_err'],band) - lcurve['mag_bgsub'])
+    lcurve['mag_mcatbgsub'] = gxt.counts2mag(lcurve['cps_mcatbgsub'],band)
+    lcurve['mag_mcatbgsub_err_1'] = (lcurve['mag_mcatbgsub'] -
+                                gxt.counts2mag(lcurve['cps_mcatbgsub'] +
+                                            lcurve['cps_mcatbgsub_err'],band))
+    lcurve['mag_mcatbgsub_err_2'] = (gxt.counts2mag(lcurve['cps_mcatbgsub'] -
+                lcurve['cps_mcatbgsub_err'],band) - lcurve['mag_mcatbgsub'])
 
     lcurve['photons'] = data
 

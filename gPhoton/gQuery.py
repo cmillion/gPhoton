@@ -108,6 +108,29 @@ def mcat_visit_sources(ra0,dec0,radius):
         repr(float(dec0))+', '+str(radius*60.)+
         ') as nb on vpo.objid=nb.objid'+str(formatURL))
 
+def test(ra0,dec0,radius):
+    return (str(baseURL)+
+        'select vpo.objid, ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg,'
+        ' fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, vpe.fexptime,'
+        ' vpe.nexptime, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3,'
+        ' fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7,'
+        ' nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4,'
+        ' nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7,'
+        ' fuv_magerr_aper_1, fuv_magerr_aper_2, fuv_magerr_aper_3,'
+        ' fuv_magerr_aper_4, fuv_magerr_aper_5, fuv_magerr_aper_6,'
+        ' fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2,'
+        ' nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5,'
+        ' nuv_magerr_aper_6, nuv_magerr_aper_7, nobssecs, fobssecs,'
+        ' nuv_artifact, fuv_artifact'
+        ' from '+str(MCATDB)+'.visitphotoobjall as vpo'
+        ' inner join '+str(MCATDB)+'.visitphotoextract'
+        ' as vpe on vpo.photoextractid=vpe.photoextractid inner join'
+        ' inner join '+
+        str(MCATDB)+'.imgrun as ir on vpo.photoextractid=ir.imgrunid'
+        ' '+str(MCATDB)+'.fGetNearbyVisitObjEq('+repr(float(ra0))+','+
+        repr(float(dec0))+', '+str(radius*60.)+
+        ') as nb on vpo.objid=nb.objid'+str(formatURL))
+
 def mcat_objid_search(objid,mode='visit'):
     """Return a bunch of observation data for a visit level objid (ggoid).
     Doing the same for coadd level data is not yet supported.

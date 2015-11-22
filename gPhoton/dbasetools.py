@@ -266,21 +266,41 @@ def get_mcat_data(skypos,rad):
     except:
         raise
 
-def mcat_skybg(band,skypos,radius,verbose=0,retries=20):
-	"""Estimate the sky background using the MCAT skybg for nearby sources."""
-	# Setting maglimit to 30 so that it gets _everything_...
-	sources = gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],
-                                                  radius,maglimit=30),
-                                                  retries=retries)
+def exp_from_objid(objid):
+    out = np.array(gQuery.getArray(gQuery.mcat_objid_search(objid)))
+    return {'NUV':
+            {'expt':np.array(out[:,7],dtype='float')[0],
+             't0':np.array(out[:,9],dtype='float64')[0]-GPSSECS,
+             't1':np.array(out[:,10],dtype='float64')[0]-GPSSECS},
+            'FUV':{'expt':np.array(out[:,8],dtype='float')[0],
+             't0':np.array(out[:,11],dtype='float64')[0]-GPSSECS,
+             't1':np.array(out[:,12],dtype='float64')[0]-GPSSECS}}
 
-	# The MCAT reports skybg in photons/sec/sq.arcsec
-	if band=='NUV':
-		skybg = np.float32(np.array(sources)[:,5]).mean()
-	else:
-		skybg = np.float32(np.array(sources)[:,6]).mean()
-
-	# And radius is in degrees
-	return skybg*area(radius*60.*60.)
+def mcat_skybg(band,skypos,radius,verbose=0,retries=20,trange=None):
+    """Estimate the sky background using the MCAT skybg for nearby sources."""
+    # Setting maglimit to 30 so that it gets _everything_...
+    if verbose:
+        print_inline('Estimating background using {m} method...'.format(
+            m='per-visit' if trange else 'median'))
+    mcat = get_mcat_data(skypos,radius)
+    skybg = None
+    # FIXME: This is really slow for deep fields because it makes one
+    # https request for every single objid until it gets a match. The time
+    # ranges need to be folded into the return from gQuery.mcat_visit_sources()
+    if trange:
+        for i,objid in enumerate(mcat['objid']):
+            if skybg:
+                continue
+            exp = exp_from_objid(objid)
+            t0,t1 = exp[band]['t0'],exp[band]['t1']
+            if (trange[0]<=t0<=trange[1] or trange[0]<=t1<=trange[1] or
+                t0<=trange[0]<=t1 or t0<=trange[1]<=t1):
+                skybg = mcat[band]['skybg'][i]
+    else:
+        ix = np.where(mcat[band]['skybg']>=0)
+        skybg = np.median(mcat[band]['skybg'][ix])
+    # Scale bg to area of aperture. Radius is in degrees.
+    return skybg*area(radius*60.*60.)
 
 def get_mags(band,ra0,dec0,radius,maglimit,mode='coadd',
                    zpmag={'NUV':20.08,'FUV':18.82},verbose=0):
@@ -328,11 +348,7 @@ def get_mags(band,ra0,dec0,radius,maglimit,mode='coadd',
         print "mode must be in [coadd,visit]"
         return None
 
-def exp_from_objid(objid):
-    out = np.array(gQuery.getArray(gQuery.mcat_objid_search(objid)))
-    return {'NUV':{'expt':np.array(out[:,7],dtype='float')[0],'t0':np.array(out[:,9],dtype='float64')[0]-GPSSECS,'t1':np.array(out[:,10],dtype='float64')[0]-GPSSECS},'FUV':{'expt':np.array(out[:,8],dtype='float')[0],'t0':np.array(out[:,11],dtype='float64')[0]-GPSSECS,'t1':np.array(out[:,12],dtype='float64')[0]-GPSSECS}}
-
-def parse_unique_sources(ras,decs,fmags,nmags,margin=0.005):
+def parse_unique_sources(ras,decs,fmags,nmags,margin=0.001):
     """Iteratively returns unique sources based upon a _margin_ within
     which two sources should be considered the same sources. Is a little
     bit sensitive to the first entry and could probably be written to be
