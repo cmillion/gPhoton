@@ -201,7 +201,6 @@ def angularSeparation(ra1,dec1,ra2,dec2):
 	#	r[zero] = 0.0
 	return r*ra2deg
 
-
 def intersect(r1,r2):
     #FIXME
     t0,t1=np.array(r1)

@@ -397,45 +397,35 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
 
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                 stepsz=None, trange=None, tranges=None, verbose=0, coadd=False,
-                iocode='wb',detsize=1.1,overwrite=False,
-                minexp=1.,maxgap=1.,photonfile=None):
+                iocode='wb',detsize=1.1,overwrite=False,minexp=1.,maxgap=1.,
+                photonfile=None,minimal_output=False):
     data = getcurve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
                     trange=trange, tranges=tranges, verbose=verbose,
                     coadd=coadd, minexp=minexp, maxgap=maxgap,
                     photonfile=photonfile, detsize=detsize)
+    exclude_keys = ['photons','params']
+    minimal_columns = ['t0','t1','exptime','flux','flux_err','flags']
+    if annulus:
+        minimal_columns+=['flux_bgsub','flux_bgsub_err']
     if csvfile:
-        columns = ['t0','t1','exptime','t_mean','t0_data','t1_data','cps',
-                   'cps_err','cps_bgsub','counts','flat_counts','bg',
-                   'mag','mag_err_1','mag_err_2','mag_bgsub','flux',
-                   'flux_err','flux_bgsub','detx','dety','detrad','response',
-                   'flags']
+        if verbose:
+            mc.print_inline('Building output data frame.')
+        frame,columns = {},[]
+        for k in (minimal_columns if minimal_output else data.keys()):
+            if k in exclude_keys:
+                continue
+            frame[k]=data[k]
+            columns+=[k]
         try:
-            test=pd.DataFrame({'t0':data['t0'],'t1':data['t1'],
-                           't_mean':data['t_mean'],'t0_data':data['t0_data'],
-                           't1_data':data['t1_data'],'exptime':data['exptime'],
-                           'cps':data['cps'],'cps_err':data['cps_err'],
-                           'cps_bgsub':data['cps_bgsub'],
-                           'counts':data['counts'],
-                           'flat_counts':data['flat_counts'],
-                           'bg':data['bg'],'mag':data['mag'],
-                           'mag_err_1':data['mag_err_1'],
-                           'mag_err_2':data['mag_err_2'],
-                           'mag_bgsub':data['mag_bgsub'],
-                           'flux':data['flux'],
-                           'flux_err':data['flux_err'],
-                           'flux_bgsub':data['flux_bgsub'],
-                           'detx':data['detxs'],'dety':data['detys'],
-                           'detrad':data['detrad'],'response':data['responses'],
-                           'flags':data['flags']
-                           })
+            output=pd.DataFrame(frame)
         except:
             raise
             if verbose>1:
                 print 'Unable to build dataframe.'
         try:
-            test.to_csv(csvfile,index=False,mode=iocode,columns=columns)
+            output.to_csv(csvfile,index=False,mode=iocode,columns=columns)
         except:
-            print 'Did not write to: '+str(csvfile)
+            print 'Unable to write to: '+str(csvfile)
     else:
         if verbose>2:
             print "No CSV file requested."

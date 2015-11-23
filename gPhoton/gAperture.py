@@ -13,7 +13,8 @@ from gPhoton import __version__
 
 def gAperture(band,skypos,radius,csvfile=None,annulus=None, coadd=False,
               stepsz=False,verbose=0,overwrite=False,trange=None,tranges=None,
-              minexp=1.,maxgap=1500.,iocode='wb',photonfile=None,detsize=1.1):
+              minexp=1.,maxgap=1500.,iocode='wb',photonfile=None,detsize=1.1,
+              minimal_output=False):
     """Runs gAperture and returns the data in a python dict() and as
     a CSV file if outfile is specified. Can be called from the interpreter.
     """
@@ -34,7 +35,8 @@ def gAperture(band,skypos,radius,csvfile=None,annulus=None, coadd=False,
     data = ct.write_curve(band.upper(), skypos[0], skypos[1], radius,
         csvfile=csvfile, annulus=annulus, stepsz=stepsz, verbose=verbose,
         overwrite=overwrite, trange=trange, tranges=tranges,coadd=coadd,
-        minexp=minexp, maxgap=maxgap, iocode = iocode, detsize=detsize)
+        minexp=minexp, maxgap=maxgap, iocode = iocode, detsize=detsize,
+        minimal_output=minimal_output)
     return data
 
 def check_radius(args):
@@ -93,6 +95,9 @@ def setup_parser(iam='gaperture'):
     parser.add_argument("--bgmaskradius", action="store", dest="maskradius",
         help="DEPRECATED. Radius of background mask in n sigmas (assuming Gaussians)",
         type=float, default=1.5)
+    parser.add_argument("--minimal_output", "--minout", action="store_true",
+        dest="minimal_output", help=("If csvfile is also set, writes only "+
+        "a small number of human-readable columns to the lightcurve file."))
     return parser
 
 def check_args(args,iam='gaperture'):
@@ -165,7 +170,8 @@ def __main__():
                      verbose=args.verbose, overwrite=args.overwrite,
                      trange=[args.tmin,args.tmax], tranges=args.trange,
                      coadd=args.coadd, minexp=args.minexp, maxgap=args.maxgap,
-                     iocode=args.iocode, detsize=args.detsize)
+                     iocode=args.iocode, detsize=args.detsize,
+                     minimal_output=args.minimal_output)
 
 if __name__ == "__main__":
     try:
