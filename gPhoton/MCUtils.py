@@ -64,7 +64,8 @@ def manage_requests2(query,maxcnt=100.,wait=10,timeout=60,verbose=0):
 			break
 		elif r.json()['status']=='ERROR':
 			print 'ERROR'
-			raise ValueError('Unsuccessful query: {q}'.format(q=query))
+			print 'Unsuccessful query: {q}'.format(q=query)
+			raise ValueError(r.json()['msg'])
 		else:
 			print 'Unknown return: {s}'.format(s=r.json()['status'])
 			cnt+=1

@@ -79,6 +79,9 @@ def mcat_sources(band,ra0,dec0,radius,maglimit=20):
         str(bandflag)+') and '+str(band)+'_mag<'+str(maglimit)+
         str(formatURL))
 
+def obstype(objid):
+        return '{baseURL}select distinct vpe.mpstype as survey, vpe.tilename, vpe.photoextractid, vpe.petal, vpe.nlegs, vpe.leg, vpe.eclipse, vpe.img, vpe.subvis from {MCATDB}.visitPhotoextract as vpe inner join {MCATDB}.imgrun as iv on vpe.photoextractid=iv.imgrunid inner join {MCATDB}.visitphotoobjall as p on vpe.photoextractid=p.photoextractid where p.objid={objid}{formatURL}'.format(baseURL=baseURL,MCATDB=MCATDB,objid=objid,formatURL=formatURL)
+
 def mcat_visit_sources(ra0,dec0,radius):
     ''' Return the MCAT per-visit sources given sky position and search radius.
     The columns are as follows:
@@ -86,50 +89,12 @@ def mcat_visit_sources(ra0,dec0,radius):
     [6,NUV_skybg],[7,FUV_skybg],[8,NUV_FWHM],[9,FUV_FWHM],[10,FUV_expt],
     [11,NUV_expt],[12:18,FUV_mag_aper_1:7],[19:25,NUV_mag_aper_1:7],
     [26:32,FUV_magerr_aper_1:7],[33:39,NUV_magerr_aper_1:7],[40,Nobssecs],
-    [41,Fobssecs],[42,NUV_artifact],[43,FUV_artifact]
+    [41,Fobssecs],[42,NUV_artifact],[43,FUV_artifact],[44,FUV_obstart],
+    [45,FUV_obsend],[46,NUV_obstart],[47,NUV_obsend]
     '''
-    return (str(baseURL)+
-        'select vpo.objid, ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg,'
-        ' fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, vpe.fexptime,'
-        ' vpe.nexptime, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3,'
-        ' fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7,'
-        ' nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4,'
-        ' nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7,'
-        ' fuv_magerr_aper_1, fuv_magerr_aper_2, fuv_magerr_aper_3,'
-        ' fuv_magerr_aper_4, fuv_magerr_aper_5, fuv_magerr_aper_6,'
-        ' fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2,'
-        ' nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5,'
-        ' nuv_magerr_aper_6, nuv_magerr_aper_7, nobssecs, fobssecs,'
-        ' nuv_artifact, fuv_artifact'
-        ' from '+str(MCATDB)+'.visitphotoobjall as vpo'
-        ' inner join '+str(MCATDB)+'.visitphotoextract'
-        ' as vpe on vpo.photoextractid=vpe.photoextractid inner join'
-        ' '+str(MCATDB)+'.fGetNearbyVisitObjEq('+repr(float(ra0))+','+
-        repr(float(dec0))+', '+str(radius*60.)+
-        ') as nb on vpo.objid=nb.objid'+str(formatURL))
-
-def test(ra0,dec0,radius):
-    return (str(baseURL)+
-        'select vpo.objid, ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg,'
-        ' fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, vpe.fexptime,'
-        ' vpe.nexptime, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3,'
-        ' fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7,'
-        ' nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4,'
-        ' nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7,'
-        ' fuv_magerr_aper_1, fuv_magerr_aper_2, fuv_magerr_aper_3,'
-        ' fuv_magerr_aper_4, fuv_magerr_aper_5, fuv_magerr_aper_6,'
-        ' fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2,'
-        ' nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5,'
-        ' nuv_magerr_aper_6, nuv_magerr_aper_7, nobssecs, fobssecs,'
-        ' nuv_artifact, fuv_artifact'
-        ' from '+str(MCATDB)+'.visitphotoobjall as vpo'
-        ' inner join '+str(MCATDB)+'.visitphotoextract'
-        ' as vpe on vpo.photoextractid=vpe.photoextractid inner join'
-        ' inner join '+
-        str(MCATDB)+'.imgrun as ir on vpo.photoextractid=ir.imgrunid'
-        ' '+str(MCATDB)+'.fGetNearbyVisitObjEq('+repr(float(ra0))+','+
-        repr(float(dec0))+', '+str(radius*60.)+
-        ') as nb on vpo.objid=nb.objid'+str(formatURL))
+    return "{baseURL}select vpo.objid, ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, vpe.fexptime, vpe.nexptime, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7, fuv_magerr_aper_1, fuv_magerr_aper_2, fuv_magerr_aper_3, fuv_magerr_aper_4, fuv_magerr_aper_5, fuv_magerr_aper_6, fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2, nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5, nuv_magerr_aper_6, nuv_magerr_aper_7, nobssecs, fobssecs, nuv_artifact, fuv_artifact, vpe.fexpstar, vpe.fexpend, vpe.nexpstar, vpe.nexpend from {MCATDB}.visitphotoobjall as vpo inner join {MCATDB}.visitphotoextract as vpe on vpo.photoextractid=vpe.photoextractid inner join {MCATDB}.fGetNearbyVisitObjEq({ra0},{dec0},{radius}) as nb on vpo.objid=nb.objid inner join {MCATDB}.imgrun as i on vpe.photoExtractID=i.imgRunID{formatURL}".format(baseURL=baseURL,
+        MCATDB=MCATDB,ra0=float(ra0),dec0=float(dec0),radius=radius*60.,
+        formatURL=formatURL)
 
 def mcat_objid_search(objid,mode='visit'):
     """Return a bunch of observation data for a visit level objid (ggoid).

@@ -231,7 +231,6 @@ def getflags(band,bin_ix,events,verbose=0):
     8 - "respose" - events weighted with response < 0.7
     16 - "nonlinearity" - local countrate exceeds 10% response dropoff
     32 - "detector edge" - events outside of 0.55 degrees of detector center
-
     """
     bin_num = np.unique(bin_ix)
     flags = np.zeros(len(bin_num))
@@ -316,8 +315,9 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
 
     # FIXME: This just uses the average background over all visits until
     # the MCAT query gets fixed to return the time ranges.
-    lcurve['mcat_bg']=lcurve['exptime']*(np.ones(len(lcurve['counts']))*
-                        dbt.mcat_skybg(band,[ra0,dec0],radius,verbose=verbose))
+    lcurve['mcat_bg']=lcurve['exptime']*np.array(
+        [dbt.mcat_skybg(band,[ra0,dec0],radius,trange=tr,verbose=verbose)
+                                    for tr in zip(lcurve['t0'],lcurve['t1'])])
     if annulus is not None:
         annu_ix = np.where((angSep > annulus[0]) & (angSep <= annulus[1]))
         lcurve['bg_counts'] = reduce_lcurve(bin_ix,annu_ix,data['t'],len)

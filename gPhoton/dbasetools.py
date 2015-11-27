@@ -220,6 +220,8 @@ def get_mcat_data(skypos,rad):
             'ra':np.array(out[:,1],dtype='float32'),
             'dec':np.array(out[:,2],dtype='float32'),
             'NUV':{'mag':np.array(out[:,3],dtype='float32'),
+                   't0':np.array(out[:,46],dtype='float64')-GPSSECS,
+                   't1':np.array(out[:,47],dtype='float64')-GPSSECS,
                    'skybg':np.array(out[:,6],dtype='float32'),
                    'expt':np.array(out[:,11],dtype='float32'),
                    'fwhm':np.array(out[:,8],dtype='float32'),
@@ -240,6 +242,8 @@ def get_mcat_data(skypos,rad):
                    7:{'mag':np.array(out[:,25],dtype='float32')+zpmag('NUV'),
                       'err':np.array(out[:,39],dtype='float32')} },
             'FUV':{'mag':np.array(out[:,4],dtype='float32'),
+                   't0':np.array(out[:,44],dtype='float64')-GPSSECS,
+                   't1':np.array(out[:,45],dtype='float64')-GPSSECS,
                    'skybg':np.array(out[:,7],dtype='float32'),
                    'expt':np.array(out[:,10],dtype='float32'),
                    'fwhm':np.array(out[:,9],dtype='float32'),
@@ -276,6 +280,11 @@ def exp_from_objid(objid):
              't0':np.array(out[:,11],dtype='float64')[0]-GPSSECS,
              't1':np.array(out[:,12],dtype='float64')[0]-GPSSECS}}
 
+def obstype_from_objid(objid):
+    out = gQuery.getArray(gQuery.obstype(objid))
+    survey, tilename, photoextractid, petal, nlegs, leg, eclipse, img, subvis =np.array(out)[0]
+    return int(nlegs),int(petal)
+
 def mcat_skybg(band,skypos,radius,verbose=0,retries=20,trange=None):
     """Estimate the sky background using the MCAT skybg for nearby sources."""
     # Setting maglimit to 30 so that it gets _everything_...
@@ -291,12 +300,13 @@ def mcat_skybg(band,skypos,radius,verbose=0,retries=20,trange=None):
         for i,objid in enumerate(mcat['objid']):
             if skybg:
                 continue
-            exp = exp_from_objid(objid)
-            t0,t1 = exp[band]['t0'],exp[band]['t1']
-            if (trange[0]<=t0<=trange[1] or trange[0]<=t1<=trange[1] or
-                t0<=trange[0]<=t1 or t0<=trange[1]<=t1):
-                skybg = mcat[band]['skybg'][i]
-    else:
+            for i,(t0,t1) in enumerate(zip(mcat[band]['t0'],mcat[band]['t1'])):
+                if (trange[0]<=t0<=trange[1] or trange[0]<=t1<=trange[1] or
+                    t0<=trange[0]<=t1 or t0<=trange[1]<=t1):
+                    skybg = mcat[band]['skybg'][i]
+    if not skybg:
+        if trange and verbose:
+            print 'No bg data for this visit... Using median over all visits.'
         ix = np.where(mcat[band]['skybg']>=0)
         skybg = np.median(mcat[band]['skybg'][ix])
     # Scale bg to area of aperture. Radius is in degrees.
