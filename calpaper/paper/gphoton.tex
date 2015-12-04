@@ -57,7 +57,7 @@ gPhoton\footnote{\url{https://github.com/cmillion/gPhoton}} is a new database pr
 
 \section{Introduction}
 \subsection{GALEX Overview}
-The Galaxy Evolution Explorer \citep[GALEX;][]{mar2005} was a NASA Small Explorer (SMEX) telescope that surveyed the sky in the ultraviolet over ten years between launch on 28 April 2003 and spacecraft termination on 28 June 2013. The spacecraft, instruments, data and calibration are well described in previous publications \citep{mor2005,mor2007} and the mission'€™s technical documentation\footnote{\url{http://www.galex.caltech.edu/wiki/Public:Documentation}}. We will restrict discussion to topics that have not appeared elsewhere in the literature, are of particular importance to the gPhoton project, or are otherwise necessary for completeness.
+The Galaxy Evolution Explorer \citep{mar2005} was a NASA Small Explorer (SMEX) telescope that surveyed the sky in the ultraviolet over ten years between launch on 28 April 2003 and spacecraft termination on 28 June 2013. The spacecraft, instruments, data and calibration are well described in previous publications \citep{mor2005,mor2007} and the mission'€™s technical documentation\footnote{\url{http://www.galex.caltech.edu/wiki/Public:Documentation}}. We will restrict discussion to topics that have not appeared elsewhere in the literature, are of particular importance to the gPhoton project, or are otherwise necessary for completeness.
 
 GALEX carried two microchannel plate detectors (MCP), simultaneously exposed via a dichroic, and had a 1.25 degree field-of-view (FoV). It observed in two broad ultraviolet (UV) bands centered around $1528\,\rm{\AA}$ (Far Ultraviolet or ``FUV'') and $2271\,\rm{\AA}$ (Near Ultraviolet or ``NUV'').  The FUV detector failed in May of 2009, but the NUV detector continued to operate until the end of the mission. The detectors could observe in either direct imaging or slitless spectroscopic (grism) modes. Observations were conducted while the spacecraft was on the night side of each orbit (an ``eclipse''), which lasted 1500-1800 seconds. To avoid detector burn-in or local gain sag effects caused by depletion of electrons in the multiplier plate, and to smooth over local irregularities in detector response, the telescope did not stare at a fixed location on the sky during an observation, but continuously moved the boresight relative to the target position. Several boresight patterns, or ``modes,'' were used over the course of the mission, with consequences for the nature of the corresponding observations and data.
 
@@ -202,10 +202,10 @@ We suggest that the first method be used for studies of intra-visit variability.
 We also tested two variations of the annulus method that might mitigate the presence of stars in or near the background annulus, both of which were abandoned because they produced poor agreement with catalog fluxes and they were highly sensitive to somewhat arbitrary input parameters. The first method, which we called ``swiss cheese'', mimicked that applied by Morrissey in the analysis of the GALEX standard star LDS749B \citet{mor2007}: nearby bright stars from the MCAT out to several sigma, assuming Gaussian profiles, were masked out by excluding those data and sky regions from subsequent calculations. The second method was a direct port of the ``sigma clipping'' algorithm used by the mission pipeline as described in \url{http://www.galex.caltech.edu/DATA/gr1_docs/Background_determination_and_source_extraction_for_GALEX_data.pdf}, which iteratively excluded and interpolated over relatively bright regions (i.e. "sigma clipping"), using full Poissonian statistics to account for low, diffuse UV background.
 
 \subsection{Relative Response Correction}
-aefasdfIn the mission pipeline, differential sensitivity ("response") across the detector was corrected for by the application of relative response maps. These relative response maps (-rrhr) were composed of successive projections of an upsampled detector flat on the sky in second increments, weighted for effective exposure time over those increments, which could then be divided out of the integrated count maps over the same time range to produce fully calibrated intensity maps (-int). In developing gPhoton, we discovered that not only did this repeated interpolation unnecessarily degrade the information in the flat, but it was also computationally intensive and slow. For this reason, we apply the flat at the detector level by weighting each individual photon event by the value of the pixel in the flat field that corresponds to the detector location at which the event was recorded. The exposure time correction is performed as a separate step.
+In the mission pipeline, differential sensitivity ("response") across the detector was corrected for by the application of relative response maps. These relative response maps (-rrhr) were composed of successive projections of an upsampled detector flat on the sky in second increments, weighted for effective exposure time over those increments, which could then be divided out of the integrated count maps over the same time range to produce fully calibrated intensity maps (-int). In developing gPhoton, we discovered that not only did this repeated interpolation unnecessarily degrade the information in the flat, but it was also computationally intensive and slow. For this reason, we apply the flat at the detector level by weighting each individual photon event by the value of the pixel in the flat field that corresponds to the detector location at which the event was recorded. The exposure time correction is performed as a separate step.
 
 \subsection{Flux Uncertainties}
-{\color{red}We are going to need to explain the current way the pipeline estimates uncertainty, some of the challenges with deriving an accurate uncertainty estimate, and perhaps some ideas for improvements in the future.}
+The flux uncertainties produced by gAperture are computed by adding the counting error in the aperture and background annulus in quadrature. If there are relatively bright sources in the background annulus, then this will be an underestimate.
 
 \section{Calibration Tests}
 \label{calibration}
@@ -216,7 +216,7 @@ The aperture radius for absolute photometry using the white dwarf standards was 
 
 \subsection{Astrometric Reproducibility}
 {\color{red}Graphic In Progress}
-We compare the mean photon event position within the aperture to the MCAT source position for {\color{red}XXXX} randomly selected MCAT targets. One source of uncertainty here is that the {\color{red}[``CoB'' was used here, is that ``center of brightness?'']} was calculated by the mission pipeline on a pixel-based map, whereas gPhoton uses the photons directly. Another possible source of error is that one should ideally fit a two-dimensional Gaussian bounded by an off-center circle to find the center of brightness.  {\color{red}Were the same sources selected from each band?  Did the sources sample different observing modes, times, sky coordinates?}  We find that nearly all sources lie within one GALEX resolution element ($\sim 6''$), and that \{{\color{red}XXXX, YYYY}\} lie within {\color{red}$XXXX''$} in the FUV and NUV bands, respectively (Fig.\ \ref{fuvnuvastrometry}).
+We compare the mean photon event position within the aperture to the MCAT source position for {\color{red}XXXX} randomly selected MCAT targets. One source of uncertainty here is that the center of brightness was calculated by the mission pipeline on a pixel-based map, whereas gPhoton uses the photons directly. Another possible source of error is that one should ideally fit a two-dimensional Gaussian bounded by an off-center circle to find the center of brightness.  {\color{red}Were the same sources selected from each band?  Did the sources sample different observing modes, times, sky coordinates?}  We find that nearly all sources lie within one GALEX resolution element ($\sim 6''$), and that \{{\color{red}XXXX, YYYY}\} lie within {\color{red}$XXXX''$} in the FUV and NUV bands, respectively (Fig.\ \ref{fuvnuvastrometry}).
 
 \begin{figure}
 \includegraphics[scale=0.35]{FigAngSepFUVNUV.eps}
@@ -225,6 +225,8 @@ We compare the mean photon event position within the aperture to the MCAT source
 
 \subsection{Relative Flux Precision}
 As a test of the relative photometric precision from gPhoton, we plot the difference between the MCAT magnitude and gAperture magnitude against the MCAT magnitude for 7692 and 20213 randomly selected MCAT sources in FUV and NUV respectively. Fig.\ \ref{fuvrelphot} and Fig.\ \ref{nuvrelphot} use the background estimated from the gAperture background annulus, while Fig.\ \ref{fuvrelphotmcat} and Fig.\ \ref{nuvrelphotmcat} use the per-visit MCAT background. To a first-order approximation, Although both methods show good agreement on average, with higher dispersion for lower source brightnesses, the MCAT background method has a more symmetric distribution overall. The asymmetry of the annulus background method as compared to the per-visit MCAT is highlighted in Fig.\ \ref{bgrelphot} and likely due to unmasked background sources in the annulus, which effect is more severe in NUV than FUV due to higher source densities.
+
+
 
 \begin{figure}
 \includegraphics[scale=0.32]{FigRelPhotFUV-annulus_bg.pdf}
@@ -255,6 +257,19 @@ As a test of the relative photometric precision from gPhoton, we plot the differ
 \caption{Effective surface brightness within a 6 arcsecond aperture for the gAperture unmasked annulus method of background estimation as compared to estimates drawn from visit-level MCAT.
 \label{bgrelphot}}
 \end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.32]{dMag_LDS749B.pdf}
+\caption{The relative photometry of LDS749B from gAperture compared against the mission produced catalog values, using an aperture equivalent to the MCAT APER4 column. The distribution in both bands is clearly bimodal. The small mode in NUV is strongly correlated to data collected after the CSP event. We have not been able to understand the source of the bimodality in FUV but, importantly, it does not show up in other relative photometry, including of LB227, so it is likely due to something unique about LDS749B observations.
+\label{ldsrelphot}}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.32]{dMag_LB227.pdf}
+\caption{The relative photometry of LB227 from gAperture compared against the mission produced catalog values, using an aperture equivalent to the MCAT APER4 column.
+\label{lbrelphot}}
+\end{figure}
+
 
 \subsection{Absolute Flux Precision}
 As described in \citet{mor2007}, the primary calibration standard star of choice for GALEX was the white dwarf LDS749B, which is also one of the Hubble Space Telescope standards. A total of \{259909, 595672\} seconds of exposure depth in the FUV and NUV bands, respectively, were made on this source. We use gAperture to compute magnitudes for all of these observations in both bands and compare them against the standard magnitudes used by GALEX (Fig.\ \ref{ldsabsphot}). We measure fluxes separated into visit levels to match the exposure times in the MCAT.
@@ -299,7 +314,7 @@ All visit-level MCAT detections within 0.001 degrees of the nominal source posit
 
 \begin{figure}
 \includegraphics[scale=0.35]{LB227_ABMag_dist.pdf}
-\caption{These histograms show the differences, in AB magnitude, between background subtracted photometry of LB227 produced by gAperture and the mission pipeline. Aperture radii of six seconds of arc (equivalent to the MCAT \emph{APER4} column) were used, with the background estimated within an annulus extending between 30 to 90 arcseconds from the source position.
+\caption{These histograms show the differences, in AB magnitude, between background subtracted photometry of LB227 produced by gAperture and the mission pipeline. Aperture radii of six seconds of arc (equivalent to the MCAT \emph{APER4} column) were used, with the background estimated within an annulus extending between 30 to 90 arcseconds from the source position. {\color{red}Still working on this graphic.}
 \label{ldsrelphot}}
 \end{figure}
 
