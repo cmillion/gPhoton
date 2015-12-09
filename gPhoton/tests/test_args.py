@@ -62,7 +62,7 @@ class TestArguments(unittest.TestCase):
 
     def test_detsize_default(self):
         """Check the default value of --detsize"""
-        self.assertAlmostEqual(self.args.detsize,1.25)
+        self.assertAlmostEqual(self.args.detsize,1.1)
 
     def test_iocode_default(self):
         """Check the default value of --iocode"""
