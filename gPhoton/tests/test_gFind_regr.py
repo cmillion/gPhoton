@@ -1,7 +1,7 @@
 import unittest
-import gMap as gm
-import gFind as gf
-import gAperture as ga
+import gPhoton.gMap as gm
+import gPhoton.gFind as gf
+import gPhoton.gAperture as ga
 
 """Regression tests for the command line utilities.
 Note that these are end-to-end tests of the system that may fail due to
@@ -22,33 +22,36 @@ class TestRegression(unittest.TestCase):
 
     def test_basic_query(self):
         """Test a simple query."""
-        out = gf.gFind(band=self.bands[0],skypos=self.skypos)
-        self.assertAlmostEqual(out[self.bands[0]]['expt'],2885.0)
-        self.assertEqual(len(out[self.bands[0]]['t0']),4)
+        out = gf.gFind(band=self.bands[0],skypos=self.skypos,quiet=True)
+        self.assertAlmostEqual(out[self.bands[0]]['expt'],3516.0)
+        self.assertEqual(len(out[self.bands[0]]['t0']),6)
 
     def test_maxgap_query(self):
         """Test that the maxgap keyword combines nearby time ranges."""
-        out = gf.gFind(band=self.bands[0],skypos=self.skypos,maxgap=100)
-        self.assertAlmostEqual(out[self.bands[0]]['expt'],2888.0)
-        self.assertEqual(len(out[self.bands[0]]['t0']),3)
+        out = gf.gFind(band=self.bands[0],skypos=self.skypos,maxgap=6000,
+                       quiet=True)
+        self.assertAlmostEqual(out[self.bands[0]]['expt'],9031.0)
+        self.assertEqual(len(out[self.bands[0]]['t0']),5)
 
     def test_minexp_query(self):
         """Test that the minexp keyword excludes too-short time ranges."""
-        out = gf.gFind(band=self.bands[0],skypos=self.skypos,minexp=1000)
+        out = gf.gFind(band=self.bands[0],skypos=self.skypos,minexp=1000,
+                       quiet=True)
         self.assertAlmostEqual(out[self.bands[0]]['expt'],1244.0)
         self.assertEqual(len(out[self.bands[0]]['t0']),1)
 
     def test_detsize_query(self):
         """Test that the detsize keyword excludes exposure times."""
-        out = gf.gFind(band=self.bands[0],skypos=self.skypos,detsize=0.5)
-        self.assertAlmostEqual(out[self.bands[0]]['expt'],1506.0)
-        self.assertEqual(len(out[self.bands[0]]['t0']),25)
+        out = gf.gFind(band=self.bands[0],skypos=self.skypos,detsize=0.5,
+                       quiet=True)
+        self.assertAlmostEqual(out[self.bands[0]]['expt'],2781.0)
+        self.assertEqual(len(out[self.bands[0]]['t0']),5)
 
     def test_both_query(self):
         """Test that band='both' does, in fact, search on both bands."""
-        fuvout = gf.gFind(band='FUV',skypos=self.skypos)
-        nuvout = gf.gFind(band='NUV',skypos=self.skypos)
-        bothout = gf.gFind(band='both',skypos=self.skypos)
+        fuvout = gf.gFind(band='FUV',skypos=self.skypos,quiet=True)
+        nuvout = gf.gFind(band='NUV',skypos=self.skypos,quiet=True)
+        bothout = gf.gFind(band='both',skypos=self.skypos,quiet=True)
         self.assertAlmostEqual(fuvout['FUV']['expt'],bothout['FUV']['expt'])
         self.assertAlmostEqual(nuvout['NUV']['expt'],bothout['NUV']['expt'])
         self.assertEqual(len(fuvout['FUV']['t0']),len(bothout['FUV']['t0']))
