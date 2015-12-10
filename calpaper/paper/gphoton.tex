@@ -182,12 +182,14 @@ The effective exposure time is computed as the raw exposure time (the difference
 
 \begin{figure}
 \includegraphics[scale=0.31]{gcr_smiley.eps}
-\caption{Over the course of a typical eclipse such as this one, the global count rate falls and then rises in a characteristic ``smiley face'' pattern due to light scattered by Earth's atmosphere. The scalloped, periodic variations throughout the eclipse are due to the dither pattern moving the spacecraft minutely, repeatedly toward and away from the Earth's limb during an eclipse.\label{smiley}}
+\caption{Over the course of a typical eclipse such as this one, the global count rate falls and then rises in a characteristic ``smiley face'' pattern due to light scattered by Earth's atmosphere. The scalloped, periodic variations throughout the eclipse are due to the dither pattern moving the spacecraft minutely, repeatedly toward and away from the Earth's limb during an eclipse.
+\label{smiley}}
 \end{figure}
 
 \begin{figure}
 \includegraphics[scale=0.31]{expt_frowny.eps}
-\caption{Detector dead time varies directly as a function of global count rate, so effective exposure time varies inversely. The scalloped, periodic variations throughout the eclipse are due to the dither pattern moving the spacecraft minutely, repeatedly toward and away from the Earth's limb during an eclipse.\label{frowny}}
+\caption{Detector dead time varies directly as a function of global count rate, so effective exposure time varies inversely. The scalloped, periodic variations throughout the eclipse are due to the dither pattern moving the spacecraft minutely, repeatedly toward and away from the Earth's limb during an eclipse.
+\label{frowny}}
 \end{figure}
 
 Note that the ratio of effective exposure time to raw exposure time is not constant over any finite period. Global count rate can change quite substantially, even during an observation of a single target, because the detector FOV is constantly moving in relationship to the sky, causing small changes in the global count rate due to field brightness changes. At the same time, the spacecraft is traveling through the shadow of the Earth and encountering shifts in ambient brightness due to airglow which likewise manifest as changes in global count rate. If one plots global count rates as a function of time for a typical 1600 second MIS observation, there will be a characteristic, broad parabolic shape (``smiley face''). (Fig.\ \ref{smiley}) This shape is inverted in a plot of effective exposure time as a function of the observing timestamps, because higher global count rates create more detector dead time, resulting in less effective exposure time. (Fig.\ \ref{frowny}) Researchers interested in the variability of targets within single observations should re-compute the exposure time for every bin in order to account for this effect. gAperture makes this correction automatically when creating a light curve.
@@ -220,7 +222,8 @@ We compare the mean photon event position within the aperture to the MCAT source
 
 \begin{figure}
 \includegraphics[scale=0.35]{FigAngSepFUVNUV.eps}
-\caption{Angular separation between gPhoton and MCAT source positions for {\color{red}XXXX} MCAT sources in both bands. \label{fuvnuvastrometry}}
+\caption{Angular separation between gPhoton and MCAT source positions for {\color{red}XXXX} MCAT sources in both bands.
+\label{fuvnuvastrometry}}
 \end{figure}
 
 \subsection{Relative Flux Precision}
@@ -319,13 +322,13 @@ All visit-level MCAT detections within 0.001 degrees of the nominal source posit
 \end{figure}
 
 \begin{figure}
-\includegraphics[scale=0.35]{LB227_90as_ABMag_FUV.pdf}
+\includegraphics[scale=0.35]{LB227_ABMag_FUV.pdf}
 \caption{Comparison of gPhoton FUV fluxes for LB227 to the catalog reference value of 15.076 AB Mag (solid line) as a function of exposure depth. The aperture had a radius of 90 arcseconds and backgrounds were estimated with an unmasked annulus extending from 90 to 180 arcseconds. The dashed lines denote ideal 3 sigma scatter as predicted from counting statistics. The error bars on the points denote 1 sigma.
 \label{ldsabsphotfuv}}
 \end{figure}
 
 \begin{figure}
-\includegraphics[scale=0.35]{LB227_90as_ABMag_NUV.pdf}
+\includegraphics[scale=0.35]{LB227_ABMag_NUV.pdf}
 \caption{Comparison of gPhoton NUV fluxes for LB227 to the catalog reference value of 15.168 AB Mag (solid line) as a function of exposure depth. The aperture had a radius of 90 arcseconds and backgrounds were estimated with an unmasked annulus extending from 90 to 180 arcseconds. The dashed lines denote ideal 3 sigma scatter as predicted from counting statistics. The error bars on the points denote 1 sigma.
 \label{ldsabsphotnuv}}
 \end{figure}
@@ -337,13 +340,13 @@ All visit-level MCAT detections within 0.001 degrees of the nominal source posit
 \end{figure}
 
 \begin{figure}
-\includegraphics[scale=0.35]{LB227_90as_ABMag_FUV_MCAT.pdf}
+\includegraphics[scale=0.35]{LB227_ABMag_FUV_MCAT.pdf}
 \caption{Comparison of gPhoton FUV fluxes for LB227 to the catalog reference value of 15.076 AB Mag (solid line) as a function of exposure depth. The aperture had a radius of 90 arcseconds and backgrounds estimates were drawn from the visit-level MCAT. The dashed lines denote ideal 3 sigma scatter as predicted from counting statistics. The error bars on the points denote 1 sigma.
 \label{ldsabsphotfuvmcat}}
 \end{figure}
 
 \begin{figure}
-\includegraphics[scale=0.35]{LB227_90as_ABMag_NUV_MCAT.pdf}
+\includegraphics[scale=0.35]{LB227_ABMag_NUV_MCAT.pdf}
 \caption{Comparison of gPhoton NUV fluxes for LB227 to the catalog reference value of 15.168 AB Mag (solid line) as a function of exposure depth. The aperture had a radius of 90 arcseconds and background estimates drawn from the visit-level MCAT. The dashed lines denote ideal 3 sigma scatter as predicted from counting statistics. The error bars on the points denote 1 sigma.
 \label{ldsabsphotnuvmcat}}
 \end{figure}
