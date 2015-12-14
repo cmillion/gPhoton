@@ -42,18 +42,6 @@ def calrun(outfile,band,nsamples=10,seed=323,rarange=[0,360],decrange=[-90,90],
             print skypos, expt, False
     return
 
-def check_radius(args):
-    """Checks the radius value."""
-    if not (args.radius or args.suggest or args.aperradius):
-        print "Must specify an aperture radius."
-        raise SystemExit
-    if args.radius and args.aperradius:
-        print "Must not specify both --aperture and --mcataper."
-        raise SystemExit
-    if args.aperradius and not args.radius:
-        args.radius=aper2deg(args.aperradius)
-    return args
-
 def check_annulus(args):
     """Checks and formats the annulus values."""
     if not (args.annulus1 and args.annulus2) and not args.annulus:
@@ -115,8 +103,6 @@ def check_args(args):
         raise SystemExit("Invalid RA or Dec ranges.")
     if not (args.exprange[0]<args.exprange[1]):
         raise SystemExit("Invalid exposure range: {r}".format(r=args.exprange))
-    args = check_radius(args)
-    args = check_annulus(args)
     return args
 
 def __main__():

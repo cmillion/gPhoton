@@ -208,7 +208,8 @@ def compute_exptime(band,tr,verbose=0,skypos=None,detsize=1.25,
     else:
         exptime = [exposure(band,trange,verbose=verbose,retries=retries)
                                                             for trange in tr]
-    return ([sum(exptime)] if coadd else exptime) if tr else 0.
+    return (([sum(exptime)] if coadd else exptime)
+                                    if np.array(tr).any() else [0.])
 
 def get_mcat_data(skypos,rad):
     # Try once with the default radius.
