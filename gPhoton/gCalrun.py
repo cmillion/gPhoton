@@ -7,6 +7,7 @@ import MCUtils as mc
 import gFind
 import numpy as np
 import os
+import galextools as gt
 
 def find_random_positions(rarange=[0,360],decrange=[-90,90],nsamples=10,
                           seed=323):
@@ -17,7 +18,8 @@ def find_random_positions(rarange=[0,360],decrange=[-90,90],nsamples=10,
     return ra, dec
 
 def calrun(outfile,band,nsamples=10,seed=323,rarange=[0,360],decrange=[-90,90],
-           exprange=[0.,5000.],maglimit=24,verbose=0):
+           exprange=[0.,5000.],maglimit=24,verbose=0,radius=gt.aper2deg(4),
+           annulus=[0.0083,0.025]):
     """Generate a bunch of magnitudes with comparisons against MCAT values for
     random points on the sky within given legal ranges. Write it to a CSV.
     """
@@ -40,10 +42,44 @@ def calrun(outfile,band,nsamples=10,seed=323,rarange=[0,360],decrange=[-90,90],
             print skypos, expt, False
     return
 
+def check_radius(args):
+    """Checks the radius value."""
+    if not (args.radius or args.suggest or args.aperradius):
+        print "Must specify an aperture radius."
+        raise SystemExit
+    if args.radius and args.aperradius:
+        print "Must not specify both --aperture and --mcataper."
+        raise SystemExit
+    if args.aperradius and not args.radius:
+        args.radius=aper2deg(args.aperradius)
+    return args
+
+def check_annulus(args):
+    """Checks and formats the annulus values."""
+    if not (args.annulus1 and args.annulus2) and not args.annulus:
+        args.annulus = None
+    elif args.annulus1 and args.annulus2:
+        args.annulus = [args.annulus1,args.annulus2]
+    else:
+        args.annulus = list(args.annulus)
+        if not (args.annulus1 and args.annulus2):
+            args.annulus1 = args.annulus[0]
+            args.annulus2 = args.annulus[1]
+    return args
+
 def setup_parser():
     parser = argparse.ArgumentParser(description="Generate a bunch of "+
         "magnitudes with comparisons against MCAT values for random points on "+
         "the sky within given legal ranges. Write it to a CSV.")
+    parser.add_argument("-a", "--aperture", action="store", dest="radius",
+        help="Aperture radius in decimal degrees",type=float)
+    parser.add_argument("-i", "--inner", action="store", dest="annulus1",
+        help="Inner annulus radius for background subtraction", type=float)
+    parser.add_argument("-o", "--outer", action="store", dest="annulus2",
+        help="Outer annulus radius for background subtraction", type=float)
+    parser.add_argument("--annulus", action="store", type=ast.literal_eval,
+        dest="annulus",
+        help="Annulus inner and outer radius definition as '[inner,outer]'")
     parser.add_argument("-f", "--file", action="store", type=str, dest="file",
 		default=None, help="File name (full path) for the output CSV.",
         required=True)
@@ -79,6 +115,8 @@ def check_args(args):
         raise SystemExit("Invalid RA or Dec ranges.")
     if not (args.exprange[0]<args.exprange[1]):
         raise SystemExit("Invalid exposure range: {r}".format(r=args.exprange))
+    args = check_radius(args)
+    args = check_annulus(args)
     return args
 
 def __main__():
@@ -86,7 +124,8 @@ def __main__():
     args = check_args(args)
     calrun(args.file,args.band,nsamples=args.nsamples,seed=args.seed,
            rarange=args.rarange,decrange=args.decrange,exprange=args.exprange,
-           maglimit=args.maglimit,verbose=args.verbose)
+           maglimit=args.maglimit,verbose=args.verbose,radius=args.radius,
+           annulus=args.annulus)
 
 if __name__ == "__main__":
     try:

@@ -286,10 +286,10 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     try:
         lcurve['t0'] = bins[np.unique(bin_ix)-1]
         lcurve['t1'] = bins[np.unique(bin_ix)]
-        lcurve['exptime'] = np.array(
-            [dbt.compute_exptime(band,trange,skypos=[ra0,dec0],
-                verbose=verbose,coadd=coadd)
-                    for trange in zip(lcurve['t0'],lcurve['t1'])])
+        lcurve['exptime'] = np.array(dbt.compute_exptime(band,
+                    tranges if coadd else zip(lcurve['t0'],lcurve['t1']),
+                                            verbose=verbose,coadd=coadd,
+                                            detsize=detsize,skypos=[ra0,dec0]))
     except IndexError:
         if np.isnan(data['t']):
             print "No valid data available in {t}".format(t=tranges)

@@ -84,7 +84,7 @@ def fGetTimeRanges(band,skypos,trange=None,detsize=1.1,verbose=0,
     times = get_valid_times(band,skypos,trange=trange,detsize=detsize,
                             verbose=verbose,retries=retries,skyrange=skyrange)
     if not len(times):
-        return np.array([],dtype='float64')
+        return np.array([[]],dtype='float64')
     if verbose:
         print_inline('Parsing ~'+str(len(times)-1)+' seconds of raw exposure.')
 
@@ -186,25 +186,29 @@ def exposure(band,trange,verbose=0,retries=20):
                                   timestamplist=t)
     return (rawexpt-shutter)*(1.-deadtime)
 
-def compute_exptime(band,trange,verbose=0,skypos=None,detsize=1.25,
+def compute_exptime(band,tr,verbose=0,skypos=None,detsize=1.25,
                     retries=20,coadd=False):
     """Compute the effective exposure time."""
-    # FIXME: This skypos[] check appears to not work properly and leads
-    #  to dramatic _underestimates_ of the exposure time.
-    if skypos and coadd:
-        tranges = fGetTimeRanges(band,skypos,verbose=verbose,trange=trange,
-                                 retries=retries)
+    if len(np.shape(tr))==1:
+        tr = [tr]
+    if not len(np.shape(tr))==2:
+        raise ValueError('tr array has {d} dimensions, must be <=2'.format(
+                                                        d=len(np.shape(tr))))
+    if skypos:
+        exptime = []
+        for trange in tr:
+            tranges = fGetTimeRanges(band,skypos,verbose=verbose,
+                    trange=trange,retries=retries,detsize=detsize).tolist()
+            if tranges[0]:
+                exptime += [sum(
+                    exposure(band,trange,verbose=verbose,retries=retries)
+                                                    for trange in tranges)]
+            else:
+                exptime += [0.]
     else:
-        tranges=[trange]
-    if verbose>1:
-        print_inline('Computing exposure within {tr}'.format(tr=tranges))
-        if skypos and coadd:
-            print 'Based on skypos {sp}'.format(sp=skypos)
-    exptime = 0.
-    for trange in tranges:
-        exptime += exposure(band,[trange[0],trange[1]],verbose=verbose,
-                                                            retries=retries)
-    return exptime
+        exptime = [exposure(band,trange,verbose=verbose,retries=retries)
+                                                            for trange in tr]
+    return ([sum(exptime)] if coadd else exptime) if tr else 0.
 
 def get_mcat_data(skypos,rad):
     # Try once with the default radius.
