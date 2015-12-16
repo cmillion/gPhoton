@@ -45,9 +45,23 @@ def print_inline(text,blanks=60):
 def manage_requests2(query,maxcnt=100.,wait=10,timeout=60,verbose=0):
 	query = query.replace('json','extjs') # temporary hack for testing
 	cnt = 0
+	# This will keep track of whether we've gotten at least one
+	# successful response.
+	successful_response = False
 	while cnt < maxcnt:
 		try:
 			r = requests.get(query,timeout=timeout)
+			successful_response = True
+		except requests.exceptions.ConnectionError as e:
+			if verbose:
+				print "Domain does not resolve."
+			cnt+=1
+			continue
+		except requests.exceptions.ConnectTimeout as e:
+			if verbose:
+				print "Connection time out."
+			cnt+=1
+			continue
 		except:
 			if verbose:
 				print 'bad query? {q}'.format(q=query)
@@ -70,6 +84,11 @@ def manage_requests2(query,maxcnt=100.,wait=10,timeout=60,verbose=0):
 			print 'Unknown return: {s}'.format(s=r.json()['status'])
 			cnt+=1
 			continue
+	if not successful_response:
+		# Initiate an empty response object in case
+		# the try statement is never executed.
+#		r = requests.Response()
+		r = None
 	return r
 
 def manage_requests(query,maxcnt=100,wait=10,timeout=60):
