@@ -43,7 +43,6 @@ def print_inline(text,blanks=60):
         return
 
 def manage_requests2(query,maxcnt=100.,wait=10,timeout=60,verbose=0):
-	query = query.replace('json','extjs') # temporary hack for testing
 	cnt = 0
 	# This will keep track of whether we've gotten at least one
 	# successful response.

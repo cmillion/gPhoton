@@ -15,7 +15,7 @@ you're doing.
 baseURL = 'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
 baseDB = 'GPFCore.dbo'
 MCATDB = 'GR6Plus7.dbo'
-formatURL = ' -- '+str(time_id)+'&format=json'
+formatURL = ' -- '+str(time_id)+'&format=extjs'
 
 def hasNaN(query):
     """Check if there is NaN in a query (or any string) and, if so, raise an
