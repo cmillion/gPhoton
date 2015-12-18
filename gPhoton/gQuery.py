@@ -15,7 +15,7 @@ you're doing.
 baseURL = 'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
 baseDB = 'GPFCore.dbo'
 MCATDB = 'GR6Plus7.dbo'
-formatURL = ' -- '+str(time_id)+'&format=json'
+formatURL = ' -- '+str(time_id)+'&format=extjs'
 
 def hasNaN(query):
     """Check if there is NaN in a query (or any string) and, if so, raise an
@@ -28,24 +28,34 @@ def hasNaN(query):
 def getValue(query,verbose=0,retries=20):
     """Manage a database call which returns a single value."""
     hasNaN(query)
-    try:
-        out = float(manage_requests2(query,maxcnt=retries,
-                verbose=verbose).json()['data']['Tables'][0]['Rows'][0][0])
-    except:
+    out = manage_requests2(query,maxcnt=retries,verbose=verbose)
+    if out is not None:
+        try:
+            out = float(out.json()['data']['Tables'][0]['Rows'][0][0])
+        except:
+            print 'Failed: {q}'.format(q=query)
+            raise# RuntimeError('Connection timeout.')
+        return out
+    else:
         print 'Failed: {q}'.format(q=query)
-        raise# RuntimeError('Connection timeout.')
-    return out
+        raise ValueError("Query never finished on server, run with verbose"
+                         " turned on for more info.")
 
 def getArray(query,verbose=0,retries=20):
     """Manage a database call which returns an array of values."""
     hasNaN(query)
-    try:
-        out = manage_requests2(query,
-            maxcnt=retries,verbose=verbose).json()['data']['Tables'][0]['Rows']
-    except:
+    out = manage_requests2(query,maxcnt=retries,verbose=verbose)
+    if out is not None:
+        try:
+            out = out.json()['data']['Tables'][0]['Rows']
+        except:
+            print 'Failed: {q}'.format(q=query)
+            raise# RuntimeError('Connection timeout.')
+        return out
+    else:
         print 'Failed: {q}'.format(q=query)
-        raise# RuntimeError('Connection timeout.')
-    return out
+        raise ValueError("Query never finished on server, run with verbose"
+                         " turned on for more info.")
 
 def mcat_sources(band,ra0,dec0,radius,maglimit=20):
     ''' Return the MCAT _coadd_ sources given sky position and search radius

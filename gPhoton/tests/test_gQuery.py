@@ -23,7 +23,7 @@ class TestGQueryFunctions(unittest.TestCase):
         self.baseURL = 'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
         self.baseDB = 'GPFCore.dbo'
         self.MCATDB = 'GR6Plus7.dbo'
-        self.formatURL = ' -- '+str(time_id)+'&format=json'
+        self.formatURL = ' -- '+str(time_id)+'&format=extjs'
 
     def test_baseURL(self):
         self.assertEqual(gq.baseURL,self.baseURL)
