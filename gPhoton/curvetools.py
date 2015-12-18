@@ -185,7 +185,8 @@ def reduce_lcurve(bin_ix,region_ix,data,function,dtype='float64'):
     output = np.empty(len(bin_num))
     for i,b in enumerate(bin_num):
         try:
-            output[i] = function(data[np.where(bin_ix[region_ix]==b)])
+            ix = region_ix[0][np.where(bin_ix[region_ix]==b)]
+            output[i] = function(data[ix])
         except ValueError:
             output[i] = np.nan
         except IndexError:
@@ -313,8 +314,6 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     lcurve['racent']=reduce_lcurve(bin_ix,aper_ix,data['ra'],np.mean)
     lcurve['deccent']=reduce_lcurve(bin_ix,aper_ix,data['dec'],np.mean)
 
-    # FIXME: This just uses the average background over all visits until
-    # the MCAT query gets fixed to return the time ranges.
     lcurve['mcat_bg']=lcurve['exptime']*np.array(
         [dbt.mcat_skybg(band,[ra0,dec0],radius,trange=tr,verbose=verbose)
                                     for tr in zip(lcurve['t0'],lcurve['t1'])])
@@ -384,9 +383,10 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     if tranges is None:
         tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
                 maxgap=maxgap, minexp=minexp, verbose=verbose, detsize=detsize)
-    elif not np.array(tranges).shape:
+    if not np.array(tranges).shape[1]:
         print "No exposure time at this location: [{ra},{dec}]".format(
                                                             ra=ra0,dec=dec0)
+        return None
     lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
                               stepsz=stepsz, verbose=verbose, coadd=coadd)
 
@@ -403,6 +403,8 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                     trange=trange, tranges=tranges, verbose=verbose,
                     coadd=coadd, minexp=minexp, maxgap=maxgap,
                     photonfile=photonfile, detsize=detsize)
+    if not data:
+        return None
     exclude_keys = ['photons','params']
     minimal_columns = ['t0','t1','exptime','flux','flux_err','flags']
     if annulus:

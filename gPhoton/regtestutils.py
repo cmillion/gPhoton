@@ -88,13 +88,16 @@ def datamaker(band,skypos,outfile,maglimit=20.,margin=0.005,searchradius=0.1,
             print [mcat['ra'][i],mcat['dec'][i]]
             print [exp[band]['t0'],exp[band]['t1']]
             data = gAperture(band,[mcat['ra'][i],mcat['dec'][i]],radius,
-                             annulus=annulus,verbose=0,coadd=True,
+                             annulus=annulus,verbose=verbose,coadd=True,
                              trange=[exp[band]['t0'],exp[band]['t1']],
                              detsize=1.25)
-            csv_construct = construct_row(i,band,objid,mcat,data)
-            print csv_construct
-            with open(outfile,'ab') as csvfile:
-                spreadsheet = csv.writer(csvfile, delimiter=',',
+            try:
+                csv_construct = construct_row(i,band,objid,mcat,data)
+                print csv_construct
+                with open(outfile,'ab') as csvfile:
+                    spreadsheet = csv.writer(csvfile, delimiter=',',
                                     quotechar='|', quoting=csv.QUOTE_MINIMAL)
-                spreadsheet.writerow(csv_construct)
+                    spreadsheet.writerow(csv_construct)
+            except TypeError:
+                continue
     return
