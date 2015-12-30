@@ -25,7 +25,7 @@ def gFind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
 					    minexp=minexp,verbose=verbose,
 					    detsize=detsize,retries=retries,
 					    trange=trange, skyrange=skyrange)
-		if not len(ranges[0]):
+		if not ranges.any():
 			if not quiet:
 				print 'No {band} exposure time in database.'.format(band=this_band)
 			output[this_band]={'expt':0,'t0':None,'t1':None}

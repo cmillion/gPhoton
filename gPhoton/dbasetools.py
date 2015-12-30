@@ -159,8 +159,9 @@ def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966,
     formulas. Restricts integration of global counts to non-shuttered time
     periods.
     """
-    model = {'FUV':[-0.000410118920433,76.3161728023],
-             'NUV':[-0.00043674790659,77.0751119568]}
+    model = {'NUV':[-0.000434730599193,77.217817988],
+             'FUV':[-0.000408075976406,76.3000943221]}
+
     rawexpt = trange[1]-trange[0]-compute_shutter(band,trange,
         timestamplist=timestamplist)
     gcr = globalcount_shuttered(band,trange,timestamplist=timestamplist)/rawexpt
@@ -179,7 +180,7 @@ def exposure(band,trange,verbose=0,retries=20):
     except IndexError: # Shutter this whole time range.
         if verbose:
             print 'No data in {t0},{t1}'.format(t0=trange[0],t1=trange[1])
-        return 0
+        return 0.
     shutter = compute_shutter(band,trange,verbose=verbose,retries=retries,
                               timestamplist=t)
     deadtime = empirical_deadtime(band,trange,verbose=verbose,retries=retries,
@@ -199,7 +200,7 @@ def compute_exptime(band,tr,verbose=0,skypos=None,detsize=1.25,
         for trange in tr:
             tranges = fGetTimeRanges(band,skypos,verbose=verbose,
                     trange=trange,retries=retries,detsize=detsize).tolist()
-            if tranges[0]:
+            if np.array(tranges).any():
                 exptime += [sum(
                     exposure(band,trange,verbose=verbose,retries=retries)
                                                     for trange in tranges)]

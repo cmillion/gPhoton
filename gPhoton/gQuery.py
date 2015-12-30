@@ -305,7 +305,6 @@ def stimtimes(band,t0,t1,margin=[90.01,90.01],aspum=68.754932/1000.,
                 y40=(avgstim['y4']-margin[1])/aspum,
                 y41=(avgstim['y4']+margin[1])/aspum,formatURL=formatURL)
 
-
 def boxcentroid(band,t0,t1,xr,yr):
     """Find the mean position of events inside of a box in detector space."""
     return (str(baseURL)+
