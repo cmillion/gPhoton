@@ -661,9 +661,9 @@ def get_stim_coefs(ssdfile):
 def find_FUV_offset(scstfile):
     """
     Computes NUV->FUV center offset based on a lookup table.
+    @CHASE - Camel-case should be avoided, would need to change in calls too.@
 
-    :param scstfile: Name of the SCST FITS file. @CHASE - What is an scstfile?
-    Is it spacecraft state file? Is it always a FITS file?@
+    :param scstfile: Name of the spacecraft state FITS file.
 
     :type scstfile: str @CHASE - Please confirm this.@
 
