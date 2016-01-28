@@ -252,7 +252,7 @@ def PhotonPipe(raw6file, scstfile, band, outbase, aspfile=0, ssdfile=0,
                              wlk2data, clk2, clk2data)
             y = y + yac
 
-        # [FUTURE] This and other ugly lines like it below are for the purpose
+        # [Future] This and other ugly lines like it below are for the purpose
         # of memory management. There is likely a more Pythonic way.
         (phb1, phb2, phb3, phb4, phb5, xb, xamc, yb, yamc, xraw0, yraw0, xraw,
          yraw) = ([], [], [], [], [], [], [], [], [], [], [], [], [])
@@ -413,7 +413,7 @@ def PhotonPipe(raw6file, scstfile, band, outbase, aspfile=0, ssdfile=0,
         row[ix] = (yp_as[ix] - cube_y0) / cube_dy
         depth[ix] = (ss[ix] - cube_d0) / cube_dd
 
-        # [FUTURE]: This throws an error sometimes like the following, may need
+        # [Future]: This throws an error sometimes like the following, may need
         # fixing...
         """PhotonPipe.py:262: RuntimeWarning: invalid value encountered in
         less depth[((depth < 0)).nonzero()[0]] = 0.
@@ -517,7 +517,7 @@ def PhotonPipe(raw6file, scstfile, band, outbase, aspfile=0, ssdfile=0,
         # NOTE: If you wish to add a hook that filters the gPhoton output
         # (like perhaps by sky position or time range) then add it here.
         # I reccomend that you use the "ix = np.where" technique used above.
-        # [FUTURE]: Preprogram a (commented out) filter on RA/Dec.
+        # [Future]: Preprogram a (commented out) filter on RA/Dec.
 
         print_inline(chunkid+"Writing to spreadsheet...")
 
