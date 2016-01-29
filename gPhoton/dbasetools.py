@@ -1,63 +1,141 @@
-# Contains tools for working with data from the database that are used by
-#  a number of different modules.
+"""
+.. module:: dbasetools
+
+   :synopsis: Contains tools for working with data from the database that are
+   used by a number of different modules.
+
+.. moduleauthor:: Chase Million <chase.million@gmail.com>
+"""
+
 import numpy as np
 import gQuery
-from MCUtils import print_inline,area,distance,angularSeparation
+from MCUtils import print_inline, area, distance, angularSeparation
 from galextools import GPSSECS, zpmag
 from gQuery import tscale
 
-def get_aspect(band,skypos,trange=[6e8,11e8],verbose=0,
-               detsize=1.25):
-    """Get aspect solution in a dict() for given time range."""
-    asp = np.array(gQuery.getArray(gQuery.aspect_skypos(skypos[0],skypos[1],
-                   detsize=detsize),verbose=verbose))
-    data = {'eclipse':np.array(asp[:,0],dtype='int16'),'filename':asp[:,1],
-            't':np.array(asp[:,2],dtype='float64')/tscale,
-            'ra':np.array(asp[:,3],dtype='float64'),
-            'dec':np.array(asp[:,4],dtype='float64'),
-            'twist':np.array(asp[:,5],dtype='float64'),
-            'flag':np.array(asp[:,6],dtype='int8'),
-            'ra0':np.array(asp[:,7],dtype='float64'),
-            'dec0':np.array(asp[:,8],dtype='float64'),
-            'twist0':np.array(asp[:,9],dtype='float64')}
-    ix = np.where((data['t']>trange[0]) & (data['t']<trange[1]) &
-                  (angularSeparation(skypos[0],skypos[1],
-                                     data['ra'],data['dec'])<=detsize/2.))
+# ------------------------------------------------------------------------------
+def get_aspect(band, skypos, trange=[6e8, 11e8], verbose=0, detsize=1.25):
+    """
+    Get aspect solution in a dict() for the given time range.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param skypos: The right ascension and declination, in degrees.
+
+    :type skypos: list @CHASE - list or numpy.ndarray?@
+
+    :param trange: Minimum and maximum time (in GALEX time) to consider.
+
+    :type trange: list
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param detsize: The effective detector diameter, in degrees.
+
+    :type detsize: float
+
+    :returns: dict -- The aspect solution parameters.
+    """
+
+    asp = np.array(gQuery.getArray(gQuery.aspect_skypos(skypos[0], skypos[1],
+                                                        detsize=detsize),
+                                   verbose=verbose))
+
+    data = {'eclipse':np.array(asp[:, 0], dtype='int16'), 'filename':asp[:, 1],
+            't':np.array(asp[:, 2], dtype='float64')/tscale,
+            'ra':np.array(asp[:, 3], dtype='float64'),
+            'dec':np.array(asp[:, 4], dtype='float64'),
+            'twist':np.array(asp[:, 5], dtype='float64'),
+            'flag':np.array(asp[:, 6], dtype='int8'),
+            'ra0':np.array(asp[:, 7], dtype='float64'),
+            'dec0':np.array(asp[:, 8], dtype='float64'),
+            'twist0':np.array(asp[:, 9], dtype='float64')}
+
+    ix = np.where((data['t'] > trange[0]) & (data['t'] < trange[1]) &
+                  (angularSeparation(skypos[0], skypos[1],
+                                     data['ra'], data['dec']) <= detsize/2.))
+
     for key in data.keys():
         data[key] = data[key][ix]
+
     return data
+# ------------------------------------------------------------------------------
 
-def get_valid_times(band,skypos,trange=None,detsize=1.1,verbose=0,retries=100.,
-                    skyrange=None):
+# ------------------------------------------------------------------------------
+def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
+                    retries=100, skyrange=None):
+    """
+    @CHASE - Please provide method summary.@
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param skypos: The right ascension and declination, in degrees.
+
+    :type skypos: list @CHASE - list or numpy.ndarray?@
+
+    :param trange: Minimum and maximum time (in GALEX time) to consider.
+
+    :type trange: list
+
+    :param detsize: The effective detector diameter, in degrees.
+
+    :type detsize: float
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param retries: Number of query retries to attempt before giving up.
+
+    :type retries: int
+
+    :param skyrange: @CHASE - please describe.@
+
+    :type skyrange: list @CHASE - list or numpy.ndarray?@
+
+    :returns: numpy.ndarray -- A sorted set of unique time stamps.
+    """
+
     if not np.array(trange).tolist():
-        trange = [1,1000000000000]
-    if len(np.shape(trange))==2:
-        trange=trange[0]
+        trange = [1, 1000000000000]
 
-    # FIXME: This is probably not an optimally efficient way to check an entire
-    #  region of sky for data, but it's not hugely dumb and does work...
+    if len(np.shape(trange)) == 2:
+        trange = trange[0]
+
+    # [Future]: This is probably not an optimally efficient way to check an
+    # entire region of sky for data, but it's not hugely dumb and does work...
     # Assemble sky positions on a grid within the targeted region.
     skypos_list = [skypos]
     if skyrange:
-        for r in np.linspace(skypos[0]-skyrange[0]/2.,skypos[0]+skyrange[0]/2.,
-                    np.ceil(skyrange[0]/(detsize/2.)),endpoint=True):
+        for r in np.linspace(skypos[0]-skyrange[0]/2.,
+                             skypos[0]+skyrange[0]/2.,
+                             np.ceil(skyrange[0]/(detsize/2.)), endpoint=True):
             for d in np.linspace(skypos[1]-skyrange[1]/2.,
-                    skypos[1]+skyrange[1]/2.,np.ceil(skyrange[1]/(detsize/2.)),
-                    endpoint=True):
-                skypos_list += [[r,d]]
+                                 skypos[1]+skyrange[1]/2.,
+                                 np.ceil(skyrange[1]/(detsize/2.)),
+                                 endpoint=True):
+                skypos_list += [[r, d]]
 
     times = []
     for skypos in skypos_list:
         try:
             times = (list(times) +
-                list(np.array(gQuery.getArray(gQuery.exposure_ranges(
-                    band,skypos[0],skypos[1],t0=trange[0],t1=trange[1],
-                    detsize=detsize),verbose=verbose,retries=retries),
-                    dtype='float64')[:,0]/tscale))
+                     list(np.array(gQuery.getArray(
+                         gQuery.exposure_ranges(band, skypos[0], skypos[1],
+                                                t0=trange[0], t1=trange[1],
+                                                detsize=detsize),
+                         verbose=verbose, retries=retries),
+                                   dtype='float64')[:, 0]/tscale))
         except IndexError:
             if verbose:
                 print "No exposure time available at {pos}".format(pos=skypos)
-                return np.array([],dtype='float64')
+                return np.array([], dtype='float64')
         except TypeError:
             print "Is one of the inputs malformed?"
             raise
@@ -65,398 +143,1133 @@ def get_valid_times(band,skypos,trange=None,detsize=1.1,verbose=0,retries=100.,
             raise
 
     return np.sort(np.unique(times))
+# ------------------------------------------------------------------------------
 
-def distinct_tranges(times,maxgap=1.):
-    ix=np.where(times[1:]-times[:-1]>maxgap)
+# ------------------------------------------------------------------------------
+def distinct_tranges(times, maxgap=1.):
+    """
+    @CHASE - please describe this method@
+
+    :param times: A set of time stamps to extract unique time ranges from.
+
+    :type times: list @CHASE list or numpy.ndarray?@
+
+    :param maxgap:  Maximum gap size, in seconds, for data to be considered
+    contiguous.
+
+    :type maxgap: float
+
+    :returns: list -- The set of distinct time ranges.
+    """
+
+    ix = np.where(times[1:]-times[:-1] > maxgap)
+
     ixs = [-1] + list(ix[0]) + [len(times)-1]
-    return [[times[ixs[i]+1],times[ixs[i+1]]] for i,b in enumerate(ixs[:-1])]
 
-def fGetTimeRanges(band,skypos,trange=None,detsize=1.1,verbose=0,
-                   maxgap=1.,minexp=1.,retries=100.,
-                   skyrange=None,maxgap_override=False):
-    """Find the contiguous time ranges within a time range at a
-    specific location.
-	minexp - Do not include exposure time less than this.
-	maxgap - Gaps in exposure longer than this initiate a new time range.
-	detsize - Fiddle with this if you want to exlude the edges of the
-    detector.
+    return [[times[ixs[i]+1], times[ixs[i+1]]] for i, b in enumerate(ixs[:-1])]
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def fGetTimeRanges(band, skypos, trange=None, detsize=1.1, verbose=0,
+                   maxgap=1., minexp=1., retries=100,
+                   skyrange=None, maxgap_override=False):
+    """
+    Find the contiguous time ranges within a time range at a specific location.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param skypos: The right ascension and declination, in degrees.
+
+    :type skypos: list @CHASE - list or numpy.ndarray?@
+
+    :param trange: Minimum and maximum time (in GALEX time) to consider.
+
+    :type trange: list
+
+    :param detsize: The effective detector diameter, in degrees.
+
+    :type detsize: float
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param maxgap:  Maximum gap size, in seconds, for data to be considered
+    contiguous.
+
+    :type maxgap: float
+
+    :param minexp: Minimum gap size, in seconds, for data to be considered
+    contiguous.
+
+    :type minexp: float
+
+    :param retries: Number of query retries to attempt before giving up.
+
+    :type retries: int
+
+    :param skyrange: @CHASE - please describe.@
+
+    :type skyrange: list @CHASE - list or numpy.ndarray?@
+
+    :param maxgap_override: @CHASE - please describe what this does.@
+
+    :type maxgap_override: bool
+
+    :returns: numpy.ndarray -- A valid set of time ranges, accounting for
+    minimum exposure lengths and maximum gaps.
 	"""
-    times = get_valid_times(band,skypos,trange=trange,detsize=detsize,
-                            verbose=verbose,retries=retries,skyrange=skyrange)
+
+    times = get_valid_times(band, skypos, trange=trange, detsize=detsize,
+                            verbose=verbose, retries=retries, skyrange=skyrange)
+
     if not len(times):
-        return np.array([[]],dtype='float64')
+        return np.array([[]], dtype='float64')
+
     if verbose:
         print_inline('Parsing ~'+str(len(times)-1)+' seconds of raw exposure.')
 
     # NOTE: The minimum meaningful maxgap is 1 second.
-    if maxgap<1 and not maxgap_override:
+    if maxgap < 1 and not maxgap_override:
         raise 'maxgap must be >=1 second'
-    tranges = distinct_tranges(times,maxgap=maxgap)
 
-    ix = np.where(np.array(tranges)[:,1]-np.array(tranges)[:,0]>=minexp)
+    tranges = distinct_tranges(times, maxgap=maxgap)
+
+    ix = np.where(np.array(tranges)[:, 1]-np.array(tranges)[:, 0] >= minexp)
     tranges = np.array(tranges)[ix].tolist()
 
-    return np.array(tranges,dtype='float64')
+    return np.array(tranges, dtype='float64')
+# ------------------------------------------------------------------------------
 
-def stimcount_shuttered(band,trange,verbose=0,retries=20.,timestamplist=False):
+# ------------------------------------------------------------------------------
+def stimcount_shuttered(band, trange, verbose=0, retries=20,
+                        timestamplist=False):
+    """
+    @CHASE - please provide summary.@
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param trange: Minimum and maximum time (in GALEX time) to consider.
+
+    :type trange: list
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param retries: Number of query retries to attempt before giving up.
+    @CHASE - Other default retries are set to 100, should we change this one?@
+    @CHASE - This parameter is not used here, it can be removed?@
+
+    :type retries: int
+
+    :param timestamplist: @CHASE - please provide description.@
+
+    :type timestamplist: bool @CHASE - Should this be a string with None as
+    default?@
+
+    :returns: int -- Total stim count and shuttered events. @CHASE - please
+    revise this description.@
+    """
+
     try:
         t = (timestamplist if np.array(timestamplist).any() else
-                np.array(gQuery.getArray(
-                    gQuery.uniquetimes(band,trange[0],trange[1]),
-                        verbose=verbose),dtype='float64')[:,0]/gQuery.tscale)
+             np.array(gQuery.getArray(gQuery.uniquetimes(band, trange[0],
+                                                         trange[1]),
+                                      verbose=verbose),
+                      dtype='float64')[:, 0]/gQuery.tscale)
     except IndexError: # Shutter this whole time range.
         if verbose:
-            print 'No data in {t0},{t1}'.format(t0=trange[0],t1=trange[1])
+            print 'No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1])
         return 0
 
-    times = np.sort(np.unique(np.append(t,trange)))
-    tranges = distinct_tranges(times,maxgap=0.05)
+    times = np.sort(np.unique(np.append(t, trange)))
+    tranges = distinct_tranges(times, maxgap=0.05)
     stimcount = 0
-    for trange in tranges:
-        stimcount += gQuery.getValue(gQuery.stimcount(band,trange[0],trange[1]),
-                                        verbose=verbose)+gQuery.getValue(
-                                     gQuery.stimcount(band,trange[0],trange[1],
-                                        null=False),verbose=verbose)
-    return stimcount
 
-def globalcount_shuttered(band,trange,verbose=0,timestamplist=False):
+    for trange in tranges:
+        stimcount += (gQuery.getValue(gQuery.stimcount(band, trange[0],
+                                                       trange[1]),
+                                      verbose=verbose) +
+                      gQuery.getValue(gQuery.stimcount(band, trange[0],
+                                                       trange[1], null=False),
+                                      verbose=verbose))
+
+    return stimcount
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def globalcount_shuttered(band, trange, verbose=0, timestamplist=False):
+    """
+    @CHASE - please provide summary.@
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param trange: Minimum and maximum time (in GALEX time) to consider.
+
+    :type trange: list
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param timestamplist: @CHASE - please provide description.@
+
+    :type timestamplist: bool @CHASE - Should this be a string with None as
+    default?@
+
+    :returns: int -- Total global counts and shuttered events. @CHASE - please
+    revise this description.@
+    """
+
     try:
         t = (timestamplist if np.array(timestamplist).any() else
-                np.array(gQuery.getArray(
-                    gQuery.uniquetimes(band,trange[0],trange[1],flag=True),
-                        verbose=verbose),dtype='float64')[:,0]/gQuery.tscale)
+             np.array(gQuery.getArray(gQuery.uniquetimes(band, trange[0],
+                                                         trange[1], flag=True),
+                                      verbose=verbose),
+                      dtype='float64')[:, 0]/gQuery.tscale)
     except IndexError: # Shutter this whole time range.
         if verbose:
-            print 'No data in {t0},{t1}'.format(t0=trange[0],t1=trange[1])
+            print 'No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1])
         return 0
-    times = np.sort(np.unique(np.append(t,trange)))
-    tranges = distinct_tranges(times,maxgap=0.05)
-    nonnullevents,nullevents = 0,0
+
+    times = np.sort(np.unique(np.append(t, trange)))
+    tranges = distinct_tranges(times, maxgap=0.05)
+    nonnullevents, nullevents = 0, 0
+
     for trange in tranges:
         nullevents += gQuery.getValue(
-                    gQuery.deadtime2(band,trange[0],trange[1]),verbose=verbose)
-        nonnullevents += gQuery.getValue(gQuery.deadtime1(band,trange[0],
-                                        trange[1]),verbose=verbose)
+            gQuery.deadtime2(band, trange[0], trange[1]), verbose=verbose)
+
+        nonnullevents += gQuery.getValue(gQuery.deadtime1(band, trange[0],
+                                                          trange[1]),
+                                         verbose=verbose)
 
     return nullevents+nonnullevents
+# ------------------------------------------------------------------------------
 
-def compute_shutter(band,trange,verbose=0,retries=20,shutgap=0.05,
-    timestamplist=False):
+# ------------------------------------------------------------------------------
+def compute_shutter(band, trange, verbose=0, retries=20, shutgap=0.05,
+                    timestamplist=False):
+    """
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param trange: Minimum and maximum time (in GALEX time) to consider.
+
+    :type trange: list
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param retries: Number of query retries to attempt before giving up.
+    @CHASE - Other default retries are set to 100, should we change this one?@
+    @CHASE - This parameter is not used here, it can be removed?@
+
+    :type retries: int
+
+    :param shutgap: Amount of time, in seconds, that defines the minimum gap in
+    observation that corresponds to a 'shutter' (not a true exposure time).
+
+    :type shutgap: float
+
+    :param timestamplist: @CHASE - please provide description.@
+
+    :type timestamplist: bool @CHASE - Should this be a string with None as
+    default?@
+
+    :returns: numpy.ndarray -- The total shutter time, in seconds, during the
+    specified time range.
+    """
+
     try:
         t = (timestamplist if np.array(timestamplist).any() else
-                np.array(gQuery.getArray(
-                    gQuery.uniquetimes(band,trange[0],trange[1],flag=True),
-                        verbose=verbose),dtype='float64')[:,0]/gQuery.tscale)
+             np.array(gQuery.getArray(gQuery.uniquetimes(band, trange[0],
+                                                         trange[1], flag=True),
+                                      verbose=verbose),
+                      dtype='float64')[:, 0]/gQuery.tscale)
     except IndexError: # Shutter this whole time range if there's no data
         return trange[1]-trange[0]
-    t = np.sort(np.unique(np.append(t,trange)))
-    ix = np.where(t[1:]-t[:-1]>=shutgap)
-    return np.array(t[1:]-t[:-1])[ix].sum()
 
-def empirical_deadtime(band,trange,verbose=0,retries=20,feeclkratio=0.966,
-    timestamplist=False):
-    """Calculate empirical deadtime (per global count rate) using revised
+    t = np.sort(np.unique(np.append(t, trange)))
+    ix = np.where(t[1:]-t[:-1] >= shutgap)
+
+    return np.array(t[1:]-t[:-1])[ix].sum()
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def empirical_deadtime(band, trange, verbose=0, retries=20, feeclkratio=0.966,
+                       timestamplist=False):
+    """
+    Calculate empirical deadtime (per global count rate) using revised
     formulas. Restricts integration of global counts to non-shuttered time
     periods.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param trange: Minimum and maximum time (in GALEX time) to consider.
+
+    :type trange: list
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param retries: Number of query retries to attempt before giving up.
+    @CHASE - Other default retries are set to 100, should we change this one?@
+    @CHASE - This parameter is not used here, it can be removed?@
+
+    :type retries: int
+
+    :param feeclkratio: @CHASE - please describe.@
+
+    :type feeclkratio: float
+
+    :param timestamplist: @CHASE - please provide description.@
+
+    :type timestamplist: bool @CHASE - Should this be a string with None as
+    default?@
+
+    :returns: float -- The empirical deadtime, in seconds. @CHASE - please
+    confirm data type and expand description.@
     """
-    model = {'NUV':[-0.000434730599193,77.217817988],
-             'FUV':[-0.000408075976406,76.3000943221]}
 
-    rawexpt = trange[1]-trange[0]-compute_shutter(band,trange,
-        timestamplist=timestamplist)
-    gcr = globalcount_shuttered(band,trange,timestamplist=timestamplist)/rawexpt
+    model = {'NUV':[-0.000434730599193, 77.217817988],
+             'FUV':[-0.000408075976406, 76.3000943221]}
+
+    rawexpt = trange[1]-trange[0]-compute_shutter(band, trange,
+                                                  timestamplist=timestamplist)
+    gcr = globalcount_shuttered(band, trange,
+                                timestamplist=timestamplist)/rawexpt
+
     refrate = model[band][1]/feeclkratio
-    scr = model[band][0]*gcr+model[band][1]
-    return (1-scr/feeclkratio/refrate)
 
-def exposure(band,trange,verbose=0,retries=20):
+    scr = model[band][0]*gcr+model[band][1]
+
+    return 1 - scr/feeclkratio/refrate
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def exposure(band, trange, verbose=0, retries=20):
+    """
+    Calculate the effective exposure time, in seconds, accounting for shutter
+    and deadtime. @CHASE - please refine if needed.@
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param trange: Minimum and maximum time (in GALEX time) to consider.
+
+    :type trange: list
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param retries: Number of query retries to attempt before giving up.
+    @CHASE - Other default retries are set to 100, should we change this one?@
+    @CHASE - This parameter is not used here or in the methods called, it can
+    be removed?@
+
+    :type retries: int
+
+    :returns: float -- The effective exposure time, in seconds.
+    """
+
     rawexpt = trange[1]-trange[0]
-    if rawexpt==0.:
+
+    if rawexpt == 0.:
         return 0.
+
     try:
-        t = np.array(gQuery.getArray(
-                gQuery.uniquetimes(band,trange[0],trange[1],flag=True),
-                verbose=verbose),dtype='float64')[:,0]/gQuery.tscale
+        t = np.array(gQuery.getArray(gQuery.uniquetimes(band, trange[0],
+                                                        trange[1], flag=True),
+                                     verbose=verbose),
+                     dtype='float64')[:, 0]/gQuery.tscale
     except IndexError: # Shutter this whole time range.
         if verbose:
-            print 'No data in {t0},{t1}'.format(t0=trange[0],t1=trange[1])
+            print 'No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1])
         return 0.
-    shutter = compute_shutter(band,trange,verbose=verbose,retries=retries,
-                              timestamplist=t)
-    deadtime = empirical_deadtime(band,trange,verbose=verbose,retries=retries,
-                                  timestamplist=t)
-    return (rawexpt-shutter)*(1.-deadtime)
 
-def compute_exptime(band,tr,verbose=0,skypos=None,detsize=1.25,
-                    retries=20,coadd=False):
-    """Compute the effective exposure time."""
-    if len(np.shape(tr))==1:
+    shutter = compute_shutter(band, trange, verbose=verbose, retries=retries,
+                              timestamplist=t)
+
+    deadtime = empirical_deadtime(band, trange, verbose=verbose,
+                                  retries=retries, timestamplist=t)
+
+    return (rawexpt-shutter)*(1.-deadtime)
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def compute_exptime(band, tr, verbose=0, skypos=None, detsize=1.25,
+                    retries=20, coadd=False):
+    """
+    Compute the total effective exposure time, in seconds, accounting for
+    shutter and deadtime. @CHASE - please refine if needed, also, explain how
+    this differs from 'exposure' method above?@
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param tr: Minimum and maximum time (in GALEX time) to consider.
+    @CHASE - Is this a list of lists of time ranges e.g., a set of time ranges?@
+
+    :type tr: list
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param skypos: The right ascension and declination, in degrees.
+
+    :type skypos: list @CHASE - list or numpy.ndarray?@
+
+    :param detsize: The effective detector diameter, in degrees.
+
+    :type detsize: float
+
+    :param retries: The number of query attempts to make before giving up.
+    @CHASE - Should the default be made 100 like other methods?@
+
+    :type retries: int
+
+    :param coadd: Should the effective exposure time be calculated across all
+    time ranges, e.g., a coadded effective exposure time.
+
+    :type coadd: bool
+
+    :returns: numpy.ndarray -- The effective exposure time(s), in seconds.
+    @CHASE - Looks like if coadd=True or 0. it's returned as a list, otherwise
+    a numpy.ndarray? This should be consistently a numpy.ndarray I would think.@
+    """
+
+    if len(np.shape(tr)) == 1:
         tr = [tr]
-    if not len(np.shape(tr))==2:
-        raise ValueError('tr array has {d} dimensions, must be <=2'.format(
-                                                        d=len(np.shape(tr))))
+
+    if not len(np.shape(tr)) == 2:
+        raise ValueError('tr array has {d} dimensions,'
+                         ' must be <=2'.format(d=len(np.shape(tr))))
+
     if skypos:
         exptime = []
         for trange in tr:
-            tranges = fGetTimeRanges(band,skypos,verbose=verbose,
-                    trange=trange,retries=retries,detsize=detsize).tolist()
+            tranges = fGetTimeRanges(band, skypos, verbose=verbose,
+                                     trange=trange, retries=retries,
+                                     detsize=detsize).tolist()
             if np.array(tranges).any():
                 exptime += [sum(
-                    exposure(band,trange,verbose=verbose,retries=retries)
-                                                    for trange in tranges)]
+                    exposure(band, trange, verbose=verbose, retries=retries)
+                    for trange in tranges)]
             else:
                 exptime += [0.]
     else:
-        exptime = [exposure(band,trange,verbose=verbose,retries=retries)
-                                                            for trange in tr]
-    return (([sum(exptime)] if coadd else exptime)
-                                    if np.array(tr).any() else [0.])
+        exptime = [exposure(band, trange, verbose=verbose, retries=retries)
+                   for trange in tr]
 
-def get_mcat_data(skypos,rad):
+    return (([sum(exptime)] if coadd else exptime)
+            if np.array(tr).any() else [0.])
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def get_mcat_data(skypos, rad):
+    """
+    Return MCAT sources and their catalog values within a give radius of the
+    specified sky position.
+
+    :param skypos: The right ascension and declination, in degrees, around
+    which to search for MCAT sources.
+
+    :type skypos: list @CHASE - list or numpy.ndarray?@
+
+    :param rad: The radius within which to search for MCAT sources.
+    @CHASE - Is this in degrees?@
+
+    :type rad: float
+
+    :returns: dict -- The MCAT sources within the specified radius.
+    """
+
     # Try once with the default radius.
-    out = np.array(gQuery.getArray(
-            gQuery.mcat_visit_sources(skypos[0],skypos[1],rad)))
+    out = np.array(gQuery.getArray(gQuery.mcat_visit_sources(skypos[0],
+                                                             skypos[1], rad)))
     # If no MCAT sources found, try again with a radius 5 times bigger.
     if len(out) == 0:
-        out = np.array(gQuery.getArray(
-                gQuery.mcat_visit_sources(skypos[0],skypos[1],rad*5.)))
-    # FIXME: The APER entries should really be generated
+        out = np.array(gQuery.getArray(gQuery.mcat_visit_sources(skypos[0],
+                                                                 skypos[1],
+                                                                 rad*5.)))
+    # [Future]: The APER entries should really be generated.
     try:
-        return {'objid':np.array(out[:,0],dtype='int64'),
-            'ra':np.array(out[:,1],dtype='float32'),
-            'dec':np.array(out[:,2],dtype='float32'),
-            'NUV':{'mag':np.array(out[:,3],dtype='float32'),
-                   't0':np.array(out[:,46],dtype='float64')-GPSSECS,
-                   't1':np.array(out[:,47],dtype='float64')-GPSSECS,
-                   'skybg':np.array(out[:,6],dtype='float32'),
-                   'expt':np.array(out[:,11],dtype='float32'),
-                   'fwhm':np.array(out[:,8],dtype='float32'),
-                   'obssecs':np.array(out[:,40],dtype='float64'),
-                   'artifact':np.array(out[:,42],dtype='int32'),
-                   1:{'mag':np.array(out[:,19],dtype='float32')+zpmag('NUV'),
-                      'err':np.array(out[:,33],dtype='float32')},
-                   2:{'mag':np.array(out[:,20],dtype='float32')+zpmag('NUV'),
-                      'err':np.array(out[:,34],dtype='float32')},
-                   3:{'mag':np.array(out[:,21],dtype='float32')+zpmag('NUV'),
-                      'err':np.array(out[:,35],dtype='float32')},
-                   4:{'mag':np.array(out[:,22],dtype='float32')+zpmag('NUV'),
-                      'err':np.array(out[:,36],dtype='float32')},
-                   5:{'mag':np.array(out[:,23],dtype='float32')+zpmag('NUV'),
-                      'err':np.array(out[:,37],dtype='float32')},
-                   6:{'mag':np.array(out[:,24],dtype='float32')+zpmag('NUV'),
-                      'err':np.array(out[:,38],dtype='float32')},
-                   7:{'mag':np.array(out[:,25],dtype='float32')+zpmag('NUV'),
-                      'err':np.array(out[:,39],dtype='float32')} },
-            'FUV':{'mag':np.array(out[:,4],dtype='float32'),
-                   't0':np.array(out[:,44],dtype='float64')-GPSSECS,
-                   't1':np.array(out[:,45],dtype='float64')-GPSSECS,
-                   'skybg':np.array(out[:,7],dtype='float32'),
-                   'expt':np.array(out[:,10],dtype='float32'),
-                   'fwhm':np.array(out[:,9],dtype='float32'),
-                   'obssecs':np.array(out[:,41],dtype='float64'),
-                   'artifact':np.array(out[:,43],dtype='int32'),
-                   1:{'mag':np.array(out[:,12],dtype='float32')+zpmag('FUV'),
-                      'err':np.array(out[:,26],dtype='float32')},
-                   2:{'mag':np.array(out[:,13],dtype='float32')+zpmag('FUV'),
-                      'err':np.array(out[:,27],dtype='float32')},
-                   3:{'mag':np.array(out[:,14],dtype='float32')+zpmag('FUV'),
-                      'err':np.array(out[:,28],dtype='float32')},
-                   4:{'mag':np.array(out[:,15],dtype='float32')+zpmag('FUV'),
-                      'err':np.array(out[:,29],dtype='float32')},
-                   5:{'mag':np.array(out[:,16],dtype='float32')+zpmag('FUV'),
-                      'err':np.array(out[:,30],dtype='float32')},
-                   6:{'mag':np.array(out[:,17],dtype='float32')+zpmag('FUV'),
-                      'err':np.array(out[:,31],dtype='float32')},
-                   7:{'mag':np.array(out[:,18],dtype='float32')+zpmag('FUV'),
-                      'err':np.array(out[:,32],dtype='float32')} } }
+        return {'objid':np.array(out[:, 0], dtype='int64'),
+                'ra':np.array(out[:, 1], dtype='float32'),
+                'dec':np.array(out[:, 2], dtype='float32'),
+                'NUV':{'mag':np.array(out[:, 3], dtype='float32'),
+                       't0':np.array(out[:, 46], dtype='float64')-GPSSECS,
+                       't1':np.array(out[:, 47], dtype='float64')-GPSSECS,
+                       'skybg':np.array(out[:, 6], dtype='float32'),
+                       'expt':np.array(out[:, 11], dtype='float32'),
+                       'fwhm':np.array(out[:, 8], dtype='float32'),
+                       'obssecs':np.array(out[:, 40], dtype='float64'),
+                       'artifact':np.array(out[:, 42], dtype='int32'),
+                       1:{'mag':np.array(out[:, 19],
+                                         dtype='float32')+zpmag('NUV'),
+                          'err':np.array(out[:, 33], dtype='float32')},
+                       2:{'mag':np.array(out[:, 20],
+                                         dtype='float32')+zpmag('NUV'),
+                          'err':np.array(out[:, 34], dtype='float32')},
+                       3:{'mag':np.array(out[:, 21],
+                                         dtype='float32')+zpmag('NUV'),
+                          'err':np.array(out[:, 35], dtype='float32')},
+                       4:{'mag':np.array(out[:, 22],
+                                         dtype='float32')+zpmag('NUV'),
+                          'err':np.array(out[:, 36], dtype='float32')},
+                       5:{'mag':np.array(out[:, 23],
+                                         dtype='float32')+zpmag('NUV'),
+                          'err':np.array(out[:, 37], dtype='float32')},
+                       6:{'mag':np.array(out[:, 24],
+                                         dtype='float32')+zpmag('NUV'),
+                          'err':np.array(out[:, 38], dtype='float32')},
+                       7:{'mag':np.array(out[:, 25],
+                                         dtype='float32')+zpmag('NUV'),
+                          'err':np.array(out[:, 39], dtype='float32')}},
+
+                'FUV':{'mag':np.array(out[:, 4], dtype='float32'),
+                       't0':np.array(out[:, 44], dtype='float64')-GPSSECS,
+                       't1':np.array(out[:, 45], dtype='float64')-GPSSECS,
+                       'skybg':np.array(out[:, 7], dtype='float32'),
+                       'expt':np.array(out[:, 10], dtype='float32'),
+                       'fwhm':np.array(out[:, 9], dtype='float32'),
+                       'obssecs':np.array(out[:, 41], dtype='float64'),
+                       'artifact':np.array(out[:, 43], dtype='int32'),
+                       1:{'mag':np.array(out[:, 12],
+                                         dtype='float32')+zpmag('FUV'),
+                          'err':np.array(out[:, 26], dtype='float32')},
+                       2:{'mag':np.array(out[:, 13],
+                                         dtype='float32')+zpmag('FUV'),
+                          'err':np.array(out[:, 27], dtype='float32')},
+                       3:{'mag':np.array(out[:, 14],
+                                         dtype='float32')+zpmag('FUV'),
+                          'err':np.array(out[:, 28], dtype='float32')},
+                       4:{'mag':np.array(out[:, 15],
+                                         dtype='float32')+zpmag('FUV'),
+                          'err':np.array(out[:, 29], dtype='float32')},
+                       5:{'mag':np.array(out[:, 16],
+                                         dtype='float32')+zpmag('FUV'),
+                          'err':np.array(out[:, 30], dtype='float32')},
+                       6:{'mag':np.array(out[:, 17],
+                                         dtype='float32')+zpmag('FUV'),
+                          'err':np.array(out[:, 31], dtype='float32')},
+                       7:{'mag':np.array(out[:, 18],
+                                         dtype='float32')+zpmag('FUV'),
+                          'err':np.array(out[:, 32], dtype='float32')}}}
     except IndexError:
         # If there are STILL no detections, then pass a dict with empty values.
         # A default set of values will then be used.
-        return {'objid':None,'ra':None,'dec':None,'NUV':None,'FUV':None}
+        return {'objid':None, 'ra':None, 'dec':None, 'NUV':None, 'FUV':None}
     except:
         raise
+# ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
 def exp_from_objid(objid):
+    """
+    Return the effective exposure time, start time, and end time from the MCAT
+    for a given GALEX object ID.
+
+    :param objid: GALEX object ID.
+
+    :type objid: int @CHASE - is this an int or long?@
+
+    :returns: dict -- The FUV and NUV effective exposure time and start/stop
+    times.
+    """
+
     out = np.array(gQuery.getArray(gQuery.mcat_objid_search(objid)))
+
     return {'NUV':
-            {'expt':np.array(out[:,7],dtype='float')[0],
-             't0':np.array(out[:,9],dtype='float64')[0]-GPSSECS,
-             't1':np.array(out[:,10],dtype='float64')[0]-GPSSECS},
-            'FUV':{'expt':np.array(out[:,8],dtype='float')[0],
-             't0':np.array(out[:,11],dtype='float64')[0]-GPSSECS,
-             't1':np.array(out[:,12],dtype='float64')[0]-GPSSECS}}
+                {'expt':np.array(out[:, 7], dtype='float')[0],
+                 't0':np.array(out[:, 9], dtype='float64')[0]-GPSSECS,
+                 't1':np.array(out[:, 10], dtype='float64')[0]-GPSSECS},
+            'FUV':{'expt':np.array(out[:, 8], dtype='float')[0],
+                   't0':np.array(out[:, 11], dtype='float64')[0]-GPSSECS,
+                   't1':np.array(out[:, 12], dtype='float64')[0]-GPSSECS}}
+# ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
 def obstype_from_objid(objid):
-    out = gQuery.getArray(gQuery.obstype(objid))
-    survey, tilename, photoextractid, petal, nlegs, leg, eclipse, img, subvis =np.array(out)[0]
-    return int(nlegs),int(petal)
+    """
+    Return the number of legs and petal value for a given GALEX object ID.
 
-def mcat_skybg(band,skypos,radius,verbose=0,retries=20,trange=None):
-    """Estimate the sky background using the MCAT skybg for nearby sources."""
+    :param objid: GALEX object ID.
+
+    :type objid: int @CHASE - is this an int or long?@
+
+    :returns: tuple -- A two-element tuple containing the number of legs and
+    the petal value, which can be used to infer the observation type/strategy.
+    """
+
+    out = gQuery.getArray(gQuery.obstype(objid))
+
+    (survey, tilename, photoextractid, petal, nlegs, leg, eclipse, img,
+     subvis) = np.array(out)[0]
+
+    return int(nlegs), int(petal)
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def mcat_skybg(band, skypos, radius, verbose=0, retries=20, trange=None):
+    """
+    Estimate the sky background using the MCAT 'skybg' for nearby sources.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param skypos: The right ascension and declination, in degrees.
+
+    :type skypos: list @CHASE - list or numpy.ndarray?@
+
+    :param radius: The radius within which to search for MCAT sources.
+    @CHASE - Is this in degrees?@
+
+    :type radius: float
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param retries: Number of query retries to attempt before giving up.
+
+    :type retries: int
+
+    :param trange: Minimum and maximum time (in GALEX time) to consider.
+
+    :type trange: list
+
+    :returns: float -- The estimated sky background, in counts per second.
+    @CHASE - confirm units please.@
+    """
+
     # Setting maglimit to 30 so that it gets _everything_...
     if verbose:
         print_inline('Estimating background using {m} method...'.format(
             m='per-visit' if trange else 'median'))
-    mcat = get_mcat_data(skypos,radius)
+
+    mcat = get_mcat_data(skypos, radius)
     skybg = None
-    # FIXME: This is really slow for deep fields because it makes one
+
+    # [Future]: This is really slow for deep fields because it makes one
     # https request for every single objid until it gets a match. The time
     # ranges need to be folded into the return from gQuery.mcat_visit_sources()
     if trange:
-        for i,objid in enumerate(mcat['objid']):
+        for i, objid in enumerate(mcat['objid']):
             if skybg:
                 continue
-            for i,(t0,t1) in enumerate(zip(mcat[band]['t0'],mcat[band]['t1'])):
-                if (trange[0]<=t0<=trange[1] or trange[0]<=t1<=trange[1] or
-                    t0<=trange[0]<=t1 or t0<=trange[1]<=t1):
+            for i, (t0, t1) in enumerate(zip(mcat[band]['t0'],
+                                             mcat[band]['t1'])):
+                if (trange[0] <= t0 <= trange[1] or
+                        trange[0] <= t1 <= trange[1] or
+                        t0 <= trange[0] <= t1 or t0 <= trange[1] <= t1):
                     skybg = mcat[band]['skybg'][i]
+
     if not skybg:
         if trange and verbose:
             print 'No bg data for this visit... Using median over all visits.'
-        ix = np.where(mcat[band]['skybg']>=0)
+        ix = np.where(mcat[band]['skybg'] >= 0)
         skybg = np.median(mcat[band]['skybg'][ix])
+
     # Scale bg to area of aperture. Radius is in degrees.
     return skybg*area(radius*60.*60.)
+# ------------------------------------------------------------------------------
 
-def get_mags(band,ra0,dec0,radius,maglimit,mode='coadd',
-                   zpmag={'NUV':20.08,'FUV':18.82},verbose=0):
-    """Given RA, Dec and search radius, searches the coadd MCAT for sources.
+# ------------------------------------------------------------------------------
+def get_mags(band, ra0, dec0, radius, maglimit, mode='coadd',
+             zpmag={'NUV':20.08, 'FUV':18.82}, verbose=0):
+    """
+    Given RA, Dec and search radius, searches the coadd MCAT for sources.
     Returns a dict() which contains magnitudes for all of the APER settings.
     Note: Visit mode returns a lot more sources, more slowly than coadd mode
     given the same search parameters. You should probably use smaller search
     radii in visit mode. If you're just trying to find unique sources in a
     large region, use coadd mode and then pass the result through the
     parse_unique_sources() function contained in this module.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param ra0: The right ascension, in degrees, around which to search.
+
+    :type ra0: float
+
+    :param dec0: The declination, in degrees, around which to search.
+
+    :type dec0: float
+
+    :param radius: The size of the radius to search for MCAT sources.
+    @CHASE - Is this in degrees?@
+
+    :type radius: float
+
+    :param maglimit: The NUV faint limit to return MCAT sources for.
+
+    :type maglimit: float
+
+    :param mode: Specify whether to return MCAT sources from the 'visit' or
+    'coadd' catalog.
+
+    :type mode: str
+
+    :param zpmag: The zero-point magnitude in FUV and NUV.
+
+    :type zpmag: dict
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :returns: dict -- The set of magnitudes from different apertures for sources
+    in the MCAT, centered around the specified coordinate.
     """
-    zpf,zpn = zpmag['FUV'],zpmag['NUV']
-    if mode=='coadd':
-        out =np.array(gQuery.getArray(
-                  gQuery.mcat_sources(band,ra0,dec0,radius,maglimit=maglimit),
-                  verbose=verbose))
+
+    zpf, zpn = zpmag['FUV'], zpmag['NUV']
+
+    if mode == 'coadd':
+        out = np.array(gQuery.getArray(gQuery.mcat_sources(band, ra0, dec0,
+                                                           radius,
+                                                           maglimit=maglimit),
+                                       verbose=verbose))
         if not len(out):
             print "Warning: No sources found!"
             return 0
-        return {'ra':out[:,0],'dec':out[:,1],
-                'FUV':{'mag':out[:,3],1:out[:,9]+zpf,2:out[:,10]+zpf,
-                       3:out[:,11]+zpf,4:out[:,12]+zpf,5:out[:,13]+zpf,
-                       6:out[:,14],7:out[:,15]+zpf},
-                'NUV':{'mag':out[:,2],1:out[:,16]+zpn,2:out[:,17]+zpn,
-                       3:out[:,18]+zpn,4:out[:,19]+zpn,5:out[:,20]+zpn,
-                       6:out[:,21]+zpn,7:out[:,22]+zpn}}
-    elif mode=='visit':
-        out = np.array(gQuery.getArray(
-                       gQuery.mcat_visit_sources(ra0,dec0,radius),
-                       verbose=verbose))
+        return {'ra':out[:, 0], 'dec':out[:, 1],
+                'FUV':{'mag':out[:, 3], 1:out[:, 9]+zpf, 2:out[:, 10]+zpf,
+                       3:out[:, 11]+zpf, 4:out[:, 12]+zpf, 5:out[:, 13]+zpf,
+                       6:out[:, 14], 7:out[:, 15]+zpf},
+                'NUV':{'mag':out[:, 2], 1:out[:, 16]+zpn, 2:out[:, 17]+zpn,
+                       3:out[:, 18]+zpn, 4:out[:, 19]+zpn, 5:out[:, 20]+zpn,
+                       6:out[:, 21]+zpn, 7:out[:, 22]+zpn}}
+    elif mode == 'visit':
+        out = np.array(gQuery.getArray(gQuery.mcat_visit_sources(ra0, dec0,
+                                                                 radius),
+                                       verbose=verbose))
         # NOTE: For runtime considerations, mcat_visit_sources() does not
         # make any slices on time or maglimit, so we need to do it here.
-        ix = np.where((out[:,2 if band=='NUV' else 3]<maglimit) &
-                                           (out[:,2 if band=='NUV' else 3]>0))
-        return {'ra':out[:,0][ix],'dec':out[:,1][ix],
-                'NUV':{'mag':out[:,2][ix],'expt':out[:,8][ix],
-                1:out[:,18][ix]+zpn,2:out[:,19][ix]+zpn,3:out[:,20][ix]+zpn,
-                4:out[:,21][ix]+zpn,5:out[:,22][ix]+zpn,6:out[:,23][ix]+zpn,
-                7:out[:,24][ix]+zpn},
-                'FUV':{'mag':out[:,3][ix],'expt':out[:,9][ix],
-                1:out[:,11][ix]+zpf,2:out[:,12][ix]+zpf,3:out[:,13][ix]+zpf,
-                4:out[:,14][ix]+zpf,5:out[:,15][ix]+zpf,6:out[:,16][ix]+zpf,
-                7:out[:,17][ix]+zpf}}
+        ix = np.where((out[:, 2 if band == 'NUV' else 3] < maglimit) &
+                      (out[:, 2 if band == 'NUV' else 3] > 0))
+        return {'ra':out[:, 0][ix], 'dec':out[:, 1][ix],
+                'NUV':{'mag':out[:, 2][ix], 'expt':out[:, 8][ix],
+                       1:out[:, 18][ix]+zpn, 2:out[:, 19][ix]+zpn,
+                       3:out[:, 20][ix]+zpn, 4:out[:, 21][ix]+zpn,
+                       5:out[:, 22][ix]+zpn, 6:out[:, 23][ix]+zpn,
+                       7:out[:, 24][ix]+zpn},
+                'FUV':{'mag':out[:, 3][ix], 'expt':out[:, 9][ix],
+                       1:out[:, 11][ix]+zpf, 2:out[:, 12][ix]+zpf,
+                       3:out[:, 13][ix]+zpf, 4:out[:, 14][ix]+zpf,
+                       5:out[:, 15][ix]+zpf, 6:out[:, 16][ix]+zpf,
+                       7:out[:, 17][ix]+zpf}}
     else:
         print "mode must be in [coadd,visit]"
         return None
+# ------------------------------------------------------------------------------
 
-def parse_unique_sources(ras,decs,fmags,nmags,margin=0.001):
-    """Iteratively returns unique sources based upon a _margin_ within
+# ------------------------------------------------------------------------------
+def parse_unique_sources(ras, decs, fmags, nmags, margin=0.001):
+    """
+    Iteratively returns unique sources based upon a margin within
     which two sources should be considered the same sources. Is a little
     bit sensitive to the first entry and could probably be written to be
     more robust, but works well enough.
-    """
-    skypos = zip(ras,decs)
-    for i,pos in enumerate(skypos):
-        ix = np.where(angularSeparation(pos[0],pos[1],ras,decs)<=margin)
-        skypos[i]=[ras[ix].mean(),decs[ix].mean()]
-        a = skypos #unique_sources(data['ra'],data['dec'])
-    b = []
-    for i in a:
-        if not (i in b):
-            b+=[i]
-    return b
 
-def find_unique_sources(band,ra0,dec0,searchradius,maglimit=20.0,margin=0.001,
-                                                                    verbose=0):
-    coadds = get_mags(band,ra0,dec0,searchradius,maglimit,mode='coadd',
-                                                            verbose=verbose)
+    :param ras: Set of right ascensions, in degrees.
+
+    :type ras: list @CHASE list or numpy.ndarray?@
+
+    :param decs: Set of declinations, in degrees.
+
+    :type decs: list @CHASE = list or numpy.ndarray?@
+
+    :param fmags: @CHASE - This is not used.@
+
+    :type fmags: list
+
+    :param nmags: @CHASE - This is not used.@
+
+    :type nmags: list
+
+    :param margin: Buffer size when determining matches, in degrees.
+    @CHASE - plase confirm unit is degrees.@
+
+    :type margin: float
+
+    :returns: list -- The indexes corresponding to the unique sources.
+    @CHASE - please update description as needed.@
+    """
+
+    skypos = zip(ras, decs)
+
+    for i, pos in enumerate(skypos):
+        ix = np.where(angularSeparation(pos[0], pos[1], ras, decs) <= margin)
+        skypos[i] = [ras[ix].mean(), decs[ix].mean()]
+        a = skypos
+
+    b = []
+
+    for i in a:
+        if not i in b:
+            b += [i]
+
+    return b
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def find_unique_sources(band, ra0, dec0, searchradius, maglimit=20.0,
+                        margin=0.001, verbose=0):
+    """
+    @CHASE - please describe this method.@
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param ra0: The right ascension, in degrees, around which to search.
+
+    :type ra0: float
+
+    :param dec0: The declination, in degrees, around which to search.
+
+    :type dec0: float
+
+    :param searchradius: The size of the radius to search for unique sources.
+    @CHASE - Is this in degrees?@
+
+    :type searchradius: float
+
+    :param maglimit: The NUV faint limit to return unique sources for.
+
+    :type maglimit: float
+
+    :param margin: Buffer size when determining matches, in degrees.
+    @CHASE - plase confirm unit is degrees.@
+
+    :type margin: float
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :returns: numpy.ndarray -- The set of unique sources.
+    """
+
+    coadds = get_mags(band, ra0, dec0, searchradius, maglimit, mode='coadd',
+                      verbose=verbose)
+
     if not coadds:
         return None
     else:
-        return np.array(parse_unique_sources(coadds['ra'],coadds['dec'],
-                    coadds['FUV']['mag'],coadds['NUV']['mag'],margin=margin))
+        return np.array(parse_unique_sources(coadds['ra'], coadds['dec'],
+                                             coadds['FUV']['mag'],
+                                             coadds['NUV']['mag'],
+                                             margin=margin))
+# ------------------------------------------------------------------------------
 
-def avg_sources(band,skypos,radius=0.001,maglimit=20.0,verbose=0,
-                                                    catalog='MCAT',retries=20):
-	"""Return the mean position of sources within the search radius."""
-	out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],
-        skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
-	ix = np.where(out[:,-2]>0) if band=='NUV' else np.where(out[:,-1]>0)
-	fwhm = out[ix,-2].mean() if band=='NUV' else out[ix,-1].mean()
-	return out[ix,0].mean(),out[ix,1].mean(),round(fwhm,4)
-
-def nearest_source(band,skypos,radius=0.01,maglimit=20.0,verbose=0,
-                                                    catalog='MCAT',retries=20):
-    """Return targeting parameters for the nearest MCAT source to a position.
+# ------------------------------------------------------------------------------
+def avg_sources(band, skypos, radius=0.001, maglimit=20.0, verbose=0,
+                catalog='MCAT', retries=20):
     """
-    out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
-    if not len(out) and band=='FUV':
+    Return the mean position of sources within the search radius.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param skypos: The right ascension and declination, in degrees.
+
+    :type skypos: list @CHASE - list or numpy.ndarray?@
+
+    :param radius: The radius within which to search for MCAT sources.
+    @CHASE - Is this in degrees?@
+
+    :type radius: float
+
+    :param maglimit: The NUV faint limit to return unique sources for.
+
+    :type maglimit: float
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param catalog: The name of the catalog to query.
+
+    :type catalog: str
+
+    :param retries: Number of query retries to attempt before giving up.
+    @CHASE - should the default be made to be 100 like other methods?@
+
+    :type retries: int
+
+    :returns: tuple -- A three-element tuple containing the mean RA, mean DEC,
+    and mean FWHM of sources within the search radius.
+    """
+
+    out = np.array(gQuery.getArray(gQuery.mcat_sources(band, skypos[0],
+                                                       skypos[1], radius,
+                                                       maglimit=maglimit),
+                                   verbose=verbose, retries=retries))
+
+    ix = np.where(out[:, -2] > 0) if band == 'NUV' else np.where(out[:, -1] > 0)
+
+    fwhm = out[ix, -2].mean() if band == 'NUV' else out[ix, -1].mean()
+
+    return out[ix, 0].mean(), out[ix, 1].mean(), round(fwhm, 4)
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def nearest_source(band, skypos, radius=0.01, maglimit=20.0, verbose=0,
+                   catalog='MCAT', retries=20):
+    """
+    Return targeting parameters for the nearest MCAT source to a position.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param skypos: The right ascension and declination, in degrees.
+
+    :type skypos: list @CHASE - list or numpy.ndarray?@
+
+    :param radius: The radius within which to search for the nearest MCAT
+    source. @CHASE - Is this in degrees?@
+
+    :type radius: float
+
+    :param maglimit: The NUV faint limit to return unique sources for.
+
+    :type maglimit: float
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param catalog: The name of the catalog to query.
+
+    :type catalog: str
+
+    :param retries: Number of query retries to attempt before giving up.
+    @CHASE - should the default be made to be 100 like other methods?@
+
+    :type retries: int
+
+    :returns: tuple -- A three-element tuple containing the mean RA, mean DEC,
+    and mean FWHM of the nearest sources within the search radius.
+    """
+
+    out = np.array(gQuery.getArray(gQuery.mcat_sources(band, skypos[0],
+                                                       skypos[1], radius,
+                                                       maglimit=maglimit),
+                                   verbose=verbose, retries=retries))
+
+    if not len(out) and band == 'FUV':
         if verbose:
             print "No nearby MCAT source found in FUV. Trying NUV..."
         band = 'NUV'
-        out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
-    if not len(out) and band=='NUV':
+        out = np.array(gQuery.getArray(gQuery.mcat_sources(band, skypos[0],
+                                                           skypos[1], radius,
+                                                           maglimit=maglimit),
+                                       verbose=verbose, retries=retries))
+
+    if not len(out) and band == 'NUV':
         if verbose:
             print "No nearby MCAT source found. Using input sky position."
-        return skypos[0],skypos[1],0.01
+        return skypos[0], skypos[1], 0.01
 
-    #dist=np.sqrt( (out[:,0]-skypos[0])**2 + (out[:,1]-skypos[1])**2)
-    dist = angularSeparation(out[:,0],out[:,1],skypos[0],skypos[1])
+    dist = angularSeparation(out[:, 0], out[:, 1], skypos[0], skypos[1])
+
     if verbose > 1:
         print "Finding nearest among "+str(len(dist))+" nearby sources."
+
     # Note that this doesn't cope with multiple entries for the same source.
     s = out[np.where(dist == dist.min())][0]
-    # RA, Dec, NUV mag, FUV mag, NUV fwhm, FUV fwhm
-    return avg_sources(band,[s[0],s[1]],verbose=verbose,retries=retries)
-    #return s[0],s[1],s[2],s[3],s[7],s[8]
 
-def nearest_distinct_source(band,skypos,radius=0.1,maglimit=20.0,verbose=0,
-                                                    catalog='MCAT',retries=20):
-    """Return parameters for the nearest non-targeted source."""
-    out = np.array(gQuery.getArray(gQuery.mcat_sources(band,skypos[0],skypos[1],radius,maglimit=maglimit),verbose=verbose,retries=retries))
-    #dist=np.sqrt( (out[:,0]-skypos[0])**2 + (out[:,1]-skypos[1])**2)
-    dist = angularSeparation(out[:,0],out[:,1],skypos[0],skypos[1])
-    ix = np.where(dist>0.005)
-    return np.array(out)[ix][np.where(dist[ix]==dist[ix].min())][0]
+    return avg_sources(band, [s[0], s[1]], verbose=verbose, retries=retries)
+# ------------------------------------------------------------------------------
 
-def suggest_bg_radius(band,skypos,radius=0.1,maglimit=20.0,verbose=0,
-                                                    catalog='MCAT',retries=20):
-    """Returns a recommended background radius based upon the
-    positions and FWHM of nearby sources in the MCAT.
+# ------------------------------------------------------------------------------
+def nearest_distinct_source(band, skypos, radius=0.1, maglimit=20.0, verbose=0,
+                            catalog='MCAT', retries=20):
     """
-    nearest = nearest_distinct_source(band,skypos,verbose=verbose,retries=retries)
-    #dist = np.sqrt( (nearest[0]-skypos[0])**2 + (nearest[1]-skypos[1])**2 )
-    dist = angularSeparation(nearest[0],nearest[1],skypos[0],skypos[1])
-    return round(dist-3*nearest[-2 if band=='NUV' else -1],4)
+    Return parameters for the nearest non-targeted source.
 
-def optimize_annulus(optrad,outann,verbose=0):
-	"""Suggest optiumum annulus dimensions."""
-	if outann<=round(2*optrad,4):
-		print "Warning: There are known sources within the background annulus."
-		print "Use --hrbg to mask these out. (Will increase run times.)"
-	return round(1.2*optrad,4),round(2*optrad,4)
+    :param band: The band to use, either 'FUV' or 'NUV'.
 
-def suggest_parameters(band,skypos,verbose=0,retries=20):
-    mcat = get_mcat_data(skypos,0.01)
-    ix = np.where((mcat[band]['mag']>0) & (mcat[band]['fwhm']>0))
-    pos,fwhm = None, None
+    :type band: str
+
+    :param skypos: The right ascension and declination, in degrees.
+
+    :type skypos: list @CHASE - list or numpy.ndarray?@
+
+    :param radius: The radius within which to search for the nearest MCAT
+    source. @CHASE - Is this in degrees?@
+
+    :type radius: float
+
+    :param maglimit: The NUV faint limit to return unique sources for.
+
+    :type maglimit: float
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param catalog: The name of the catalog to query.
+
+    :type catalog: str
+
+    :param retries: Number of query retries to attempt before giving up.
+    @CHASE - should the default be made to be 100 like other methods?@
+
+    :type retries: int
+
+    :returns: numpy.ndarray -- Catalog values for the nearest non-targeted
+    source. @CHASE - please refine as needed.@
+    """
+
+    out = np.array(gQuery.getArray(gQuery.mcat_sources(band, skypos[0],
+                                                       skypos[1], radius,
+                                                       maglimit=maglimit),
+                                   verbose=verbose, retries=retries))
+
+    dist = angularSeparation(out[:, 0], out[:, 1], skypos[0], skypos[1])
+
+    ix = np.where(dist > 0.005)
+
+    return np.array(out)[ix][np.where(dist[ix] == dist[ix].min())][0]
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def suggest_bg_radius(band, skypos, radius=0.1, maglimit=20.0, verbose=0,
+                      catalog='MCAT', retries=20):
+    """
+    Returns a recommended background radius based upon the positions and FWHM of
+    nearby sources in the MCAT.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param skypos: The right ascension and declination, in degrees.
+
+    :type skypos: list @CHASE - list or numpy.ndarray?@
+
+    :param radius: The radius within which to search for MCAT  sources.
+    @CHASE - Is this in degrees?@
+
+    :type radius: float
+
+    :param maglimit: The NUV faint limit to return unique sources for.
+
+    :type maglimit: float
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param catalog: The name of the catalog to query.
+
+    :type catalog: str
+
+    :param retries: Number of query retries to attempt before giving up.
+    @CHASE - should the default be made to be 100 like other methods?@
+
+    :type retries: int
+
+    :returns: float -- The suggested radius to define the background with.
+    """
+
+    nearest = nearest_distinct_source(band, skypos, verbose=verbose,
+                                      retries=retries)
+
+    dist = angularSeparation(nearest[0], nearest[1], skypos[0], skypos[1])
+
+    return round(dist-3*nearest[-2 if band == 'NUV' else -1], 4)
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def optimize_annulus(optrad, outann, verbose=0):
+    """
+    Suggest optiumum annulus dimensions.
+
+    :param optrad: The optimal photometric aperture radius, in degrees.
+    @CHASE - confirm unit is degrees.
+
+    :type optrad: float
+
+    :param outann: The outer annulus to test, in degrees.
+    @CHASE - confirm unit is degrees.
+
+    :type outann: float
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :returns: float - The suggested outer annulus for background calculation.
+    """
+
+    if outann <= round(2*optrad, 4):
+        print "Warning: There are known sources within the background annulus."
+        print "Use --hrbg to mask these out. (Will increase run times.)"
+
+    return round(1.2*optrad, 4), round(2*optrad, 4)
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def suggest_parameters(band, skypos, verbose=0, retries=20):
+    """
+    Provide suggested coordinates and photometric apertures for a source
+    given the location of known MCAT sources nearby.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param skypos: The right ascension and declination, in degrees.
+
+    :type skypos: list @CHASE - list or numpy.ndarray?@
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param retries: Number of query retries to attempt before giving up.
+    @CHASE - should the default be made to be 100 like other methods?@
+
+    :type retries: int
+
+    :returns: tuple -- A five-element tuple containing the suggested right
+    ascension, declination, photometric aperture, inner annulus, and outer
+    annulus, all in degrees.
+    @CHASE - confirm radius and annuli are in degrees.@
+    """
+
+    mcat = get_mcat_data(skypos, 0.01)
+    ix = np.where((mcat[band]['mag'] > 0) & (mcat[band]['fwhm'] > 0))
+    pos, fwhm = None, None
+
     if mcat['objid'].any(): # There is a known star at the target position!
-        pos = [mcat['ra'][ix].mean(),mcat['dec'][ix].mean()]
+        pos = [mcat['ra'][ix].mean(), mcat['dec'][ix].mean()]
         radius = 2*mcat[band]['fwhm'][ix].mean()
         if verbose:
             print 'Recentering on {pos}.'.format(pos=pos)
@@ -466,4 +1279,5 @@ def suggest_parameters(band,skypos,verbose=0,retries=20):
         radius = gt.aper2deg(4)
     annulus = [3*radius, 5*radius]
 
-    return pos[0],pos[1],radius,annulus[0],annulus[1]
+    return pos[0], pos[1], radius, annulus[0], annulus[1]
+# ------------------------------------------------------------------------------
