@@ -246,7 +246,7 @@ def setup_parser(iam='gaperture'):
 def check_args(args, iam='gaperture'):
     """
     Checks validity of command line arguments and, in some cases
-    massages them a little bit.
+    modifies them a little bit.
 
     :param args: The command-line arguments.
 
