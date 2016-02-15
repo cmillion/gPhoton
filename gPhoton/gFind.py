@@ -184,7 +184,7 @@ def check_args(args, iam='gfind', allow_no_coords=False):
 # ------------------------------------------------------------------------------
 def __main__():
     """
-    Called when gFind is executed directly through command line.
+    Called when gFind is executed directly through the command line.
     """
 
     args = setup_parser().parse_args()
