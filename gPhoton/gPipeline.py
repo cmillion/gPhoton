@@ -6,7 +6,7 @@ import argparse
 
 def gPipeline(raw6file,scstfile,band,outbase,aspfile,ssdfile,nullout,
 			verbose=0,retries=20):
-	PhotonPipe(raw6file,scstfile,band,outbase,aspfile,ssdfile,nullout,
+	photonpipe(raw6file,scstfile,band,outbase,aspfile,ssdfile,nullout,
 			   verbose=verbose,retries=retries)
 	return
 
