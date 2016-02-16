@@ -56,7 +56,7 @@ def gPipeline(raw6file, scstfile, band, outbase, aspfile, ssdfile, nullout,
     :type retries: int
     """
 
-    PhotonPipe(raw6file, scstfile, band, outbase, aspfile, ssdfile, nullout,
+    photonpipe(raw6file, scstfile, band, outbase, aspfile, ssdfile, nullout,
                verbose=verbose, retries=retries)
 
     return
