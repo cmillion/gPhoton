@@ -256,10 +256,11 @@ def check_args(args, iam='gmap'):
 # ------------------------------------------------------------------------------
 def __main__():
     """
-    Called when gMap is executed directly through command line.
+    Called when gMap is executed directly through the command line.
     """
 
     args = setup_parser().parse_args()
+
     args = check_args(args)
 
     if args.verbose:

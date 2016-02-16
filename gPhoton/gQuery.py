@@ -1,76 +1,174 @@
-# This file defines common queries that are passed to the GALEX photon
-# database at MAST.
+"""
+.. module:: gQuery
+
+   :synopsis: Defines common queries that are passed to the GALEX photon
+   database at MAST. @CHASE - update if needed.@
+
+.. moduleauthor:: Chase Million <chase.million@gmail.com>
+"""
+
+# @CHASE - manage_requests (first one) is not used, can be removed?@
 from MCUtils import manage_requests, manage_requests2
 import CalUtils
 from galextools import isPostCSP
 from gPhoton import time_id
 
-tscale = 1000. # time in the database is "integer-ized" by multiplying by this
+# ------------------------------------------------------------------------------
+# Time in the database is "integer-ized" by multiplying by this
+tscale = 1000.
 
-"""The following three global variables are used in constructing a properly
-formatted query to the MAST database. Don't change them unless you know what
-you're doing.
-"""
-#baseURL = 'http://masttest.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
-baseURL = 'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query='
+# The following three global variables are used in constructing a properly
+# formatted query to the MAST database. Don't change them unless you know what
+# you're doing.
+baseURL = ('https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/Galex'
+           'PhotonListQueryTest?query=')
 baseDB = 'GPFCore.dbo'
 MCATDB = 'GR6Plus7.dbo'
 formatURL = ' -- '+str(time_id)+'&format=extjs'
+# ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
 def hasNaN(query):
-    """Check if there is NaN in a query (or any string) and, if so, raise an
-    exception because that probably indicates that something has gone wrong.
     """
+    Check if there is NaN in a query (or any string) and, if so, raise an
+    exception because that probably indicates that something has gone wrong.
+
+    :param query: The query string to check.
+
+    :type query: str
+    """
+
     if 'NaN' in query:
         raise RuntimeError("Malformed query: contains NaN values.")
-    return
 
-def getValue(query,verbose=0,retries=20):
-    """Manage a database call which returns a single value."""
+    # @CHASE - Don't need a return statement here?@
+    return
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def getValue(query, verbose=0, retries=20):
+    """
+    Manage a database call which returns a single value.
+
+    :param query: The query to run.
+
+    :type query: str
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param retries: Number of query retries to attempt before giving up.
+    @CHASE - The default is 100 some places and 20 others, should be same?@
+
+    :type retries: int
+
+    :returns: requests.Response or None -- The response from the server. If the
+    query does not receive a response, returns None.
+    """
+
     hasNaN(query)
-    out = manage_requests2(query,maxcnt=retries,verbose=verbose)
+
+    out = manage_requests2(query, maxcnt=retries, verbose=verbose)
+
     if out is not None:
         try:
             out = float(out.json()['data']['Tables'][0]['Rows'][0][0])
         except:
             print 'Failed: {q}'.format(q=query)
-            raise# RuntimeError('Connection timeout.')
+            raise
         return out
     else:
         print 'Failed: {q}'.format(q=query)
         raise ValueError("Query never finished on server, run with verbose"
                          " turned on for more info.")
+# ------------------------------------------------------------------------------
 
-def getArray(query,verbose=0,retries=20):
-    """Manage a database call which returns an array of values."""
+# ------------------------------------------------------------------------------
+def getArray(query, verbose=0, retries=20):
+    """
+    Manage a database call which returns an array of values.
+
+    :param query: The query to run.
+
+    :type query: str
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+
+    :param retries: Number of query retries to attempt before giving up.
+    @CHASE - The default is 100 some places and 20 others, should be same?@
+
+    :type retries: int
+
+    :returns: requests.Response or None -- The response from the server. If the
+    query does not receive a response, returns None.
+    """
+
     hasNaN(query)
-    out = manage_requests2(query,maxcnt=retries,verbose=verbose)
+
+    out = manage_requests2(query, maxcnt=retries, verbose=verbose)
+
     if out is not None:
         try:
             out = out.json()['data']['Tables'][0]['Rows']
         except:
             print 'Failed: {q}'.format(q=query)
-            raise# RuntimeError('Connection timeout.')
+            raise
         return out
     else:
         print 'Failed: {q}'.format(q=query)
         raise ValueError("Query never finished on server, run with verbose"
                          " turned on for more info.")
+# ------------------------------------------------------------------------------
 
-def mcat_sources(band,ra0,dec0,radius,maglimit=20):
-    ''' Return the MCAT _coadd_ sources given sky position and search radius
-    (and optional lower magnitude limit).
+# ------------------------------------------------------------------------------
+def mcat_sources(band, ra0, dec0, radius, maglimit=20.):
+    """
+    Return the MCAT coadd sources given sky position and search radius
+    (and optional lower magnitude limit). @CHASE - from the coadd source list,
+    right?@
+
     Columns are:
     [0,RA],[1,Dec],[2,NUV_mag],[3,FUV_mag],[4,FoV_radius],[5,NUV_skybg],
     [6,FUV_skybg],[7,NUV_FWHM_world],[8,FUV_FWHM_world],
     [9:15,FUV_mag_aper_1:7],[16:22,NUV_mag_aper_1:7]
     [23:29,FUV_magerr_aper_1:7],[30:36,NUV_magerr_aper1:7]
-    '''
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param ra0: The right ascension, in degrees, around which to search.
+
+    :type ra0: float @CHASE - this is converted to float below, isn't it already
+    a float?@
+
+    :param dec0: The declination, in degrees, around which to search.
+
+    :type dec0: float @CHASE - this is converted to float below, isn't it
+    already a float?@
+
+    :param radius: The radius within which to search for MCAT sources, in
+    degrees.
+
+    :type radius: float
+
+    :param maglimit: The NUV faint limit to return MCAT sources for.
+
+    :type maglimit: float
+
+    :returns: str -- The query to submit to the database.
+    """
+
     # 1=nuv, 2=fuv, 3=both
-    bandflag = 1 if band=='NUV' else 2
+    bandflag = 1 if band == 'NUV' else 2
+
     # fGetNearbyObjEq takes radius in arcminutes
-    # TODO: Add exposure time.
-    return (str(baseURL)+
+    # [Future]: Add exposure time. @CHASE - still relevant? (just checking)@
+    return (
+        str(baseURL)+
         'select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg,'
         ' nuv_fwhm_world, fuv_fwhm_world, fuv_mag_aper_1, fuv_mag_aper_2,'
         ' fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6,'
@@ -88,12 +186,37 @@ def mcat_sources(band,ra0,dec0,radius,maglimit=20):
         str(radius*60.)+') as nb on p.objid=nb.objid and (band=3 or band='+
         str(bandflag)+') and '+str(band)+'_mag<'+str(maglimit)+
         str(formatURL))
+# ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
 def obstype(objid):
-        return '{baseURL}select distinct vpe.mpstype as survey, vpe.tilename, vpe.photoextractid, vpe.petal, vpe.nlegs, vpe.leg, vpe.eclipse, vpe.img, vpe.subvis from {MCATDB}.visitPhotoextract as vpe inner join {MCATDB}.imgrun as iv on vpe.photoextractid=iv.imgrunid inner join {MCATDB}.visitphotoobjall as p on vpe.photoextractid=p.photoextractid where p.objid={objid}{formatURL}'.format(baseURL=baseURL,MCATDB=MCATDB,objid=objid,formatURL=formatURL)
+    """
+    @CHASE - please provide description.@
 
-def mcat_visit_sources(ra0,dec0,radius):
-    ''' Return the MCAT per-visit sources given sky position and search radius.
+    :param objid: The MCAT Object ID to return the observation type from.
+
+    :type objid: int @CHASE - is this float/int/long?@
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    return (
+        '{baseURL}select distinct vpe.mpstype as survey, vpe.tilename,'
+        ' vpe.photoextractid, vpe.petal, vpe.nlegs, vpe.leg, vpe.eclipse,'
+        ' vpe.img, vpe.subvis from {MCATDB}.visitPhotoextract as vpe inner'
+        ' join {MCATDB}.imgrun as iv on vpe.photoextractid=iv.imgrunid'
+        ' inner join {MCATDB}.visitphotoobjall as p on vpe.photoextractid'
+        '=p.photoextractid where p.objid={objid}{formatURL}'.format(
+            baseURL=baseURL, MCATDB=MCATDB, objid=objid, formatURL=formatURL))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def mcat_visit_sources(ra0, dec0, radius):
+    """
+    Return the MCAT per-visit sources given sky position and search radius.
+    @CHASE - noticed this doesn't take in band, should that be added in the
+    future?@
+
     The columns are as follows:
     [0,objid],[1,ra],[2,dec],[3,NUV_mag],[4,FUV_mag],[5,FoV_radius],
     [6,NUV_skybg],[7,FUV_skybg],[8,NUV_FWHM],[9,FUV_FWHM],[10,FUV_expt],
@@ -101,150 +224,534 @@ def mcat_visit_sources(ra0,dec0,radius):
     [26:32,FUV_magerr_aper_1:7],[33:39,NUV_magerr_aper_1:7],[40,Nobssecs],
     [41,Fobssecs],[42,NUV_artifact],[43,FUV_artifact],[44,FUV_obstart],
     [45,FUV_obsend],[46,NUV_obstart],[47,NUV_obsend]
-    '''
-    return "{baseURL}select vpo.objid, ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world, vpe.fexptime, vpe.nexptime, fuv_mag_aper_1, fuv_mag_aper_2, fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6, fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3, nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7, fuv_magerr_aper_1, fuv_magerr_aper_2, fuv_magerr_aper_3, fuv_magerr_aper_4, fuv_magerr_aper_5, fuv_magerr_aper_6, fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2, nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5, nuv_magerr_aper_6, nuv_magerr_aper_7, nobssecs, fobssecs, nuv_artifact, fuv_artifact, vpe.fexpstar, vpe.fexpend, vpe.nexpstar, vpe.nexpend from {MCATDB}.visitphotoobjall as vpo inner join {MCATDB}.visitphotoextract as vpe on vpo.photoextractid=vpe.photoextractid inner join {MCATDB}.fGetNearbyVisitObjEq({ra0},{dec0},{radius}) as nb on vpo.objid=nb.objid inner join {MCATDB}.imgrun as i on vpe.photoExtractID=i.imgRunID{formatURL}".format(baseURL=baseURL,
-        MCATDB=MCATDB,ra0=float(ra0),dec0=float(dec0),radius=radius*60.,
-        formatURL=formatURL)
 
-def mcat_objid_search(objid,mode='visit'):
-    """Return a bunch of observation data for a visit level objid (ggoid).
-    Doing the same for coadd level data is not yet supported.
+    :param ra0: The right ascension, in degrees, around which to search.
+
+    :type ra0: float @CHASE - this is converted to float below, isn't it already
+    a float?@
+
+    :param dec0: The declination, in degrees, around which to search.
+
+    :type dec0: float @CHASE - this is converted to float below, isn't it
+    already a float?@
+
+    :param radius: The radius within which to search for MCAT sources, in
+    degrees.
+
+    :type radius: float
+
+    :returns: str -- The query to submit to the database.
     """
-    return (str(baseURL)+
-        'select objid, minPhotoObsDate, maxPhotoObsDate, obs_date, obsdatim,'
-        ' nobssecs, fobssecs, nexptime, fexptime, nexpstar, nexpend, fexpstar,'
-        ' fexpend from '+str(MCATDB)+'.visitphotoobjall as vp inner join '+
-        str(MCATDB)+'.imgrun as ir on vp.photoextractid=ir.imgrunid'
+
+    return (
+        "{baseURL}select vpo.objid, ra, dec, nuv_mag, fuv_mag, fov_radius,"
+        " nuv_skybg, fuv_skybg, nuv_fwhm_world, fuv_fwhm_world,"
+        " vpe.fexptime, vpe.nexptime, fuv_mag_aper_1, fuv_mag_aper_2,"
+        " fuv_mag_aper_3, fuv_mag_aper_4, fuv_mag_aper_5, fuv_mag_aper_6,"
+        " fuv_mag_aper_7, nuv_mag_aper_1, nuv_mag_aper_2, nuv_mag_aper_3,"
+        " nuv_mag_aper_4, nuv_mag_aper_5, nuv_mag_aper_6, nuv_mag_aper_7,"
+        " fuv_magerr_aper_1, fuv_magerr_aper_2, fuv_magerr_aper_3,"
+        " fuv_magerr_aper_4, fuv_magerr_aper_5, fuv_magerr_aper_6,"
+        " fuv_magerr_aper_7, nuv_magerr_aper_1, nuv_magerr_aper_2,"
+        " nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5,"
+        " nuv_magerr_aper_6, nuv_magerr_aper_7, nobssecs, fobssecs,"
+        " nuv_artifact, fuv_artifact, vpe.fexpstar, vpe.fexpend,"
+        " vpe.nexpstar, vpe.nexpend from {MCATDB}.visitphotoobjall as vpo"
+        " inner join {MCATDB}.visitphotoextract as vpe on"
+        " vpo.photoextractid=vpe.photoextractid inner join"
+        " {MCATDB}.fGetNearbyVisitObjEq({ra0},{dec0},{radius}) as nb on"
+        " vpo.objid=nb.objid inner join {MCATDB}.imgrun as i on"
+        " vpe.photoExtractID=i.imgRunID{formatURL}".format(
+            baseURL=baseURL, MCATDB=MCATDB, ra0=float(ra0), dec0=float(dec0),
+            radius=radius*60., formatURL=formatURL))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def mcat_objid_search(objid, mode='visit'):
+    """
+    Return a bunch of observation data for a visit level objid (ggoid).
+    Doing the same for coadd level data is not yet supported.
+
+    :param objid: The MCAT Object ID to return the observation type from.
+
+    :type objid: int @CHASE - is this float/int/long?@
+
+    :param mode: @CHASE - This is not used at all here, remove?@
+
+    :type mode: str
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    return (
+        str(baseURL)+'select objid, minPhotoObsDate, maxPhotoObsDate, obs_date,'
+        ' obsdatim, nobssecs, fobssecs, nexptime, fexptime, nexpstar, nexpend,'
+        ' fexpstar, fexpend from '+str(MCATDB)+'.visitphotoobjall as vp inner'
+        ' join '+str(MCATDB)+'.imgrun as ir on vp.photoextractid=ir.imgrunid'
         ' inner join '+str(MCATDB)+'.visitphotoextract as vpe on'
         ' vp.photoextractid=vpe.photoextractid where objid = '+
         str(long(objid))+str(formatURL))
+# ------------------------------------------------------------------------------
 
-def exposure_ranges(band,ra0,dec0,t0=1,t1=10000000000000,detsize=1.25):
-    """Returns a list of times (in one second increments) where data exists
-    with an aspect solution within detsize of [ra0,dec0].
+# ------------------------------------------------------------------------------
+def exposure_ranges(band, ra0, dec0, t0=1, t1=10000000000000, detsize=1.25):
     """
+    Returns a list of times (in one second increments) where data exists
+    with an aspect solution within detsize of [ra0,dec0].
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param ra0: The right ascension, in degrees, around which to search.
+
+    :type ra0: float @CHASE - this is converted to float below, isn't it already
+    a float?@
+
+    :param dec0: The declination, in degrees, around which to search.
+
+    :type dec0: float @CHASE - this is converted to float below, isn't it
+    already a float?@
+
+    :param t0: The minimum time stamp to search for exposure ranges.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search for exposure ranges.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param detsize: Effective diameter, in degrees, of the field-of-view.
+
+    :type detsize: float
+
+    :returns: str -- The query to submit to the database.
+    """
+
     # If band is set to False (or equivalent), search on both bands
     if not band:
         band = 'FUV/NUV'
-    return (str(baseURL)+
+
+    return (
+        str(baseURL)+
         'select distinct time from '+str(baseDB)+
         '.fGetNearbyAspectEq('+repr(float(ra0))+','+repr(float(dec0))+',(('+
-            str(detsize)+'/2.0)*60.0),'+
-            str(long(t0*tscale))+','+str(long(t1*tscale))+')'
+        str(detsize)+'/2.0)*60.0),'+
+        str(long(t0*tscale))+','+str(long(t1*tscale))+')'
         ' where band=\''+str(band)+'\' or band=\'FUV/NUV\' order by time'+
         str(formatURL))
+# ------------------------------------------------------------------------------
 
-def exposure_range(band,ra0,dec0,t0=1,t1=10000000000000):
-    """Find time ranges for which data exists at a given position."""
-    return (str(baseURL)+
-        'select startTimeRange, endTimeRange'
-        ' from '+str(baseDB)+
+# ------------------------------------------------------------------------------
+def exposure_range(band, ra0, dec0, t0=1, t1=10000000000000):
+    """
+    Find time ranges for which data exists at a given position.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param ra0: The right ascension, in degrees, around which to search.
+
+    :type ra0: float @CHASE - this is converted to float below, isn't it already
+    a float?@
+
+    :param dec0: The declination, in degrees, around which to search.
+
+    :type dec0: float @CHASE - this is converted to float below, isn't it
+    already a float?@
+
+    :param t0: The minimum time stamp to search for exposure ranges.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search for exposure ranges.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    return (str(baseURL)+'select startTimeRange, endTimeRange'
+            ' from '+str(baseDB)+
             '.fGetTimeRanges('+str(int(t0))+','+str(int(t1))+','+
             repr(float(ra0))+','+repr(float(dec0))+') where band=\''+
             str(band)+'\''+str(formatURL))
+# ------------------------------------------------------------------------------
 
-def aperture(band,ra0,dec0,t0,t1,radius):
-    """Integrate counts over an aperture at a position."""
-    return (str(baseURL)+
-        'Select  sum(photonCount)'
-        ' from '+str(baseDB)+'.fGetNearbyObjEqCount'+str(band)+
-        '('+repr(float(ra0))+','+repr(float(dec0))+
-        ','+str(radius)+','+str(long(t0*tscale))+','+
-        str(long(t1*tscale))+',0)'+str(formatURL))
-
-def deadtime1(band,t0,t1,flag=False):
-    """Return the global counts of non-NULL data."""
-    return ('{baseURL}select count(*) from {baseDB}.{band}PhotonsV where '+
-            'time >= {t0} and time < {t1}'+
-            '{flag}{formatURL}').format(baseURL=baseURL,
-                baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
-                t1=str(long(t1*tscale)), flag=' and flag=0' if flag else '',
-                formatURL=formatURL)
-
-def deadtime2(band,t0,t1):
-    """Return the global counts for NULL data."""
-    return ('{baseURL}select count(*) from {baseDB}.{band}PhotonsNULLV where '+
-            'time >= {t0} and time < {t1}{formatURL}').format(baseURL=baseURL,
-                baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
-                t1=str(long(t1*tscale)), formatURL=formatURL)
-
-def deadtime(band,t0,t1,feeclkratio=0.966,tec2fdead=5.52e-6):
-    """Return the emperically determined deadtime correction based upon the
-    global count rate.
+# ------------------------------------------------------------------------------
+def aperture(band, ra0, dec0, t0, t1, radius):
     """
-    scale = tec2fdead/feeclkratio
-    return (str(baseURL)+
-        'select sum(dt)*'+'%0.30f'%scale+' / ('+repr(t1)+'-'+repr(t0)+')'
-        ' from(select count(*) as dt from '+str(baseDB)+'.'+str(band)+
-        'PhotonsNULLV where time >= '+str(long(t0*tscale))+' and time < '+
-        str(long(t1*tscale))+' union all select count(*) as dt from '+
-        str(baseDB)+'.'+str(band)+
-        'PhotonsV where time >= '+str(long(t0*tscale))+' and time < '+
-        str(long(t1*tscale))+') x'+str(formatURL))
+    Integrate counts over an aperture at a position.
 
-def globalcounts(band,t0,t1,flag=False):
-    """Return the total number of detector events within a time range."""
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param ra0: The right ascension, in degrees, around which to search.
+
+    :type ra0: float @CHASE - this is converted to float below, isn't it already
+    a float?@
+
+    :param dec0: The declination, in degrees, around which to search.
+
+    :type dec0: float @CHASE - this is converted to float below, isn't it
+    already a float?@
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param radius: The radius within which to integrate counts, in
+    degrees.
+
+    :type radius: float
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    return (str(baseURL)+
+            'Select  sum(photonCount) from '+str(baseDB)+
+            '.fGetNearbyObjEqCount'+str(band)+'('+repr(float(ra0))+','+
+            repr(float(dec0))+','+str(radius)+','+str(long(t0*tscale))+','+
+            str(long(t1*tscale))+',0)'+str(formatURL))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def deadtime1(band, t0, t1, flag=False):
+    """
+    Return the global counts of non-NULL data.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param flag: Only return counts without a flag set. @CHASE - confirm
+    please.@
+
+    :type flag: bool
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    return (
+        '{baseURL}select count(*) from {baseDB}.{band}PhotonsV where '+
+        'time >= {t0} and time < {t1}'+
+        '{flag}{formatURL}').format(
+            baseURL=baseURL, baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
+            t1=str(long(t1*tscale)), flag=' and flag=0' if flag else '',
+            formatURL=formatURL)
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def deadtime2(band, t0, t1):
+    """
+    Return the global counts for NULL data.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    return ('{baseURL}select count(*) from {baseDB}.{band}PhotonsNULLV where '+
+            'time >= {t0} and time < {t1}{formatURL}').format(
+                baseURL=baseURL, baseDB=baseDB, band=band,
+                t0=str(long(t0*tscale)), t1=str(long(t1*tscale)),
+                formatURL=formatURL)
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def deadtime(band, t0, t1, feeclkratio=0.966, tec2fdead=5.52e-6):
+    """
+    Return the emperically determined deadtime correction based upon the
+    global count rate.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param feeclkratio: @CHASE - please define.@
+
+    :type feeclkratio: float
+
+    :param tec2fdead: @CHASE - please define.@
+
+    :type tec2fdead: float
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    scale = tec2fdead/feeclkratio
+
+    return (str(baseURL)+
+            'select sum(dt)*'+'%0.30f'%scale+' / ('+repr(t1)+'-'+repr(t0)+')'
+            ' from(select count(*) as dt from '+str(baseDB)+'.'+str(band)+
+            'PhotonsNULLV where time >= '+str(long(t0*tscale))+' and time < '+
+            str(long(t1*tscale))+' union all select count(*) as dt from '+
+            str(baseDB)+'.'+str(band)+
+            'PhotonsV where time >= '+str(long(t0*tscale))+' and time < '+
+            str(long(t1*tscale))+') x'+str(formatURL))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def globalcounts(band, t0, t1, flag=False):
+    """
+    Return the total number of detector events within a time range.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param flag: Only return counts without a flag set. @CHASE - confirm
+    please.@
+
+    :type flag: bool
+
+    :returns: str -- The query to submit to the database.
+    """
+
     return ('{baseURL}select count(t) from '+
             '(select time as t from {baseDB}.{band}PhotonsV '+
             'where time >= {t0} and time < {t1}{flag} union all '+
             'select time as t from {baseDB}.{band}PhotonsNULLV where time >= '+
-            '{t0} and time < {t1}) x{formatURL}').format(baseURL=baseURL,
-                baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
-                t1=str(long(t1*tscale)), flag=' and flag=0' if flag else '',
-                formatURL=formatURL)
+            '{t0} and time < {t1}) x{formatURL}').format(
+                baseURL=baseURL, baseDB=baseDB, band=band,
+                t0=str(long(t0*tscale)), t1=str(long(t1*tscale)),
+                flag=' and flag=0' if flag else '', formatURL=formatURL)
+# ------------------------------------------------------------------------------
 
-def alltimes(band,t0,t1):
-    """Return the time stamps of every detector event within a time range."""
-    return ('{baseURL}select t from (select time as t from {baseDB}.{band}PhotonsV '+
+# ------------------------------------------------------------------------------
+def alltimes(band, t0, t1):
+    """
+    Return the time stamps of every detector event within a time range.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    return ('{baseURL}select t from (select time as t from'
+            ' {baseDB}.{band}PhotonsV '+
             'where time >= {t0} and time < {t1} union all select time as t '+
             'from {baseDB}.{band}PhotonsNULLV where time >= '+
-            '{t0} and time < {t1}) x{formatURL}').format(baseURL=baseURL,
-                baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
-                t1=str(long(t1*tscale)), formatURL=formatURL)
+            '{t0} and time < {t1}) x{formatURL}').format(
+                baseURL=baseURL, baseDB=baseDB, band=band,
+                t0=str(long(t0*tscale)), t1=str(long(t1*tscale)),
+                formatURL=formatURL)
+# ------------------------------------------------------------------------------
 
-def uniquetimes(band,t0,t1,flag=False,null=False):
-    """Return the _unique_ timestamps for events within trange."""
+# ------------------------------------------------------------------------------
+def uniquetimes(band, t0, t1, flag=False, null=False):
+    """
+    Return the unique timestamps for events within trange.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param flag: Only return times without a flag set. @CHASE - confirm
+    please.@
+
+    :type flag: bool
+
+    :param null: Return times from the null table? @CHASE - please confirm@
+
+    :returns: str -- The query to submit to the database.
+    """
+
     if not null:
         return ('{baseURL}select time from {baseDB}.{band}ShutterPOTimeV '+
                 'where time >= {t0} and time < {t1} order by '+
-                'time{formatURL}').format(baseURL=baseURL, baseDB=baseDB,band=band, t0=str(long(t0*tscale)), t1=str(long(t1*tscale)), formatURL=formatURL)
+                'time{formatURL}').format(
+                    baseURL=baseURL, baseDB=baseDB, band=band,
+                    t0=str(long(t0*tscale)), t1=str(long(t1*tscale)),
+                    formatURL=formatURL)
     else:
         return ('{baseURL}select distinct time from '+
-            '{baseDB}.{band}PhotonsNULLV where '+
-            'time >= {t0} and time < {t1} order by time'+
-            '{formatURL}').format(baseURL=baseURL,
-                baseDB=baseDB, band=band, t0=str(long(t0*tscale)),
-                t1=str(long(t1*tscale)), formatURL=formatURL)
+                '{baseDB}.{band}PhotonsNULLV where '+
+                'time >= {t0} and time < {t1} order by time'+
+                '{formatURL}').format(
+                    baseURL=baseURL, baseDB=baseDB, band=band,
+                    t0=str(long(t0*tscale)), t1=str(long(t1*tscale)),
+                    formatURL=formatURL)
+# ------------------------------------------------------------------------------
 
-def boxcount(band,t0,t1,xr,yr):
-    """Find the number of events inside of a box defined by [xy] range in
-    detector space coordinates. This is useful for pulling out stim events.
+# ------------------------------------------------------------------------------
+def boxcount(band, t0, t1, xr, yr):
     """
-    return (str(baseURL)+'select count(*) from '+str(baseDB)+'.'+str(band)+
-        'PhotonsNULLV where time >= '+str(long(t0*tscale))+' and time < '+
-        str(long(t1*tscale))+' and x >= '+str(xr[0])+' and x < '+str(xr[1])+
-        ' and y >= '+str(yr[0])+' and y < '+str(yr[1])+str(formatURL))
+    Find the number of events inside of a box defined by [xy] range in
+    detector space coordinates. This is useful for pulling out stim events.
 
-def detbox(band,t0,t1,xr,yr):
-    """Return all events inside a box defined in detector space by [xy]
-    range. Created as a sanity check for stim events."""
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param xr: The minimum and maximum x-values that define the box.
+
+    :type xr: list @CHASE - confirm please.@
+
+    :param yr: The minimum and maximum y-values that define the box.
+
+    :type yr: list @CHASE - confirm please.@
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    return (str(baseURL)+'select count(*) from '+str(baseDB)+'.'+str(band)+
+            'PhotonsNULLV where time >= '+str(long(t0*tscale))+' and time < '+
+            str(long(t1*tscale))+' and x >= '+str(xr[0])+' and x < '+str(xr[1])+
+            ' and y >= '+str(yr[0])+' and y < '+str(yr[1])+str(formatURL))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def detbox(band, t0, t1, xr, yr):
+    """
+    Return all events inside a box defined in detector space by [xy]
+    range. Created as a sanity check for stim events.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param xr: The minimum and maximum x-values that define the box.
+
+    :type xr: list @CHASE - confirm please.@
+
+    :param yr: The minimum and maximum y-values that define the box.
+
+    :type yr: list @CHASE - confirm please.@
+
+    :returns: str -- The query to submit to the database.
+    """
+
     return ('{baseURL}select time,x,y,ya from {baseDB}.{band}PhotonsNULLV '+
             'where time >= {t0} and time < {t1} and '+
             'x >= {xmin} and x < {xmax} and y >= {ymin} and y < {ymax}'+
-            '{formatURL}').format(baseURL=baseURL, baseDB=baseDB, band=band,
-                t0=str(long(t0*tscale)), t1=str(long(t1*tscale)),
-                xmin=xr[0], xmax=xr[1], ymin=yr[0], ymax=yr[1],
-                formatURL=formatURL)
+            '{formatURL}').format(
+                baseURL=baseURL, baseDB=baseDB, band=band,
+                t0=str(long(t0*tscale)), t1=str(long(t1*tscale)), xmin=xr[0],
+                xmax=xr[1], ymin=yr[0], ymax=yr[1], formatURL=formatURL)
+# ------------------------------------------------------------------------------
 
-# FIXME: convert t0 to eclipse
-def stimcount(band,t0,t1,margin=[90.01,90.01],aspum=68.754932/1000.,
-              eclipse=None,null=True):
-    """Return stim counts."""
+# ------------------------------------------------------------------------------
+def stimcount(band, t0, t1, margin=[90.01, 90.01], aspum=68.754932/1000.,
+              eclipse=None, null=True):
+    """
+    Return stim counts.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param margin: @CHASE - please define.@
+
+    :type margin: list
+
+    :param aspum: @CHASE - please define.@
+
+    :type aspum: float
+
+    :param eclipse: The eclipse to return stim counts for.
+
+    :type eclipse: int
+
+    :param null: @CHASE - please define.@
+
+    :type null: bool
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    # [Future]: Convert t0 to eclipse
+
     if not eclipse:
         eclipse = 55000 if isPostCSP(t0) else 30000
+
     if isPostCSP(t0):
-        margin[1]=180.02
-    avgstim = CalUtils.avg_stimpos(band,eclipse)
+        margin[1] = 180.02
+
+    avgstim = CalUtils.avg_stimpos(band, eclipse)
+
     return ('{baseURL}select count(*) from {baseDB}.{band}Photons{N}V '+
             'where time >= {t0} and time < {t1} and ('+
             '((x >= {x10} and x < {x11}) and (y >= {y10} and y < {y11})) or '+
@@ -252,34 +759,69 @@ def stimcount(band,t0,t1,margin=[90.01,90.01],aspum=68.754932/1000.,
             '((x >= {x30} and x < {x31}) and (y >= {y30} and y < {y31})) or '+
             '((x >= {x40} and x < {x41}) and (y >= {y40} and y < {y41}))'+
             '){formatURL}').format(baseURL=baseURL, baseDB=baseDB, band=band,
-                N='NULL' if null else '',
-                t0=str(long(t0*tscale)), t1=str(long(t1*tscale)),
-                x10=(avgstim['x1']-margin[0])/aspum,
-                x11=(avgstim['x1']+margin[0])/aspum,
-                y10=(avgstim['y1']-margin[1])/aspum,
-                y11=(avgstim['y1']+margin[1])/aspum,
-                x20=(avgstim['x2']-margin[0])/aspum,
-                x21=(avgstim['x2']+margin[0])/aspum,
-                y20=(avgstim['y2']-margin[1])/aspum,
-                y21=(avgstim['y2']+margin[1])/aspum,
-                x30=(avgstim['x3']-margin[0])/aspum,
-                x31=(avgstim['x3']+margin[0])/aspum,
-                y30=(avgstim['y3']-margin[1])/aspum,
-                y31=(avgstim['y3']+margin[1])/aspum,
-                x40=(avgstim['x4']-margin[0])/aspum,
-                x41=(avgstim['x4']+margin[0])/aspum,
-                y40=(avgstim['y4']-margin[1])/aspum,
-                y41=(avgstim['y4']+margin[1])/aspum,
-                formatURL=formatURL)
+                                   N='NULL' if null else '',
+                                   t0=str(long(t0*tscale)),
+                                   t1=str(long(t1*tscale)),
+                                   x10=(avgstim['x1']-margin[0])/aspum,
+                                   x11=(avgstim['x1']+margin[0])/aspum,
+                                   y10=(avgstim['y1']-margin[1])/aspum,
+                                   y11=(avgstim['y1']+margin[1])/aspum,
+                                   x20=(avgstim['x2']-margin[0])/aspum,
+                                   x21=(avgstim['x2']+margin[0])/aspum,
+                                   y20=(avgstim['y2']-margin[1])/aspum,
+                                   y21=(avgstim['y2']+margin[1])/aspum,
+                                   x30=(avgstim['x3']-margin[0])/aspum,
+                                   x31=(avgstim['x3']+margin[0])/aspum,
+                                   y30=(avgstim['y3']-margin[1])/aspum,
+                                   y31=(avgstim['y3']+margin[1])/aspum,
+                                   x40=(avgstim['x4']-margin[0])/aspum,
+                                   x41=(avgstim['x4']+margin[0])/aspum,
+                                   y40=(avgstim['y4']-margin[1])/aspum,
+                                   y41=(avgstim['y4']+margin[1])/aspum,
+                                   formatURL=formatURL)
+# ------------------------------------------------------------------------------
 
-def stimtimes(band,t0,t1,margin=[90.01,90.01],aspum=68.754932/1000.,
+# ------------------------------------------------------------------------------
+def stimtimes(band, t0, t1, margin=[90.01, 90.01], aspum=68.754932/1000.,
               eclipse=None):
-    """Return stim counts."""
+    """
+    Return stim counts.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param margin: @CHASE - please define.@
+
+    :type margin: list
+
+    :param aspum: @CHASE - please define.@
+
+    :type aspum: float
+
+    :param eclipse: The eclipse to return stim counts for.
+
+    :type eclipse: int
+
+    :returns: str -- The query to submit to the database.
+    """
+
     if not eclipse:
         eclipse = 55000 if isPostCSP(t0) else 30000
+
     if isPostCSP(t0):
-        margin[1]=180.02
-    avgstim = CalUtils.avg_stimpos(band,eclipse)
+        margin[1] = 180.02
+
+    avgstim = CalUtils.avg_stimpos(band, eclipse)
+
     return ('{baseURL}select time from {baseDB}.{band}PhotonsNULLV '+
             'where time >= {t0} and time < {t1} and ('+
             '((x >= {x10} and x < {x11}) and (y >= {y10} and y < {y11})) or '+
@@ -287,131 +829,492 @@ def stimtimes(band,t0,t1,margin=[90.01,90.01],aspum=68.754932/1000.,
             '((x >= {x30} and x < {x31}) and (y >= {y30} and y < {y31})) or '+
             '((x >= {x40} and x < {x41}) and (y >= {y40} and y < {y41}))'+
             '){formatURL}').format(baseURL=baseURL, baseDB=baseDB, band=band,
-                t0=str(long(t0*tscale)), t1=str(long(t1*tscale)),
-                x10=(avgstim['x1']-margin[0])/aspum,
-                x11=(avgstim['x1']+margin[0])/aspum,
-                y10=(avgstim['y1']-margin[1])/aspum,
-                y11=(avgstim['y1']+margin[1])/aspum,
-                x20=(avgstim['x2']-margin[0])/aspum,
-                x21=(avgstim['x2']+margin[0])/aspum,
-                y20=(avgstim['y2']-margin[1])/aspum,
-                y21=(avgstim['y2']+margin[1])/aspum,
-                x30=(avgstim['x3']-margin[0])/aspum,
-                x31=(avgstim['x3']+margin[0])/aspum,
-                y30=(avgstim['y3']-margin[1])/aspum,
-                y31=(avgstim['y3']+margin[1])/aspum,
-                x40=(avgstim['x4']-margin[0])/aspum,
-                x41=(avgstim['x4']+margin[0])/aspum,
-                y40=(avgstim['y4']-margin[1])/aspum,
-                y41=(avgstim['y4']+margin[1])/aspum,formatURL=formatURL)
+                                   t0=str(long(t0*tscale)),
+                                   t1=str(long(t1*tscale)),
+                                   x10=(avgstim['x1']-margin[0])/aspum,
+                                   x11=(avgstim['x1']+margin[0])/aspum,
+                                   y10=(avgstim['y1']-margin[1])/aspum,
+                                   y11=(avgstim['y1']+margin[1])/aspum,
+                                   x20=(avgstim['x2']-margin[0])/aspum,
+                                   x21=(avgstim['x2']+margin[0])/aspum,
+                                   y20=(avgstim['y2']-margin[1])/aspum,
+                                   y21=(avgstim['y2']+margin[1])/aspum,
+                                   x30=(avgstim['x3']-margin[0])/aspum,
+                                   x31=(avgstim['x3']+margin[0])/aspum,
+                                   y30=(avgstim['y3']-margin[1])/aspum,
+                                   y31=(avgstim['y3']+margin[1])/aspum,
+                                   x40=(avgstim['x4']-margin[0])/aspum,
+                                   x41=(avgstim['x4']+margin[0])/aspum,
+                                   y40=(avgstim['y4']-margin[1])/aspum,
+                                   y41=(avgstim['y4']+margin[1])/aspum,
+                                   formatURL=formatURL)
+# ------------------------------------------------------------------------------
 
-def boxcentroid(band,t0,t1,xr,yr):
-    """Find the mean position of events inside of a box in detector space."""
+# ------------------------------------------------------------------------------
+def boxcentroid(band, t0, t1, xr, yr):
+    """
+    Find the mean position of events inside of a box in detector space.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param xr: The minimum and maximum x-values that define the box.
+
+    :type xr: list @CHASE - confirm please.@
+
+    :param yr: The minimum and maximum y-values that define the box.
+
+    :type yr: list @CHASE - confirm please.@
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    return (str(baseURL)+'select avg(x), avg(y) from '+str(baseDB)+
+            '.'+str(band)+'PhotonsNULLV where time >= '+
+            str(long(t0*tscale))+' and time < '+str(long(t1*tscale))+
+            ' and x >= '+str(xr[0])+' and x < '+str(xr[1])+' and y >= '+
+            str(yr[0])+' and y < '+str(yr[1])+str(formatURL))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def boxtimes(band, t0, t1, xr, yr):
+    """
+    Get the list of times for events inside of a box in detector space.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param xr: The minimum and maximum x-values that define the box.
+
+    :type xr: list @CHASE - confirm please.@
+
+    :param yr: The minimum and maximum y-values that define the box.
+
+    :type yr: list @CHASE - confirm please.@
+
+    :returns: str -- The query to submit to the database.
+    """
+
     return (str(baseURL)+
-        'select avg(x), avg(y) from '+str(baseDB)+
-        '.'+str(band)+'PhotonsNULLV where time >= '+
-        str(long(t0*tscale))+' and time < '+str(long(t1*tscale))+
-        ' and x >= '+str(xr[0])+' and x < '+str(xr[1])+' and y >= '+
-        str(yr[0])+' and y < '+str(yr[1])+str(formatURL))
+            'select time from '+str(baseDB)+'.'+str(band)+
+            'PhotonsNULLV where time >= '+
+            str(long(t0*tscale))+' and time < '+str(long(t1*tscale))+
+            ' and x >= '+
+            str(xr[0])+' and x < '+str(xr[1])+' and y >= '+str(yr[0])+
+            ' and y < '+str(yr[1])+str(formatURL))
+# ------------------------------------------------------------------------------
 
-def boxtimes(band,t0,t1,xr,yr):
-    """Get the list of times for events inside of a box in detector space."""
+# ------------------------------------------------------------------------------
+def centroid(band, ra0, dec0, t0, t1, radius):
+    """
+    @CHASE - Please provide description.@
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param ra0: The right ascension, in degrees, around which to search.
+
+    :type ra0: float
+
+    :param dec0: The declination, in degrees, around which to search.
+
+    :type dec0: float
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param radius: The radius within which to search, in degrees.
+
+    :type radius: float
+
+    :returns: str -- The query to submit to the database.
+    """
+
     return (str(baseURL)+
-        'select time from '+str(baseDB)+'.'+str(band)+
-        'PhotonsNULLV where time >= '+
-        str(long(t0*tscale))+' and time < '+str(long(t1*tscale))+
-        ' and x >= '+
-        str(xr[0])+' and x < '+str(xr[1])+' and y >= '+str(yr[0])+' and y < '+
-        str(yr[1])+str(formatURL))
+            'select avg(ra), avg(dec) from '+str(baseDB)+'.'+str(band)+
+            'PhotonsV where time >= '+
+            str(long(t0*tscale))+' and time < '+str(long(t1*tscale))+
+            ' and ra >= '+
+            repr(ra0-radius)+' and ra < '+repr(ra0+radius)+' and dec >= '+
+            repr(dec0-radius)+' and dec < '+repr(dec0+radius)+str(formatURL))
+# ------------------------------------------------------------------------------
 
-def centroid(band,ra0,dec0,t0,t1,radius):
-    return (str(baseURL)+
-        'select avg(ra), avg(dec) from '+str(baseDB)+'.'+str(band)+
-        'PhotonsV where time >= '+
-        str(long(t0*tscale))+' and time < '+str(long(t1*tscale))+
-        ' and ra >= '+
-        repr(ra0-radius)+' and ra < '+repr(ra0+radius)+' and dec >= '+
-        repr(dec0-radius)+' and dec < '+repr(dec0+radius)+str(formatURL))
+# ------------------------------------------------------------------------------
+def allphotons(band, ra0, dec0, t0, t1, radius, flag=0):
+    """
+    Grab the major columns for all events within an aperture.
 
-def allphotons(band,ra0,dec0,t0,t1,radius,flag=0):
-    """Grab the major columns for all events within an aperture."""
-    return ('{baseURL}select time,ra,dec,xi,eta,x,y from '+
-        '{baseDB}.fGetNearbyObjEq{band}AllColumns({ra0},{dec0},{radius},{t0},'+
-        '{t1},{flag}){formatURL}').format(baseURL=baseURL,baseDB=baseDB,
-            band=band,ra0=repr(float(ra0)),dec0=repr(float(dec0)),
-            radius=radius,t0=str(long(t0*tscale)),t1=str(long(t1*tscale)),
-            flag=flag,formatURL=formatURL)
+    :param band: The band to use, either 'FUV' or 'NUV'.
 
-# Shutter correction
-#  i.e. number of 0.05s gaps in data
-def shutter(band,t0,t1):
-    return (str(baseURL)+
-        'select shutter*0.05 from '+str(baseDB)+'.fGet'+str(band)+'Shutter('+
-        str(long(t0*tscale))+','+str(long(t1*tscale))+')'+str(formatURL))
+    :type band: str
 
-def shutdead(band,t0,t1):
+    :param ra0: The right ascension, in degrees, around which to search.
+
+    :type ra0: float
+
+    :param dec0: The declination, in degrees, around which to search.
+
+    :type dec0: float
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param radius: The radius within which to search, in degrees.
+
+    :type radius: float
+
+    :param flag: Only return times without a flag set. @CHASE - confirm
+    please, also confirm default as int is OK and shouldn't be a bool..@
+
+    :type flag: int
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    return ('{baseURL}select time,ra,dec,xi,eta,x,y from '
+            '{baseDB}.fGetNearbyObjEq{band}AllColumns({ra0},{dec0},{radius},'
+            '{t0},{t1},{flag}){formatURL}').format(
+                baseURL=baseURL, baseDB=baseDB, band=band, ra0=repr(float(ra0)),
+                dec0=repr(float(dec0)), radius=radius, t0=str(long(t0*tscale)),
+                t1=str(long(t1*tscale)), flag=flag, formatURL=formatURL)
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def shutter(band, t0, t1):
+    """
+    Get shutter correction, i.e., number of 0.05-sec gaps in data.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    return (str(baseURL)+'select shutter*0.05 from '+str(baseDB)+'.fGet'+
+            str(band)+'Shutter('+str(long(t0*tscale))+','+str(long(t1*tscale))+
+            ')'+str(formatURL))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def shutdead(band, t0, t1):
+    """
+    @CHASE - Please describe.@
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :returns: str -- The query to submit to the database.
+    """
+
     tt0, tt1 = [long(t*tscale) for t in [t0, t1]]
+
     return ('{baseURL}SELECT shutter*0.05 FROM {baseDB}'
-        '.fGet{band}Shutter({tt0},{tt1}) AS '
-        'time UNION ALL SELECT SUM(dt) * 0.0000057142857142857145 / '
-        '({t1}-{t0}) AS dead FROM(SELECT count(*) AS dt FROM {baseDB}'
-        '.{band}PhotonsNULLV WHERE time >= {tt0} AND time < {tt1} UNION ALL '
-        'SELECT count(*) AS dt FROM {baseDB}.{band}PhotonsV WHERE time '
-        '>= {tt0} AND time < {tt1}) x{fmt}'.format(baseURL=baseURL,
-                band=band.upper(), tt0=tt0, tt1=tt1, t0=t0, t1=t1,
-                baseDB=baseDB, fmt=formatURL))
+            '.fGet{band}Shutter({tt0},{tt1}) AS '
+            'time UNION ALL SELECT SUM(dt) * 0.0000057142857142857145 / '
+            '({t1}-{t0}) AS dead FROM(SELECT count(*) AS dt FROM {baseDB}'
+            '.{band}PhotonsNULLV WHERE time >= {tt0} AND time < {tt1} UNION'
+            ' ALL SELECT count(*) AS dt FROM {baseDB}.{band}PhotonsV WHERE'
+            ' time >= {tt0} AND time < {tt1}) x{fmt}'.format(
+                baseURL=baseURL, band=band.upper(), tt0=tt0, tt1=tt1, t0=t0,
+                t1=t1, baseDB=baseDB, fmt=formatURL))
+# ------------------------------------------------------------------------------
 
+# ------------------------------------------------------------------------------
+def exptime(band, t0, t1, stepsz=1.):
+    """
+    @CHASE - Please describe.@
 
-def exptime(band,t0,t1,stepsz=1.):
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param stepsz: The size of the time bin to use. @CHASE - please check this.@
+
+    :type stepsz: float
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    return (str(baseURL)+'select * from '+str(baseDB)+'.fGet'+str(band)+
+            'EffectiveExposureTime('+str(long(t0*tscale))+','+
+            str(long(t1*tscale))+','+str(stepsz)+')'+str(formatURL))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def aspect(t0, t1):
+    """
+    Return the aspect information based on a time range.
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :returns: str -- The query to submit to the database.
+    """
+
     return (str(baseURL)+
-        'select * from '+str(baseDB)+'.fGet'+str(band)+'EffectiveExposureTime('+
-        str(long(t0*tscale))+','+str(long(t1*tscale))+','+str(stepsz)+')'+
-        str(formatURL))
+            'select eclipse, filename, time, ra, dec, twist, flag, ra0, dec0,'
+            ' twist0 from aspect where time >= '+str(long(t0*tscale))+
+            ' and time < '+str(long(t1*tscale))+' order by time'+str(formatURL))
+# ------------------------------------------------------------------------------
 
-def aspect(t0,t1):
-    """Return the aspect information based on time range."""
-    return (str(baseURL)+
-        'select eclipse, filename, time, ra, dec, twist, flag, ra0, dec0,'
-        ' twist0 from aspect where time >= '+str(long(t0*tscale))+
-        ' and time < '+str(long(t1*tscale))+' order by time'+str(formatURL))
-
-# Return the aspect information based on eclipse
+# ------------------------------------------------------------------------------
 def aspect_ecl(eclipse):
-    """Return the aspect information based upon an eclipse number."""
-    return (str(baseURL)+
-        'select eclipse, filename, time, ra, dec, twist, flag, ra0, dec0,'
-        ' twist0 from aspect where eclipse='+str(eclipse)+' order by time'+
-        str(formatURL))
+    """
+    Return the aspect information based upon an eclipse number.
 
-def aspect_skypos(ra,dec,detsize=1.25):
-    """Return the aspect information based upon sky position and det radius."""
-    return (str(baseURL)+
-        "select eclipse, filename, time, ra, dec, twist, flag, ra0, dec0,"
-        " twist0 from aspect where ra >= "+repr(ra-detsize/2.)+
-        " and ra < "+repr(ra+detsize/2.)+" and dec >= "+repr(dec-detsize/2.)+
-        " and dec < "+repr(dec+detsize/2.)+" order by time"+str(formatURL))
+    :param eclipse: The eclipse to return aspect information for.
 
-# Return data within a box centered on ra0, dec0 with sides of length 2*radius
-# TODO: deprecate this and rename it skybox()
-def box(band,ra0,dec0,t0,t1,radius,flag=0):
-    return (str(baseURL)+
-        'select time,ra,dec from '+str(baseDB)+'.'+str(band)+
-        'PhotonsV where time >= '+
-        str(long(t0*tscale))+' and time < '+str(long(t1*tscale))+
-        ' and ra >= '+
-        repr(ra0-radius)+' and ra < '+repr(ra0+radius)+' and dec >= '+
-        repr(dec0-radius)+' and dec < '+repr(dec0+radius)+' and flag='+
-        str(flag)+str(formatURL))
+    :type eclipse: int
 
-# Return data within a rectangle centered on ra0, dec0
-# TODO: deprecate this and rename it skyrect()
-def rect(band,ra0,dec0,t0,t1,ra,dec,flag=0):
-    #time,ra,dec,xi,eta,x,y
-    return (str(baseURL)+
-        'select time,ra,dec,xi,eta,x,y from '+str(baseDB)+'.fGetObjFromRect'+str(band)+'('+
-        repr(ra0-ra/2.)+','+repr(ra0+ra/2.)+','+repr(dec0-dec/2.)+','+
-        repr(dec0+dec/2.)+','+str(long(t0*tscale))+','+
-        str(long(t1*tscale))+','+str(flag)+')'+str(formatURL))
+    :returns: str -- The query to submit to the database.
+    """
 
-def skyrect(band,ra0,dec0,t0,t1,ra,dec,detsize=1.1,flag=0):
-    return '{baseURL}select time,ra,dec,xi,eta,x,y from {baseDB}.fGetObjFromRect{band}AllColumns({ra_min},{ra_max},{dec_min},{dec_max},{t0},{t1},{flag}){formatURL}'.format(baseURL=baseURL,baseDB=baseDB,band=band,ra_min=repr(ra0-ra/2.),ra_max=repr(ra0+ra/2.),dec_min=repr(dec0-dec/2.),dec_max=repr(dec0+dec/2.),t0=str(long(t0*tscale)),t1=str(long(t1*tscale)),flag=flag,formatURL=formatURL)
+    return (str(baseURL)+
+            'select eclipse, filename, time, ra, dec, twist, flag, ra0, dec0,'
+            ' twist0 from aspect where eclipse='+str(eclipse)+' order by time'+
+            str(formatURL))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def aspect_skypos(ra, dec, detsize=1.25):
+    """
+    Return the aspect information based upon sky position and det radius.
+
+    :param ra: The right ascension to search on, in degrees.
+
+    :type ra: float
+
+    :param dec: The declination to search on, in degrees.
+
+    :type dec: float
+
+    :param detsize: Effective diameter, in degrees, of the field-of-view.
+
+    :type detsize: float
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    return (str(baseURL)+
+            "select eclipse, filename, time, ra, dec, twist, flag, ra0, dec0,"
+            " twist0 from aspect where ra >= "+repr(ra-detsize/2.)+
+            " and ra < "+repr(ra+detsize/2.)+" and dec >= "+
+            repr(dec-detsize/2.)+" and dec < "+repr(dec+detsize/2.)+
+            " order by time"+str(formatURL))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def box(band, ra0, dec0, t0, t1, radius, flag=0):
+    """
+    Return data within a box centered on ra0, dec0 with sides of length
+    2*radius.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param ra0: The right ascension, in degrees, around which to search.
+
+    :type ra0: float
+
+    :param dec0: The declination, in degrees, around which to search.
+
+    :type dec0: float
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param radius: The radius within which to search, in degrees.
+
+    :type radius: float
+
+    :param flag: Only return times without a flag set. @CHASE - confirm
+    please, also confirm default as int is OK and shouldn't be a bool@
+
+    :type flag: int
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    # [Future]: Deprecate this and rename it skybox().
+
+    return (str(baseURL)+'select time,ra,dec from '+str(baseDB)+'.'+str(band)+
+            'PhotonsV where time >= '+
+            str(long(t0*tscale))+' and time < '+str(long(t1*tscale))+
+            ' and ra >= '+
+            repr(ra0-radius)+' and ra < '+repr(ra0+radius)+' and dec >= '+
+            repr(dec0-radius)+' and dec < '+repr(dec0+radius)+' and flag='+
+            str(flag)+str(formatURL))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def rect(band, ra0, dec0, t0, t1, ra, dec, flag=0):
+    """
+    Return data within a rectangle centered on ra0, dec0.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param ra0: The right ascension, in degrees, around which to search.
+
+    :type ra0: float
+
+    :param dec0: The declination, in degrees, around which to search.
+
+    :type dec0: float
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param ra: @CHASE - please describe (and check vs. ra0 description).@
+
+    :type ra: @CHASE - please specify type.@
+
+    :param dec: @CHASE - please describe (and check vs. dec0 description).@
+
+    :type dec: @CHASE - please specify type.@
+
+    :param flag: Only return times without a flag set. @CHASE - confirm
+    please, also confirm default as int is OK and shouldn't be a bool@
+
+    :type flag: int
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    # [Future]: Deprecate this and rename it skyrect()
+
+    return (str(baseURL)+
+            'select time,ra,dec,xi,eta,x,y from '+str(baseDB)+
+            '.fGetObjFromRect'+str(band)+'('+
+            repr(ra0-ra/2.)+','+repr(ra0+ra/2.)+','+repr(dec0-dec/2.)+','+
+            repr(dec0+dec/2.)+','+str(long(t0*tscale))+','+
+            str(long(t1*tscale))+','+str(flag)+')'+str(formatURL))
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def skyrect(band, ra0, dec0, t0, t1, ra, dec, detsize=1.1, flag=0):
+    """
+    @CHASE - Please provide description.@
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param ra0: The right ascension, in degrees, around which to search.
+
+    :type ra0: float
+
+    :param dec0: The declination, in degrees, around which to search.
+
+    :type dec0: float
+
+    :param t0: The minimum time stamp to search.
+
+    :type t0: int @CHASE - really this is a long or float?
+
+    :param t1: The maximum time stamp to search.
+
+    :type t1: int @CHASE - really this is a long or float?
+
+    :param ra: @CHASE - please describe (and check vs. ra0 description).@
+
+    :type ra: @CHASE - please specify type.@
+
+    :param dec: @CHASE - please describe (and check vs. dec0 description).@
+
+    :type dec: @CHASE - please specify type.@
+
+    :param detsize: Effective diameter, in degrees, of the field-of-view.
+    @CHASE - This parameter is not used in this method.@
+
+    :type detsize: float
+
+    :param flag: Only return times without a flag set. @CHASE - confirm
+    please, also confirm default as int is OK and shouldn't be a bool@
+
+    :type flag: int
+
+    :returns: str -- The query to submit to the database.
+    """
+
+    return ('{baseURL}select time,ra,dec,xi,eta,x,y from'
+            ' {baseDB}.fGetObjFromRect{band}AllColumns({ra_min},{ra_max},'
+            '{dec_min},{dec_max},{t0},{t1},{flag}){formatURL}'.format(
+                baseURL=baseURL, baseDB=baseDB, band=band,
+                ra_min=repr(ra0-ra/2.), ra_max=repr(ra0+ra/2.),
+                dec_min=repr(dec0-dec/2.), dec_max=repr(dec0+dec/2.),
+                t0=str(long(t0*tscale)), t1=str(long(t1*tscale)), flag=flag,
+                formatURL=formatURL))
+# ------------------------------------------------------------------------------
