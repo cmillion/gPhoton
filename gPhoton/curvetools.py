@@ -278,8 +278,8 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def pullphotons(band, ra0, dec0, tranges, radius, verbose=0,
-                photonfile=None, flag=0):
+def pullphotons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
+                photonfile=None):
     """
     Reads photon list data from the MAST database using a cone search.
 
@@ -1004,7 +1004,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
     data = get_curve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
                     trange=trange, tranges=tranges, verbose=verbose,
                     coadd=coadd, minexp=minexp, maxgap=maxgap,
-                    photonfile=photonfile, detsize=detsize)
+                    detsize=detsize)
     if not data:
         return None
 

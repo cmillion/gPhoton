@@ -206,7 +206,6 @@ def check_common_args(args, function_name,
     if args.suggest and function_name in ['gfind', 'gaperture']:
         (args.ra, args.dec, args.radius, args.annulus1,
          args.annulus2) = dbt.suggest_parameters(args.band, args.skypos,
-                                                 retries=args.retries,
                                                  verbose=0)
         args.skypos = [args.ra, args.dec]
         if args.verbose:
@@ -268,7 +267,6 @@ def check_common_args(args, function_name,
                                          trange=[args.tmin, args.tmax],
                                          maxgap=args.maxgap, minexp=args.minexp,
                                          detsize=args.detsize,
-                                         retries=args.retries,
                                          skyrange=args.skyrange)
     else:
         # If no coordinates specified then use a huge time range for now.

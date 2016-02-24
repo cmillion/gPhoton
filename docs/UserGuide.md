@@ -231,11 +231,6 @@ However, if you do not specify any time range, _gMap_ will automatically use all
 
     gMap -b 'FUV' --skypos '[176.919525856024,0.255696872807351]' --angle 0.5 --count 'count.fits' --coadd
 
-####Response Maps
-Relative response maps (_rrhr_) can be thought of as the detector flat field as projected onto the sky as a function of the detector boresight over time. Because the creation of relative response maps requires multiple computationally intensive interpolations, they take a long time to run. Intensity maps require response maps and therefore also take a long time to run. So, therefore, **WARNING: Making a response map will take longer than you expect. Do it sparingly.** If you want to create a response map, pass a FITS filename to the `--response` flag.
-
-    gMap -b 'FUV' --skypos '[176.919525856024,0.255696872807351]' --angle 0.5 --response 'response.fits' --coadd
-
 ####Intensity Maps
 Intensity maps (_int_) are integrated, aspect corrected images which have been corrected for both relative response as well as effective exposure time. If you need to perform photometric analysis on an image, you need an intensity map. Note the warning above about long run times for generating the _response_ for this. If you want to create an intensity map, pass a FITS filename to the `--intensity` flag.
 

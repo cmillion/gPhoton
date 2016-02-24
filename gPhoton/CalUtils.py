@@ -13,6 +13,8 @@
 from MCUtils import rms, print_inline, get_fits_header, get_tbl_data
 import pandas as pd
 from galextools import isPostCSP
+from astropy.io import fits as pyfits
+import numpy as np
 import cal
 
 # ------------------------------------------------------------------------------

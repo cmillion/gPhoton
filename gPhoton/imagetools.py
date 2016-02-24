@@ -103,8 +103,7 @@ def movie_tbl(band, tranges, verbose=0, framesz=0., retries=100):
             tstarts.append(t0)
             tstops.append(t1)
             exptimes.append(dbt.compute_exptime(band, [t0, t1],
-                                                verbose=verbose,
-                                                retries=retries))
+                                                verbose=verbose))
     col1 = pyfits.Column(name='tstart', format='E', array=np.array(tstarts))
     col2 = pyfits.Column(name='tstop', format='E', array=np.array(tstops))
     col3 = pyfits.Column(name='exptime', format='E', array=np.array(exptimes))
@@ -157,7 +156,7 @@ def fits_header(band, skypos, tranges, skyrange, verbose=0, hdu=None,
 
     hdu = hdu if hdu else pyfits.PrimaryHDU()
 
-    wcs = define_wcs(skypos, skyrange, width=width, height=height)
+    wcs = define_wcs(skypos, skyrange)
 
     hdu.header['CDELT1'], hdu.header['CDELT2'] = wcs.wcs.cdelt
     hdu.header['CTYPE1'], hdu.header['CTYPE2'] = wcs.wcs.ctype
@@ -236,7 +235,7 @@ def makemap(band, skypos, trange, skyrange, response=False, verbose=0,
         events[k] = events[k][ix]
 
     events = ct.hashresponse(band, events)
-    wcs = define_wcs(skypos, skyrange, width=None, height=None)
+    wcs = define_wcs(skypos, skyrange)
     coo = zip(events['ra'], events['dec'])
     foc = wcs.sip_pix2foc(wcs.wcs_world2pix(coo, 1), 1)
     weights = 1./events['response'] if response else None
@@ -369,7 +368,6 @@ def write_jpeg(filename, band, skypos, tranges, skyrange, stepsz=1.,
     """
 
     scipy.misc.imsave(filename, integrate_map(band, skypos, tranges, skyrange,
-                                              width=width, height=height,
                                               verbose=verbose, retries=retries))
 
     return
@@ -443,8 +441,8 @@ def movie(band, skypos, tranges, skyrange, framesz=0, verbose=0,
         if verbose > 2:
             print 'Coadding across '+str(tranges)
 
-        mv = integrate_map(band, skypos, tranges, skyrange, width=width,
-                           height=height, verbose=verbose, memlight=memlight,
+        mv = integrate_map(band, skypos, tranges, skyrange,
+                           verbose=verbose, memlight=memlight,
                            hdu=hdu, retries=retries, response=response,
                            detsize=detsize)
     else:
@@ -458,7 +456,7 @@ def movie(band, skypos, tranges, skyrange, framesz=0, verbose=0,
                 t1 = trange[1] if i == steps else t0+stepsz
 
                 img = integrate_map(band, skypos, [[t0, t1]], skyrange,
-                                    width=width, height=height, verbose=verbose,
+                                    verbose=verbose,
                                     memlight=memlight, hdu=hdu, retries=retries,
                                     response=response, detsize=detsize)
                 if img.min() == 0 and img.max() == 0:
@@ -535,7 +533,7 @@ def create_image(band, skypos, tranges, skyrange, framesz=0, verbose=0,
     """
 
     img = movie(band, skypos, tranges, skyrange, framesz=framesz,
-                width=width, height=height, verbose=verbose, memlight=memlight,
+                verbose=verbose, memlight=memlight,
                 coadd=coadd, response=response, hdu=hdu, retries=retries,
                 detsize=detsize)
 
@@ -622,7 +620,7 @@ def write_images(band, skypos, tranges, skyrange, write_cnt=None,
             continue
 
         img = create_image(band, skypos, tranges, skyrange, framesz=framesz,
-                           width=width, height=height, verbose=verbose,
+                           verbose=verbose,
                            memlight=memlight, retries=retries, detsize=detsize,
                            coadd=(
                                True if (coadd or i in ['cnt_coadd',
@@ -636,8 +634,7 @@ def write_images(band, skypos, tranges, skyrange, write_cnt=None,
                         retries=retries) if i in ['int', 'int_coadd'] else False
 
         hdu = pyfits.PrimaryHDU(img)
-        hdu = fits_header(band, skypos, tranges, skyrange, width=width,
-                          height=height, verbose=verbose, hdu=hdu,
+        hdu = fits_header(band, skypos, tranges, skyrange,verbose=verbose, hdu=hdu,
                           retries=retries)
 
         hdulist = pyfits.HDUList([hdu, tbl]) if tbl else pyfits.HDUList([hdu])

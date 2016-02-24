@@ -17,7 +17,7 @@ import numpy as np
 
 # ------------------------------------------------------------------------------
 def gMap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,
-         rrfile=None, skypos=None, maxgap=1500., memlight=100., minexp=1.,
+         skypos=None, maxgap=1500., memlight=100., minexp=1.,
          overwrite=False, retries=100, skyrange=None, stepsz=0., trange=None,
          verbose=0, cntcoaddfile=False, intcoaddfile=False):
     """
@@ -47,10 +47,6 @@ def gMap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,
     :param intfile: Name of intensity file to make.
 
     :type intfile: str
-
-    :param rrfile: Name of relative response file to make.
-
-    :type rrfile: str
 
     :param skypos: The right ascension and declination, in degrees.
 
@@ -110,7 +106,6 @@ def gMap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,
     # [Future]: Consider improving this section.
     write_cnt = cntfile if (cntfile) else False
     write_int = intfile if (intfile) else False
-    write_rr = rrfile if (rrfile) else False
     write_cnt_coadd = cntcoaddfile if cntcoaddfile else False
     write_int_coadd = intcoaddfile if intcoaddfile else False
 
@@ -124,12 +119,11 @@ def gMap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,
     if len(np.array(trange).shape) == 1:
         trange = [trange]
 
-    write_images(band.upper(), skypos, trange, skyrange, width=False,
-                 height=False, write_cnt=write_cnt, write_int=write_int,
-                 write_rr=write_rr, framesz=stepsz, overwrite=overwrite,
-                 verbose=verbose, memlight=memlight, coadd=coadd,
-                 retries=retries, write_cnt_coadd=write_cnt_coadd,
-                 write_int_coadd=write_int_coadd, detsize=detsize)
+    write_images(band.upper(), skypos, trange, skyrange, write_cnt=write_cnt,
+        write_int=write_int, framesz=stepsz,
+        overwrite=overwrite, verbose=verbose, memlight=memlight, coadd=coadd,
+        retries=retries, write_cnt_coadd=write_cnt_coadd,
+        write_int_coadd=write_int_coadd, detsize=detsize)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -174,9 +168,6 @@ def setup_parser(iam='gmap'):
                         dest="memlight", default=100., help="Reduce server-"
                         "side memory usage by requesting data in chunks of"
                         " no more than this depth in seconds.")
-    parser.add_argument("--response", action="store", type=str, dest="rrfile",
-                        help="File name (full path) for the response image.",
-                        default=None)
 
     return parser
 # ------------------------------------------------------------------------------
@@ -241,7 +232,7 @@ def check_args(args, iam='gmap'):
     if args.memlight and args.memlight <= 0.:
         raise SystemExit("Maximum data chunk per must be > 0 seconds.")
 
-    for image in [args.cntfile, args.intfile]:#, args.rrfile]:
+    for image in [args.cntfile, args.intfile]:
         # Check for overwriting existing images.
         if image and os.path.exists(image) and not args.overwrite:
             raise SystemExit("{f} already exists.".format(f=image))
@@ -270,7 +261,7 @@ def __main__():
 
     gMap(band=args.band, cntfile=args.cntfile,
          coadd=args.coadd, detsize=args.detsize, intfile=args.intfile,
-         rrfile=args.rrfile, skypos=args.skypos, maxgap=args.maxgap,
+         skypos=args.skypos, maxgap=args.maxgap,
          memlight=args.memlight, minexp=args.minexp, overwrite=args.overwrite,
          retries=args.retries, skyrange=args.skyrange, stepsz=args.stepsz,
          trange=args.trange, verbose=args.verbose,

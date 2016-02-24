@@ -115,7 +115,7 @@ def print_inline(text, blanks=60):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def manage_requests2(query, maxcnt=100, wait=10, timeout=60., verbose=0):
+def manage_requests2(query, maxcnt=100, wait=2, timeout=60., verbose=0):
     """
     Make simple 'requests' calls more robust against network issues.
 

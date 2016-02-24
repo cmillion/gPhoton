@@ -25,7 +25,7 @@ from gPhoton import __version__
 def gAperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
               stepsz=False, verbose=0, overwrite=False, trange=None,
               tranges=None, minexp=1., maxgap=1500., iocode='wb',
-              photonfile=None, detsize=1.1, minimal_output=False):
+              detsize=1.1, minimal_output=False):
     """
     Creates a light curve and returns the data in a python dict() and as
     a CSV file, if outfile is specified. Can be called from the interpreter.
@@ -91,10 +91,6 @@ def gAperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
 
     :type iocode: str
 
-    :param photonfile: Name of photon event CSV file to use.
-
-    :type photonfile: str
-
     :param detsize: Effective diameter, in degrees, of the field-of-view.
 
     :type detsize: float
@@ -118,10 +114,6 @@ def gAperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
         print " stepsz:  {stepsz}".format(stepsz=stepsz)
         print " csvfile: {csvfile}".format(csvfile=csvfile)
         print " verbose: {verbose}".format(verbose=verbose)
-
-        if photonfile:
-            print "Using local photon file: {photonfile}".format(
-                photonfile=photonfile)
 
     data = ct.write_curve(band.upper(), skypos[0], skypos[1], radius,
                           csvfile=csvfile, annulus=annulus, stepsz=stepsz,

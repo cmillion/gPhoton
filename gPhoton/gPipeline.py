@@ -10,7 +10,7 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
-from PhotonPipe import PhotonPipe
+from PhotonPipe import photonpipe
 import argparse
 
 # ------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ def gPipeline(raw6file, scstfile, band, outbase, aspfile, ssdfile, nullout,
     """
 
     photonpipe(raw6file, scstfile, band, outbase, aspfile, ssdfile, nullout,
-               verbose=verbose, retries=retries)
+               retries=retries)
 
     return
 # ------------------------------------------------------------------------------
@@ -85,9 +85,6 @@ def setup_parser():
     parser.add_argument("-u", "--nullout", action="store_true", dest="nullout",
                         help="write NULL entries to a separate file",
                         default=False)
-    parser.add_argument("-v", "--verbose", action="store", type=float,
-                        dest="verbose", help="Display more output. Set to 0-2",
-                        default=0)
     parser.add_argument("--retries", action="store", type=int, default=20,
                         help="Query attempts before timeout.")
 
