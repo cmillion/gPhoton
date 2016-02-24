@@ -1,14 +1,13 @@
 """
 .. module:: gQuery
 
-   :synopsis: Defines common queries that are passed to the GALEX photon
-   database at MAST. @CHASE - update if needed.@
+   :synopsis: Defines and constructs common queries that are passed to the
+   GALEX databases (esp: photon, aspect, and MCAT) at MAST.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
-# @CHASE - manage_requests (first one) is not used, can be removed?@
-from MCUtils import manage_requests, manage_requests2
+from MCUtils import manage_requests2
 import CalUtils
 from galextools import isPostCSP
 from gPhoton import time_id
@@ -19,11 +18,14 @@ tscale = 1000.
 
 # The following three global variables are used in constructing a properly
 # formatted query to the MAST database. Don't change them unless you know what
-# you're doing.
+# you're doing!
 baseURL = ('https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/Galex'
            'PhotonListQueryTest?query=')
 baseDB = 'GPFCore.dbo'
 MCATDB = 'GR6Plus7.dbo'
+
+# All queries from the same _run_ of the photon tools should have identical
+# time_id, providing a quick way to troubleshoot issues on the server side.
 formatURL = ' -- '+str(time_id)+'&format=extjs'
 # ------------------------------------------------------------------------------
 
@@ -41,12 +43,11 @@ def hasNaN(query):
     if 'NaN' in query:
         raise RuntimeError("Malformed query: contains NaN values.")
 
-    # @CHASE - Don't need a return statement here?@
     return
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def getValue(query, verbose=0, retries=20):
+def getValue(query, verbose=0, retries=100):
     """
     Manage a database call which returns a single value.
 
@@ -59,7 +60,6 @@ def getValue(query, verbose=0, retries=20):
     :type verbose: int
 
     :param retries: Number of query retries to attempt before giving up.
-    @CHASE - The default is 100 some places and 20 others, should be same?@
 
     :type retries: int
 
@@ -85,7 +85,7 @@ def getValue(query, verbose=0, retries=20):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def getArray(query, verbose=0, retries=20):
+def getArray(query, verbose=0, retries=100):
     """
     Manage a database call which returns an array of values.
 
@@ -98,7 +98,6 @@ def getArray(query, verbose=0, retries=20):
     :type verbose: int
 
     :param retries: Number of query retries to attempt before giving up.
-    @CHASE - The default is 100 some places and 20 others, should be same?@
 
     :type retries: int
 
@@ -127,8 +126,7 @@ def getArray(query, verbose=0, retries=20):
 def mcat_sources(band, ra0, dec0, radius, maglimit=20.):
     """
     Return the MCAT coadd sources given sky position and search radius
-    (and optional lower magnitude limit). @CHASE - from the coadd source list,
-    right?@
+    (and optional lower magnitude limit).
 
     Columns are:
     [0,RA],[1,Dec],[2,NUV_mag],[3,FUV_mag],[4,FoV_radius],[5,NUV_skybg],
@@ -142,13 +140,11 @@ def mcat_sources(band, ra0, dec0, radius, maglimit=20.):
 
     :param ra0: The right ascension, in degrees, around which to search.
 
-    :type ra0: float @CHASE - this is converted to float below, isn't it already
-    a float?@
+    :type ra0: float
 
     :param dec0: The declination, in degrees, around which to search.
 
-    :type dec0: float @CHASE - this is converted to float below, isn't it
-    already a float?@
+    :type dec0: float
 
     :param radius: The radius within which to search for MCAT sources, in
     degrees.
@@ -166,7 +162,7 @@ def mcat_sources(band, ra0, dec0, radius, maglimit=20.):
     bandflag = 1 if band == 'NUV' else 2
 
     # fGetNearbyObjEq takes radius in arcminutes
-    # [Future]: Add exposure time. @CHASE - still relevant? (just checking)@
+    # [Future]: Add exposure time.
     return (
         str(baseURL)+
         'select ra, dec, nuv_mag, fuv_mag, fov_radius, nuv_skybg, fuv_skybg,'
@@ -191,11 +187,11 @@ def mcat_sources(band, ra0, dec0, radius, maglimit=20.):
 # ------------------------------------------------------------------------------
 def obstype(objid):
     """
-    @CHASE - please provide description.@
+    Get the dither pattern type based on the object id.
 
     :param objid: The MCAT Object ID to return the observation type from.
 
-    :type objid: int @CHASE - is this float/int/long?@
+    :type objid: long
 
     :returns: str -- The query to submit to the database.
     """
@@ -214,8 +210,6 @@ def obstype(objid):
 def mcat_visit_sources(ra0, dec0, radius):
     """
     Return the MCAT per-visit sources given sky position and search radius.
-    @CHASE - noticed this doesn't take in band, should that be added in the
-    future?@
 
     The columns are as follows:
     [0,objid],[1,ra],[2,dec],[3,NUV_mag],[4,FUV_mag],[5,FoV_radius],
@@ -227,13 +221,11 @@ def mcat_visit_sources(ra0, dec0, radius):
 
     :param ra0: The right ascension, in degrees, around which to search.
 
-    :type ra0: float @CHASE - this is converted to float below, isn't it already
-    a float?@
+    :type ra0: float
 
     :param dec0: The declination, in degrees, around which to search.
 
-    :type dec0: float @CHASE - this is converted to float below, isn't it
-    already a float?@
+    :type dec0: float
 
     :param radius: The radius within which to search for MCAT sources, in
     degrees.
@@ -267,18 +259,14 @@ def mcat_visit_sources(ra0, dec0, radius):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def mcat_objid_search(objid, mode='visit'):
+def mcat_objid_search(objid):
     """
     Return a bunch of observation data for a visit level objid (ggoid).
     Doing the same for coadd level data is not yet supported.
 
     :param objid: The MCAT Object ID to return the observation type from.
 
-    :type objid: int @CHASE - is this float/int/long?@
-
-    :param mode: @CHASE - This is not used at all here, remove?@
-
-    :type mode: str
+    :type objid: long
 
     :returns: str -- The query to submit to the database.
     """
@@ -305,21 +293,19 @@ def exposure_ranges(band, ra0, dec0, t0=1, t1=10000000000000, detsize=1.25):
 
     :param ra0: The right ascension, in degrees, around which to search.
 
-    :type ra0: float @CHASE - this is converted to float below, isn't it already
-    a float?@
+    :type ra0: float
 
     :param dec0: The declination, in degrees, around which to search.
 
-    :type dec0: float @CHASE - this is converted to float below, isn't it
-    already a float?@
+    :type dec0: float
 
     :param t0: The minimum time stamp to search for exposure ranges.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search for exposure ranges.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
     :param detsize: Effective diameter, in degrees, of the field-of-view.
 
@@ -353,21 +339,19 @@ def exposure_range(band, ra0, dec0, t0=1, t1=10000000000000):
 
     :param ra0: The right ascension, in degrees, around which to search.
 
-    :type ra0: float @CHASE - this is converted to float below, isn't it already
-    a float?@
+    :type ra0: float
 
     :param dec0: The declination, in degrees, around which to search.
 
-    :type dec0: float @CHASE - this is converted to float below, isn't it
-    already a float?@
+    :type dec0: float
 
     :param t0: The minimum time stamp to search for exposure ranges.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search for exposure ranges.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
     :returns: str -- The query to submit to the database.
     """
@@ -390,21 +374,19 @@ def aperture(band, ra0, dec0, t0, t1, radius):
 
     :param ra0: The right ascension, in degrees, around which to search.
 
-    :type ra0: float @CHASE - this is converted to float below, isn't it already
-    a float?@
+    :type ra0: float
 
     :param dec0: The declination, in degrees, around which to search.
 
-    :type dec0: float @CHASE - this is converted to float below, isn't it
-    already a float?@
+    :type dec0: float
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
     :param radius: The radius within which to integrate counts, in
     degrees.
@@ -432,14 +414,13 @@ def deadtime1(band, t0, t1, flag=False):
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
-    :param flag: Only return counts without a flag set. @CHASE - confirm
-    please.@
+    :param flag: If true, return only flag=0 data, else return all non-NULL.
 
     :type flag: bool
 
@@ -466,11 +447,11 @@ def deadtime2(band, t0, t1):
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
     :returns: str -- The query to submit to the database.
     """
@@ -494,17 +475,18 @@ def deadtime(band, t0, t1, feeclkratio=0.966, tec2fdead=5.52e-6):
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
-    :param feeclkratio: @CHASE - please define.@
+    :param feeclkratio: Ratio of Front End Electronics clock rates.
 
     :type feeclkratio: float
 
-    :param tec2fdead: @CHASE - please define.@
+    :param tec2fdead: The nominal amount of time following an event that the
+    detector is unable to detect another event.
 
     :type tec2fdead: float
 
@@ -534,14 +516,13 @@ def globalcounts(band, t0, t1, flag=False):
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
-    :param flag: Only return counts without a flag set. @CHASE - confirm
-    please.@
+    :param flag: If true, return only flag=0 data. Else return all non-NULL.
 
     :type flag: bool
 
@@ -569,11 +550,11 @@ def alltimes(band, t0, t1):
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
     :returns: str -- The query to submit to the database.
     """
@@ -599,18 +580,17 @@ def uniquetimes(band, t0, t1, flag=False, null=False):
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
-    :param flag: Only return times without a flag set. @CHASE - confirm
-    please.@
+    :param flag: If true, only return flag=0 data. Else return all non-NULL.
 
     :type flag: bool
 
-    :param null: Return times from the null table? @CHASE - please confirm@
+    :param null: If true, query the null table.
 
     :returns: str -- The query to submit to the database.
     """
@@ -644,19 +624,19 @@ def boxcount(band, t0, t1, xr, yr):
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
     :param xr: The minimum and maximum x-values that define the box.
 
-    :type xr: list @CHASE - confirm please.@
+    :type xr: list
 
     :param yr: The minimum and maximum y-values that define the box.
 
-    :type yr: list @CHASE - confirm please.@
+    :type yr: list
 
     :returns: str -- The query to submit to the database.
     """
@@ -679,19 +659,19 @@ def detbox(band, t0, t1, xr, yr):
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
     :param xr: The minimum and maximum x-values that define the box.
 
-    :type xr: list @CHASE - confirm please.@
+    :type xr: list
 
     :param yr: The minimum and maximum y-values that define the box.
 
-    :type yr: list @CHASE - confirm please.@
+    :type yr: list
 
     :returns: str -- The query to submit to the database.
     """
@@ -717,17 +697,18 @@ def stimcount(band, t0, t1, margin=[90.01, 90.01], aspum=68.754932/1000.,
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
-    :param margin: @CHASE - please define.@
+    :param margin: X and Y lengths, in arcseconds, of a box within which
+    to search for stim events.
 
     :type margin: list
 
-    :param aspum: @CHASE - please define.@
+    :param aspum: Arcseconds per micrometer (of detector).
 
     :type aspum: float
 
@@ -735,7 +716,7 @@ def stimcount(band, t0, t1, margin=[90.01, 90.01], aspum=68.754932/1000.,
 
     :type eclipse: int
 
-    :param null: @CHASE - please define.@
+    :param null: If true, query the NULL table.
 
     :type null: bool
 
@@ -793,17 +774,18 @@ def stimtimes(band, t0, t1, margin=[90.01, 90.01], aspum=68.754932/1000.,
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
-    :param margin: @CHASE - please define.@
+    :param margin: X and Y lengths, in arcseconds, of a box in which to
+    search for stim values.
 
     :type margin: list
 
-    :param aspum: @CHASE - please define.@
+    :param aspum: Arcseconds per micrometer (on detector).
 
     :type aspum: float
 
@@ -861,19 +843,19 @@ def boxcentroid(band, t0, t1, xr, yr):
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
     :param xr: The minimum and maximum x-values that define the box.
 
-    :type xr: list @CHASE - confirm please.@
+    :type xr: list
 
     :param yr: The minimum and maximum y-values that define the box.
 
-    :type yr: list @CHASE - confirm please.@
+    :type yr: list
 
     :returns: str -- The query to submit to the database.
     """
@@ -896,19 +878,19 @@ def boxtimes(band, t0, t1, xr, yr):
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
     :param xr: The minimum and maximum x-values that define the box.
 
-    :type xr: list @CHASE - confirm please.@
+    :type xr: list
 
     :param yr: The minimum and maximum y-values that define the box.
 
-    :type yr: list @CHASE - confirm please.@
+    :type yr: list
 
     :returns: str -- The query to submit to the database.
     """
@@ -920,47 +902,6 @@ def boxtimes(band, t0, t1, xr, yr):
             ' and x >= '+
             str(xr[0])+' and x < '+str(xr[1])+' and y >= '+str(yr[0])+
             ' and y < '+str(yr[1])+str(formatURL))
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-def centroid(band, ra0, dec0, t0, t1, radius):
-    """
-    @CHASE - Please provide description.@
-
-    :param band: The band to use, either 'FUV' or 'NUV'.
-
-    :type band: str
-
-    :param ra0: The right ascension, in degrees, around which to search.
-
-    :type ra0: float
-
-    :param dec0: The declination, in degrees, around which to search.
-
-    :type dec0: float
-
-    :param t0: The minimum time stamp to search.
-
-    :type t0: int @CHASE - really this is a long or float?
-
-    :param t1: The maximum time stamp to search.
-
-    :type t1: int @CHASE - really this is a long or float?
-
-    :param radius: The radius within which to search, in degrees.
-
-    :type radius: float
-
-    :returns: str -- The query to submit to the database.
-    """
-
-    return (str(baseURL)+
-            'select avg(ra), avg(dec) from '+str(baseDB)+'.'+str(band)+
-            'PhotonsV where time >= '+
-            str(long(t0*tscale))+' and time < '+str(long(t1*tscale))+
-            ' and ra >= '+
-            repr(ra0-radius)+' and ra < '+repr(ra0+radius)+' and dec >= '+
-            repr(dec0-radius)+' and dec < '+repr(dec0+radius)+str(formatURL))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -982,18 +923,17 @@ def allphotons(band, ra0, dec0, t0, t1, radius, flag=0):
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
     :param radius: The radius within which to search, in degrees.
 
     :type radius: float
 
-    :param flag: Only return times without a flag set. @CHASE - confirm
-    please, also confirm default as int is OK and shouldn't be a bool..@
+    :param flag: Only return times with this flag value. Zero is nominal.
 
     :type flag: int
 
@@ -1019,11 +959,11 @@ def shutter(band, t0, t1):
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
     :returns: str -- The query to submit to the database.
     """
@@ -1034,79 +974,17 @@ def shutter(band, t0, t1):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def shutdead(band, t0, t1):
-    """
-    @CHASE - Please describe.@
-
-    :param band: The band to use, either 'FUV' or 'NUV'.
-
-    :type band: str
-
-    :param t0: The minimum time stamp to search.
-
-    :type t0: int @CHASE - really this is a long or float?
-
-    :param t1: The maximum time stamp to search.
-
-    :type t1: int @CHASE - really this is a long or float?
-
-    :returns: str -- The query to submit to the database.
-    """
-
-    tt0, tt1 = [long(t*tscale) for t in [t0, t1]]
-
-    return ('{baseURL}SELECT shutter*0.05 FROM {baseDB}'
-            '.fGet{band}Shutter({tt0},{tt1}) AS '
-            'time UNION ALL SELECT SUM(dt) * 0.0000057142857142857145 / '
-            '({t1}-{t0}) AS dead FROM(SELECT count(*) AS dt FROM {baseDB}'
-            '.{band}PhotonsNULLV WHERE time >= {tt0} AND time < {tt1} UNION'
-            ' ALL SELECT count(*) AS dt FROM {baseDB}.{band}PhotonsV WHERE'
-            ' time >= {tt0} AND time < {tt1}) x{fmt}'.format(
-                baseURL=baseURL, band=band.upper(), tt0=tt0, tt1=tt1, t0=t0,
-                t1=t1, baseDB=baseDB, fmt=formatURL))
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-def exptime(band, t0, t1, stepsz=1.):
-    """
-    @CHASE - Please describe.@
-
-    :param band: The band to use, either 'FUV' or 'NUV'.
-
-    :type band: str
-
-    :param t0: The minimum time stamp to search.
-
-    :type t0: int @CHASE - really this is a long or float?
-
-    :param t1: The maximum time stamp to search.
-
-    :type t1: int @CHASE - really this is a long or float?
-
-    :param stepsz: The size of the time bin to use. @CHASE - please check this.@
-
-    :type stepsz: float
-
-    :returns: str -- The query to submit to the database.
-    """
-
-    return (str(baseURL)+'select * from '+str(baseDB)+'.fGet'+str(band)+
-            'EffectiveExposureTime('+str(long(t0*tscale))+','+
-            str(long(t1*tscale))+','+str(stepsz)+')'+str(formatURL))
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
 def aspect(t0, t1):
     """
     Return the aspect information based on a time range.
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
     :returns: str -- The query to submit to the database.
     """
@@ -1183,18 +1061,17 @@ def box(band, ra0, dec0, t0, t1, radius, flag=0):
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
     :param radius: The radius within which to search, in degrees.
 
     :type radius: float
 
-    :param flag: Only return times without a flag set. @CHASE - confirm
-    please, also confirm default as int is OK and shouldn't be a bool@
+    :param flag: If true, only return flag=0 data. Else return all non-NULL.
 
     :type flag: int
 
@@ -1213,9 +1090,9 @@ def box(band, ra0, dec0, t0, t1, radius, flag=0):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def rect(band, ra0, dec0, t0, t1, ra, dec, flag=0):
+def skyrect(band, ra0, dec0, t0, t1, ra, dec, flag=0):
     """
-    Return data within a rectangle centered on ra0, dec0.
+    Extract photon data falling within a specified rectangle on the sky.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -1231,78 +1108,23 @@ def rect(band, ra0, dec0, t0, t1, ra, dec, flag=0):
 
     :param t0: The minimum time stamp to search.
 
-    :type t0: int @CHASE - really this is a long or float?
+    :type t0: long
 
     :param t1: The maximum time stamp to search.
 
-    :type t1: int @CHASE - really this is a long or float?
+    :type t1: long
 
-    :param ra: @CHASE - please describe (and check vs. ra0 description).@
+    :param ra: The length in degrees along RA describing the region of
+    interest.
 
-    :type ra: @CHASE - please specify type.@
+    :type ra: float
 
-    :param dec: @CHASE - please describe (and check vs. dec0 description).@
+    :param dec: The length in degrees along Dec describing the region of
+    interest.
 
-    :type dec: @CHASE - please specify type.@
+    :type dec: float
 
-    :param flag: Only return times without a flag set. @CHASE - confirm
-    please, also confirm default as int is OK and shouldn't be a bool@
-
-    :type flag: int
-
-    :returns: str -- The query to submit to the database.
-    """
-
-    # [Future]: Deprecate this and rename it skyrect()
-
-    return (str(baseURL)+
-            'select time,ra,dec,xi,eta,x,y from '+str(baseDB)+
-            '.fGetObjFromRect'+str(band)+'('+
-            repr(ra0-ra/2.)+','+repr(ra0+ra/2.)+','+repr(dec0-dec/2.)+','+
-            repr(dec0+dec/2.)+','+str(long(t0*tscale))+','+
-            str(long(t1*tscale))+','+str(flag)+')'+str(formatURL))
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-def skyrect(band, ra0, dec0, t0, t1, ra, dec, detsize=1.1, flag=0):
-    """
-    @CHASE - Please provide description.@
-
-    :param band: The band to use, either 'FUV' or 'NUV'.
-
-    :type band: str
-
-    :param ra0: The right ascension, in degrees, around which to search.
-
-    :type ra0: float
-
-    :param dec0: The declination, in degrees, around which to search.
-
-    :type dec0: float
-
-    :param t0: The minimum time stamp to search.
-
-    :type t0: int @CHASE - really this is a long or float?
-
-    :param t1: The maximum time stamp to search.
-
-    :type t1: int @CHASE - really this is a long or float?
-
-    :param ra: @CHASE - please describe (and check vs. ra0 description).@
-
-    :type ra: @CHASE - please specify type.@
-
-    :param dec: @CHASE - please describe (and check vs. dec0 description).@
-
-    :type dec: @CHASE - please specify type.@
-
-    :param detsize: Effective diameter, in degrees, of the field-of-view.
-    @CHASE - This parameter is not used in this method.@
-
-    :type detsize: float
-
-    :param flag: Only return times without a flag set. @CHASE - confirm
-    please, also confirm default as int is OK and shouldn't be a bool@
+    :param flag: Flag value of non-NULL data to return. Zero is nominal.
 
     :type flag: int
 

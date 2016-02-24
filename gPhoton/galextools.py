@@ -24,7 +24,7 @@ def isPostCSP(t, switch=961986575.):
 
     :param t: The time stamp to test.
 
-    :type t: int @CHASE - int/float/long?@
+    :type t: float
 
     :param switch: The GALEX time stamp that defines pre- and post-CSP.
 
@@ -176,21 +176,22 @@ def apcorrect2(radius, band):
 # ------------------------------------------------------------------------------
 def photometric_repeatability(cps, expt, band):
     """
-    Estimate the photometric repeatability vs. magnitude.
+    Estimate the photometric repeatability vs. magnitude .
+    See: http://asd.gsfc.nasa.gov/archive/galex/FAQ/counts_background.html
 
-    :param cps: Flux in counts per second. @CHASE - please refine description.@
+    :param cps: Source flux in counts per second.
 
-    :type cps: float @CHASE - please confirm type@
+    :type cps: float
 
-    :param expt: Exposure time, in seconds. @CHASE - please refine description.@
+    :param expt: Effective exposure time, in seconds.
 
-    :type expt: float @CHASE - please confirm type@
+    :type expt: float
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
     :type band: str
 
-    :returns: float -- @CHASE - please describe return value, and check type.@
+    :returns: float -- Estimated photometric repeatability based on flux.
     """
 
     scale = 0.050 if band == 'FUV' else 0.027
@@ -203,8 +204,9 @@ def photometric_repeatability(cps, expt, band):
 def detbg(area, band):
     """
     Nominal background in counts per second per 1.5" pixel.
+    See: http://asd.gsfc.nasa.gov/archive/galex/FAQ/counts_background.html
 
-    :param area: The area to calculate the background in. @CHASE - what units?@
+    :param area: The area to calculate the background in square degrees.
 
     :type area: float
 
@@ -225,6 +227,7 @@ def detbg(area, band):
 def counts2mag(cps, band):
     """
     Converts GALEX counts per second to AB magnitudes.
+    See: http://asd.gsfc.nasa.gov/archive/galex/FAQ/counts_background.html
 
     :param cps: The flux in counts per second.
 
@@ -237,8 +240,7 @@ def counts2mag(cps, band):
     :returns: float -- The converted flux in AB magnitudes.
     """
 
-    # @CHASE - Should this use zpmag() method in this module here?@
-    scale = 18.82 if band == 'FUV' else 20.08
+    scale = zpmag(band)
 
     with np.errstate(invalid='ignore'):
         mag = -2.5 * np.log10(cps) + scale
@@ -250,6 +252,7 @@ def counts2mag(cps, band):
 def mag2counts(mag, band):
     """
     Converts AB magnitudes to GALEX counts per second.
+    See: http://asd.gsfc.nasa.gov/archive/galex/FAQ/counts_background.html
 
     :param mag: The AB magnitude to convert.
 
@@ -262,8 +265,7 @@ def mag2counts(mag, band):
     :returns: float -- The converted flux in counts per second.
     """
 
-    # @CHASE - Should this use zpmag() method in this module here?@
-    scale = 18.82 if band == 'FUV' else 20.08
+    scale = zpmag(band)
 
     return 10.**(-(mag-scale)/2.5)
 # ------------------------------------------------------------------------------
@@ -272,6 +274,7 @@ def mag2counts(mag, band):
 def counts2flux(cps, band):
     """
     Converts GALEX counts per second to flux (erg sec^-1 cm^-2 A^-1).
+    See: http://asd.gsfc.nasa.gov/archive/galex/FAQ/counts_background.html
 
     :param cps: The flux in counts per second.
 
@@ -301,13 +304,14 @@ def deg2pix(skypos, skyrange, pixsz=0.000416666666666667):
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - check list or numpy.ndarray@
+    :type skypos: list
 
-    :param skyrange: @CHASE - please provide description.@
+    :param skyrange: Values in degrees RA and Dec of a box around skypos that
+    defines the extent of the region of interest.
 
-    :type skyrange: @CHASE - please provide data type.@
+    :type skyrange: list
 
-    :param pixsz: Size of a GALEX pixel, in degrees. @CHASE - please confirm@
+    :param pixsz: Width of a GALEX pixel, in degrees.
 
     :type pixsz: float
 
@@ -386,7 +390,7 @@ def compute_flat_scale(t, band, verbose=0):
 
     :param t: Time stamp(s) to retrieve the scale factor for.
 
-    :type t: list @CHASE - Is this a list or numpy.ndarray?@
+    :type t: numpy.ndarray
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -396,8 +400,7 @@ def compute_flat_scale(t, band, verbose=0):
 
     :type verbose: int
 
-    :returns: float -- The flat scale factor. @CHASE - please check data type,
-    is this a scalar float?  Looks like it could be a numpy.ndarray or list.@
+    :returns: numpy.ndarray
     """
 
     if verbose:

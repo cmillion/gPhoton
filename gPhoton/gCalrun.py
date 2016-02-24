@@ -3,7 +3,8 @@
 """
 .. module:: gCalrun
 
-   :synopsis: @CHASE - Please provide the summary.@
+   :synopsis: Performs a batch run of photometric extractions on semi-random
+   sets of known sources for calibration / regression purposes.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -23,7 +24,6 @@ def find_random_positions(rarange=[0., 360.], decrange=[-90., 90.], nsamples=10,
     """
     Generate 'nsamples' random positions uniformly selected from the specified
     RA and DEC ranges.
-    @CHASE - Please review the description.@
 
     :param rarange: The minimum and maximum RA range to sample from.
 
@@ -84,14 +84,15 @@ def calrun(outfile, band, nsamples=10, seed=323, rarange=[0., 360.],
     :type maglimit: float
     :param verbose: Verbosity level, a value of 0 is minimum verbosity.
     :type verbose: int
-    :param radius: @CHASE - This parameter is not used here, remove?@
+    :param radius: Photometric aperture radius, in degrees.
     :type radius: float
-    :param annulus: @CHASE - This parameter is not used here, remove?@
+    :param annulus: Inner and outer extent of background annulus, in degrees.
     :type annulus: list
     """
 
     (ra, dec) = find_random_positions(rarange=rarange, decrange=decrange,
-                                      nsamples=nsamples, seed=seed)
+                                      nsamples=nsamples, seed=seed,
+                                      radius=radius, annulus=annulus)
 
     if verbose:
         print 'Running {n} random samples with seed of {seed}.'.format(
@@ -109,7 +110,6 @@ def calrun(outfile, band, nsamples=10, seed=323, rarange=[0., 360.],
         else:
             print skypos, expt, False
 
-    # @CHASE - I don't think this is needed?@
     return
 # ------------------------------------------------------------------------------
 
@@ -204,8 +204,7 @@ def check_args(args):
     :type args: argparse.ArgumentParser Namespace
 
     :returns: argparse.ArgumentParser Namespace -- The command-line arguments.
-    @CHASE - This doesn't change the args, so this method doesn't need to return
-    anything.@
+    Included for function usage consistency.
     """
 
     if (not(0. <= args.rarange[0] <= 360. and 0. <= args.rarange[1] <= 360. and

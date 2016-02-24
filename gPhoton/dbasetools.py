@@ -24,7 +24,7 @@ def get_aspect(band, skypos, trange=[6e8, 11e8], verbose=0, detsize=1.25):
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
     :param trange: Minimum and maximum time (in GALEX time) to consider.
 
@@ -67,9 +67,10 @@ def get_aspect(band, skypos, trange=[6e8, 11e8], verbose=0, detsize=1.25):
 
 # ------------------------------------------------------------------------------
 def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
-                    retries=100, skyrange=None):
+                    skyrange=None):
     """
-    @CHASE - Please provide method summary.@
+    Given a sky position and (optional) extent, return all of the times
+    periods containing spatially intersecting observations.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -77,7 +78,7 @@ def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
     :param trange: Minimum and maximum time (in GALEX time) to consider.
 
@@ -91,13 +92,10 @@ def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
 
     :type verbose: int
 
-    :param retries: Number of query retries to attempt before giving up.
+    :param skyrange: Values in degrees RA and Dec of a box around skypos that
+    defines the extent of the region of interest.
 
-    :type retries: int
-
-    :param skyrange: @CHASE - please describe.@
-
-    :type skyrange: list @CHASE - list or numpy.ndarray?@
+    :type skyrange: list
 
     :returns: numpy.ndarray -- A sorted set of unique time stamps.
     """
@@ -130,7 +128,7 @@ def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
                          gQuery.exposure_ranges(band, skypos[0], skypos[1],
                                                 t0=trange[0], t1=trange[1],
                                                 detsize=detsize),
-                         verbose=verbose, retries=retries),
+                                                verbose=verbose),
                                    dtype='float64')[:, 0]/tscale))
         except IndexError:
             if verbose:
@@ -148,11 +146,12 @@ def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
 # ------------------------------------------------------------------------------
 def distinct_tranges(times, maxgap=1.):
     """
-    @CHASE - please describe this method@
+    Produces a list of pairs of start / stop times delimiting distinct around
+    unique time ranges, given that gaps of >maxgap initiate a new time period.
 
     :param times: A set of time stamps to extract unique time ranges from.
 
-    :type times: list @CHASE list or numpy.ndarray?@
+    :type times: list
 
     :param maxgap:  Maximum gap size, in seconds, for data to be considered
     contiguous.
@@ -171,8 +170,7 @@ def distinct_tranges(times, maxgap=1.):
 
 # ------------------------------------------------------------------------------
 def fGetTimeRanges(band, skypos, trange=None, detsize=1.1, verbose=0,
-                   maxgap=1., minexp=1., retries=100,
-                   skyrange=None, maxgap_override=False):
+                   maxgap=1., minexp=1., skyrange=None, maxgap_override=False):
     """
     Find the contiguous time ranges within a time range at a specific location.
 
@@ -182,7 +180,7 @@ def fGetTimeRanges(band, skypos, trange=None, detsize=1.1, verbose=0,
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
     :param trange: Minimum and maximum time (in GALEX time) to consider.
 
@@ -206,15 +204,13 @@ def fGetTimeRanges(band, skypos, trange=None, detsize=1.1, verbose=0,
 
     :type minexp: float
 
-    :param retries: Number of query retries to attempt before giving up.
+    :param skyrange: Values in degrees RA and Dec of a box around skypos that
+    defines the extent of the region of interest.
 
-    :type retries: int
+    :type skyrange: list
 
-    :param skyrange: @CHASE - please describe.@
-
-    :type skyrange: list @CHASE - list or numpy.ndarray?@
-
-    :param maxgap_override: @CHASE - please describe what this does.@
+    :param maxgap_override: Enables an experimental feature where maxgap
+    can be less than one second.
 
     :type maxgap_override: bool
 
@@ -223,7 +219,7 @@ def fGetTimeRanges(band, skypos, trange=None, detsize=1.1, verbose=0,
 	"""
 
     times = get_valid_times(band, skypos, trange=trange, detsize=detsize,
-                            verbose=verbose, retries=retries, skyrange=skyrange)
+                            verbose=verbose, skyrange=skyrange)
 
     if not len(times):
         return np.array([[]], dtype='float64')
@@ -244,10 +240,10 @@ def fGetTimeRanges(band, skypos, trange=None, detsize=1.1, verbose=0,
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def stimcount_shuttered(band, trange, verbose=0, retries=20,
-                        timestamplist=False):
+def stimcount_shuttered(band, trange, verbose=0, timestamplist=False):
     """
-    @CHASE - please provide summary.@
+    Returns the stim count over a time range, excluding periods that the
+    detector is considered shuttered (because of no non-NULL data).
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -261,19 +257,11 @@ def stimcount_shuttered(band, trange, verbose=0, retries=20,
 
     :type verbose: int
 
-    :param retries: Number of query retries to attempt before giving up.
-    @CHASE - Other default retries are set to 100, should we change this one?@
-    @CHASE - This parameter is not used here, it can be removed?@
+    :param timestamplist: Global detector event timestamps.
 
-    :type retries: int
+    :type timestamplist: list
 
-    :param timestamplist: @CHASE - please provide description.@
-
-    :type timestamplist: bool @CHASE - Should this be a string with None as
-    default?@
-
-    :returns: int -- Total stim count and shuttered events. @CHASE - please
-    revise this description.@
+    :returns: int -- Total stim counts excluding shuttered time ranges.
     """
 
     try:
@@ -305,7 +293,8 @@ def stimcount_shuttered(band, trange, verbose=0, retries=20,
 # ------------------------------------------------------------------------------
 def globalcount_shuttered(band, trange, verbose=0, timestamplist=False):
     """
-    @CHASE - please provide summary.@
+    Global event counts over the time range, exluding shuttered periods (due to
+    no non-NULL data).
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -319,13 +308,11 @@ def globalcount_shuttered(band, trange, verbose=0, timestamplist=False):
 
     :type verbose: int
 
-    :param timestamplist: @CHASE - please provide description.@
+    :param timestamplist: Global event time stamps.
 
-    :type timestamplist: bool @CHASE - Should this be a string with None as
-    default?@
+    :type timestamplist: list
 
-    :returns: int -- Total global counts and shuttered events. @CHASE - please
-    revise this description.@
+    :returns: int -- Total global counts excluding shuttered periods.
     """
 
     try:
@@ -355,7 +342,7 @@ def globalcount_shuttered(band, trange, verbose=0, timestamplist=False):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def compute_shutter(band, trange, verbose=0, retries=20, shutgap=0.05,
+def compute_shutter(band, trange, verbose=0, shutgap=0.05,
                     timestamplist=False):
     """
     :param band: The band to use, either 'FUV' or 'NUV'.
@@ -370,21 +357,14 @@ def compute_shutter(band, trange, verbose=0, retries=20, shutgap=0.05,
 
     :type verbose: int
 
-    :param retries: Number of query retries to attempt before giving up.
-    @CHASE - Other default retries are set to 100, should we change this one?@
-    @CHASE - This parameter is not used here, it can be removed?@
-
-    :type retries: int
-
     :param shutgap: Amount of time, in seconds, that defines the minimum gap in
     observation that corresponds to a 'shutter' (not a true exposure time).
 
     :type shutgap: float
 
-    :param timestamplist: @CHASE - please provide description.@
+    :param timestamplist: Global event time stamps.
 
-    :type timestamplist: bool @CHASE - Should this be a string with None as
-    default?@
+    :type timestamplist: list
 
     :returns: numpy.ndarray -- The total shutter time, in seconds, during the
     specified time range.
@@ -406,7 +386,7 @@ def compute_shutter(band, trange, verbose=0, retries=20, shutgap=0.05,
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def empirical_deadtime(band, trange, verbose=0, retries=20, feeclkratio=0.966,
+def empirical_deadtime(band, trange, verbose=0, feeclkratio=0.966,
                        timestamplist=False):
     """
     Calculate empirical deadtime (per global count rate) using revised
@@ -425,23 +405,15 @@ def empirical_deadtime(band, trange, verbose=0, retries=20, feeclkratio=0.966,
 
     :type verbose: int
 
-    :param retries: Number of query retries to attempt before giving up.
-    @CHASE - Other default retries are set to 100, should we change this one?@
-    @CHASE - This parameter is not used here, it can be removed?@
-
-    :type retries: int
-
-    :param feeclkratio: @CHASE - please describe.@
+    :param feeclkratio: A scaling parameter for the Front End Electronics clock.
 
     :type feeclkratio: float
 
-    :param timestamplist: @CHASE - please provide description.@
+    :param timestamplist: Global even time stamps.
 
-    :type timestamplist: bool @CHASE - Should this be a string with None as
-    default?@
+    :type timestamplist: list
 
-    :returns: float -- The empirical deadtime, in seconds. @CHASE - please
-    confirm data type and expand description.@
+    :returns: float -- The empirical deadtime ratio.
     """
 
     model = {'NUV':[-0.000434730599193, 77.217817988],
@@ -460,10 +432,11 @@ def empirical_deadtime(band, trange, verbose=0, retries=20, feeclkratio=0.966,
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def exposure(band, trange, verbose=0, retries=20):
+def exposure(band, trange, verbose=0):
     """
-    Calculate the effective exposure time, in seconds, accounting for shutter
-    and deadtime. @CHASE - please refine if needed.@
+    Calculate the effective exposure time in a period, in seconds, accounting
+    for shutter and deadtime. Does not account for actual sky coverage of
+    the telescope during the time period queried (see: compute_exptime() below).
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -476,13 +449,6 @@ def exposure(band, trange, verbose=0, retries=20):
     :param verbose: Verbosity level, a value of 0 is minimum verbosity.
 
     :type verbose: int
-
-    :param retries: Number of query retries to attempt before giving up.
-    @CHASE - Other default retries are set to 100, should we change this one?@
-    @CHASE - This parameter is not used here or in the methods called, it can
-    be removed?@
-
-    :type retries: int
 
     :returns: float -- The effective exposure time, in seconds.
     """
@@ -502,29 +468,26 @@ def exposure(band, trange, verbose=0, retries=20):
             print 'No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1])
         return 0.
 
-    shutter = compute_shutter(band, trange, verbose=verbose, retries=retries,
-                              timestamplist=t)
+    shutter = compute_shutter(band, trange, verbose=verbose, timestamplist=t)
 
     deadtime = empirical_deadtime(band, trange, verbose=verbose,
-                                  retries=retries, timestamplist=t)
+                                  timestamplist=t)
 
     return (rawexpt-shutter)*(1.-deadtime)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 def compute_exptime(band, tr, verbose=0, skypos=None, detsize=1.25,
-                    retries=20, coadd=False):
+                    coadd=False):
     """
     Compute the total effective exposure time, in seconds, accounting for
-    shutter and deadtime. @CHASE - please refine if needed, also, explain how
-    this differs from 'exposure' method above?@
+    shutter and deadtime _and_ detector size (i.e. effective coverage).
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
     :type band: str
 
-    :param tr: Minimum and maximum time (in GALEX time) to consider.
-    @CHASE - Is this a list of lists of time ranges e.g., a set of time ranges?@
+    :param tr: Pairs of minimum and maximum times (in GALEX time) to consider.
 
     :type tr: list
 
@@ -532,27 +495,20 @@ def compute_exptime(band, tr, verbose=0, skypos=None, detsize=1.25,
 
     :type verbose: int
 
-    :param skypos: The right ascension and declination, in degrees.
+    :param skypos: The right ascension and declination of interest, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
     :param detsize: The effective detector diameter, in degrees.
 
     :type detsize: float
-
-    :param retries: The number of query attempts to make before giving up.
-    @CHASE - Should the default be made 100 like other methods?@
-
-    :type retries: int
 
     :param coadd: Should the effective exposure time be calculated across all
     time ranges, e.g., a coadded effective exposure time.
 
     :type coadd: bool
 
-    :returns: numpy.ndarray -- The effective exposure time(s), in seconds.
-    @CHASE - Looks like if coadd=True or 0. it's returned as a list, otherwise
-    a numpy.ndarray? This should be consistently a numpy.ndarray I would think.@
+    :returns: list
     """
 
     if len(np.shape(tr)) == 1:
@@ -566,16 +522,15 @@ def compute_exptime(band, tr, verbose=0, skypos=None, detsize=1.25,
         exptime = []
         for trange in tr:
             tranges = fGetTimeRanges(band, skypos, verbose=verbose,
-                                     trange=trange, retries=retries,
-                                     detsize=detsize).tolist()
+                                     trange=trange, detsize=detsize).tolist()
             if np.array(tranges).any():
                 exptime += [sum(
-                    exposure(band, trange, verbose=verbose, retries=retries)
+                    exposure(band, trange, verbose=verbose)
                     for trange in tranges)]
             else:
                 exptime += [0.]
     else:
-        exptime = [exposure(band, trange, verbose=verbose, retries=retries)
+        exptime = [exposure(band, trange, verbose=verbose)
                    for trange in tr]
 
     return (([sum(exptime)] if coadd else exptime)
@@ -591,10 +546,10 @@ def get_mcat_data(skypos, rad):
     :param skypos: The right ascension and declination, in degrees, around
     which to search for MCAT sources.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
-    :param rad: The radius within which to search for MCAT sources.
-    @CHASE - Is this in degrees?@
+    :param rad: The radius within which to search for MCAT sources,
+    in degrees.
 
     :type rad: float
 
@@ -689,7 +644,7 @@ def exp_from_objid(objid):
 
     :param objid: GALEX object ID.
 
-    :type objid: int @CHASE - is this an int or long?@
+    :type objid: int
 
     :returns: dict -- The FUV and NUV effective exposure time and start/stop
     times.
@@ -713,7 +668,7 @@ def obstype_from_objid(objid):
 
     :param objid: GALEX object ID.
 
-    :type objid: int @CHASE - is this an int or long?@
+    :type objid: int
 
     :returns: tuple -- A two-element tuple containing the number of legs and
     the petal value, which can be used to infer the observation type/strategy.
@@ -728,7 +683,7 @@ def obstype_from_objid(objid):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def mcat_skybg(band, skypos, radius, verbose=0, retries=20, trange=None):
+def mcat_skybg(band, skypos, radius, verbose=0, trange=None):
     """
     Estimate the sky background using the MCAT 'skybg' for nearby sources.
 
@@ -738,10 +693,9 @@ def mcat_skybg(band, skypos, radius, verbose=0, retries=20, trange=None):
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
-    :param radius: The radius within which to search for MCAT sources.
-    @CHASE - Is this in degrees?@
+    :param radius: The radius in which to search for MCAT sources in degrees.
 
     :type radius: float
 
@@ -749,16 +703,12 @@ def mcat_skybg(band, skypos, radius, verbose=0, retries=20, trange=None):
 
     :type verbose: int
 
-    :param retries: Number of query retries to attempt before giving up.
-
-    :type retries: int
-
     :param trange: Minimum and maximum time (in GALEX time) to consider.
 
     :type trange: list
 
-    :returns: float -- The estimated sky background, in counts per second.
-    @CHASE - confirm units please.@
+    :returns: float -- The estimated sky background in the photometric
+    aperture, in counts per second.
     """
 
     # Setting maglimit to 30 so that it gets _everything_...
@@ -817,8 +767,7 @@ def get_mags(band, ra0, dec0, radius, maglimit, mode='coadd',
 
     :type dec0: float
 
-    :param radius: The size of the radius to search for MCAT sources.
-    @CHASE - Is this in degrees?@
+    :param radius: The size of the search radius for MCAT sources in degrees.
 
     :type radius: float
 
@@ -885,7 +834,7 @@ def get_mags(band, ra0, dec0, radius, maglimit, mode='coadd',
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def parse_unique_sources(ras, decs, fmags, nmags, margin=0.001):
+def parse_unique_sources(ras, decs, margin=0.001):
     """
     Iteratively returns unique sources based upon a margin within
     which two sources should be considered the same sources. Is a little
@@ -894,27 +843,17 @@ def parse_unique_sources(ras, decs, fmags, nmags, margin=0.001):
 
     :param ras: Set of right ascensions, in degrees.
 
-    :type ras: list @CHASE list or numpy.ndarray?@
+    :type ras: numpy.ndarray
 
     :param decs: Set of declinations, in degrees.
 
-    :type decs: list @CHASE = list or numpy.ndarray?@
-
-    :param fmags: @CHASE - This is not used.@
-
-    :type fmags: list
-
-    :param nmags: @CHASE - This is not used.@
-
-    :type nmags: list
+    :type decs: numpy.ndarray
 
     :param margin: Buffer size when determining matches, in degrees.
-    @CHASE - plase confirm unit is degrees.@
 
     :type margin: float
 
-    :returns: list -- The indexes corresponding to the unique sources.
-    @CHASE - please update description as needed.@
+    :returns: list -- The indices corresponding to unique sources.
     """
 
     skypos = zip(ras, decs)
@@ -937,7 +876,8 @@ def parse_unique_sources(ras, decs, fmags, nmags, margin=0.001):
 def find_unique_sources(band, ra0, dec0, searchradius, maglimit=20.0,
                         margin=0.001, verbose=0):
     """
-    @CHASE - please describe this method.@
+    Locates nominally unique (via crossmatch) GALEX sources in the MCAT
+    near a sky position of interest.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -951,8 +891,8 @@ def find_unique_sources(band, ra0, dec0, searchradius, maglimit=20.0,
 
     :type dec0: float
 
-    :param searchradius: The size of the radius to search for unique sources.
-    @CHASE - Is this in degrees?@
+    :param searchradius: The size of the radius to search for unique sources,
+    in degrees.
 
     :type searchradius: float
 
@@ -961,7 +901,6 @@ def find_unique_sources(band, ra0, dec0, searchradius, maglimit=20.0,
     :type maglimit: float
 
     :param margin: Buffer size when determining matches, in degrees.
-    @CHASE - plase confirm unit is degrees.@
 
     :type margin: float
 
@@ -979,14 +918,12 @@ def find_unique_sources(band, ra0, dec0, searchradius, maglimit=20.0,
         return None
     else:
         return np.array(parse_unique_sources(coadds['ra'], coadds['dec'],
-                                             coadds['FUV']['mag'],
-                                             coadds['NUV']['mag'],
                                              margin=margin))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 def avg_sources(band, skypos, radius=0.001, maglimit=20.0, verbose=0,
-                catalog='MCAT', retries=20):
+                catalog='MCAT'):
     """
     Return the mean position of sources within the search radius.
 
@@ -996,10 +933,10 @@ def avg_sources(band, skypos, radius=0.001, maglimit=20.0, verbose=0,
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
-    :param radius: The radius within which to search for MCAT sources.
-    @CHASE - Is this in degrees?@
+    :param radius: The radius within which to search for MCAT sources,
+    in degrees?
 
     :type radius: float
 
@@ -1015,11 +952,6 @@ def avg_sources(band, skypos, radius=0.001, maglimit=20.0, verbose=0,
 
     :type catalog: str
 
-    :param retries: Number of query retries to attempt before giving up.
-    @CHASE - should the default be made to be 100 like other methods?@
-
-    :type retries: int
-
     :returns: tuple -- A three-element tuple containing the mean RA, mean DEC,
     and mean FWHM of sources within the search radius.
     """
@@ -1027,7 +959,7 @@ def avg_sources(band, skypos, radius=0.001, maglimit=20.0, verbose=0,
     out = np.array(gQuery.getArray(gQuery.mcat_sources(band, skypos[0],
                                                        skypos[1], radius,
                                                        maglimit=maglimit),
-                                   verbose=verbose, retries=retries))
+                                   verbose=verbose))
 
     ix = np.where(out[:, -2] > 0) if band == 'NUV' else np.where(out[:, -1] > 0)
 
@@ -1038,7 +970,7 @@ def avg_sources(band, skypos, radius=0.001, maglimit=20.0, verbose=0,
 
 # ------------------------------------------------------------------------------
 def nearest_source(band, skypos, radius=0.01, maglimit=20.0, verbose=0,
-                   catalog='MCAT', retries=20):
+                   catalog='MCAT'):
     """
     Return targeting parameters for the nearest MCAT source to a position.
 
@@ -1048,10 +980,10 @@ def nearest_source(band, skypos, radius=0.01, maglimit=20.0, verbose=0,
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
     :param radius: The radius within which to search for the nearest MCAT
-    source. @CHASE - Is this in degrees?@
+    source, in degrees.
 
     :type radius: float
 
@@ -1067,11 +999,6 @@ def nearest_source(band, skypos, radius=0.01, maglimit=20.0, verbose=0,
 
     :type catalog: str
 
-    :param retries: Number of query retries to attempt before giving up.
-    @CHASE - should the default be made to be 100 like other methods?@
-
-    :type retries: int
-
     :returns: tuple -- A three-element tuple containing the mean RA, mean DEC,
     and mean FWHM of the nearest sources within the search radius.
     """
@@ -1079,7 +1006,7 @@ def nearest_source(band, skypos, radius=0.01, maglimit=20.0, verbose=0,
     out = np.array(gQuery.getArray(gQuery.mcat_sources(band, skypos[0],
                                                        skypos[1], radius,
                                                        maglimit=maglimit),
-                                   verbose=verbose, retries=retries))
+                                                       verbose=verbose))
 
     if not len(out) and band == 'FUV':
         if verbose:
@@ -1088,7 +1015,7 @@ def nearest_source(band, skypos, radius=0.01, maglimit=20.0, verbose=0,
         out = np.array(gQuery.getArray(gQuery.mcat_sources(band, skypos[0],
                                                            skypos[1], radius,
                                                            maglimit=maglimit),
-                                       verbose=verbose, retries=retries))
+                                                           verbose=verbose))
 
     if not len(out) and band == 'NUV':
         if verbose:
@@ -1103,12 +1030,12 @@ def nearest_source(band, skypos, radius=0.01, maglimit=20.0, verbose=0,
     # Note that this doesn't cope with multiple entries for the same source.
     s = out[np.where(dist == dist.min())][0]
 
-    return avg_sources(band, [s[0], s[1]], verbose=verbose, retries=retries)
+    return avg_sources(band, [s[0], s[1]], verbose=verbose)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 def nearest_distinct_source(band, skypos, radius=0.1, maglimit=20.0, verbose=0,
-                            catalog='MCAT', retries=20):
+                            catalog='MCAT'):
     """
     Return parameters for the nearest non-targeted source.
 
@@ -1118,10 +1045,10 @@ def nearest_distinct_source(band, skypos, radius=0.1, maglimit=20.0, verbose=0,
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
     :param radius: The radius within which to search for the nearest MCAT
-    source. @CHASE - Is this in degrees?@
+    source, in degrees.
 
     :type radius: float
 
@@ -1137,19 +1064,14 @@ def nearest_distinct_source(band, skypos, radius=0.1, maglimit=20.0, verbose=0,
 
     :type catalog: str
 
-    :param retries: Number of query retries to attempt before giving up.
-    @CHASE - should the default be made to be 100 like other methods?@
-
-    :type retries: int
-
     :returns: numpy.ndarray -- Catalog values for the nearest non-targeted
-    source. @CHASE - please refine as needed.@
+    source.
     """
 
     out = np.array(gQuery.getArray(gQuery.mcat_sources(band, skypos[0],
                                                        skypos[1], radius,
                                                        maglimit=maglimit),
-                                   verbose=verbose, retries=retries))
+                                                       verbose=verbose))
 
     dist = angularSeparation(out[:, 0], out[:, 1], skypos[0], skypos[1])
 
@@ -1160,7 +1082,7 @@ def nearest_distinct_source(band, skypos, radius=0.1, maglimit=20.0, verbose=0,
 
 # ------------------------------------------------------------------------------
 def suggest_bg_radius(band, skypos, radius=0.1, maglimit=20.0, verbose=0,
-                      catalog='MCAT', retries=20):
+                      catalog='MCAT'):
     """
     Returns a recommended background radius based upon the positions and FWHM of
     nearby sources in the MCAT.
@@ -1171,10 +1093,10 @@ def suggest_bg_radius(band, skypos, radius=0.1, maglimit=20.0, verbose=0,
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
-    :param radius: The radius within which to search for MCAT  sources.
-    @CHASE - Is this in degrees?@
+    :param radius: The radius within which to search for MCAT  sources,
+    in degrees?
 
     :type radius: float
 
@@ -1190,16 +1112,10 @@ def suggest_bg_radius(band, skypos, radius=0.1, maglimit=20.0, verbose=0,
 
     :type catalog: str
 
-    :param retries: Number of query retries to attempt before giving up.
-    @CHASE - should the default be made to be 100 like other methods?@
-
-    :type retries: int
-
     :returns: float -- The suggested radius to define the background with.
     """
 
-    nearest = nearest_distinct_source(band, skypos, verbose=verbose,
-                                      retries=retries)
+    nearest = nearest_distinct_source(band, skypos, verbose=verbose)
 
     dist = angularSeparation(nearest[0], nearest[1], skypos[0], skypos[1])
 
@@ -1212,12 +1128,10 @@ def optimize_annulus(optrad, outann, verbose=0):
     Suggest optiumum annulus dimensions.
 
     :param optrad: The optimal photometric aperture radius, in degrees.
-    @CHASE - confirm unit is degrees.
 
     :type optrad: float
 
     :param outann: The outer annulus to test, in degrees.
-    @CHASE - confirm unit is degrees.
 
     :type outann: float
 
@@ -1236,7 +1150,7 @@ def optimize_annulus(optrad, outann, verbose=0):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def suggest_parameters(band, skypos, verbose=0, retries=20):
+def suggest_parameters(band, skypos, verbose=0):
     """
     Provide suggested coordinates and photometric apertures for a source
     given the location of known MCAT sources nearby.
@@ -1247,21 +1161,15 @@ def suggest_parameters(band, skypos, verbose=0, retries=20):
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
     :param verbose: Verbosity level, a value of 0 is minimum verbosity.
 
     :type verbose: int
 
-    :param retries: Number of query retries to attempt before giving up.
-    @CHASE - should the default be made to be 100 like other methods?@
-
-    :type retries: int
-
     :returns: tuple -- A five-element tuple containing the suggested right
     ascension, declination, photometric aperture, inner annulus, and outer
     annulus, all in degrees.
-    @CHASE - confirm radius and annuli are in degrees.@
     """
 
     mcat = get_mcat_data(skypos, 0.01)

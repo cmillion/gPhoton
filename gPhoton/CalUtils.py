@@ -2,15 +2,15 @@
 .. module:: CalUtils
 
    :synopsis: Numerous methods for calibrating the raw photon event data.
-   @CHASE - elaborate on this please.@
+   Many of these instantiate or make use of specific detector hardware
+   parameters / constants related to the "static" or detector-space event
+   calibration, including walk, wiggle, linearity, post-CSP, and stim
+   scaling corrections.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
-# @CHASE - We need to avoid "import *", can we do specific imports here?@
-from MCUtils import *
-from FileUtils import *
-from gnomonic import *
+from MCUtils import rms, print_inline, get_fits_header, get_tbl_data
 import pandas as pd
 from galextools import isPostCSP
 import cal
@@ -18,8 +18,10 @@ import cal
 # ------------------------------------------------------------------------------
 def clk_cen_scl_slp(band, eclipse):
     """
-    Return the detector clock, center, scale, and slope constants.
-    @CHASE - what are these "constants"?@
+    Return the detector clock, center, scale, and slope constants. These are
+    empirically determined detector-space calibration parameters that help
+    define the relationship between raw event data and its physical position
+    on the detector.
 
     :param band: The band to return the constants for, either 'FUV' or 'NUV'.
 
@@ -27,7 +29,7 @@ def clk_cen_scl_slp(band, eclipse):
 
     :param eclipse: The eclipse number to return the constants for.
 
-    :type eclipse: int @CHASE - Confirm this is int/long/float.@
+    :type eclipse: int
 
     :returns: tuple -- a tuple containing the x-clock, y-clock, x-center,
     y-center, x-scale, y-scale, x-slope, and y-slope constants.
@@ -43,7 +45,6 @@ def clk_cen_scl_slp(band, eclipse):
     elif band == 'NUV':
         xclk, yclk = 2007., 1992.
         # Special value for post-CSP event.
-        # @CHASE - Confirm this is the case please.@
         if eclipse >= 38150:
             yclk = 2016.
         xcen, ycen = 7400., 6070.
@@ -62,25 +63,25 @@ def xieta2colrow(xi, eta, detsize, fill, npixx, npixy):
     """
     Convert detector xi and eta values to image column and row.
 
-    :param xi: @CHASE - What is "xi".@
+    :param xi: One coordinate of the unprojected detector position.
 
-    :type xi: float @CHASE - Or is this a numpy.ndarray? Something else?@
+    :type xi: numpy.ndarray
 
-    :param eta: @CHASE - What is "eta"?@
+    :param eta: Second coordinate of the unprojected detector position.
 
-    :type eta: float @CHASE - Or is this a numpy.ndarray? Something else?@
+    :type eta: numpy.ndarray
 
-    :param fill: @CHASE - What is "fill"@
+    :param fill: Ration of the detector extent to the image extent.
 
-    :type fill: @CHASE - please specify@
+    :type fill: float
 
-    :param npixx: @CHASE - What is "npixx"?@
+    :param npixx: Number of pixels in the x dimension of an image.
 
-    :type npixx: int @CHASE - confirm?@
+    :type npixx: int
 
-    :param nipxy: @CHASE - What is "npixx"?@
+    :param nipxy: Number of pixels in the y dimension of an image.
 
-    :type npixy: int @CHASE - confirm?@
+    :type npixy: int
 
     :returns: tuple -- A tuple containing the image column and row values.
     """
@@ -104,7 +105,7 @@ def avg_stimpos(band, eclipse):
 
     :param eclipse: The eclipse number to return the average stim positions for.
 
-    :type eclipse: int @CHASE - Confirm this is int/long/float.@
+    :type eclipse: int
 
     :returns: dict -- A dict containing the average x and y positions of the
     four stims (for the requested band).
@@ -147,11 +148,11 @@ def find_stims_index(x, y, band, eclipse, margin=90.001):
 
     :param x: Detector 'x' positions to identify likely stim events from.
 
-    :type x: list @CHASE - looks like a list, not a numpy.ndarray?@
+    :type x: list
 
     :param y: Detector 'y' positions to identify likely stim events from.
 
-    :type y: list @CHASE - looks like a list, not a numpy.ndarray?@
+    :type y: list
 
     :param band: The band to return the constants for, either 'FUV' or 'NUV'.
 
@@ -159,11 +160,11 @@ def find_stims_index(x, y, band, eclipse, margin=90.001):
 
     :param eclipse: The eclipse number to return the average stim positions for.
 
-    :type eclipse: int @CHASE - Confirm this is int/long/float.@
+    :type eclipse: int
 
-    :param margin: @CHASE - What is "margin"?@
+    :param margin: +/- extent in arcseconds defining search box
 
-    :type margin: @CHASE - Please confirm data type.@
+    :type margin: float
 
     :returns: tuple -- A four-element tuple containing arrays of indexes that
     correpond to the event positions for stim1, stim2, stim3, and stim4.
@@ -212,9 +213,9 @@ def stimcount(data, band, t0, t1, margin=90.001):
     range.
 
     :param data: The event times and detector positions from which to count the
-    total number of stim events. @CHASE - Please confirm.@
+    total number of stim events.
 
-    :type data: dict @CHASE - please confirm.@
+    :type data: dict
 
     :param band: The band to return the constants for, either 'FUV' or 'NUV'.
 
@@ -222,15 +223,15 @@ def stimcount(data, band, t0, t1, margin=90.001):
 
     :param t0: The mininum of the time range to report stim counts within.
 
-    :type t0: float @CHASE - Confirm?@
+    :type t0: float
 
     :param t1: The maximum of the time range to report stim counts within.
 
-    :type t1: float @CHASE - Confirm?@
+    :type t1: float
 
-    :param margin: @CHASE - What is "margin"?@
+    :param margin: +/- extent in arcseconds defining search box
 
-    :type margin: @CHASE - Please confirm data type.@
+    :type margin: float
 
     :returns: int -- The total number of stim events.
     """
@@ -280,27 +281,21 @@ def totalcount(data, t0, t1):
     the total number of events within the time range.
 
     :param data: The event times and detector positions from which to count the
-    total number of photon events. @CHASE - Please confirm.@
+    total number of photon events.
 
-    :type data: dict @CHASE - please confirm.@
+    :type data: dict
 
     :param t0: The mininum of the time range to report total counts within.
 
-    :type t0: float @CHASE - Confirm?@
+    :type t0: float
 
     :param t1: The maximum of the time range to report total counts within.
 
-    :type t1: float @CHASE - Confirm?@
+    :type t1: float
 
     :returns: int -- The total number of events within the given time range.
     """
-
-    time = ((np.array(data['t']) >= t0) & (np.array(data['t']) <= t1))
-
-    ix = np.where(time)
-
-    # @CHASE - This could all be done in one line:@
-    # ix = np.where((np.array(data['t']) >= t0) & (np.array(data['t']) <= t1))
+    ix = np.where((np.array(data['t']) >= t0) & (np.array(data['t']) <= t1))
 
     return len(ix[0])
 # ------------------------------------------------------------------------------
@@ -312,39 +307,35 @@ def deadtime_method0(data, t0, t1, band, feeclkratio=0.966, tec2fdead=5.52e-6):
     the deadtime using an empirical formula based on global count rate over
     the whole time range.
 
-    :param data: The event times and detector positions from which to calculate
-    the deadtime. @CHASE - Please confirm - dict has times only or also detector
-    positions?@
+    :param data: The event times from which to calculate the deadtime.
 
-    :type data: dict @CHASE - please confirm.@
+    :type data: dict
 
     :param t0: The mininum of the time range to calculate the deadtime within.
 
-    :type t0: float @CHASE - Confirm?@
+    :type t0: float
 
     :param t1: The maximum of the time range to calculate the deadtime within.
 
-    :type t1: float @CHASE - Confirm?@
+    :type t1: float
 
     :param band: The band to return the constants for, either 'FUV' or 'NUV'.
-    @CHASE - This parameter is not actually used in this method, ideally should
-    be removed or made optional parameter? I recognize this was likely done to
-    simplify calling multiple methods in deadtime_fromlist or something...@
+    Not actually used in this function, but retained to make this function
+    definition consistent with deadtime_method[12].
 
     :type band: str
 
-    :param feeclkratio: @CHASE - What is this?@
+    :param feeclkratio: Ratio of Front End Electronics clock rates.
 
-    :type feeclkratio: @CHASE - What is data type?@
+    :type feeclkratio: float
 
-    :param tec2fdead: @CHASE - What is this?@
+    :param tec2fdead: The nominal amount of time following an event that the
+    detector is unable to detect another event.
 
-    :type tec2fdead: @CHASE - What is data type?@
+    :type tec2fdead: float
 
-    :returns: float -- The deadtime for the specified time range. @CHASE -
-    Please confirm the return data type is a scalar float.@
+    :returns: float -- The deadtime for the specified time range.
     """
-
     exptime = t1-t0
 
     totcount = totalcount(data, t0, t1)
@@ -361,42 +352,41 @@ def deadtime_method1(data, t0, t1, band, feeclkratio=0.966, tec2fdead=5.52e-6,
     into bins of depth equal to `tstep` seconds and averaged.
 
     :param data: The event times and detector positions from which to calculate
-    the deadtime. @CHASE - Please confirm, especially, does the dict also
-    contain positions? The description at top makes it sound like it only has
-    times.@
+    the deadtime.
 
-    :type data: dict @CHASE - please confirm.@
+    :type data: dict
 
     :param t0: The mininum of the time range to calculate the deadtime within.
 
-    :type t0: float @CHASE - Confirm?@
+    :type t0: float
 
     :param t1: The maximum of the time range to calculate the deadtime within.
 
-    :type t1: float @CHASE - Confirm?@
+    :type t1: float
 
     :param band: The band to return the constants for, either 'FUV' or 'NUV'.
-    @CHASE - This parameter is not actually used in this method, ideally should
-    be removed or made optional parameter? I recognize this was likely done to
-    simplify calling multiple methods in deadtime_fromlist or something...@
+    Not actually used in this function, but retained to make this function
+    definition consistent with deadtime_method[02].
 
     :type band: str
 
-    :param feeclkratio: @CHASE - What is this?@
+    :param feeclkratio: Ratio of Front End Electronics clock rates.
 
-    :type feeclkratio: @CHASE - What is data type?@
+    :type feeclkratio: float
 
-    :param tec2fdead: @CHASE - What is this?@
+    :param tec2fdead: The nominal amount of time following an event that the
+    detector is unable to detect another event.
 
-    :type tec2fdead: @CHASE - What is data type?@
+    :type tec2fdead: float
+
+    :type tec2fdead: float
 
     :param tstep: Bin size (in seconds) to use when reporting the deadtime.
 
     :type tstep: float
 
     :returns: numpy.ndarray -- The deadtimes within the specified time range,
-    split into the requested bin size. @CHASE - Please confirm the return data
-    type is a numpy.ndarray, and my description is correct.@
+    split into the requested bin size.
     """
 
     exptime = t1-t0
@@ -412,57 +402,50 @@ def deadtime_method1(data, t0, t1, band, feeclkratio=0.966, tec2fdead=5.52e-6,
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def deadtime_method2(data, t0, t1, band, refrate=79., tstep=1.,
-                     feeclkratio=0.966, refrange=[.4, 2.]):
+def deadtime_method2(data, t0, t1, band, refrate=79., feeclkratio=0.966,
+    tstep=1., refrange=[.4, 2.]):
     """
     Given a list of global event times, computes the deadtime through
     direct comparison of the stim rate to the reference rate in bins of
     depth `tstep` seconds, and trimmed of outliers. This is close to the
     deadtime method used by the mission pipeline.
 
-    :param data: The event times and detector positions from which to calculate
-    the deadtime. @CHASE - Please confirm, especially, does the dict also
-    contain positions? The description at top makes it sound like it only has
-    times.@
+    :param data: The event times and 'x' and 'y' detector positions from
+    which to calculate the deadtime.
 
-    :type data: dict @CHASE - please confirm.@
+    :type data: dict
 
     :param t0: The mininum of the time range to calculate the deadtime within.
 
-    :type t0: float @CHASE - Confirm?@
+    :type t0: float
 
     :param t1: The maximum of the time range to calculate the deadtime within.
 
-    :type t1: float @CHASE - Confirm?@
+    :type t1: float
 
     :param band: The band to return the constants for, either 'FUV' or 'NUV'.
 
     :type band: str
 
-    :param refrate: The reference rate of stims in counts/sec. @CHASE - Am I
-    right that this is in counts / sec.?@
+    :param refrate: The reference rate of stims in counts/sec.
 
     :type refrate: float
 
+    :param feeclkratio: Ratio of Front End Electronics clock rates.
+
+    :type feeclkratio: float
+
     :param tstep: Bin size (in seconds) to use when reporting the deadtime.
-    @CHASE - A little strange this comes before feeclkratio, but method1 has it
-    after. Ideally would be consistent ordering. Since they are both optional
-    input parameters, I think they can be switched in the method definition
-    above without breaking things?@
 
     :type tstep: float
 
-    :param feeclkratio: @CHASE - What is this?@
-
-    :type feeclkratio: @CHASE - What is data type?@
-
-    :param refrange: @CHASE - What is this? Some sort of tolerance?@
+    :param refrange: minimum and maximum multiplicative of the reference stim
+    rate that will be considered a legitimate / valid measurement
 
     :type refrange: list
 
     :returns: numpy.ndarray -- The deadtimes within the specified time range,
-    split into the requested bin size. @CHASE - Please confirm the return data
-    type is a numpy.ndarray, and my description is correct.@
+    split into the requested bin size.
     """
 
     eclipse = 100. if isPostCSP(t0) else 40000. # HACK: for backwards comp.
@@ -497,17 +480,17 @@ def deadtime_fromlist(photonfile, t0, t1, band, method=0,
 
     :param t0: The mininum of the time range to calculate the deadtime within.
 
-    :type t0: float @CHASE - Confirm?@
+    :type t0: float
 
     :param t1: The maximum of the time range to calculate the deadtime within.
 
-    :type t1: float @CHASE - Confirm?@
+    :type t1: float
 
     :param band: The band to return the constants for, either 'FUV' or 'NUV'.
 
     :type band: str
 
-    :param method: Which method to use when calculating deadtime?
+    :param method: which deadtime_method[012] to use when calculating deadtime
 
     :type method: int
 
@@ -536,17 +519,17 @@ def find_stims(t, x, y, band, eclipse):
 
     :param t: Photon event times within which to search for stim events.
 
-    :type t: @CHASE - Is this a list, numpy.ndarray?@
+    :type t: numpy.ndarray
 
     :param x: Photon event detector x positions within which to search for stim
     events.
 
-    :type x: @CHASE - Is this a list, numpy.ndarray?@
+    :type x: numpy.ndarray
 
     :param y: Photon event detector y positions within which to search for stim
     events.
 
-    :type y: @CHASE - Is this a list, numpy.ndarray?@
+    :type y: numpy.ndarray
 
     :param band: The band to return the constants for, either 'FUV' or 'NUV'.
 
@@ -554,7 +537,7 @@ def find_stims(t, x, y, band, eclipse):
 
     :param eclipse: The eclipse number to return the constants for.
 
-    :type eclipse: int @CHASE - Confirm this is int/long/float.@
+    :type eclipse: int
 
     :returns: tuple -- A four-element tuple containing arrays of the times,
     detector x, detector y, and stim ID (1, 2, 3 or 4) of the likely stim
@@ -626,23 +609,17 @@ def find_stims(t, x, y, band, eclipse):
 # ------------------------------------------------------------------------------
 def get_stim_coefs(ssdfile):
     """
-    Computes the stim scaling coefficients based on a ssdfile.
+    Computes the stim scaling coefficients based on a ssdfile (which contains
+    information on the on-detector spatial separation of stims as a function
+    of time).
 
-    :param ssdfile: The name of the SSD file. @CHASE - What is an SSD file, what
-    does "SSD" stand for?@
+    :param ssdfile: The name of the Stim Separatation Data (SSD) file.
 
-    :type ssdfile: str @CHASE - Please confirm.@
+    :type ssdfile: str
 
     :returns: tuple -- A two-element tuple containing the stim scaling
     coefficients.
     """
-
-    # @CHASE - Is this legacy stuff that can be removed from the source code?@
-    # if (band=='NUV'):
-    #       stim_coef0=5105.48
-    # else:
-    #       stim_coef0=5089.75
-
     tbl = get_tbl_data(ssdfile)
 
     c11 = sum(tbl[:, 2])
@@ -658,14 +635,13 @@ def get_stim_coefs(ssdfile):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def find_FUV_offset(scstfile):
+def find_fuv_offset(scstfile):
     """
     Computes NUV->FUV center offset based on a lookup table.
-    @CHASE - Camel-case should be avoided, would need to change in calls too.@
 
-    :param scstfile: Name of the spacecraft state FITS file.
+    :param scstfile: Name of the spacecraft state (-scst) FITS file.
 
-    :type scstfile: str @CHASE - Please confirm this.@
+    :type scstfile: str
 
     :returns: tuple -- A two-element tuple containing the x and y offsets.
     """
@@ -686,10 +662,6 @@ def find_FUV_offset(scstfile):
     print "Offsetting FUV image for eclipse {e} at {t} degrees.".format(
         e=eclipse, t=fdttdc)
 
-    # @CHASE - Legacy code that can be removed?@
-    # fuv_dx_tbl = cal.offset('x')
-    # fuv_dy_tbl = cal.offset('y')
-
     fodx_coef_0 = cal.offset('x')[eclipse-1, 1]
     fody_coef_0 = cal.offset('y')[eclipse-1, 1]
 
@@ -709,13 +681,12 @@ def find_FUV_offset(scstfile):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def postCSP_caldata():
+def post_csp_caldata():
     """
     Loads the calibration data for after the CSP event.
 
     :returns: tuple -- A six-element tuple containing the wiggle, walk, and
-    clock information. @CHASE - Please describe better what each element in the
-    tuple is.
+    clock corrections. See the calibration paper for details.
     """
 
     print "Loading post-CSP wiggle file..."
@@ -768,20 +739,19 @@ def rtaph_yap(ya, yb, yamc):
     """
     For post-CSP data, 'wrap' the YA value for YA in [0,1]. From rtaph.c.
 
-    :param ya: @CHASE - Please describe.@
+    :param ya: Y axis wiggle.
 
-    :type ya: @CHASE - Please specify data type.@
+    :type ya: numpy.ndarray
 
-    :param yb: @CHASE - Please describe.@
+    :param yb: Y axis coarse clock.
 
-    :type yb: @CHASE - Please specify data type.@
+    :type yb: numpy.ndarray
 
-    :param yamc: @CHASE - Please describe.@
+    :param yamc: Raw Y detector position in FEE pixels.
 
-    :type yamc: @CHASE - Please specify data type.@
+    :type yamc: numpy.ndarray
 
-    :returns: numpy.ndarray -- Something? @CHASE - Please confirm return data
-    type and describe what it is.@
+    :returns: numpy.ndarray
     """
 
     yap = np.append([], ya)
@@ -801,30 +771,29 @@ def rtaph_yap(ya, yb, yamc):
 # ------------------------------------------------------------------------------
 def rtaph_yac(yactbl, ya, yb, yamc, eclipse):
     """
-    @CHASE - This method is missing it's docstring, please provide summary.@
+    Compute a the YAmC (yac) correction to the Y detector FEE position.
 
-    :param yactble: @CHASE - Please describe.@
+    :param yactbl: yac correction lookup table
 
-    :type yactble: @CHASE - Please specify data type.@
+    :type yactbl: numpy.ndarry
 
-    :param ya: @CHASE - Please describe.@
+    :param ya: Y axis wiggle.
 
-    :type ya: @CHASE - Please specify data type.@
+    :type ya: numpy.ndarray
 
-    :param yb: @CHASE - Please describe.@
+    :param yb: Y axis coarse clock.
 
-    :type yb: @CHASE - Please specify data type.@
+    :type yb: numpy.ndarray
 
-    :param yamc: @CHASE - Please describe.@
+    :param yamc: Raw Y detector position in FEE pixels.
 
-    :type yamc: @CHASE - Please specify data type.@
+    :type yamc: numpy.ndarray
 
     :param eclipse: The eclipse number to return the constants for.
 
-    :type eclipse: int @CHASE - Confirm this is int/long/float.@
+    :type eclipse: int
 
-    :returns: numpy.ndarray -- Something? @CHASE - Please confirm return data
-    type and describe what it is.@
+    :returns: numpy.ndarray
     """
 
     yac = np.zeros(len(ya))
@@ -842,58 +811,57 @@ def rtaph_yac(yactbl, ya, yb, yamc, eclipse):
 def rtaph_yac2(q, xb, yb, ya, y, aspum, wig2, wig2data, wlk2, wlk2data, clk2,
                clk2data):
     """
-    @CHASE - This method is missing it's docstring, please provide summary.@
+    Compute a secondary correction to the YAmC (yac) detector FEE Y position.
 
-    :param q: @CHASE - Please describe.@
+    :param q: Detected pulse height
 
-    :type q: @CHASE - Please specify data type.@
+    :type q: numpy.ndarray
 
-    :param xb: @CHASE - Please describe.@
+    :param xb: X axis coarse clock.
 
-    :type xb: @CHASE - Please specify data type.@
+    :type xb: numpy.ndarray
 
-    :param yb: @CHASE - Please describe.@
+    :param yb: Y axis coarse clock.
 
-    :type yb: @CHASE - Please specify data type.@
+    :type yb: int
 
-    :param ya: @CHASE - Please describe.@
+    :param ya: Y axis wiggle.
 
-    :type ya: @CHASE - Please specify data type.@
+    :type ya: int
 
-    :param y: @CHASE - Please describe.@
+    :param y: Detector y position.
 
-    :type y: @CHASE - Please specify data type.@
+    :type y: numpy.ndarray
 
-    :param aspum: @CHASE - Please describe.@
+    :param aspum: Detector arcseconds per micrometer.
 
-    :type aspum: @CHASE - Please specify data type.@
+    :type aspum: float
 
-    :param wig2: @CHASE - Please describe.@
+    :param wig2: Secondary wiggle correction lookup table.
 
-    :type wig2: @CHASE - Please specify data type.@
+    :type wig2: numpy.ndarray
 
-    :param wig2data: @CHASE - Please describe.@
+    :param wig2data: Secondary wiggle reference values.
 
-    :type wig2data: @CHASE - Please specify data type.@
+    :type wig2data: dict
 
-    :param wlk2: @CHASE - Please describe.@
+    :param wlk2: Secondary walk correction lookup table.
 
-    :type wlk2: @CHASE - Please specify data type.@
+    :type wlk2: numpy.ndarray
 
-    :param wlk2data: @CHASE - Please describe.@
+    :param wlk2data: Secondary walk correction reference values.
 
-    :type wlk2data: @CHASE - Please specify data type.@
+    :type wlk2data: dict
 
-    :param clk2: @CHASE - Please describe.@
+    :param clk2: Secondary clock correction lookup table.
 
-    :type clk2: @CHASE - Please specify data type.@
+    :type clk2: numpy.ndarray
 
-    :param clk2data: @CHASE - Please describe.@
+    :param clk2data: Secondary clock correction reference values.
 
-    :type clk2data: @CHASE - Please specify data type.@
+    :type clk2data: dict
 
-    :returns: numpy.ndarray -- Something? @CHASE - Please confirm return data
-    type and describe what it is.@
+    :returns: numpy.ndarray -- Secondary YAmC corrections.
     """
 
     yac = 0
@@ -928,11 +896,11 @@ def raw6_to_stims(raw6file, band, eclipse, margin=90.001):
 
     :param eclipse: The eclipse number to return the stim data for.
 
-    :type eclipse: int @CHASE - Confirm this is int/long/float.@
+    :type eclipse: int
 
-    :param margin: @CHASE - What is "margin"?@
+    :param margin: +/- extent in arcseconds defining stim search box
 
-    :type margin: @CHASE - Please confirm data type.@
+    :type margin: float
 
     :returns: tuple -- A four-element tuple containing data from each stim. The
     data from each stim are stored in dicts.
@@ -1081,7 +1049,7 @@ def raw6_to_stims(raw6file, band, eclipse, margin=90.001):
 # ------------------------------------------------------------------------------
 def compute_stimstats(raw6file, band, eclipse):
     """
-    Computes statistics for stim events.
+    Computes statistics for stim events for the post-CSP stim-based correction.
 
     :param raw6file: The name of the raw6 FITS file to read.
 
@@ -1093,10 +1061,11 @@ def compute_stimstats(raw6file, band, eclipse):
 
     :param eclipse: The eclipse number to return the stim data for.
 
-    :type eclipse: int @CHASE - Confirm this is int/long/float.@
+    :type eclipse: int
 
-    :returns: tuple -- Six-element tuple containing ... @CHASE - Please describe
-    the values/parameters returned by this method.@
+    :returns: tuple -- Six-element tuple containing information on the trend
+    in relative positions of the stims over time used for the Post-CSP
+    stim correction.
     """
 
     print "Computing stim statistics and post-CSP corrections..."
@@ -1216,8 +1185,8 @@ def compute_stimstats(raw6file, band, eclipse):
            (stim1rmss[1]+stim2rmss[1]+stim3rmss[1]+stim4rmss[1])/4.)
 
     # Fit straight line to YA>2 and YB==2 points.
-    # @CHASE - Check comment below, should re-word or re-write (or remove)?@
-    # The variable names are super convoluted because I copied Tom's code
+    # This could be written more efficiently, but it's an attempt at a faithful
+    #  port of the GALEX code (from Tom Barlow) which was written in C.
     ix1 = ((stim1['ya'] > 2)&(stim1['yb'] == 2)).nonzero()[0]
     ix2 = ((stim2['ya'] > 2)&(stim2['yb'] == 2)).nonzero()[0]
     ix3 = ((stim3['ya'] > 2)&(stim3['yb'] == 2)).nonzero()[0]
@@ -1237,9 +1206,6 @@ def compute_stimstats(raw6file, band, eclipse):
     yac_coef1, yac_coef0 = np.polyfit(x8, y8, 1)
 
     print "Scal: YA correction coef for YB=2:", yac_coef0, yac_coef1
-
-    # @CHASE - Can this comment below be removed?@
-    # Do I need to write fit parameters to a file here?
 
     # Compute yb shift factors == zero for all.
     yac_ybs = np.zeros(8)
@@ -1287,8 +1253,7 @@ def compute_stimstats(raw6file, band, eclipse):
                         np.array(stim4['yb'], dtype='int64')])
 
     # [Future] The section below could be re-written more elegantly.
-    # @CHASE - Can you confirm the below comment is still true?@
-    # [Future] Also, it appears to return wrong values for YB==1.
+    # [Future] Does this return the correct values for YB==1?
     for yb in xrange(8):
         ix = ((stim1['yb'] == yb)&(stim1['ya'] > 4)).nonzero()[0]
         s1m = ((stim1['ys']-stim1['yac'])[ix]*aspum).mean()
@@ -1322,13 +1287,8 @@ def compute_stimstats(raw6file, band, eclipse):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def create_SSD(raw6file, band, eclipse, ssdfile=0):
+def create_ssd(raw6file, band, eclipse, ssdfile=None):
     """
-    @CHASE - Use of camel case for method names is non-PEP8 compliant. We should
-    rename this "create_ssd", and then change it throughout the rest of the
-    package where it is used. I did a quick "grep" and it's not used in many
-    places, but we'd need to make sure we got all instances.@
-
     Creates a Stim Separation Data (SSD) table file.
 
     :param raw6file: The name of the raw6 FITS file to read.
@@ -1341,20 +1301,15 @@ def create_SSD(raw6file, band, eclipse, ssdfile=0):
 
     :param eclipse: The eclipse number to create the SSD file for.
 
-    :type eclipse: int @CHASE - Confirm this is int/long/float.@
+    :type eclipse: int
 
-    :param ssdfile: Name of SSD output file to create. @CHASE - Verify correct.@
+    :param ssdfile: Name of stim separation data (SSD) output file to create.
 
-    :type ssdfile: str @CHASE - If so, default should not be an int, make it an
-    empty string and change code below accordingly, or set to None, etc.@
+    :type ssdfile: str
 
-    :returns: tuple -- Two-element tuple containing ... @CHASE - Please describe
-    the values/parameters returned by this method.@
+    :returns: tuple -- 2xN tuple containing slope and intercept of
+    stim positions over time.
     """
-
-    # @CHASE - Can this commented row be removed?@
-    # ssdfile = str(outpath)+"SSD_"+str.lower(band)+str(eclipse)+".tbl"
-
     if ssdfile:
         print "Preparing SSD output file "+ssdfile
         tbl = csv.writer(open(ssdfile, 'wb'), delimiter=' ',
@@ -1413,10 +1368,6 @@ def create_SSD(raw6file, band, eclipse, ssdfile=0):
 
     m, C = np.polyfit(avt, sep, 1)
     fit = C+np.array(avt)*m
-
-    # @CHASE - Should this be removed, or put behind a "verbose" option?@
-    # print ("Stim separation linear fit parameters [C, m] = ["+str(C)+
-    # ", "+str(m)+"]")
 
     if ssdfile:
         for i in xrange(len(avt)):

@@ -3,8 +3,8 @@
 """
 .. module:: gAperture
 
-   :synopsis: Create light curves with user-defined time bins and photometric
-   apertures.
+   :synopsis: Module for the creation of GALEX  light curves with user-defined
+   time bins and photometric apertures.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -36,10 +36,9 @@ def gAperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
-    :param radius: The photometric aperture, in degrees. @CHASE - Confirm
-    this is in degrees.@
+    :param radius: The radius of the photometric aperture, in degrees.
 
     :type radius: float
 
@@ -47,8 +46,8 @@ def gAperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
 
     :type csvfile: str
 
-    :param annulus: Radius of the inner and outer annuli to define the
-    background with, in degrees. @CHASE - confirm units.@
+    :param annulus: Radii of the inner and outer of an annulus, in degrees,
+    within which to measure the background.
 
     :type annulus: list
 
@@ -59,7 +58,7 @@ def gAperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
 
     :param stepsz: The size of the time bins to use, in seconds.
 
-    :type stepsz: float @CHASE - The default should be None or 0., not a bool.@
+    :type stepsz: float
 
     :param verbose: Verbosity level, a value of 0 is minimum verbosity.
 
@@ -69,12 +68,12 @@ def gAperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
 
     :type overwrite: bool
 
-    :param trange: Minimum and maximum time range to make a light curve.
-    @CHASE - assume this is in GALEX time?@
+    :param trange: Minimum and maximum time range to make a light curve,
+    in GALEX time seconds.
 
     :type trange: list
 
-    :param tranges: Set of time ranges to query within. @CHASE - GALEX time?@
+    :param tranges: Set of time ranges to query within, in GALEX time seconds.
 
     :type tranges: list
 
@@ -332,7 +331,7 @@ def setup_file(args):
 # ------------------------------------------------------------------------------
 def stamp(args):
     """
-    Creates a jpeg preview image of the aperture area. @CHASE - please update@
+    Creates a jpeg preview image stamp of the targeted region.
 
     :param args: The command-line arguments.
 
@@ -368,7 +367,6 @@ def __main__():
     args = setup_file(args)
     stamp(args)
 
-    # @CHASE - Is this (below) still an item that needs attention?
     # [Future]: add support for trange(s).
     data = gAperture(args.band, args.skypos, args.radius, csvfile=args.csvfile,
                      annulus=args.annulus, stepsz=args.stepsz,
@@ -380,9 +378,8 @@ def __main__():
 # ------------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    # @CHASE - What is 'pycurl' below? Is it defined? Missing an import?
     try:
         __main__()
-    except (KeyboardInterrupt, pycurl.error):
+    except KeyboardInterrupt:
         exit('Received Ctrl + C... Exiting! Bye.', 1)
 # ------------------------------------------------------------------------------

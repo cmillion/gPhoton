@@ -1,8 +1,8 @@
 """
 .. module:: gnomonic
 
-   :synopsis: This module contains gnomonic projection methods. @CHASE - please
-   add more description as needed.@
+   :synopsis: This module contains gnomonic projection methods for translating
+   between detector and sky coordinates.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -18,33 +18,33 @@ def gnomrev_simple(xi, eta, ra0, dec0, crota, cdelt, cenpix):
     """
     A reverse gnomonic projection.
 
-    :param xi: @CHASE - What is "xi".@
+    :param xi: Detector-space coordinte.
 
-    :type xi: float @CHASE - Or is this a numpy.ndarray? Something else?@
+    :type xi: numpy.ndarray
 
-    :param eta: @CHASE - What is "eta"?@
+    :param eta: Detector-space coordinate.
 
-    :type eta: float @CHASE - Or is this a numpy.ndarray? Something else?@
+    :type eta: numpy.ndarray
 
-    :param ra0: The right ascension, in degrees.
+    :param ra0: The right ascension of the boresite, in degrees.
 
     :type ra0: float
 
-    :param dec0: The declination, in degrees.
+    :param dec0: The declination of the boresite, in degrees.
 
     :type dec0: float
 
-    :param crota: @CHASE - please provide description.@
+    :param crota: The field rotation.
 
-    :type crota: @CHASE - please provide type.@
+    :type crota: float
 
-    :param cdelt: @CHASE - please provide description.@
+    :param cdelt: The resolution per pixel element at the field center.
 
-    :type cdelt: @CHASE - please provide type.@
+    :type cdelt: float
 
-    :param cenpix: @CHASE - please provide description.@
+    :param cenpix: The coordinates of the center pixel.
 
-    :type cenpix: @CHASE - please provide type.@
+    :type cenpix: float
 
     :returns: tuple -- A two-element tuple containing the right ascension and
     declination, in degrees.
@@ -90,38 +90,35 @@ def gnomfwd_simple(ra, dec, ra0, dec0, crota, cdelt, cenpix):
     """
     A forward gnomonic projection.
 
-    :param ra: The right ascension, in degrees.
+    :param ra: The right ascension of the event, in degrees.
 
-    :type ra: float @CHASE - Or is this a numpy.ndarray? Something else?@
+    :type ra: float numpy.ndarray
 
-    :param dec: The declination, in degrees.
+    :param dec: The declination of the event, in degrees.
 
-    :type dec: float @CHASE - Or is this a numpy.ndarray? Something else?@
+    :type dec: numpy.ndarray
 
-    :param ra0: The right ascension, in degrees. @CHASE - how does this differ
-    from 'ra'?@
+    :param ra0: The right ascension of the boresight.
 
     :type ra0: float
 
-    :param dec0: The declination, in degrees. @CHASE - how does this differ
-    from 'dec'?@
+    :param dec0: The declination of the boresight.
 
     :type dec0: float
 
-    :param crota: @CHASE - please provide description.@
+    :param crota: Rotation of the FOV.
 
-    :type crota: @CHASE - please provide type.@
+    :type crota: float
 
-    :param cdelt: @CHASE - please provide description.@
+    :param cdelt: Resolution at the center of the FOV.
 
-    :type cdelt: @CHASE - please provide type.@
+    :type cdelt: float
 
-    :param cenpix: @CHASE - please provide description.@
+    :param cenpix: Coordinates of the center pixel.
 
-    :type cenpix: @CHASE - please provide type.@
+    :type cenpix: float
 
-    :returns: tuple -- A two-element tuple containing the @CHASE - detector x-
-    and y-positions?@.
+    :returns: tuple -- A two-element tuple containing the detector coordinates.
     """
 
     cosdec0 = np.cos(dec0/R2D)

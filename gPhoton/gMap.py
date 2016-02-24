@@ -8,18 +8,17 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
-# @CHASE - avoid import * here@
 import os
 import argparse
-from imagetools import *
+from imagetools import write_images
 import dbasetools as dbt
 import gphoton_args as gargs
 import numpy as np
 
 # ------------------------------------------------------------------------------
-def gMap(band, cntfile=False, coadd=False, detsize=1.1, intfile=False,
-         rrfile=False, skypos=None, maxgap=1500., memlight=100., minexp=1.,
-         overwrite=False, retries=20, skyrange=None, stepsz=0., trange=None,
+def gMap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,
+         rrfile=None, skypos=None, maxgap=1500., memlight=100., minexp=1.,
+         overwrite=False, retries=100, skyrange=None, stepsz=0., trange=None,
          verbose=0, cntcoaddfile=False, intcoaddfile=False):
     """
     Use a mix of strings (if we want to make an output file) and Booleans
@@ -34,7 +33,7 @@ def gMap(band, cntfile=False, coadd=False, detsize=1.1, intfile=False,
 
     :param cntfile: Name of the count file to make.
 
-    :type cntfile: str @CHASE - default should be None or some other string?@
+    :type cntfile: str
 
     :param coadd: If true, create a coadd image using all available data within
     the specified time range (don't use time bins).
@@ -47,15 +46,15 @@ def gMap(band, cntfile=False, coadd=False, detsize=1.1, intfile=False,
 
     :param intfile: Name of intensity file to make.
 
-    :type intfile: str @CHASE - default should be None or some other string?@
+    :type intfile: str
 
     :param rrfile: Name of relative response file to make.
 
-    :type rrfile: str @CHASE - default should be None or some other string?@
+    :type rrfile: str
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
     :param maxgap: Maximum gap size, in seconds, for data to be considered
     contiguous.
@@ -77,20 +76,21 @@ def gMap(band, cntfile=False, coadd=False, detsize=1.1, intfile=False,
     :type overwrite: bool
 
     :param retries: Number of query retries to attempt before giving up.
-    @CHASE - should this be made 100 to be like other methods' defaults?@
 
     :type retries: int
 
-    :param skyrange: @CHASE - please describe.@
+    :param skyrange: RA and Dec extents, in degrees, that define the lengths
+    of edges of a box on the sky, centered at skypos, that defines the
+    sky region of interest.
 
-    :type skyrange: list @CHASE - list or numpy.ndarray?@
+    :type skyrange: list
 
     :param stepsz: The size of the time bins to use, in seconds.
 
-    :type stepsz: float @CHASE - The default should be None or 0., not a bool.@
+    :type stepsz: float
 
-    :param trange: Minimum and maximum time range to make images for.
-    @CHASE - assume this is in GALEX time?@
+    :param trange: Minimum and maximum time range to make images for,
+    in GALEX time.
 
     :type trange: list
 
@@ -100,13 +100,11 @@ def gMap(band, cntfile=False, coadd=False, detsize=1.1, intfile=False,
 
     :param cntcoaddfile: Name of the count coadd file to make.
 
-    :type cntcoaddfile: str @CHASE - default should be None or some other
-    string?@
+    :type cntcoaddfile: str
 
     :param intcoaddfile: Name of the intensity coadd file to make.
 
-    :type intcoaddfile: str @CHASE - default should be None or some other
-    string?@
+    :type intcoaddfile: str
     """
 
     # [Future]: Consider improving this section.
@@ -121,8 +119,7 @@ def gMap(band, cntfile=False, coadd=False, detsize=1.1, intfile=False,
     if trange is None:
         trange = dbt.fGetTimeRanges(band, skypos, trange=[6.E8, 11.E8],
                                     maxgap=maxgap, minexp=minexp,
-                                    detsize=detsize, retries=retries,
-                                    skyrange=skyrange)
+                                    detsize=detsize, skyrange=skyrange)
 
     if len(np.array(trange).shape) == 1:
         trange = [trange]
@@ -221,8 +218,8 @@ def check_args(args, iam='gmap'):
         if np.array(args.skyrange).shape == (2,):
             args.raangle, args.decangle = args.skyrange
         else:
-            # @CHASE - This does not seem to be defined? Missing an import?@
-            gPhotonArgsError("Invalid --skyrange: {s}".format(s=args.skyrange))
+            gargs.gPhotonArgsError(
+                        "Invalid --skyrange: {s}".format(s=args.skyrange))
 
     # use --angle to fill in missing subtend angles
     if args.angle and not args.raangle:
@@ -231,8 +228,7 @@ def check_args(args, iam='gmap'):
         args.decangle = args.angle
 
     # Check that requested image subtend angles are positive
-    # @CHASE - 'i' is never used, don't need to enumerate the for loop.@
-    for i, a in enumerate([args.angle, args.raangle, args.decangle]):
+    for a in [args.angle, args.raangle, args.decangle]:
         if not a:
             continue
         if a <= 0:
@@ -283,9 +279,8 @@ def __main__():
 
 # ------------------------------------------------------------------------------
 if __name__ == "__main__":
-    # @CHASE - What is 'pycurl' below? Is it defined? Missing an import?
     try:
         __main__()
-    except (KeyboardInterrupt, pycurl.error):
+    except KeyboardInterrupt:
         exit('Received Ctrl + C... Exiting! Bye.', 1)
 # ------------------------------------------------------------------------------

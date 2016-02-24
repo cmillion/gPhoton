@@ -1,7 +1,8 @@
 """
 .. module:: regtestutils
 
-   :synopsis: @CHASE - please provide summary of this module.@
+   :synopsis: Functions for end-to-end photometric regression testing with
+   emphasis on comparing gAperture values to MCAT values.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -17,14 +18,15 @@ from gAperture import gAperture
 # ------------------------------------------------------------------------------
 def file_setup(outfile):
     """
-    @CHASE - please describe this method.
+    Checks for a CSV file in which to put all the data and initializes it
+    if it hasn't already been created. Loads already processed data, if any,
+    in order to continue interrupted runs.
 
     :param outfile: Name of output file to make.
 
     :type outfile: str
 
-    :returns: numpy.ndarray -- Set of object IDs. @CHASE - please refine if
-    needed.@
+    :returns: numpy.ndarray -- Set of object IDs that are already processed.
     """
 
     extant_objids = []
@@ -63,7 +65,7 @@ def file_setup(outfile):
 # ------------------------------------------------------------------------------
 def construct_row(i, band, objid, mcat, data):
     """
-    @CHASE - please describe this method.
+    Assemble gAperture and MCAT data into a CSV row.
 
     :param i: The index of the row to collect values for.
 
@@ -75,15 +77,15 @@ def construct_row(i, band, objid, mcat, data):
 
     :param objid: The GALEX MCAT object ID.
 
-    :type objid: int @CHASE - int or long?@
+    :type objid: long
 
-    :param mcat: @CHASE - please describe what this is.@
+    :param mcat: Object containing MCAT data.
 
-    :type mcat: @CHASE - what is this data type, a dict?@
+    :type mcat: dict
 
-    :param data: @CHASE - please describe what this is.@
+    :param data: Object containing gAperture data.
 
-    :type data: @CHASE - what is this data type, a pandas frame?@
+    :type data: dict
 
     :returns: tuple -- The CSV row to output.
     """
@@ -116,7 +118,7 @@ def datamaker(band, skypos, outfile, maglimit=20., margin=0.005,
               searchradius=0.1, radius=gt.aper2deg(4), annulus=[0.0083, 0.025],
               verbose=0):
     """
-    @CHASE - please describe this method.
+    Generate gAperture photometry for MCAT sources within a specified region.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -124,23 +126,22 @@ def datamaker(band, skypos, outfile, maglimit=20., margin=0.005,
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
     :param outfile: Name of output file to make.
 
     :type outfile: str
 
-    :param maglimit: Faint limit to use @CHASE - AB mag?@
+    :param maglimit: Faint limit to use, in AB Mag.
 
     :type maglimit: float
 
-    :param margin: The radius within which to search for MCAT sources. @CHASE -
-    in degrees?@
+    :param margin: The margin within which two sources are consider "the same,"
+    in degrees.
 
     :type margin: float
 
-    :param searchradius: The radius within which to search for unique sources.
-    @CHASE - please explain better how this differs from 'margin'.@
+    :param searchradius: The radius within which to search for sources, degrees.
 
     :type searchradius: float
 
@@ -148,7 +149,7 @@ def datamaker(band, skypos, outfile, maglimit=20., margin=0.005,
 
     :type radius: float
 
-    :param annulus: The inner and outer annulus to define the background with,
+    :param annulus: The inner and outer radii of the background annulus
     in degrees.
 
     :type annulus: float
@@ -202,6 +203,5 @@ def datamaker(band, skypos, outfile, maglimit=20., margin=0.005,
             except TypeError:
                 continue
 
-    # @CHASE - unnecessary return here?@
     return
 # ------------------------------------------------------------------------------

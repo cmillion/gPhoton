@@ -15,29 +15,6 @@ from astropy.io import fits as pyfits
 import csv
 
 # ------------------------------------------------------------------------------
-def error(program, note=''):
-    """
-    Print ERROR with callback and note.
-
-    :param program: The method associated with the error.
-    @CHASE - please confirm.@
-
-    :type program: function @CHASE - not sure how to describe this data type.@
-
-    :param note: Additional text to include with error message.
-
-    :type note: str
-    """
-
-    print '*** ERROR: '+str(program)
-
-    if note:
-        print '    '+str(note)
-
-    return
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
 def area(radius):
     """
     Returns the area of a circle with a given radius.
@@ -106,9 +83,10 @@ def rms(data):
     """
     Return the root-mean-square of the set of values.
 
-    :param data: The set of values to calculate the root-mean-square.
+    :param data: The set of values from which to calculate the
+    root-mean-squared.
 
-    :type data: list @CHASE - confirm data type.@
+    :type data: list
 
     :returns: float -- The root-mean-square of the set of values.
     """
@@ -150,7 +128,7 @@ def manage_requests2(query, maxcnt=100, wait=10, timeout=60., verbose=0):
     :type maxcnt: int
 
     :param wait: The length of time to wait before attempting the query again.
-    @CHASE - This parameter is not used in manage_requests2, remove?@
+    Currently a placeholder.
 
     :type wait: int
 
@@ -219,101 +197,6 @@ def manage_requests2(query, maxcnt=100, wait=10, timeout=60., verbose=0):
         r = None
 
     return r
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-def manage_requests(query, maxcnt=100, wait=10, timeout=60.):
-    """
-    Make simple 'requests' calls more robust against network issues.
-    @CHASE - Is it still worth keeping this old method around?@
-
-    :param query: The URL containing the query.
-
-    :type query: str
-
-    :param maxcnt: The maximum number of attempts to make before failure.
-
-    :type maxcnt: int
-
-    :param wait: The length of time to wait before attempting the query again.
-
-    :type wait: int
-
-    :param timeout: The length of time to wait for the server to send data
-    before giving up, specified in seconds.
-
-    :type timeout: float
-    """
-
-    # Keep track of the number of failures.
-    cnt = 0
-
-    while cnt < maxcnt:
-        try:
-            r = requests.get(query, timeout=timeout)
-            # NOTE: This specifically tests for the return structure
-            # from the MAST photon database and is therefore
-            # not a good general test condition.
-            test = r.json()['Tables'][0]['Rows']
-            return r
-        except:
-            # This except, which doesn't raise, gets a pass because I really
-            # do want it to catch every possible exception, and it will raise
-            # eventually below with the unsuccessful query print statements.
-            time.sleep(wait)
-            cnt += 1
-            print_inline('Query retry attempt '+str(int(cnt))+'.')
-
-    print 'Query unsuccessful after '+str(int(maxcnt))+' attempts.'
-    print '		'+str(query)
-
-    return False
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-def wheretrue(conditions):
-    """
-    Returns indices for which the input conditions are true. Example:
-
-    .. code-block:: python
-
-        a = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9])
-	    wheretrue(a > 5)
-	    array([5, 6, 7, 8])
-	    a[wheretrue(a > 5)]
-	    array([6, 7, 8, 9])
-
-    :param conditions: Expression that must evaluate to True/False.
-
-    :type conditions: numpy.ndarray
-
-    :returns: numpy.ndarray -- Array of indexes where the condition is True.
-    """
-
-    return np.where(conditions == True)[0]
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-def wherefalse(conditions):
-    """
-    Returns indices for which the input conditions are false.
-
-    .. code-block:: python
-
-	    a = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9])
-	    wherefalse(a > 5)
-	    array([0, 1, 2, 3, 4])
-	    a[wherefalse(a > 5)]
-	    array([1, 2, 3, 4, 5])
-
-    :param conditions: Expression that must evaluate to True/False.
-
-    :type conditions: numpy.ndarray
-
-    :returns: numpy.ndarray -- Array of indexes where the condition is False.
-    """
-
-    return np.where(conditions == False)[0]
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -429,73 +312,6 @@ def get_tbl_data(filename, comment='|'):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def chunk(a, b, length=1, verbose=0):
-    """
-    Produces an array, of 2x1, delimiting ranges between 'a' and 'b', with
-    the requested length.
-
-    :param a: Minimum of the range to consider.
-
-    :type a: float
-
-    :param b: Maximum of the range to consider.
-
-    :type b: float
-
-    :param length: Length of the array to create. @CHASE - confirm description.@
-
-    :type length: int @CHASE - Can this be a float?@
-
-    :param verbose: @CHASE - This is not used, can it be removed?@
-
-    :type verbose: int
-
-    :returns: list -- The segmented array. @CHASE - please refine if needed.@
-    """
-
-    if not length:
-        return [[a, b]]
-    else:
-        arr = np.array([np.arange(a, b, length), np.arange(a, b,
-                                                           length)+length]).T
-        if arr[-1][1] > b:
-            arr[-1][1] = b
-        return arr.tolist()
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-def chunks(array, length=10, verbose=0):
-    """
-    Takes an array of ranges and produces a new array of ranges
-    within the initial array that are of the requested length (or smaller).
-
-    :param array: The array of ranges (2-element lists) to operate on.
-    @CHASE - Confirm this description.@
-
-    :type array: list @CHASE - Is this is list or numpy.ndarray?@
-
-    :param length: Length of the arrays to create. @CHASE - confirm description@
-
-    :type length: int @CHASE - int or float?@
-
-    :param verbose: @CHASE - This parameter is not used in 'chunk' and can be
-    removed.  If not, it should be a Boolean True/False and not an int.@
-
-    :type verbose: int
-
-    :returns: list -- The updated set of ranges. @CHASE - Is this a list or
-    numpy.ndarray? Also please update the description.@
-    """
-
-    out = []
-
-    for a in array:
-        out += chunk(a[0], a[1], length=length, verbose=verbose)
-
-    return out
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
 def angularSeparation(ra1, dec1, ra2, dec2):
     """
     Compute angular separation in degrees of points on the sky.
@@ -531,86 +347,8 @@ def angularSeparation(ra1, dec1, ra2, dec2):
     r1 = ra1*d2r
     r2 = ra2*d2r
 
-    # @CHASE - Remove these two lines below?@
-    # sep = np.sin(d0)*np.sin(d1)+np.cos(d0)*np.cos(d1)*np.cos((ra1-ra0)*dtor)
-    # r = np.arccos(sep)*radeg
-
     a = np.sin((d2-d1)/2.)**2.+np.cos(d1)*np.cos(d2)*np.sin((r2-r1)/2.)**2.
     r = 2*np.arcsin(np.sqrt(a))
 
-    # @CHASE - Remove these commented out lines below?@
-    # zero = (np.isfinite(r) == False)
-    # if any(zero):
-    #	r[zero] = 0.0
-
     return r*ra2deg
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-def intersect(r1, r2):
-    """
-    Returns the intersection of r1 and r2.
-    @CHASE - There is a 'FIXME' here, is this method broken?@
-
-    :param r1: The first set of values.
-
-    :type r1: list @CHASE - confirm data type.@
-
-    :param r2: The second set of values.
-
-    :type r2: list @CHASE - confirm data types.@
-
-    :returns: tuple -- A 2-element tuple containing the minimum and maximum
-    value representing the intersection between the two sets of values.
-    @CHASE - Confirm data type and description.@
-    """
-
-    # @CHASE - Here is the 'FIXME' line below.@
-    # FIXME
-    t0, t1 = np.array(r1)
-    trange = np.array(r2)
-
-    if (t0 <= trange[0]) & (t1 > trange[1]):
-        return trange[0], trange[1]
-    elif (t0 <= trange[0]) & (t1 < trange[1]):
-        return trange[0], t1
-    elif (t0 > trange[0]) & (t1 > trange[1]):
-        return t0, trange[1]
-    elif (t0 > trange[0]) & (t1 <= trange[1]):
-        return t0, t1
-    else:
-        print t0, t1, trange
-        return None
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-def algebraicIntersection(steps, tranges):
-    """
-    Returns intervals defining the intersection of r1 and r2.
-
-    :param steps: @CHASE - please describe this parameter.@
-
-    :type steps: @CHASE - Is this is a list?@
-
-    :param tranges: @CHASE - please describe this parameter.@
-
-    :type tranges: @CHASE - Is this a list?@
-
-    :returns: list -- The intervals defining the intersection.
-    @CHASE - Please confirm data type and description.@
-    """
-
-    t0 = np.array(steps)[:, 0]
-    t1 = np.array(steps)[:, 1]
-
-    sect = []
-
-    for trange in tranges:
-        ix = np.where(
-            ((t0 >= trange[0]) & (t0 < trange[1])) |
-            ((t1 >= trange[0]) & (t1 < trange[1])) |
-            ((t0 <= trange[0]) & (t1 > trange[1])))[0]
-        sect += [intersect([t0[i], t1[i]], trange) for i in ix]
-
-    return sect
 # ------------------------------------------------------------------------------

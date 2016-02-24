@@ -1,25 +1,25 @@
 """
 .. module:: CalibrationTools
 
-   :synopsis: Something.
-   @CHASE - elaborate on this please. Also, explain how this differs from
-   CalUtils, which may be a source of confusion.@
+   :synopsis: Contains functions for generating calibration products applicable
+   at the image level, mostly when operating directly on the photon lists (not
+   the db), including exposure time and relative response. Not really used
+   elsewhere at present but possibly useful as "documentation."
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
-# @CHASE - We need to avoid "import *", can we do specific imports here?@
 import csv
 import time
 from astropy.io import fits as pyfits
 import numpy as np
-from FileUtils import *
+from FileUtils import load_aspect, web_query_aspect
 import scipy.ndimage
-from PhotonTools import *
-from MCUtils import *
-from CalUtils import *
-from gnomonic import *
+from MCUtils import get_fits_data
+from CalUtils import find_stims
+from gnomonic import gnomfwd_simple
 import cal
+from galextools import compute_flat_scale
 
 GPSSECS = 315532800+432000
 
@@ -61,15 +61,15 @@ def compute_deadtime(t, x, y, band, eclipse, trange=[[], []]):
 
     :param t: Set of photon event times.
 
-    :type t: @CHASE - Is this a list, numpy.ndarray?@
+    :type t: numpy.ndarray
 
     :param x: Set of photon event x positions.
 
-    :type x: @CHASE - Is this a list, numpy.ndarray?@
+    :type x: numpy.ndarray
 
     :param y: Set of photon event y positions.
 
-    :type y: @CHASE - Is this a list, numpy.ndarray?@
+    :type y: numpy.ndarray
 
     :param band: The band being used, either 'FUV' or 'NUV'.
 
@@ -77,20 +77,16 @@ def compute_deadtime(t, x, y, band, eclipse, trange=[[], []]):
 
     :param eclipse: The eclipse number the data are taken from.
 
-    :type eclipse: int @CHASE - Confirm this is int/long/float.@
+    :type eclipse: int
 
-    :param trange: The minimum and maximum times that define the range
-    to calculate the dead time. If not supplied, the range is defined as the
-    minimum and maximum times of the photon events.
-    @CHASE - This is a list of lists, does it mean there can be multiple time
-    ranges, if so, need to explain that in the description here, if not, then
-    there should be some other default value used.@
+    :param trange: A 2xN list of minimum and maximum times that define the
+    ranges in which to calculate the dead time. If not supplied, the range is
+    defined as the minimum and maximum times of the photon events.
 
     :type trange: list
 
-    :returns: float or numpy.ndarray -- The dead time, as a percentage
-    (0 < dead time < 1), during the entire observation or per time bin.
-    @CHASE - please confirm return data type(s) and description.@
+    :returns: numpy.ndarray -- The dead time (dt), as a percentage (0<dt<1),
+    during the entire observation or per time bin (if trange is defined).
     """
 
     print "Computing deadtime correction..."
@@ -159,19 +155,17 @@ def compute_shutter(t, trange=[[], []]):
 
     :param t: Set of photon event times.
 
-    :type t: @CHASE - Is this a list, numpy.ndarray?@
+    :type t: numpy.ndarray
 
-    :param trange: The minimum and maximum times that define the range
-    to calculate the shutter time. If not supplied, the range is defined as the
-    minimum and maximum times of the photon events.
-    @CHASE - This is a list of lists, does it mean there can be multiple time
-    ranges, if so, need to explain that in the description here, if not, then
-    there should be some other default value used.@
+    :param trange: A 2xN list of minimum and maximum times that define the
+    ranges in which to calculate the dead time. If not supplied, the range is
+    defined as the minimum and maximum times of the photon events.
 
     :type trange: list
 
-    :returns: float -- The total time lost due to shutter, i.e., the time spent
-    while no events are registered by the detector.
+    :returns: float -- The total time lost due to shutter, i.e., the sum of
+    all time periods >=0.05 seconds during which no events are registered by
+    the detector.
     """
 
     if not trange[0]:
@@ -199,19 +193,19 @@ def compute_exposure(t, x, y, flags, band, eclipse, trange=[[], []]):
 
     :param t: Set of photon event times.
 
-    :type t: @CHASE - Is this a list, numpy.ndarray?@
+    :type t: numpy.ndarray
 
     :param x: Set of photon event x positions.
 
-    :type x: @CHASE - Is this a list, numpy.ndarray?@
+    :type x: numpy.ndarray
 
     :param y: Set of photon event y positions.
 
-    :type y: @CHASE - Is this a list, numpy.ndarray?@
+    :type y: numpy.ndarray
 
     :param flags: Set of flags for each photon event.
 
-    :type flags: @CHASE - Is this a list, numpy.ndarray?@
+    :type flags: numpy.ndarray
 
     :param band: The band being used, either 'FUV' or 'NUV'.
 
@@ -219,24 +213,19 @@ def compute_exposure(t, x, y, flags, band, eclipse, trange=[[], []]):
 
     :param eclipse: The eclipse number the data are taken from.
 
-    :type eclipse: int @CHASE - Confirm this is int/long/float.@
+    :type eclipse: int
 
-    :param trange: The minimum and maximum times that define the range
-    to calculate the effective exposure time. If not supplied, the range is
+    :param trange: A 2xN list of minimum and maximum times that define the
+    ranges in which to calculate the dead time. If not supplied, the range is
     defined as the minimum and maximum times of the photon events.
-    @CHASE - This is a list of lists, does it mean there can be multiple time
-    ranges, if so, need to explain that in the description here, if not, then
-    there should be some other default value used.@
 
     :type trange: list
 
-    :returns: float -- The effective exposure time, in seconds, during the
-    specified time range. @CHASE - please confirm return data
-    type(s) and description.@
+    :returns: numpy.ndarray -- The effective exposure time, in seconds,
+    during the specified time range(s).
     """
 
     # Use only unflagged data.
-    # This should be done at the database level.
     ix = ((flags != 7) & (flags != 12)).nonzero()[0]
 
     if not len(ix):
@@ -266,7 +255,7 @@ def compute_exposure(t, x, y, flags, band, eclipse, trange=[[], []]):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def create_rr(csvfile, band, eclipse, aspfile=0., expstart=0., expend=0.,
+def create_rr(csvfile, band, eclipse, aspfile=None, expstart=None, expend=None,
               retries=20, detsize=1.25, pltscl=68.754932):
     """
     DEPRECATED: Creates a relative response map for an eclipse, given a
@@ -282,13 +271,11 @@ def create_rr(csvfile, band, eclipse, aspfile=0., expstart=0., expend=0.,
 
     :param eclipse: The eclipse number the data are taken from.
 
-    :type eclipse: int @CHASE - Confirm this is int/long/float.@
+    :type eclipse: int
 
     :param aspfile: The aspect file to use with the CSV file.
 
-    :type aspfile: str @CHASE - Please confirm this is a scalar string, and, if
-    so, the default should be either '' or None instead of 0., with the
-    checking of whether aspfile is specified updated accordingly.@
+    :type aspfile: str
 
     :param expstart: Start of the exposure, in seconds.
 
@@ -307,7 +294,6 @@ def create_rr(csvfile, band, eclipse, aspfile=0., expstart=0., expend=0.,
     :type detsize: float
 
     :param pltscl: The plate scale in arcseconds.
-    @CHASE - Confirm description and units are correct.@
 
     :type pltscl: float
 
@@ -345,8 +331,6 @@ def create_rr(csvfile, band, eclipse, aspfile=0., expstart=0., expend=0.,
     xi_vec, eta_vec = gnomfwd_simple(ra0, dec0, aspra, aspdec, -asptwist,
                                      1.0/36000.0, 0.)
 
-    # @CHASE - 'compute_flat_scale' seems to be undefined, need to import
-    # 'galextools' in order to access this method, right?@
     flat_scale = compute_flat_scale(asptime.mean(), band)
 
     if not expstart:
@@ -385,8 +369,8 @@ def create_rr(csvfile, band, eclipse, aspfile=0., expstart=0., expend=0.,
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def write_rr(csvfile, band, eclipse, rrfile, outfile, aspfile=0, expstart=0.,
-             expend=0., exptime=0., imsz=960., retries=20):
+def write_rr(csvfile, band, eclipse, rrfile, outfile, aspfile=None,
+    expstart=None, expend=None, retries=20):
     """
     Creates a relative response map for an eclipse, given a photon list
     file, and writes it to a FITS file.
@@ -401,11 +385,10 @@ def write_rr(csvfile, band, eclipse, rrfile, outfile, aspfile=0, expstart=0.,
 
     :param eclipse: The eclipse number the data are taken from.
 
-    :type eclipse: int @CHASE - Confirm this is int/long/float.@
+    :type eclipse: int
 
-    :param rrfile: The name of the existing relative response FITS file??
-    @CHASE - I don't know what this is, since we are making a RR FITS file in
-    this method, please update this description.@
+    :param rrfile: The name of an existing rrhr FITS frile from which to steal
+    header information about exposure time. (For comparing outputs.)
 
     :type rrfile: str
 
@@ -415,9 +398,7 @@ def write_rr(csvfile, band, eclipse, rrfile, outfile, aspfile=0, expstart=0.,
 
     :param aspfile: The aspect file to use with the CSV file.
 
-    :type aspfile: str @CHASE - Please confirm this is a scalar string, and, if
-    so, the default should be either '' or None instead of 0., with the
-    checking of whether aspfile is specified updated accordingly.@
+    :type aspfile: str
 
     :param expstart: Start of the exposure, in seconds.
 
@@ -426,17 +407,6 @@ def write_rr(csvfile, band, eclipse, rrfile, outfile, aspfile=0, expstart=0.,
     :param expend: End of the exposure, in seconds.
 
     :type expend: float
-
-    :param exptime: @CHASE - This seems to be defined by the method 'create_rr',
-    so can this actually be removed from the argument for this method?@
-
-    :type exptime: float
-
-    :param imsz: @CHASE - This doesn't seem to be used anywhere in the method,
-    should remove (but need to make sure any calls elsewhere in the script don't
-    supply this argument.@
-
-    :type imsz: float
 
     :param retries: Number of query retries before giving up.
 
@@ -484,13 +454,11 @@ def write_rrhr(rrfile, rrhrfile, outfile):
     (rrhr) file with interpolation.
 
     :param rrfile: Relative Response FITS file to get header information from.
-    @CHASE - Please correct/update this.@
 
     :type rrfile: str
 
     :param rrhrfile: High Resolution Relative Response FITS file to get header
     information from.
-    @CHASE - Please correct/update this.@
 
     :type rrhrfile: str
 
@@ -526,8 +494,7 @@ def write_int(cntfile, rrhrfile, oldint, outfile):
     Writes out an intensity (int) map given a count (cnt) and a high
     resolution relative response (rrhr).
 
-    :param cntfile: Name of count FITS file.
-    @CHASE - Any more info that can be given here?@
+    :param cntfile: Name of count map (-cnt) FITS file.
 
     :type cntfile: str
 
@@ -535,9 +502,8 @@ def write_int(cntfile, rrhrfile, oldint, outfile):
 
     :type rrhrfile: str
 
-    :param oldint: Name of Intensity file to get header from.
-    @CHASE - Please correct/update this. Is this an existing file? Where did
-    it come from if so?@
+    :param oldint: Name of Intensity file (nominally from the mission pipeline)
+    from which to pull header information. (for comparisons)
 
     :type oldint: str
 

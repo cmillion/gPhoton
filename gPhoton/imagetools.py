@@ -1,7 +1,7 @@
 """
 .. module:: imagetools
 
-   :synopsis: @CHASE - please provide summary of this module.@
+   :synopsis: Tools for the cration of count and intensity images and movies.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -21,32 +21,23 @@ from gQuery import tscale
 from gPhoton import __version__
 
 # ------------------------------------------------------------------------------
-def define_wcs(skypos, skyrange, width=False, height=False, verbose=0,
-               pixsz=0.000416666666666667):
+def define_wcs(skypos, skyrange, verbose=0, pixsz=0.000416666666666667):
     """
     Define the world coordinate system (WCS).
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
-    :param skyrange: @CHASE - please describe.@
+    :param skyrange: Extent of the region of interest, in degrees.
 
-    :type skyrange: list @CHASE - list or numpy.ndarray?@
-
-    :param width: @CHASE - This is not used, can be removed?@
-
-    :type width: bool
-
-    :param height: @CHASE - This is not used, can be removed?@
-
-    :type height: bool
+    :type skyrange: list
 
     :param verbose: Verbosity level, a value of 0 is minimum verbosity.
 
     :type verbose: int
 
-    :param pixsz: Size of a GALEX pixel, in degrees. @CHASE - confirm unit@
+    :param pixsz: Size of a GALEX pixel, in degrees.
 
     :type pixsz: float
 
@@ -70,7 +61,7 @@ def define_wcs(skypos, skyrange, width=False, height=False, verbose=0,
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def movie_tbl(band, tranges, verbose=0, framesz=0, retries=20):
+def movie_tbl(band, tranges, verbose=0, framesz=0., retries=100):
     """
     Initialize a FITS table to contain movie frame information.
 
@@ -78,26 +69,25 @@ def movie_tbl(band, tranges, verbose=0, framesz=0, retries=20):
 
     :type band: str
 
-    :param tranges: Set of time ranges to retrieve the photon events.
-    @CHASE - in GALEX time?@
+    :param tranges: Set of time ranges to retrieve the photon events, in
+    GALEX time seconds.
 
-    :type tranges: list @CHASE - list or numpy.ndarray?@
+    :type tranges: list
 
     :param verbose: Verbosity level, a value of 0 is minimum verbosity.
 
     :type verbose: int
 
-    :param framesz: The time bin size to use per frame, in seconds. @CHASE -
-    please confirm description.@
+    :param framesz: The time bin size (depth)to use per frame, in seconds.
 
-    :type framesz: int @CHASE - needs to be int or can be float?@
+    :type framesz: float
 
     :param retries: Number of query retries to attempt before giving up.
 
     :type retries: int
 
     :returns: astropy.fits.BinTableHDU object -- The set of frames as an HDU
-    object. @CHASE - check return object type.@
+    object.
     """
 
     if verbose:
@@ -125,8 +115,8 @@ def movie_tbl(band, tranges, verbose=0, framesz=0, retries=20):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def fits_header(band, skypos, tranges, skyrange, width=False, height=False,
-                verbose=0, hdu=False, retries=20):
+def fits_header(band, skypos, tranges, skyrange, verbose=0, hdu=None,
+                retries=100):
     """
     Populate a FITS header.
 
@@ -136,31 +126,22 @@ def fits_header(band, skypos, tranges, skyrange, width=False, height=False,
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
-    :param tranges: Set of time ranges to retrieve the photon events.
-    @CHASE - in GALEX time?@
+    :param tranges: Set of time ranges to retrieve the photon events, in
+    GALEX time seconds.
 
-    :type tranges: list @CHASE - list or numpy.ndarray?@
+    :type tranges: list
 
-    :param skyrange: @CHASE - please describe.@
+    :param skyrange: Extent of the region of interest, in degrees.
 
-    :type skyrange: list @CHASE - list or numpy.ndarray?@
-
-    :param width: @CHASE - This is not used in define_wcs, can be removed?@
-
-    :type width: bool
-
-    :param height: @CHASE - This is not used in define_wcs, can be removed?@
-
-    :type height: bool
+    :type skyrange: list
 
     :param verbose: Verbosity level, a value of 0 is minimum verbosity.
 
     :type verbose: int
 
-    :param hdu: An existing HDU to modify. @CHASE - should default should be
-    None instead of a bool?@
+    :param hdu: An existing HDU to modify.
 
     :type hdu: bool
 
@@ -169,7 +150,6 @@ def fits_header(band, skypos, tranges, skyrange, width=False, height=False,
     :type retries: int
 
     :returns: astropy.fits.BinTableHDU object -- The modified HDU header.
-    @CHASE - check return object type and refine description if needed.@
     """
 
     if verbose:
@@ -194,9 +174,7 @@ def fits_header(band, skypos, tranges, skyrange, width=False, height=False,
 def makemap(band, skypos, trange, skyrange, response=False, verbose=0,
             detsize=1.1):
     """
-    @CHASE - please provide description of this method.@
-    @CHASE - If remove 'width' and 'height' from define_wcs, make sure to remove
-    in the call here.@
+    Generate a single image frame.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -204,17 +182,17 @@ def makemap(band, skypos, trange, skyrange, response=False, verbose=0,
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
-    :param trange: Minimum and maximum time to use, in GALEX time.
+    :param trange: Minimum and maximum time to use, in GALEX time seconds.
 
-    :type trange: list @CHASE - list or numpy.ndarray?@
+    :type trange: list
 
-    :param skyrange: @CHASE - please describe.@
+    :param skyrange: RA and Dec extent of the region of interest in degrees.
 
-    :type skyrange: list @CHASE - list or numpy.ndarray?@
+    :type skyrange: list
 
-    :param response: @CHASE - please explain what this option does.@
+    :param response: Apply the response correction.
 
     :type response: bool
 
@@ -258,7 +236,7 @@ def makemap(band, skypos, trange, skyrange, response=False, verbose=0,
         events[k] = events[k][ix]
 
     events = ct.hashresponse(band, events)
-    wcs = define_wcs(skypos, skyrange, width=False, height=False)
+    wcs = define_wcs(skypos, skyrange, width=None, height=None)
     coo = zip(events['ra'], events['dec'])
     foc = wcs.sip_pix2foc(wcs.wcs_world2pix(coo, 1), 1)
     weights = 1./events['response'] if response else None
@@ -270,9 +248,8 @@ def makemap(band, skypos, trange, skyrange, response=False, verbose=0,
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def integrate_map(band, skypos, tranges, skyrange, width=False, height=False,
-                  verbose=0, memlight=False, hdu=False, retries=20,
-                  response=False, detsize=1.1):
+def integrate_map(band, skypos, tranges, skyrange, verbose=0, memlight=None,
+                  hdu=None, retries=100, response=False, detsize=1.1):
     """
     Integrate an image over some number of time ranges. Use a reduced
 	memory optimization (at the expense of more web queries) if requested.
@@ -283,36 +260,27 @@ def integrate_map(band, skypos, tranges, skyrange, width=False, height=False,
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
-    :param tranges: Set of time ranges to retrieve the photon events.
-    @CHASE - in GALEX time?@
+    :param tranges: Set of time ranges to retrieve the photon events, in
+    GALEX time seconds.
 
-    :type tranges: list @CHASE - list or numpy.ndarray?@
+    :type tranges: list
 
-    :param skyrange: @CHASE - please describe.@
+    :param skyrange: RA and Dec extents of the region of interest in degrees.
 
-    :type skyrange: list @CHASE - list or numpy.ndarray?@
-
-    :param width: @CHASE - This is not used in called funct., can be removed?@
-
-    :type width: bool
-
-    :param height: @CHASE - This is not used in called funct., can be removed?@
-
-    :type height: bool
+    :type skyrange: list
 
     :param verbose: Verbosity level, a value of 0 is minimum verbosity.
 
     :type verbose: int
 
     :param memlight: Reduce memory usage by breaking query into smaller
-    segments. @CHASE - refine if needed, is this the size in seconds?@
+    segments of this size in seconds.
 
-    :type memlight: bool @CHASE - Should be None instead of bool?@
+    :type memlight: float
 
-    :param hdu: An existing HDU to modify. @CHASE - should default should be
-    None instead of a bool?@
+    :param hdu: An existing HDU to modify.
 
     :type hdu: bool
 
@@ -320,7 +288,7 @@ def integrate_map(band, skypos, tranges, skyrange, width=False, height=False,
 
     :type retries: int
 
-    :param response: @CHASE - please explain what this option does.@
+    :param response: Apply the response correction.
 
     :type response: bool
 
@@ -357,8 +325,8 @@ def integrate_map(band, skypos, tranges, skyrange, width=False, height=False,
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def write_jpeg(filename, band, skypos, tranges, skyrange, width=False,
-               height=False, stepsz=1., overwrite=False, verbose=0, retries=20):
+def write_jpeg(filename, band, skypos, tranges, skyrange, stepsz=1.,
+               overwrite=None, verbose=0, retries=100):
     """
     Write a 'preview' jpeg image from a count map.
 
@@ -372,24 +340,16 @@ def write_jpeg(filename, band, skypos, tranges, skyrange, width=False,
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
-    :param tranges: Set of time ranges to retrieve the photon events.
-    @CHASE - in GALEX time?@
+    :param tranges: Set of time ranges to retrieve the photon events,
+    in GALEX time seconds.
 
-    :type tranges: list @CHASE - list or numpy.ndarray?@
+    :type tranges: list
 
-    :param skyrange: @CHASE - please describe.@
+    :param skyrange: RA and Dec extent of the region of interest in degrees.
 
-    :type skyrange: list @CHASE - list or numpy.ndarray?@
-
-    :param width: @CHASE - This is not used in called funct., can be removed?@
-
-    :type width: bool
-
-    :param height: @CHASE - This is not used in called funct., can be removed?@
-
-    :type height: bool
+    :type skyrange: list
 
     :param stepsz: Time bin size to use, in seconds.
 
@@ -412,14 +372,13 @@ def write_jpeg(filename, band, skypos, tranges, skyrange, width=False,
                                               width=width, height=height,
                                               verbose=verbose, retries=retries))
 
-    # @CHASE - No need for this return?@
     return
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def movie(band, skypos, tranges, skyrange, framesz=0, width=False, height=False,
-          verbose=0, memlight=False, coadd=False, response=False, hdu=False,
-          retries=20, detsize=1.1):
+def movie(band, skypos, tranges, skyrange, framesz=0, verbose=0,
+          memlight=None, coadd=False, response=False, hdu=None, retries=100,
+          detsize=1.1):
     """
     Generate a movie (mov) file.
 
@@ -429,50 +388,39 @@ def movie(band, skypos, tranges, skyrange, framesz=0, width=False, height=False,
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
-    :param tranges: Set of time ranges to retrieve the photon events.
-    @CHASE - in GALEX time?@
+    :param tranges: Set of time ranges to retrieve the photon events,
+    in GALEX time seconds.
 
-    :type tranges: list @CHASE - list or numpy.ndarray?@
+    :type tranges: list
 
-    :param skyrange: @CHASE - please describe.@
+    :param skyrange: RA and Dec extents of the region of interest in degrees.
 
-    :type skyrange: list @CHASE - list or numpy.ndarray?@
+    :type skyrange: list
 
-    :param framesz: The time bin size to use per frame, in seconds. @CHASE -
-    please confirm description.@
+    :param framesz: The time bin size (depth) to use per frame, in seconds.
 
-    :type framesz: int @CHASE - needs to be int or can be float?@
-
-    :param width: @CHASE - This is not used in called funct., can be removed?@
-
-    :type width: bool
-
-    :param height: @CHASE - This is not used in called funct., can be removed?@
-
-    :type height: bool
+    :type framesz: float
 
     :param verbose: Verbosity level, a value of 0 is minimum verbosity.
 
     :type verbose: int
 
     :param memlight: Reduce memory usage by breaking query into smaller
-    segments. @CHASE - refine if needed, is this the size in seconds?@
+    segments of this depth in seconds.
 
-    :type memlight: bool @CHASE - Should be None instead of bool?@
+    :type memlight: float
 
-    :param coadd: Create a coadd movie. @CHASE - can you provide better
-    description.@
+    :param coadd: Integrated across all time ranges. (i.e. create a coadd)
 
     :type coadd: bool
 
-    :param response: @CHASE - please explain what this option does.@
+    :param response: Apply the response correction.
 
     :type response: bool
 
-    :param hdu: An existing HDU to modify. @CHASE - should default should be
-    None instead of a bool?@
+    :param hdu: An existing HDU to modify.
 
     :type hdu: bool
 
@@ -526,11 +474,12 @@ def movie(band, skypos, tranges, skyrange, framesz=0, width=False, height=False,
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def create_image(band, skypos, tranges, skyrange, framesz=0, width=False,
-                 height=False, verbose=0, memlight=False, coadd=False,
-                 response=False, hdu=False, retries=20, detsize=1.1):
+def create_image(band, skypos, tranges, skyrange, framesz=0, verbose=0,
+                 memlight=None, coadd=False, response=False, hdu=None,
+                 retries=100, detsize=1.1):
     """
-    @CHASE - please provide description of this method.@
+    Generate count or intensity images or movies at a given sky position and
+    across given time ranges.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -538,50 +487,39 @@ def create_image(band, skypos, tranges, skyrange, framesz=0, width=False,
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
-    :param tranges: Set of time ranges to retrieve the photon events.
-    @CHASE - in GALEX time?@
+    :param tranges: Set of time ranges to retrieve the photon events,
+    in GALEX time seconds.
 
-    :type tranges: list @CHASE - list or numpy.ndarray?@
+    :type tranges: list
 
-    :param skyrange: @CHASE - please describe.@
+    :param skyrange: RA and Dec extents of the region of interest in degrees.
 
-    :type skyrange: list @CHASE - list or numpy.ndarray?@
+    :type skyrange: list
 
-    :param framesz: The time bin size to use per frame, in seconds. @CHASE -
-    please confirm description.@
+    :param framesz: The time bin size (depth) to use per frame, in seconds.
 
-    :type framesz: int @CHASE - needs to be int or can be float?@
-
-    :param width: @CHASE - This is not used in called funct., can be removed?@
-
-    :type width: bool
-
-    :param height: @CHASE - This is not used in called funct., can be removed?@
-
-    :type height: bool
+    :type framesz: float
 
     :param verbose: Verbosity level, a value of 0 is minimum verbosity.
 
     :type verbose: int
 
     :param memlight: Reduce memory usage by breaking query into smaller
-    segments. @CHASE - refine if needed, is this the size in seconds?@
+    segments of this size in seconds.
 
-    :type memlight: bool @CHASE - Should be None instead of bool?@
+    :type memlight: float
 
-    :param coadd: Create a coadd movie. @CHASE - can you provide better
-    description.@
+    :param coadd: Integrate across all time ranges. (i.e. make a coadd)
 
     :type coadd: bool
 
-    :param response: @CHASE - please explain what this option does.@
+    :param response: Apply the relative response correction.
 
     :type response: bool
 
-    :param hdu: An existing HDU to modify. @CHASE - should default should be
-    None instead of a bool?@
+    :param hdu: An existing HDU to modify.
 
     :type hdu: bool
 
@@ -605,11 +543,10 @@ def create_image(band, skypos, tranges, skyrange, framesz=0, width=False,
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def write_images(band, skypos, tranges, skyrange, write_cnt=False,
-                 write_int=False, write_rr=False, framesz=0, width=False,
-                 height=False, verbose=0, memlight=False, coadd=False,
-                 overwrite=False, retries=20, write_cnt_coadd=False,
-                 write_int_coadd=False, detsize=1.1):
+def write_images(band, skypos, tranges, skyrange, write_cnt=None,
+                 write_int=None, framesz=0, verbose=0, memlight=None,
+                 coadd=False, overwrite=None, retries=100,
+                 write_cnt_coadd=False, write_int_coadd=False, detsize=1.1):
     """
     Generate a write various maps to files.
 
@@ -619,16 +556,16 @@ def write_images(band, skypos, tranges, skyrange, write_cnt=False,
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
-    :param tranges: Set of time ranges to retrieve the photon events.
-    @CHASE - in GALEX time?@
+    :param tranges: Set of time ranges to retrieve the photon events,
+    in GALEX time seconds.
 
-    :type tranges: list @CHASE - list or numpy.ndarray?@
+    :type tranges: list
 
-    :param skyrange: @CHASE - please describe.@
+    :param skyrange: RA and Dec extents of the region of interest in degrees.
 
-    :type skyrange: list @CHASE - list or numpy.ndarray?@
+    :type skyrange: list
 
     :param write_cnt: Make count image?
 
@@ -638,36 +575,20 @@ def write_images(band, skypos, tranges, skyrange, write_cnt=False,
 
     :type write_int: bool
 
-    :param write_rr: Make relative response image?
-    @CHASE - Not supported/used any more it looks like, since it was commented
-    out.  I removed for clarity, should remove from options (for now?)
+    :param framesz: The time bin size (depth) to use per frame, in seconds
 
-    :type write_rr: bool
-
-    :param framesz: The time bin size to use per frame, in seconds. @CHASE -
-    please confirm description.@
-
-    :type framesz: int @CHASE - needs to be int or can be float?@
-
-    :param width: @CHASE - This is not used in called funct., can be removed?@
-
-    :type width: bool
-
-    :param height: @CHASE - This is not used in called funct., can be removed?@
-
-    :type height: bool
+    :type framesz: float
 
     :param verbose: Verbosity level, a value of 0 is minimum verbosity.
 
     :type verbose: int
 
     :param memlight: Reduce memory usage by breaking query into smaller
-    segments. @CHASE - refine if needed, is this the size in seconds?@
+    segments of this size in seconds.
 
-    :type memlight: bool @CHASE - Should be None instead of bool?@
+    :type memlight: float
 
-    :param coadd: Create a coadd movie. @CHASE - can you provide better
-    description.@
+    :param coadd: Integrate across all time ranges (i.e. create a coadd)
 
     :type coadd: bool
 
@@ -726,6 +647,5 @@ def write_images(band, skypos, tranges, skyrange, write_cnt=False,
 
         hdulist.writeto(imtypes[i], clobber=overwrite)
 
-    # @CHASE - this return is not needed?@
     return
 # ------------------------------------------------------------------------------

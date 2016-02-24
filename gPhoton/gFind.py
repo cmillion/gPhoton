@@ -14,7 +14,7 @@ import gphoton_args as gargs
 
 # ------------------------------------------------------------------------------
 def gFind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
-          minexp=1.0, quiet=False, retries=20, skypos=None, trange=None,
+          minexp=1.0, quiet=False, retries=100, skypos=None, trange=None,
           verbose=0, skyrange=None):
     """
     Primary program in the module. Prints time ranges to the screen and
@@ -29,11 +29,11 @@ def gFind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
     :type detsize: float
 
     :param exponly: If True, only report the exposure times.
-    @CHASE - does this work now?@
 
     :type exponly: bool
 
-    :param gaper: @CHASE - please provide description.@
+    :param gaper: Return time ranges in a format that can be copy-pasted as
+    a valid gAperture call.
 
     :type gaper: bool
 
@@ -47,22 +47,20 @@ def gFind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
 
     :type minexp: float
 
-    :param quiet: If True, don't print anything to STDOUT.
-    @CHASE - Can this just be rolled into 'verbose'?@
+    :param quiet: If True, don't print anything to STDOUT. Overrides verbose.
 
     :type quiet: bool
 
     :param retries: Number of query retries to attempt before giving up.
-    @CHASE - Should the default be changed to 100?@
 
     :type retries: int
 
     :param skypos: The right ascension and declination, in degrees.
 
-    :type skypos: list @CHASE - list or numpy.ndarray?@
+    :type skypos: list
 
-    :param trange: Minimum and maximum time range to make a light curve.
-    @CHASE - assume this is in GALEX time?@
+    :param trange: Minimum and maximum time range to make a light curve,
+    in GALEX time.
 
     :type trange: list
 
@@ -70,9 +68,10 @@ def gFind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
 
     :type verbose: int
 
-    :param skyrange: @CHASE - please describe.@
+    :param skyrange: RA and Dec extents, in degrees, defining the lengths of
+    sides of a box on the sky that circumscribes the region of interest.
 
-    :type skyrange: list @CHASE - list or numpy.ndarray?@
+    :type skyrange: list
 
     :returns: dict -- The available data for the requested band(s).
 	"""
@@ -89,8 +88,7 @@ def gFind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
         # Get valid time ranges, but only if trange is not provided.
         ranges = dbt.fGetTimeRanges(this_band, skypos, maxgap=maxgap,
                                     minexp=minexp, verbose=verbose,
-                                    detsize=detsize, retries=retries,
-                                    trange=trange, skyrange=skyrange)
+                                    detsize=detsize, trange=trange, skyrange=skyrange)
         if not ranges.any():
             if not quiet:
                 print ('No {band} exposure'
@@ -200,9 +198,8 @@ def __main__():
 
 # ------------------------------------------------------------------------------
 if __name__ == "__main__":
-    # @CHASE - What is 'pycurl' below? Is it defined? Missing an import?
     try:
         __main__()
-    except (KeyboardInterrupt, pycurl.error):
+    except KeyboardInterrupt:
         exit('Received Ctrl + C... Exiting! Bye.', 1)
 # ------------------------------------------------------------------------------

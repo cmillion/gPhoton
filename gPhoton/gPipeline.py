@@ -3,8 +3,9 @@
 """
 .. module:: gPipeline
 
-   :synopsis: Runs the module that creates time-tagged, aspect-corrected photon
-   events. @CHASE - update if needed.@
+   :synopsis: Runs the module that runs the standalone gPhoton calibration
+   pipelines to create aspect-corrected, time-tagged photon events from
+   low-level archived GALEX data products.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -14,7 +15,7 @@ import argparse
 
 # ------------------------------------------------------------------------------
 def gPipeline(raw6file, scstfile, band, outbase, aspfile, ssdfile, nullout,
-              verbose=0, retries=20):
+              retries=100):
     """
     Wrapper that calls the PhotonPipe method.
 
@@ -45,11 +46,6 @@ def gPipeline(raw6file, scstfile, band, outbase, aspfile, ssdfile, nullout,
     :param nullfile: Name of output file to record NULL lines.
 
     :type nullfile: str
-
-    :param verbose: @CHASE - This is not used in PhotonPipe and should be
-    removed@
-
-    :type verbose: int
 
     :param retries: Number of query retries to attempt before giving up.
 
@@ -162,15 +158,13 @@ def __main__():
     args = check_args(args)
 
     gPipeline(args.raw6file, args.scstfile, args.band, args.outbase,
-              args.aspfile, args.ssdfile, args.nullout, verbose=args.verbose,
-              retries=args.retries)
+              args.aspfile, args.ssdfile, args.nullout, retries=args.retries)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 if __name__ == "__main__":
-    # @CHASE - What is 'pycurl' below? Is it defined? Missing an import?
     try:
         __main__()
-    except (KeyboardInterrupt, pycurl.error):
+    except KeyboardInterrupt:
         exit('Received Ctrl + C... Exiting! Bye.', 1)
 # ------------------------------------------------------------------------------

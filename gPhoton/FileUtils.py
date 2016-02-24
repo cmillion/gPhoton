@@ -6,19 +6,17 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
-# @CHASE - We need to avoid "import *", can we do specific imports here?@
 import csv
 from astropy.io import fits as pyfits
 import numpy as np
 from sys import stdout
 import requests
-from MCUtils import *
 import gQuery
 
 # ------------------------------------------------------------------------------
 def load_raw6(raw6file):
     """
-    Reads a raw6 file. Just wraps some pyfits commands.
+    Reads a raw6 file. Just wraps some pyfits I/O commands.
 
     :param raw6file: Name of the raw6 file to read.
 
@@ -40,17 +38,15 @@ def load_aspect(aspfile):
     """
     Loads a set of aspect files into a bunch of arrays.
 
-    :param aspfile: List of aspect files to read.
-    @CHASE - What happens if a scalar is given?@
+    :param aspfile: List of aspect files (+paths) to read.
 
-    :type aspfile: list @CHASE - verify this is a list or numpy.ndarray@
+    :type aspfile: list
 
     :returns: tuple -- Returns a six-element tuple containing the RA, DEC,
-    twist, time, header, and aspect flags. Each of these EXCEPT for header,
-    are returned as numpy.ndarrays. The header is returned as a dict
+    twist (roll), time, header, and aspect flags. Each of these EXCEPT for
+    header, are returned as numpy.ndarrays. The header is returned as a dict
     containing the RA, DEC, and roll from the headers of the aspec files in
     numpy.ndarrays.
-    @CHASE - What's a 'twist' in this context?@
     """
 
     ra, dec = np.array([]), np.array([])
@@ -89,21 +85,19 @@ def web_query_aspect(eclipse, retries=20):
     """
     Grabs the aspect data from MAST databases based on eclipse.
 
-    :param eclipse: The set of eclipses to retrieve aspect files for.
-    @CHASE - Is this a single eclipse or multiple eclipses?@
+    :param eclipse: The number of the eclipse to retrieve aspect files for.
 
-    :type eclipse: int @CHASE - Confirm data type please.@
+    :type eclipse: int
 
     :param retries: The number of times to retry a query before giving up.
 
     :type retries: int
 
     :returns: tuple -- Returns a six-element tuple containing the RA, DEC,
-    twist, time, header, and aspect flags. Each of these EXCEPT for header,
-    are returned as numpy.ndarrays. The header is returned as a dict
+    twist (roll), time, header, and aspect flags. Each of these EXCEPT for
+    header, are returned as numpy.ndarrays. The header is returned as a dict
     containing the RA, DEC, and roll from the headers of the aspec files in
     numpy.ndarrays.
-    @CHASE - What's a 'twist' in this context?@
     """
 
     print "Attempting to query MAST database for aspect records."
@@ -139,11 +133,9 @@ def web_query_aspect(eclipse, retries=20):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def create_SSD_filename(band, eclipse):
+def create_ssd_filename(band, eclipse):
     """
     Returns the Stim Separation Data (SSD) calibration file name.
-    @CHASE - The use of camelcase is discouraged, should make this
-    'create_ssd_filename' but also need to change everywhere it is called.@
 
     :param band: The band to create the SSD for, either 'FUV' or 'NUV'.
 
@@ -151,7 +143,7 @@ def create_SSD_filename(band, eclipse):
 
     :param eclipse: The eclipse number to create the SSD file for.
 
-    :type eclipse: int @CHASE - int/float/long?@
+    :type eclipse: int
 
     :returns: str -- The name of the SSD file to create.
     """

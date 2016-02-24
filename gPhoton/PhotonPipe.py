@@ -1,33 +1,31 @@
 """
 .. module:: PhotonPipe
 
-   :synopsis: Creates time-tagged, aspect-corrected photon events from raw6
-   and spacecraft telemetry files.
-   @CHASE - elaborate on this please.@
+   :synopsis: A recreation / port of key functionality of the GALEX mission
+   pipeline to generate calibrated and sky-projected photon-level data from
+   raw spacecraft and detector telemetry. Generates time-tagged photon lists
+   given mission-produced -raw6, -scst, and -asprta data.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
-# @CHASE - We need to avoid "import *", can we do specific imports here?@
 import os
 import csv
 import time
 from astropy.io import fits as pyfits
 import numpy as np
-from CalUtils import *
-from FileUtils import *
-from gnomonic import *
-from MCUtils import *
+from CalUtils import clk_cen_scl_slp, get_stim_coefs, find_fuv_offset, post_csp_caldata, rtaph_yac, rtaph_yac2, compute_stimstats, create_ssd
+from FileUtils import load_aspect, web_query_aspect
+from gnomonic import gnomfwd_simple, gnomrev_simple
+from MCUtils import print_inline
 import cal
 
 # ------------------------------------------------------------------------------
-def PhotonPipe(raw6file, scstfile, band, outbase, aspfile=0, ssdfile=0,
-               nullfile=0, verbose=0, retries=20):
+def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
+               nullfile=None, verbose=0, retries=20):
     """
-    Return the detector clock, center, scale, and slope constants.
-    @CHASE - what are these "constants"? Also, it doesn't return them, maybe
-    it prints them to an output file?@
-    @CHASE - Camel-case should not be used for method names.@
+    Apply static and sky calibrations to -raw6 GALEX data, producing fully
+    aspect-corrected and time-tagged photon list files.
 
     :param raw6file: Name of the raw6 file to use.
 
@@ -47,17 +45,17 @@ def PhotonPipe(raw6file, scstfile, band, outbase, aspfile=0, ssdfile=0,
 
     :param aspfile: Name of aspect file to use.
 
-    :type aspfile: int @CHASE - this should be str (default '' or None)@
+    :type aspfile: int
 
     :param ssdfile: Name of Stim Separation Data file to use.
 
-    :type ssdfile: int @CHASE - this should be str (default '' or None)@
+    :type ssdfile: int
 
     :param nullfile: Name of output file to record NULL lines.
 
-    :type nullfile: int @CHASE - this should be str (default '' or None)@
+    :type nullfile: int
 
-    :param verbose: @CHASE - This is not used and should be removed.@
+    :param verbose: Note used. Included for consistency with other tools.
 
     :type verbose: int
 
@@ -82,9 +80,7 @@ def PhotonPipe(raw6file, scstfile, band, outbase, aspfile=0, ssdfile=0,
     detsize = 1.25 # Detector size in degrees
     pltscl = 68.754932 # Plate scale
     aspum = pltscl/1000.0
-    # @CHASE - Use of camel-case discouraged, chage this variable to
-    # 'arcsecperpixel' or use underscores.@
-    ArcSecPerPixel = 1.5
+    arcsecperpixel = 1.5
     xi_xsc, xi_ysc, eta_xsc, eta_ysc = 0., 1., 1., 0.
 
     # Determine the eclipse number from the raw6 header.
@@ -105,7 +101,7 @@ def PhotonPipe(raw6file, scstfile, band, outbase, aspfile=0, ssdfile=0,
     if eclipse > 37460:
         (Mx, Bx, My, By, stimsep, yactbl) = compute_stimstats(raw6file, band,
                                                               eclipse)
-        wig2, wig2data, wlk2, wlk2data, clk2, clk2data = postCSP_caldata()
+        wig2, wig2data, wlk2, wlk2data, clk2, clk2data = post_csp_caldata()
 
     print "Loading wiggle files..."
     wiggle_x, _ = cal.wiggle(band, 'x')
@@ -133,7 +129,7 @@ def PhotonPipe(raw6file, scstfile, band, outbase, aspfile=0, ssdfile=0,
                  disthead['NAXIS2'])
 
     if band == 'FUV':
-        xoffset, yoffset = find_FUV_offset(scstfile)
+        xoffset, yoffset = find_fuv_offset(scstfile)
     else:
         xoffset, yoffset = 0., 0.
 
@@ -142,10 +138,10 @@ def PhotonPipe(raw6file, scstfile, band, outbase, aspfile=0, ssdfile=0,
         stim_coef0, stim_coef1 = get_stim_coefs(ssdfile)
     elif ssdfile:
         print "SSD file requested: "+str(ssdfile)
-        stim_coef0, stim_coef1 = create_SSD(raw6file, band, eclipse, ssdfile)
+        stim_coef0, stim_coef1 = create_ssd(raw6file, band, eclipse, ssdfile)
     else:
         print "No SSD file provided or requested."
-        stim_coef0, stim_coef1 = create_SSD(raw6file, band, eclipse)
+        stim_coef0, stim_coef1 = create_ssd(raw6file, band, eclipse)
     print "		stim_coef0, stim_coef1 = "+str(stim_coef0)+", "+str(stim_coef1)
 
     print "Loading mask file..."
@@ -440,8 +436,8 @@ def PhotonPipe(raw6file, scstfile, band, outbase, aspfile=0, ssdfile=0,
             np.array(row[ix], dtype='int64'),
             np.array(col[ix], dtype='int64')]
 
-        xshift = (xshift*ArcSecPerPixel)+xoffset
-        yshift = (yshift*ArcSecPerPixel)+yoffset
+        xshift = (xshift*arcsecperpixel)+xoffset
+        yshift = (yshift*arcsecperpixel)+yoffset
 
         print_inline(chunkid+"Applying hotspot mask...")
 

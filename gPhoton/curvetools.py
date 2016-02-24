@@ -1,8 +1,7 @@
 """
 .. module:: curvetools
 
-   :synopsis: Methods for creating light curves.
-   @CHASE - elaborate on this please.@
+   :synopsis: Functions for creation of lightcurves and components thereof.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -16,8 +15,6 @@ from gQuery import tscale
 import MCUtils as mc
 import dbasetools as dbt
 import galextools as gxt
-# @CHASE - Looks like there's a bunch of methods in cal/__init.py__, shouldn't
-# these be put into a module?@
 import cal
 
 # ------------------------------------------------------------------------------
@@ -34,19 +31,18 @@ def gphot_params(band, skypos, radius, annulus=None, verbose=0, detsize=1.25,
 
     :type skypos: list
 
-    :param radius: The photometric aperture, in degrees. @CHASE - confirm units@
+    :param radius: Radius of the photometric aperture in degrees.
 
     :type radius: float
 
     :param annulus: A two-element list containing the inner and outer radius
     to use for background subtraction during aperture photometry, in degrees.
-    @CHASE - confirm units.@
 
     :type annulus: list
 
     :param verbose: Level of verbosity, 0 = minimum verbosity.
 
-    :type verbose: int @CHASE - The default was float, I made this an int.@
+    :type verbose: int
 
     :param detsize: Effective diameter, in degrees, of the field-of-view.
 
@@ -56,8 +52,7 @@ def gphot_params(band, skypos, radius, annulus=None, verbose=0, detsize=1.25,
 
     :type stepsz: float
 
-    :param trange: The start and end timestamps to consider. @CHASE - JD, GALEX
-    time?@
+    :param trange: The start and end timestamps to consider, in GALEX time
 
     :type trange: list
 
@@ -77,13 +72,13 @@ def xieta2colrow(xi, eta, band, detsize=1.25):
     """
     Convert detector xi and eta into col and row.
 
-    :param xi: @CHASE - What is 'xi'?@
+    :param xi: Sky-projected event "x" positions _in detetor coordinates_.
 
-    :type xi: @CHASE - float/list/numpy.ndarray?@
+    :type xi: numpy.ndarray
 
-    :param eta: @CHASE - What is 'eta'?@
+    :param eta: Sky-projected event "y" positions _in detetor coordinates_.
 
-    :type eta: @CHASE - float/list/numpy.ndarray?@
+    :type eta: numpy.ndarray
 
     :param band: The band that is being used, either 'FUV' or 'NUV'.
 
@@ -108,14 +103,6 @@ def xieta2colrow(xi, eta, band, detsize=1.25):
     col = (((xi/36000.)/(detsize/2.)*flatfill + 1.)/2. * npixx)
     row = (((eta/36000.)/(detsize/2.)*flatfill + 1.)/2. * npixy)
 
-    # @CHASE - Should this note be moved out of the source code for clarity?@
-    # You could theoretically drop a cut on detector position / detsize here...
-    # Also, is this cut absolutely necessary? I think it's already been taken
-    # care of by the flag==0 assertion in the SQL query.
-    # cut = ((col > 0.) & (col < flat.shape[0]-1) &
-    #       (row > 0.) & (row < flat.shape[1]-1))
-    # cut = np.where(ix == True)
-    # ix = np.where((1.25/800.)*mc.distance(col,row,400,400)=detsize)
     return col, row
 # ------------------------------------------------------------------------------
 
@@ -169,24 +156,21 @@ def read_photons(photonfile, ra0, dec0, tranges, radius, verbose=0,
 
     :type photonfile: str
 
-    :param ra0: Right ascension, in degrees, of the center of the field-of-view.
-    @CHASE - confirm please.@
+    :param ra0: Right ascension of the targeted sky position, in degrees.
 
     :type ra0: float
 
-    :param dec0: Declination, in degrees, of the center of the field-of-view.
-    @CHASE - confirm please.@
+    :param dec0: Declination of the targeted sky position, in degrees.
 
     :type dec0: float
 
-    :param tranges: Set of time ranges to retrieve the photon events.
-    @CHASE - in GALEX time?@
+    :param tranges: Set of time ranges from which to retrieve photon events,
+    in GALEX time units
 
     :type tranges: list
 
-    :param radius: The photometric aperture, in degrees. @CHASE - Confirm
-    this is in degrees. Also, the retrieval only gets those that are within
-    the radius and not the outer annulus?@
+    :param radius: The radius, in degrees, defining a cone on the sky that
+    is centered on ra0 and dec0, from which to extract photons.
 
     :type radius: float
 
@@ -236,24 +220,21 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0):
 
     :type band: str
 
-    :param ra0: Right ascension, in degrees, of the center of the field-of-view.
-    @CHASE - confirm please.@
+    :param ra0: Right ascension of the targeted sky position, in degrees.
 
     :type ra0: float
 
-    :param dec0: Declination, in degrees, of the center of the field-of-view.
-    @CHASE - confirm please.@
+    :param dec0: Declination of the targeted sky position, in degrees.
 
     :type dec0: float
 
-    :param tranges: Set of time ranges to retrieve the photon events.
-    @CHASE - in GALEX time?@
+    :param tranges: Set of time ranges from which to retrieve photon events,
+    in GALEX time units
 
     :type tranges: list
 
-    :param radius: The photometric aperture, in degrees. @CHASE - Confirm
-    this is in degrees. Also, the retrieval only gets those that are within
-    the radius and not the outer annulus?@
+    :param radius: The radius, in degrees, defining a cone on the sky that
+    is centered on ra0 and dec0, from which to extract photons.
 
     :type radius: float
 
@@ -261,7 +242,8 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0):
 
     :type verbose: int
 
-    :param flag: @CHASE - What is 'flag'?@
+    :param flag: Photon list flag value upon which to select. Default of 0
+    corresponds to nominally corrected data with no issues.
 
     :type flag: int
 
@@ -296,40 +278,32 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
+def pullphotons(band, ra0, dec0, tranges, radius, verbose=0,
                 photonfile=None, flag=0):
     """
-    @CHASE - Please provide descriptor.@
+    Reads photon list data from the MAST database using a cone search.
 
     :param band: Name of the band being used, either 'FUV' or 'NUV'.
 
     :type band: str
 
-    :param ra0: Right ascension, in degrees, of the center of the field-of-view.
-    @CHASE - confirm please.@
+    :param ra0: Right ascension of the targeted sky position, in degrees.
 
     :type ra0: float
 
-    :param dec0: Declination, in degrees, of the center of the field-of-view.
-    @CHASE - confirm please.@
+    :param dec0: Declination of the targeted sky position, in degrees.
 
     :type dec0: float
 
-    :param tranges: Set of time ranges to retrieve the photon events.
-    @CHASE - In GALEX time?@
+    :param tranges: Set of time ranges from which to retrieve photon events,
+    in GALEX time units
 
     :type tranges: list
 
-    :param radius: The photometric aperture, in degrees. @CHASE - Confirm
-    this is in degrees. Also, the retrieval only gets those that are within
-    the radius and not the outer annulus?@
+    :param radius: The radius, in degrees, defining a cone on the sky that
+    is centered on ra0 and dec0, from which to extract photons.
 
     :type radius: float
-
-    :param events: Set of photon events. @CHASE - Why is this passed as an
-    argument? It's defined within the method and returned.@
-
-    :type events: dict
 
     :param verbose: Verbosity level, a value of 0 is minimum verbosity.
 
@@ -339,7 +313,8 @@ def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
 
     :type photonfile: str
 
-    :param flag: @CHASE - What is 'flag'?@
+    :param flag: Photon list flag value upon which to select. Default of 0
+    corresponds to nominally corrected data with no issues.
 
     :type flag: int
 
@@ -361,19 +336,21 @@ def pullphotons(band, ra0, dec0, tranges, radius, events={}, verbose=0,
 # ------------------------------------------------------------------------------
 def aperture_error(counts, expt, bgcounts=0):
     """
-    @CHASE - Please provide descriptor.@
+    The estimated error in the countrate within the aperture, by adding
+    together the counting error within the aperture and background (if
+    provided) in quadrature.
 
-    :param counts: Total counts within the aperture. @CHASE - confirm please.@
+    :param counts: Total counts within the aperture.
 
-    :type counts: int @CHASE - Assume not a float?@
+    :type counts: int
 
     :param expt: The exposure time in seconds.
 
-    :type extp: float @CHASE - Is this a float or int?@
+    :type extp: float
 
     :param bgcounts: The total background counts within the aperture.
 
-    :type bgcounts: int @CHASE - Assume not a float?@
+    :type bgcounts: int
 
     :returns: float -- The error in the counts within the aperture.
     """
@@ -382,372 +359,24 @@ def aperture_error(counts, expt, bgcounts=0):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def bg_sources(band, ra0, dec0, radius, margin=0.001):
-    """
-    @CHASE - Please provide descriptor.@
-
-    :param band: The band being used, either 'FUV' or 'NUV'.
-
-    :type band: str
-
-    :param ra0: Right ascension, in degrees, of the center of the field-of-view.
-    @CHASE - confirm please.@
-
-    :type ra0: float
-
-    :param dec0: Declination, in degrees, of the center of the field-of-view.
-    @CHASE - confirm please.@
-
-    :type dec0: float
-
-    :param radius: The search radius to find MCAT sources within, in degrees.
-    @CHASE - please confirm description and units.@
-
-    :type radius: float
-
-    :param margin: Extra search margin when looking for MCAT sources, in
-    degrees. @CHASE - confirm description and units.@
-
-    :type margin: float
-
-    :returns: dict -- The RA, DEC, Full-Width-Half-Maximum, Mag. Limit, and
-    search radius. @CHASE - please confirm what 'radius' is in return dict.@
-    """
-
-    sources = gQuery.getArray(gQuery.mcat_sources(band, ra0, dec0,
-                                                  radius+margin,
-                                                  maglimit=maskdepth))
-
-    try:
-        return {'ra':np.float32(np.array(sources)[:, 0]),
-                'dec':np.float32(np.array(sources)[:, 1]),
-                'fwhm':np.float32(np.array(sources)[:, 7:9]),
-                'radius':radius}
-    except IndexError:
-        return {'ra':np.array([]), 'dec':np.array([]), 'fwhm':np.array([]),
-                'maglimit':maskdepth, 'radius':radius}
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-def bg_mask_annulus(band, ra0, dec0, annulus, ras, decs, responses):
-    """
-    @CHASE - Please provide descriptor.@
-
-    :param band: The band being used, either 'FUV' or 'NUV'.
-
-    :type band: str
-
-    :param ra0: Right ascension, in degrees, of the center of the aperture.
-    @CHASE - confirm please.@
-
-    :type ra0: float
-
-    :param dec0: Declination, in degrees, of the center of the aperture.
-    @CHASE - confirm please.@
-
-    :type dec0: float
-
-    :param annulus: The inner and outer radius of the annulus used to define
-    the background, in degrees.
-
-    :type annulus: list
-
-    :param ras: Right ascension of sources to check whether they lie in the
-    annulus, in degrees.
-
-    :type ras: numpy.ndarray @CHASE - confirm data type is not list.@
-
-    :param decs: Declination of sources to check whether they lie in the
-    annulus, in degrees.
-
-    :type decs: numpy.ndarray @CHASE - confirm data type is not list.@
-
-    :param responses: Set of response values for the sources that will be
-    checked whether they lie in the annulus.
-
-    :type responses: numpy.ndarray @CHASE - confirm data type is not list.@
-
-    :returns: tuple -- A three-element tuple containing the RAs, DECs, and
-    responses for sources that lie within the specified annulus.
-    """
-
-    # @CHASE - What happens if np.where() returns no matches? Should be caught?@
-
-    ix = np.where((mc.angularSeparation(ra0, dec0, ras, decs) >= annulus[0]) &
-                  (mc.angularSeparation(ra0, dec0, ras, decs) <= annulus[1]))
-
-    return ras[ix], decs[ix], responses[ix]
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-def bg_mask_sources(band, ra0, dec0, ras, decs, responses, sources,
-                    maskradius=1.5):
-    """
-    @CHASE - Please provide descriptor.@
-
-    :param band: The band being used, either 'FUV' or 'NUV'.
-
-    :type band: str
-
-    :param ra0: Right ascension, in degrees, of the center of the aperture.
-    @CHASE - confirm please.@
-
-    :type ra0: float
-
-    :param dec0: Declination, in degrees, of the center of the aperture.
-    @CHASE - confirm please.@
-
-    :type dec0: float
-
-    :param ras: Right ascension of sources to check whether they lie in the
-    annulus, in degrees.
-
-    :type ras: numpy.ndarray @CHASE - confirm data type is not list.@
-
-    :param decs: Declination of sources to check whether they lie in the
-    annulus, in degrees.
-
-    :type decs: numpy.ndarray @CHASE - confirm data type is not list.@
-
-    :param responses: Set of response values for the sources that will be
-    checked whether they lie in the annulus.
-
-    :type responses: numpy.ndarray @CHASE - confirm data type is not list.@
-
-    :param sources: The set of sources to check. @CHASE - please update.@
-
-    :type sources: dict @CHASE - please confirm data type.@
-
-    :param maskradius: The value to use for the mask radius.
-
-    :type maskradius: float
-
-    :returns: tuple -- A three-element tuple containing the RAs, DECs, and
-    responses for sources beyond the mask radius. @CHASE - Please update
-    this description.@
-    """
-
-    # At present, masks to 1.5 sigma where FWHM = 2.3548*sigma.
-    for i in range(len(sources['ra'])):
-        ix = np.where(
-            mc.angularSeparation(
-                sources['ra'][i], sources['dec'][i], ras, decs) >=
-            (maskradius/2.3548)*np.median(sources['fwhm'][i, :]))
-        ras, decs, responses = ras[ix], decs[ix], responses[ix]
-
-    return ras, decs, responses
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-def bg_mask(band, ra0, dec0, annulus, ras, decs, responses, sources):
-    """
-    @CHASE - Please provide descriptor.@
-
-    :param band: The band being used, either 'FUV' or 'NUV'.
-
-    :type band: str
-
-    :param ra0: Right ascension, in degrees, of the center of the aperture.
-    @CHASE - confirm please.@
-
-    :type ra0: float
-
-    :param dec0: Declination, in degrees, of the center of the aperture.
-    @CHASE - confirm please.@
-
-    :type dec0: float
-
-    :param annulus: Size of the inner and outer annuli, in degrees. @CHASE -
-    verify unit please.@
-
-    :type annulus: float
-
-    :param ras: Right ascension of sources to check whether they lie in the
-    annulus, in degrees.
-
-    :type ras: numpy.ndarray @CHASE - confirm data type is not list.@
-
-    :param decs: Declination of sources to check whether they lie in the
-    annulus, in degrees.
-
-    :type decs: numpy.ndarray @CHASE - confirm data type is not list.@
-
-    :param responses: Set of response values for the sources that will be
-    checked whether they lie in the annulus.
-
-    :type responses: numpy.ndarray @CHASE - confirm data type is not list.@
-
-    :param sources: @CHASE - This parameter is not used and is just passed back,
-    can be removed from the call?@
-
-    :type sources: numpy.ndarray @CHASE - Is this a list/numpy.ndarray?@
-    """
-
-    ras, decs, responses = bg_mask_annulus(band, ra0, dec0, annulus, ras,
-                                           decs, responses)
-
-    return bg_mask_sources(band, ra0, dec0, ras, decs, responses, sources)
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-def cheese_bg_area(band, ra0, dec0, annulus, sources, nsamples=10e5, ntests=10):
-    """
-    @CHASE - Please provide descriptor.@
-
-    :param band: The band being used, either 'FUV' or 'NUV'.
-
-    :type band: str
-
-    :param ra0: Right ascension, in degrees, of the center of the aperture.
-    @CHASE - confirm please.@
-
-    :type ra0: float
-
-    :param dec0: Declination, in degrees, of the center of the aperture.
-    @CHASE - confirm please.@
-
-    :type dec0: float
-
-    :param annulus: The size of the inner and outer background annuli,
-    in degrees. @CHASE - please confirm units.@
-
-    :type annulus: list
-
-    :param sources: Set of sources to check whether they are in the background.
-
-    :type sources: numpy.ndarray @CHASE - Is this a list or numpy.ndarray?@
-
-    :param nsamples: Number of trials to run per test.
-
-    :type nsamples: int
-
-    :param ntests: Number of tests to run.
-
-    :type ntests: int
-
-    :returns: numpy.ndarray - The size of the annuli for each trial.
-    """
-
-    # This is just a really naive Monte Carlo.
-    ratios = np.zeros(ntests)
-
-    for i in range(ntests):
-        ann_events = bg_mask_annulus(band, ra0, dec0, annulus,
-                                     np.random.uniform(ra0-annulus[1],
-                                                       ra0+annulus[1],
-                                                       int(nsamples)),
-                                     np.random.uniform(dec0-annulus[1],
-                                                       dec0+annulus[1],
-                                                       int(nsamples)),
-                                     np.ones(nsamples))
-        mask_events = bg_mask_sources(band, ra0, dec0, ann_events[0],
-                                      ann_events[1], ann_events[2], sources)
-
-        try:
-            ratios[i] = float(mask_events[2].sum())/float(ann_events[2].sum())
-        except ZeroDivisionError:
-            ratios[i] = 0.
-
-    return (mc.area(annulus[1])-mc.area(annulus[0]))*ratios.mean()
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
-def cheese_bg(band, ra0, dec0, radius, annulus, ras, decs, responses,
-              maskdepth=20., maskradius=1.5, eff_area=False, sources=False):
-    """
-    Returns an estimate of the number of counts (not count rate) within the
-    aperture based upon a masked background annulus.
-
-    :param band: The band being used, either 'FUV' or 'NUV'.
-
-    :type band: str
-
-    :param ra0: Right ascension, in degrees, of the center of the aperture.
-    @CHASE - confirm please.@
-
-    :type ra0: float
-
-    :param dec0: Declination, in degrees, of the center of the aperture.
-    @CHASE - confirm please.@
-
-    :type dec0: float
-
-    :param radius: The photometric aperture, in degrees. @CHASE - confirm
-    units.@
-
-    :type radius: float
-
-    :param annulus: The size of the inner and outer background annuli,
-    in degrees. @CHASE - please confirm units.@
-
-    :type annulus: list
-
-    :param ras: Right ascension of sources to check whether they lie in the
-    annulus, in degrees.
-
-    :type ras: numpy.ndarray @CHASE - confirm data type is not list.@
-
-    :param decs: Declination of sources to check whether they lie in the
-    annulus, in degrees.
-
-    :type decs: numpy.ndarray @CHASE - confirm data type is not list.@
-
-    :param responses: Set of response values for the sources that will be
-    checked whether they lie in the annulus.
-
-    :type responses: numpy.ndarray @CHASE - confirm data type is not list.@
-
-    :param maskdepth: @CHASE - please provide description.@
-
-    :type maskdepth: float
-
-    :param maskradius: @CHASE - please provide description.@
-
-    :type maskradius: float
-
-    :param eff_area: @CHASE - please provide description.@
-
-    :type eff_area: bool
-
-    :param sources: @CHASE - please provide description.@
-
-    :type sources: bool @CHASE - This looks like a mixed-type, the default
-    should probably be None and data type list or numpy.ndarray?@
-
-    :returns: float - The number of counts (excluding background) within the
-    photometric apreture. @CHASE - Confirm description, this does not count
-    background?@
-    """
-
-    # [Future]: This recomputes eff_area every pass at huge computational cost.
-    if not sources:
-        sources = bg_sources(band, ra0, dec0, annulus[1], maskdepth=maskdepth)
-
-    bg_counts = bg_mask(band, ra0, dec0, annulus, ras, decs, responses,
-                        sources)[2].sum()
-    if not eff_area:
-        eff_area = cheese_bg_area(band, ra0, dec0, annulus, sources)
-
-    return mc.area(radius)*bg_counts/eff_area if eff_area else 0.
-# ------------------------------------------------------------------------------
-
-# ------------------------------------------------------------------------------
 def reduce_lcurve(bin_ix, region_ix, data, function, dtype='float64'):
     """
     Produces light curve columns by iteratively applying 'function' to 'data'
     within 'region_ix' over 'bin_ix'.
 
-    :param bin_ix: @CHASE - please describe parameter.@
+    :param bin_ix: Array indices designating which events are in the time bin
+    of interest.
 
-    :type bin_ix: list @CHASE - confirm data type please.@
+    :type bin_ix: numpy.ndarray
 
-    :param region_ix: @CHASE - please describe parameter.@
+    :param region_ix: Array indices designating which events are in the spatial
+    region of interest (e.g. the photometric aperture).
 
-    :type region_ix: list @CHASE - confirm data type please.@
+    :type region_ix: numpy.ndarray
 
     :param data: The data to apply the function on.
 
-    :type data: numpy.ndarray @CHASE - list or numpy.ndarray?@
+    :type data: numpy.ndarray
 
     :param function: The function to apply to the data.
 
@@ -786,9 +415,10 @@ def maskwarning(band, bin_ix, events, verbose=0, mapkey='H'):
 
     :type band: str
 
-    :param bin_ix: @CHASE - please provide description.@
+    :param bin_ix: Array indices designating which events are in the time bin
+    of interest.
 
-    :type bin_ix: numpy.ndarray @CHASE - is this list or numpy.ndarray?@
+    :type bin_ix: numpy.ndarray
 
     :param events: Set of photon events to check if they are near a masked
     detector region.
@@ -799,7 +429,8 @@ def maskwarning(band, bin_ix, events, verbose=0, mapkey='H'):
 
     :type verbose: int
 
-    :param mapkey: @CHASE - please provide description.@
+    :param mapkey: Text code indicating whether to use the hotspot mask ("H")
+    or the flat (edge) mask ("E").
 
     :type mapkey: str
 
@@ -821,11 +452,13 @@ def maskwarning(band, bin_ix, events, verbose=0, mapkey='H'):
 # ------------------------------------------------------------------------------
 def lowresponsewarning(bin_ix, events, verbose=0, ratio=0.7):
     """
-    @CHASE - Please provide descriptor.@
+    Checks for anomalously low response values in the data of interest, which
+    could indicate data on poorly characterized or behaved detector regions.
 
-    :param bin_ix: @CHASE - please provide description.@
+    :param bin_ix: Array indices designating which events are in the time bin
+    of interest.
 
-    :type bin_ix: numpy.ndarray @CHASE - is this list or numpy.ndarray?@
+    :type bin_ix: numpy.ndarray
 
     :param events: Set of photon events to check if there is a low response.
 
@@ -836,13 +469,13 @@ def lowresponsewarning(bin_ix, events, verbose=0, ratio=0.7):
     :type verbose: int
 
     :param ratio: The value that defines a low response, between 0 and 1.
-    @CHASE - please refine, this is a response 'ratio', and if so, what is
-    the ratio?@
+    (Where a response value of 1 indicates a "perfect" response value w/ no
+    correction.)
 
     :type ratio: float
 
-    :returns: bool -- Returns True/False whether a given set of events have
-    a low response. @CHASE - please refine description.@
+    :returns: bool -- Returns True/False whether a given set of events contain
+    any on a low response region of the detector.
     """
 
     ix = np.where(events['photons']['response'][bin_ix] < 0.7)
@@ -853,11 +486,15 @@ def lowresponsewarning(bin_ix, events, verbose=0, ratio=0.7):
 # ------------------------------------------------------------------------------
 def exptimewarning(bin_ix, events, verbose=0, ratio=0.5):
     """
-    @CHASE - Please provide descriptor.@
+    Passes a warning if the effective exposure time within a bin is
+    significantly less than the raw exposure time, which might produce
+    anomalous values due to counting statistics or be a symptom of a problem
+    in the exposure time correction for this bin.
 
-    :param bin_ix: @CHASE - please provide description.@
+    :param bin_ix: Array indices designating which events are in the time bin
+    of interest.
 
-    :type bin_ix: numpy.ndarray @CHASE - is this list or numpy.ndarray?@
+    :type bin_ix: numpy.ndarray
 
     :param events: Set of photon events to check if there is an effective
     exposure time warning.
@@ -868,14 +505,12 @@ def exptimewarning(bin_ix, events, verbose=0, ratio=0.5):
 
     :type verbose: int
 
-    :param ratio: The value that defines an exposure time warning, between 0
-    and 1.
-    @CHASE - please refine, what is this a ratio of?@
+    :param ratio: The ratio of effective to raw exposure time in a bin below
+    which the bin will be flagged.
 
     :type ratio: float
 
-    :returns: bool -- Returns True/False whether a given set of events have
-    a low effective exposure time. @CHASE - please refine description.@
+    :returns: bool -- Returns True/False whether a bin has a low exposure.
     """
 
     return (events['exptime'][bin_ix]/
@@ -892,9 +527,10 @@ def nonlinearitywarning(band, bin_ix, events, verbose=0):
 
     :type band: str
 
-    :param bin_ix: @CHASE - please provide description.@
+    :param bin_ix: Array indices designating which events are in the time bin
+    of interest.
 
-    :type bin_ix: numpy.ndarray @CHASE - is this list or numpy.ndarray?@
+    :type bin_ix: numpy.ndarray
 
     :param events: Set of photon events to check if they are in the
     non-linearity regime.
@@ -919,11 +555,13 @@ def nonlinearitywarning(band, bin_ix, events, verbose=0):
 # ------------------------------------------------------------------------------
 def detedgewarning(bin_ix, events, verbose=0, valid_detrad=0.5):
     """
-    @CHASE - Please provide descriptor.@
+    Assigns warning flags if any of the events of interest are adjacent
+    to the detector edge as defined by a radius of valid_detrad in degrees.
 
-    :param bin_ix: @CHASE - please provide description.@
+    :param bin_ix: Array indices designating which events are in the time bin
+    of interest.
 
-    :type bin_ix: numpy.ndarray @CHASE - is this list or numpy.ndarray?@
+    :type bin_ix: numpy.ndarray
 
     :param events: Set of photon events to check if they are near the detector
     edge.
@@ -966,9 +604,10 @@ def getflags(band, bin_ix, events, verbose=0):
 
     :type band: str
 
-    :param bin_ix: @CHASE - please provide description.@
+    :param bin_ix: Array indices designating which events are in the time bin
+    of interest.
 
-    :type bin_ix: numpy.ndarray @CHASE - is this list or numpy.ndarray?@
+    :type bin_ix: numpy.ndarray
 
     :param events: Set of photon events to check for warning flags.
 
@@ -1010,44 +649,36 @@ def getflags(band, bin_ix, events, verbose=0):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
-             stepsz=None, verbose=0, detsize=1.25, coadd=False,
-             photonfile=None):
+def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
+             verbose=0, detsize=1.25, coadd=False):
     """
-    @CHASE - Please provide descriptor.@
+    Primary wrapper function for generating and synthesizing all of the
+    parameters and calculations necessary to create light curves.
 
     :param band: The band being used, either 'FUV' or 'NUV'.
 
     :type band: str
 
-    :param ra0: Right ascension, in degrees, of the center of the field-of-view.
-    @CHASE - confirm please.@
+    :param ra0: Right ascension, in degrees, of the target position.
 
     :type ra0: float
 
-    :param dec0: Declination, in degrees, of the center of the field-of-view.
-    @CHASE - confirm please.@
+    :param dec0: Declination, in degrees, of the target position.
 
     :type dec0: float
 
-    :param tranges: Set of time ranges to query within. @CHASE - GALEX time?@
+    :param tranges: Set of time ranges to query within in GALEX time seconds.
 
     :type tranges: list
 
-    :param radius: The photometric aperture, in degrees. @CHASE - Confirm
-    this is in degrees.@
+    :param radius: The radius of the  photometric aperture, in degrees.
 
     :type radius: float
 
-    :param annulus: Radius of the inner and outer annuli to define the
-    background with, in degrees. @CHASE - confirm units.@
+    :param annulus: Radii of the inner and outer extents of the background
+    annulus, in degrees.
 
     :type annulus: list
-
-    :param data: Set of photon events to use. @CHASE - Is this dict updated
-    within this method or sub-methods? Otherwise, why is it provided on input?@
-
-    :type data: dict
 
     :param stepsz: The size of the time bins to use, in seconds.
 
@@ -1063,11 +694,6 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
     from each time bin.
 
     :type coadd: bool
-
-    :param photonfile: Name of photon event CSV file to use. @CHASE - This is
-    not used in this method, it can be removed?@
-
-    :type photonfile: str
 
     :returns: dict -- The light curve, including input parameters.
     """
@@ -1202,52 +828,43 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, data={},
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
+def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
              trange=None, tranges=None, verbose=0, coadd=False, minexp=1.,
-             maxgap=1., photonfile=None, detsize=1.1):
+             maxgap=1., detsize=1.1):
     """
-    @CHASE - Please provide descriptor. Also, although maybe not worth
-    tacking now, this should probably be called 'get_curve' since the sibling
-    method is called 'write_curve'.@
+    Wraps quickmag() to make it ensure some proper parameter formatting and
+    therefore make it slightly more user friendly.
 
     :param band: The band being used, either 'FUV' or 'NUV'.
 
     :type band: str
 
-    :param ra0: Right ascension, in degrees, of the center of the field-of-view.
-    @CHASE - confirm please.@
+    :param ra0: Right ascension, in degrees, of the target position.
 
     :type ra0: float
 
-    :param dec0: Declination, in degrees, of the center of the field-of-view.
-    @CHASE - confirm please.@
-
+    :param dec0: Declination, in degrees, of the target position.
     :type dec0: float
 
-    :param radius: The photometric aperture, in degrees. @CHASE - Confirm
-    this is in degrees.@
+    :param radius: The radius of the photometric aperture, in degrees.
 
     :type radius: float
 
-    :param annulus: Radius of the inner and outer annuli to define the
-    background with, in degrees. @CHASE - confirm units.@
+    :param annulus: Radii of the inner and outer extents of the background
+    annulus, in degrees.
 
     :type annulus: list
 
-    :param stepsz: The size of the time bins to use, in seconds.
+    :param stepsz: The size (depth) of the time bins to use, in seconds.
 
     :type stepsz: float
 
-    :param lcurve: @CHASE - why is this passed as an argument?@
-
-    :type lcurve: dict
-
-    :param trange: Minimum and maximum time range to make a light curve.
-    @CHASE - assume this is in GALEX time?@
+    :param trange: Minimum and maximum time range to make a light curve,
+    in GALEX time seconds.
 
     :type trange: list
 
-    :param tranges: Set of time ranges to query within. @CHASE - GALEX time?@
+    :param tranges: Set of time ranges to query within in GALEX time seconds.
 
     :type tranges: list
 
@@ -1269,11 +886,6 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
     contiguous.
 
     :type maxgap: float
-
-    :param photonfile: Name of photon event CSV file to use. @CHASE - This is
-    not used in this method, it can be removed?@
-
-    :type photonfile: str
 
     :param detsize: Effective diameter, in degrees, of the field-of-view.
 
@@ -1308,26 +920,23 @@ def getcurve(band, ra0, dec0, radius, annulus=None, stepsz=None, lcurve={},
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                 stepsz=None, trange=None, tranges=None, verbose=0, coadd=False,
                 iocode='wb', detsize=1.1, overwrite=False, minexp=1., maxgap=1.,
-                photonfile=None, minimal_output=False):
+                minimal_output=False):
     """
-    @CHASE - Please provide descriptor.@
+    Generates a lightcurve and optionally writes the data to a CSV file.
 
     :param band: The band being used, either 'FUV' or 'NUV'.
 
     :type band: str
 
-    :param ra0: Right ascension, in degrees, of the center of the field-of-view.
-    @CHASE - confirm please.@
+    :param ra0: Right ascension, in degrees, of the target position.
 
     :type ra0: float
 
-    :param dec0: Declination, in degrees, of the center of the field-of-view.
-    @CHASE - confirm please.@
+    :param dec0: Declination, in degrees, of the target position.
 
     :type dec0: float
 
-    :param radius: The photometric aperture, in degrees. @CHASE - Confirm
-    this is in degrees.@
+    :param radius: The radius of the photometric aperture, in degrees.
 
     :type radius: float
 
@@ -1335,8 +944,8 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
 
     :type csvfile: str
 
-    :param annulus: Radius of the inner and outer annuli to define the
-    background with, in degrees. @CHASE - confirm units.@
+    :param annulus: Radii of the inner and outer extents of the background
+    annulus, in degrees.
 
     :type annulus: list
 
@@ -1344,12 +953,12 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
 
     :type stepsz: float
 
-    :param trange: Minimum and maximum time range to make a light curve.
-    @CHASE - assume this is in GALEX time?@
+    :param trange: Minimum and maximum timew within which to make a lightcurve,
+    in GALEX time seconds.
 
     :type trange: list
 
-    :param tranges: Set of time ranges to query within. @CHASE - GALEX time?@
+    :param tranges: Set of time ranges to query within in GALEX time seconds.
 
     :type tranges: list
 
@@ -1384,11 +993,6 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
 
     :type maxgap: float
 
-    :param photonfile: Name of photon event CSV file to use. @CHASE - This is
-    not used in this method or in 'getcurve', it can be removed?@
-
-    :type photonfile: str
-
     :param minimal_output: If True, produce an output file with a minimum
     number of columns.
 
@@ -1397,7 +1001,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
     :returns: dict -- The light curve, including input parameters.
     """
 
-    data = getcurve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
+    data = get_curve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
                     trange=trange, tranges=tranges, verbose=verbose,
                     coadd=coadd, minexp=minexp, maxgap=maxgap,
                     photonfile=photonfile, detsize=detsize)
