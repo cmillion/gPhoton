@@ -26,7 +26,7 @@ If you are a new user of the GALEX data or have not familiarized yourself with t
 
 The primary mission calibration paper (henceforth "the calibration paper") is also enlightening and thorough:
 
-    Morrissey, Patrick, et al. "The calibration and data products of GALEX." The Astrophysical Journal Supplement Series 173.2 (2007): 682.
+Morrissey, Patrick, et al. "The calibration and data products of GALEX." The Astrophysical Journal Supplement Series 173.2 (2007): 682.
 
 ###Installation Instructions
 The standalone tools are written exclusively in Python, a flexible and powerful interpreted programming and data exploration language that has been increasingly adopted in many fields of research and especially astronomy. The "installation" in this case refers to installing the required version of Python and the non-standard Python modules ("dependencies") called by the gPhoton software. For naive Python users, we suggest simply [downloading the Anaconda distribution](https://store.continuum.io/cshop/anaconda/) of Python which contains all of the required dependencies. For advanced users and developers, we suggest that you manage the dependencies yourself; the complete dependency list and suggested installation instructions are given under **Manual Package Management** below.

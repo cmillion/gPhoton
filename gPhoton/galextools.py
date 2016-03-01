@@ -240,7 +240,7 @@ def counts2mag(cps, band):
     :returns: float -- The converted flux in AB magnitudes.
     """
 
-    scale = zpmag(band)
+    scale = 18.82 if band == 'FUV' else 20.08
 
     with np.errstate(invalid='ignore'):
         mag = -2.5 * np.log10(cps) + scale
@@ -265,7 +265,7 @@ def mag2counts(mag, band):
     :returns: float -- The converted flux in counts per second.
     """
 
-    scale = zpmag(band)
+    scale = 18.82 if band == 'FUV' else 20.08
 
     return 10.**(-(mag-scale)/2.5)
 # ------------------------------------------------------------------------------

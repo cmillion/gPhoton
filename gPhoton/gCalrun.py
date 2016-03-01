@@ -91,8 +91,7 @@ def calrun(outfile, band, nsamples=10, seed=323, rarange=[0., 360.],
     """
 
     (ra, dec) = find_random_positions(rarange=rarange, decrange=decrange,
-                                      nsamples=nsamples, seed=seed,
-                                      radius=radius, annulus=annulus)
+                                      nsamples=nsamples, seed=seed)
 
     if verbose:
         print 'Running {n} random samples with seed of {seed}.'.format(

@@ -97,9 +97,9 @@ def model_errors(catmag, band, sigma=3., mode='mag', trange=[1, 1600]):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def data_errors(catmag, t, band, sigma=3., mode='mag'):
+def data_errors(catmag, band, t, sigma=3., mode='mag'):
     """
-    Given an array (of counts or mags), return an array of 1-sigma error values.
+    Given an array (of counts or mags), return an array of n-sigma error values.
 
     :param catmag: Nominal AB magnitude of the source.
 
