@@ -282,7 +282,8 @@ def mcat_objid_search(objid):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def exposure_ranges(band, ra0, dec0, t0=1, t1=10000000000000, detsize=1.25):
+def exposure_ranges(band, ra0, dec0, t0=1, t1=10000000000000, detsize=1.25,
+                    epsilon=0.001):
     """
     Returns a list of times (in one second increments) where data exists
     with an aspect solution within detsize of [ra0,dec0].
@@ -311,6 +312,10 @@ def exposure_ranges(band, ra0, dec0, t0=1, t1=10000000000000, detsize=1.25):
 
     :type detsize: float
 
+    :param epsilon: Buffer on t1 to avoid missing the end value in the search.
+
+    :type epsilon: float
+
     :returns: str -- The query to submit to the database.
     """
 
@@ -323,7 +328,7 @@ def exposure_ranges(band, ra0, dec0, t0=1, t1=10000000000000, detsize=1.25):
         'select distinct time from '+str(baseDB)+
         '.fGetNearbyAspectEq('+repr(float(ra0))+','+repr(float(dec0))+',(('+
         str(detsize)+'/2.0)*60.0),'+
-        str(long(t0*tscale))+','+str(long(t1*tscale))+')'
+        str(long(t0*tscale))+','+str(long((t1+epsilon)*tscale))+')'
         ' where band=\''+str(band)+'\' or band=\'FUV/NUV\' order by time'+
         str(formatURL))
 # ------------------------------------------------------------------------------
