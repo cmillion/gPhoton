@@ -106,9 +106,9 @@ def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
     if len(np.shape(trange)) == 2:
         trange = trange[0]
 
+    # Assembles sky positions on a grid within the targeted region.
     # [Future]: This is probably not an optimally efficient way to check an
     # entire region of sky for data, but it's not hugely dumb and does work...
-    # Assemble sky positions on a grid within the targeted region.
     skypos_list = [skypos]
     if skyrange:
         for r in np.linspace(skypos[0]-skyrange[0]/2.,
@@ -146,7 +146,7 @@ def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
 # ------------------------------------------------------------------------------
 def distinct_tranges(times, maxgap=1.):
     """
-    Produces a list of pairs of start / stop times delimiting distinct around
+    Produces a list of pairs of start / stop times delimiting distinct
     unique time ranges, given that gaps of >maxgap initiate a new time period.
 
     :param times: A set of time stamps to extract unique time ranges from.
