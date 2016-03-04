@@ -55,7 +55,7 @@ class TestGQueryFunctions(unittest.TestCase):
         self.assertEqual(gq.mcat_sources(self.NUV,self.ra0,self.dec0,self.radius,maglimit=self.maglimit),query)
 
     def test_exposure_ranges(self):
-        query = "https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select distinct time from GPFCore.dbo.fGetNearbyAspectEq(176.919525856,0.255696872807,((1.25/2.0)*60.0),766525332995,866526576995) where band='NUV' or band='FUV/NUV' order by time"+self.formatURL
+        query = "https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select distinct time from GPFCore.dbo.fGetNearbyAspectEq(176.919525856,0.255696872807,((1.25/2.0)*60.0),766525332995,866526576996) where band='NUV' or band='FUV/NUV' order by time"+self.formatURL
         self.assertEqual(gq.exposure_ranges(self.NUV,self.ra0,self.dec0,t0=self.t0,t1=self.t1,detsize=self.detsize),query)
 
     def test_exposure_range(self):
@@ -114,20 +114,11 @@ class TestGQueryFunctions(unittest.TestCase):
     def test_boxtimes(self):
         self.assertEqual(gq.boxtimes(self.NUV,self.t0,self.t1,self.xr,self.yr),'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select time from GPFCore.dbo.NUVPhotonsNULLV where time >= 766525332995 and time < 866526576995 and x >= 200 and x < 400 and y >= 300 and y < 500'+self.formatURL)
 
-    def test_centroid(self):
-        self.assertEqual(gq.centroid(self.NUV,self.ra0,self.dec0,self.t0,self.t1,self.radius),'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select avg(ra), avg(dec) from GPFCore.dbo.NUVPhotonsV where time >= 766525332995 and time < 866526576995 and ra >= 176.91552585600002 and ra < 176.923525856 and dec >= 0.251696872807 and dec < 0.259696872807'+self.formatURL)
-
     def test_allphotons(self):
         self.assertEqual(gq.allphotons(self.NUV,self.ra0,self.dec0,self.t0,self.t1,self.radius),'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select time,ra,dec,xi,eta,x,y from GPFCore.dbo.fGetNearbyObjEqNUVAllColumns(176.919525856,0.255696872807,0.004,766525332995,866526576995,0)'+self.formatURL)
 
     def test_shutter(self):
         self.assertEqual(gq.shutter(self.NUV,self.t0,self.t1),'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select shutter*0.05 from GPFCore.dbo.fGetNUVShutter(766525332995,866526576995)'+self.formatURL)
-
-    def test_shutdead(self):
-        self.assertEqual(gq.shutdead(self.NUV,self.t0,self.t1),'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=SELECT shutter*0.05 FROM GPFCore.dbo.fGetNUVShutter(766525332995,866526576995) AS time UNION ALL SELECT SUM(dt) * 0.0000057142857142857145 / (866526576.995-766525332.995) AS dead FROM(SELECT count(*) AS dt FROM GPFCore.dbo.NUVPhotonsNULLV WHERE time >= 766525332995 AND time < 866526576995 UNION ALL SELECT count(*) AS dt FROM GPFCore.dbo.NUVPhotonsV WHERE time >= 766525332995 AND time < 866526576995) x'+self.formatURL)
-
-    def test_exptime(self):
-        self.assertEqual(gq.exptime(self.NUV,self.t0,self.t1),'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select * from GPFCore.dbo.fGetNUVEffectiveExposureTime(766525332995,866526576995,1.0)'+self.formatURL)
 
     def test_aspect(self):
         self.assertEqual(gq.aspect(self.t0,self.t1),'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select eclipse, filename, time, ra, dec, twist, flag, ra0, dec0, twist0 from aspect where time >= 766525332995 and time < 866526576995 order by time'+self.formatURL)
@@ -137,9 +128,6 @@ class TestGQueryFunctions(unittest.TestCase):
 
     def test_box(self):
         self.assertEqual(gq.box(self.NUV,self.ra0,self.dec0,self.t0,self.t1,self.radius),'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select time,ra,dec from GPFCore.dbo.NUVPhotonsV where time >= 766525332995 and time < 866526576995 and ra >= 176.91552585600002 and ra < 176.923525856 and dec >= 0.251696872807 and dec < 0.259696872807 and flag=0'+self.formatURL)
-
-    def test_rect(self):
-        self.assertEqual(gq.rect(self.NUV,self.ra0,self.dec0,self.t0,self.t1,self.radius,self.radius),'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select time,ra,dec,xi,eta,x,y from GPFCore.dbo.fGetObjFromRectNUV(176.917525856,176.92152585600002,0.253696872807,0.257696872807,766525332995,866526576995,0)'+self.formatURL)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestGQueryFunctions)
 unittest.TextTestRunner(verbosity=2).run(suite)

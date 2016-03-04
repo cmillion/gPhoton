@@ -271,10 +271,6 @@ class TestArguments(unittest.TestCase):
         """Check the default value of --memlight (gMap)"""
         self.assertAlmostEqual(100.,gm.setup_parser().parse_args().memlight)
 
-    def test_response_default(self):
-        """Check the default value of --response (gMap)"""
-        self.assertIsNone(gm.setup_parser().parse_args().rrfile)
-
     def test_angle_propagate1(self):
         """Check that raangle and decangle propagate to skyrange (gMap)"""
         args = gm.check_args(gm.setup_parser().parse_args([

@@ -35,7 +35,7 @@ class TestRegression(unittest.TestCase):
         out = ga.gAperture(band='NUV',skypos=self.skypos,radius=self.radius)
         self.assertEqual(len(out['exptime']),6)
         # Regtest the exposure times
-        self.assertAlmostEqual(out['exptime'][0],101.31698158)
+        self.assertAlmostEqual(out['exptime'][0],102.20581306507783)
         self.assertAlmostEqual(out['exptime'][1],635.41801554)
         self.assertAlmostEqual(out['exptime'][2],357.71295862)
         self.assertAlmostEqual(out['exptime'][3],1102.06018543)
@@ -54,7 +54,7 @@ class TestRegression(unittest.TestCase):
         out = ga.gAperture(band='FUV',skypos=self.skypos,radius=self.radius)
         self.assertEqual(len(out['exptime']),3)
         # Regtest the exposure times
-        self.assertAlmostEqual(out['exptime'][0],1228.35811301)
+        self.assertAlmostEqual(out['exptime'][0],1229.3456407696663)
         self.assertAlmostEqual(out['exptime'][1],107.05101862)
         self.assertAlmostEqual(out['exptime'][2],913.1313701)
         # Regtest the magnitudes (no bg subtraction)
@@ -73,7 +73,7 @@ class TestRegression(unittest.TestCase):
             self.assertAlmostEqual(binsize,self.stepsz)
         # Check the magnitudes (no bg subtraction)
         for i,mag in enumerate(
-                               [ 17.19996981, 17.10094944, 16.99299101,
+                               [ 17.210879621281642, 17.10094944, 16.99299101,
                                  16.86953449, 16.58609703, 15.64080472,
                                  12.8843604,  12.60970683, 12.63479485,
                                  11.95780728, 12.2635085,  12.553789,
@@ -140,7 +140,7 @@ class TestRegression(unittest.TestCase):
             self.assertAlmostEqual(binsize,self.stepsz)
         # Check the magnitudes (no bg subtraction)
         for i,mag in enumerate(
-                               [ 18.87976244, 18.50287132, 18.57996131,
+                               [ 18.890681178506608, 18.50287132, 18.57996131,
                                  18.49695605, 18.07555158, 16.86195021,
                                  13.17351786, 13.04236207, 13.0682284,
                                  12.09391959, 12.64711125, 13.23408717,
@@ -208,7 +208,7 @@ class TestRegression(unittest.TestCase):
         # Exposure time of coadd must be sum of individual visits.
         self.assertEqual(sum(out2['exptime']), out['exptime'][0])
         # Check value of coadded magnitude.
-        self.assertAlmostEqual(out['mag'][0],14.06593323)
+        self.assertAlmostEqual(out['mag'][0],14.067056127080908)
         # Check that the uncertaintiy in the mag is less than the individual
         # visits.
         for x in out2['mag_err_1']:
@@ -229,7 +229,7 @@ class TestRegression(unittest.TestCase):
         # Exposure time of coadd must be sum of individual visits.
         self.assertEqual(sum(out2['exptime']), out['exptime'][0])
         # Check value of coadded magnitude.
-        self.assertAlmostEqual(out['mag'][0],14.14882565)
+        self.assertAlmostEqual(out['mag'][0],14.149826476039348)
         # Check that the uncertaintiy in the mag is less than the individual
         # visits.
         for x in out2['mag_err_1']:
