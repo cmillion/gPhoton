@@ -307,8 +307,8 @@ def local_nl_correction(mr,band):
     return 10**np.roots([C2,C1,C0-np.log10(MR)])[1]
 
 def deg2pix(skypos,skyrange,pixsz=0.000416666666666667):
-	"""Converts degrees to GALEX pixels rounded up to the nearest pixel
-	so that the number of degrees specified will fully fit into the frame.
+    """Converts degrees to GALEX pixels rounded up to the nearest pixel
+    so that the number of degrees specified will fully fit into the frame.
 
     :param skypos: The right ascension and declination, in degrees.
 
@@ -331,7 +331,7 @@ def deg2pix(skypos,skyrange,pixsz=0.000416666666666667):
     # >  array([ 0.,  1.])
     # > gt.deg2pix([0,0],[0,0])
     # >  array([ 1.,  0.])
-    wcs = pywcs.WCS(naxis=2) # NAXIS = 2
+    wcs = pywcs.WCS(naxis=2)
     wcs.wcs.cdelt = [pixsz, pixsz]
     wcs.wcs.ctype = ['RA---TAN', 'DEC--TAN']
 
