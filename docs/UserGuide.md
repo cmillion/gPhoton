@@ -221,12 +221,16 @@ For any command, you can always request more information be printed to the termi
 These flags are automatically set in software based upon conditions that we know to reproducibly generate misleading lightcurves. The flags are additive in binary, so it's possible to have more than one flag set at a time. They are defined as follows:
 
 1 - 'hotspot' - events in pixels contiguous to a hotspot masked region
-2 - 'mask edge' - events in pixels contiguous to the detector edge
-4 - 'exptime' - bin contains < 50% exposure time coverage
-8 - 'respose' - events weighted with response < 0.7
-16 - 'nonlinearity' - local countrate exceeds 10% response dropoff
-32 - 'detector edge' - events outside of 0.5 degrees of detector center
 
+2 - 'mask edge' - events in pixels contiguous to the detector edge
+
+4 - 'exptime' - bin contains < 50% exposure time coverage
+
+8 - 'respose' - events weighted with response < 0.7
+
+16 - 'nonlinearity' - local countrate exceeds 10% response dropoff
+
+32 - 'detector edge' - events outside of 0.5 degrees of detector center
 
 ####Calling from within the Python Interpreter
 You can also import and work with _gAperture_ and its modules from within the Python interpeter.
