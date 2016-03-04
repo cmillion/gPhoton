@@ -171,32 +171,62 @@ If you want to generate a light curve rather than an integrated value, pass the 
 For any command, you can always request more information be printed to the terminal by setting the `--verbose` or `-v` flag to a number between 1-3 (defualt is 0) where larger numbers indicate increasing levels of output. Setting `-v 3` will print out complete SQL commands and should really only be used for debugging.
 
 ####Lightcurve File Column Definitions
-**NOTE:** The column definitions for the .csv output from _gAperture_ are in flux. These are the column definitions as of the v1.23.0 build.
+**NOTE:** The column definitions for the .csv output from _gAperture_ are in flux. These are the column definitions as of the v1.27.0 build.
+**NOTE:** The columns are not necessarily written to the output file in the order given. Nor are the columns necessarily fixed in order at all. You should parse the lightcurve file on the column _name_ and not the column number.
+**NOTE:** Each row of the light curve file corresponds to a single time bin. So assume that every description below includes the implicit appendix of "within the time bin" unless stated otherwise.
+**NOTE:** All times ware in GALEX seconds. Positions are in degrees. Areas are in square degrees. Fluxes are in units of erg sec^-1 cm^-2 Å^-1.
 
-1. t0 - Start time of observation bin in GALEX seconds.
-2. t1 - End time of observation bin in GALEX seconds.
-3. exptime - Effect exposure time in seconds. (Note: This is corrected for dead time and shutter effects and so is not equal to t0-t1.)
-4. mag_bgsub_cheese - The calibrated AB magnitude within the bin using the "swiss cheese" background subtraction method where known MCAT sources are masked from the background annulus prior to surface flux estimation.
-5. t_mean - The mean timestamp of all photon data within the time bin, in GALEX seconds.
-6. t0_data - The minimum timestamp of data within the time bin, in GALEX seconds.
-7. t1_data - The maximum timestamp of data within the time bin, in GALEX seconds.
-8. cps - The counts per second within the aperture with no background subtraction.
-9. counts - The total number of counts within the aperture. (Within the time bin, and not background subtracted.)
-10. bg - The estimated number of counts within the aperture based upon the measured rates of counts within an unmasked annulus.
-11. mag - The AB magnitude of the source with no background subtraction.
-12. mag_bgsub - The AB magnitude of the source using the unmasked background subtraction.
-13. flux - The flux of the source with no background subtraction.
-14. flux_bgsub - The flux of the source using the unmasked annulus background subtraction.
-15. flux_bgsub_cheese - The flux of the source using the swiss cheese background subtraction.
-16. bg_cheese - The estimated number of background counts in the aperture based upon the background measured using the swiss cheese method.
-17. detx - The mean detector x pixel position of all events within the aperture and time bin, assuming an 800 x 800 pixel FoV (identical to the dimensions of the flat).
-18. dety - The mean detector y pixel position of all events within the aperture and time bin, assuming an 800 x 800 pixel FoV.
-19. detrad - The mean cartesian pixel distance of all events within the aperture and time bin from the center of the detector FoV, assuming an 800 x 800 pixel FoV. Observations near the detector edge (detrad ~=400) should be treated with caution.
-20. response - The mean response (flat) value assigned to all events within the aperture and time bin. Observations with a low response (~< 80) should be treated with caution.
+1. flat_counts - The sum over all flat-corrected counts within the aperture.
+2. mcat_bg - Estimated background brightness as pulled from the visit-level MCAT and scaled to the area of the aperture.
+3. bg_counts - Raw number of counts within the background annulus.
+4. flux_bgsub_err - Estimated 1-sigma error in `flux_bgsub` value.
+5. cps_mcatbgsub - Countrate within the aperture, corrected for background using the visit-level MCAT background estimates.
+6. counts - Total number of uncorrected counts within the photometric aperture.
+7. mag_mcatbgsub - AB Magnitude within the aperture, corrected for background using the visit-level MCAT background estimates.
+8. cps_err - Estimated background in the countrate within the aperture, assuming no contribution from background. (i.e. sqrt(n))
+9. mag_bgsub - AB Magnitude within the aperture, corrected by the background estimated from the annulus.
+10. cps_bgsub - Countrate within the aperture, corrected by the background estimated from the annulus.
+11. detys - Mean detector Y position of events within the aperture.
+12. flux_bgsub - Flux within the aperture, corrected by the background estimated from the annulus.
+13. flux_err - Estimated 1-sigma error in `flux` value.
+14. mag_err_1 - Estimated upper 1-sigma error in `mag` value.
+15. cps_bgsub_err - Estimated 1-sigma error in `cps_bgsub` value.
+16. t1_data - Final timestamp of events within the aperture.
+17. bg - Contribution of background, as estimated from the annulus and scaled to the area of the aperture.
+18. responses - Mean value of the flat assigned to events within the aperture.
+19. t_mean - Mean timestamp of events within the aperture.
+20. cps_mcatbgsub_err - Estimated 1-sigma error on `cps_mcatbgsub` value.
+21. mag_bgsub_err_1 - Estimated upper 1-sigma error on `mag_bgsub` value.
+22. mag_err_2 - Estimated lower 1-sigma error on `mag` value.
+23. t0_data - Earliest timestamp of events within the aperture.
+24. racent - Mean right ascension of events within the aperture.
+25. deccent - Mean declination of events within the aperture.
+26. mag - AB Magnitude within the aperture, uncorrected for background.
+27. exptime - Estimated effective exposure time (correct for dead time and shutter).
+28. bg_flat_counts - Total of flat-corrected counts within the background annulus.
+29. detxs - Mean detector X position of all events within the aperture.
+30. t0 - Lower time delimiting the bin.
+31. t1 - Upper time delimiting the bin.
+32. mag_mcatbgsub_err_2 - Estimated lower 1-sigma error on `mag_mcatbgsub` value.
+33. flux - Flux witin the aperture, uncorrected for background.
+34. mag_mcatbgsub_err_1 - Estimated upper 1-sigma error on `mag_mcatbgsub` value.
+35. flags - Automatically generated gAperture quality flag. Bins with a flag that is non-zero should not be naively trusted. See flag definitions below for more information.
+36. mag_bgsub_err_2 - Estimated lower 1-sigma error on `mag_bgsub`.
+37. detrad - Mean detector radius (distance from detector center) for events within the aperture.
+38. cps - Countrate within the aperture, uncorrected for background.
+39. flux_mcatbgsub_err - Estimated 1-sigma error on `flux_mcatbgsub` value.
+40. flux_mcatbgsub - Flux within the aperture, corrected for background using the visit-level MCAT values.
 
-**Note on the column naming convention:** The _bgsub suffix in a column definition means that the value is background subtracted using an estimate based on an unmasked annulus. The _bgsub_cheese suffix means that the value is background subtracted using an estimate based on a "swiss cheese" style mask of the annulus. Column names which don't have these suffixes do not contain background corrected.
+#####Flag Column Definitions
+These flags are automatically set in software based upon conditions that we know to reproducibly generate misleading lightcurves. The flags are additive in binary, so it's possible to have more than one flag set at a time. They are defined as follows:
 
-**What does "treated with caution" mean?** The photon level data has been so little explored that we're still in the process of identifying pitfalls and gotchas but, in general, it has been our experience that if your source brightness correlates as a function of time with something that it _should not_ (like detector position, response, or effect exposure depth), then something is probably wrong. It's also a good idea to make a gMap movie of variable sources to sanity check them by eye, and also to generate the light curve at two or more time bins that are not integer multiples (to tease out aliasing).
+1 - 'hotspot' - events in pixels contiguous to a hotspot masked region
+2 - 'mask edge' - events in pixels contiguous to the detector edge
+4 - 'exptime' - bin contains < 50% exposure time coverage
+8 - 'respose' - events weighted with response < 0.7
+16 - 'nonlinearity' - local countrate exceeds 10% response dropoff
+32 - 'detector edge' - events outside of 0.5 degrees of detector center
+
 
 ####Calling from within the Python Interpreter
 You can also import and work with _gAperture_ and its modules from within the Python interpeter.
@@ -205,7 +235,7 @@ You can also import and work with _gAperture_ and its modules from within the Py
 
 ###gMap.py
 
-**NOTE: As of v1.26.0, gMap does not apply any exposure time correction. The images (including intensity) should be used for sanity and assessment purposes, but not photometric analysis.**
+**NOTE: As of v1.26.0, gMap does not apply any exposure time correction. The images (including intensity) should be used for assessment purposes, but not photometric analysis.**
 
 _gMap_ is the image creation tool. It can generate integrated count, intensity, and response (equivalent to GALEX _cnt_, _int_ and _rrhr_) maps of arbitrary size<sup>+</sup>, shape and depth, including coadds across epochs and survey designation. It can also create "movie" (time-binned, multi-plane) versions of such maps. _(Note that in v1.23.0, image creation is quite slow because it uses an older method of interpolating the response map from the flat rather than the new and faster method used by gAperture of weighting the photons directly by the flat. This will be fixed in v1.24.0)_
 
@@ -309,7 +339,7 @@ These are the definitions of various values of the _flag_ column in the gPhoton 
 15. _N/A_
 
 ##Common Questions, Issues, and Gotchas
-1. **"My data is not available!"** You can verify that data for your desired target does or does not exist in the database and present by using the `gFind` commands described above. If data for your target is not available, there are two possible explanations: (1) we have not yet loaded those observations into the photon database, or (2) that target was never observed by the GALEX mission. As of this writing, we have only loaded about 5% of the total GALEX corpus into the photon database. You can confirm that your target was, indeed, observed by GALEX by searching for it in the [GALEX Catalog](http://galex.stsci.edu/GR6/?page=mastform). If your target was, indeed, observed by GALEX but has not yet been loaded into the gPhoton database, please contact Chase Million (chase.million@gmail.com) and Bernie Shiao (shiao@stsci.edu) with your target coordinates, and we will try to prioritize the associated data.
+1. **"My data is not available!"** You can verify that data for your desired target does or does not exist in the database and present by using the `gFind` commands described above. If data for your target is not available, there are two possible explanations: (1) we have not yet loaded those observations into the photon database, or (2) that target was never observed by the GALEX mission. As of this writing, we have loaded all direct imaging data up through the GR6/7 release, which corresponds to the end of the NASA-funded mission and beginning of the CAUSE phase. You can confirm that your target was, indeed, observed by GALEX by searching for it in the [GALEX Catalog](http://galex.stsci.edu/GR6/?page=mastform).
 2. **Exposure Time.** (Or **"Why isn't the exposure time equal to the bin width?"**) When calculating the exposure time of a GALEX observation, one cannot simply subtract the end time from the start time. This _raw exposure time_ (t<sub>raw</sub>) must be adjusted into an _effective exposure time_ (t<sub>eff</sub>) which takes into account certain microchannel plate detector properties. In particular, the raw exposure time must be adjusted by both the _shutter_ (t<sub>shut</sub>) and the _deadtime ratio_ such that: t<sub>eff</sub> = (t<sub>raw</sub> - t<sub>shut</sub>) x deadtime. In general, you can expect t<sub>eff</sub> ~= 0.8 * t<sub>raw</sub>, though the actual ratio varies wildly as a function of field brightness and the intersection of bin boundary times with observation time ranges.
     * **Shutter Correction.** GALEX did not observe all parts of the sky at all times. Even when GALEX was observing a particular part of the sky, there were times when little or no usable data was actually recorded. Data for specific targets or time ranges might exist but still be (practically) unusable for a variety for a variety of reasons which may include (1) that the spacecraft was not observing at nominal high voltage ("HVNOM"), (2) the spacecraft was observing a different part of the sky or in spectroscopic ("grism") mode, (3) a valid aspect solution could not be reconstructed from the available data (perhaps due to too few detectable reference stars), or (4) there was a temporary gap in the data due to a spacecraft or data transmission
     anomaly. The _shutter correction_ accounts for these gaps by conceptualizing a "virtual shutter" that is considered closed whenever a gap of 0.05 seconds occurs in the data covering a particular source (as determined by boresight center and detector width) and within a particular time range. The integrated time of all such 0.05 second gaps in any given time range (t<sub>shut</sub>) is subtracted from t<sub>raw</sub>.
