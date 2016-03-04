@@ -1,17 +1,23 @@
-virtualenv:
-  system_site_packages: true
+sudo: false
 language: python
 python:
   - "2.7"
-virtualenv:
-  system_site_packages: true
 before_install:
-  sudo apt-get install -qq python-numpy python-scipy
-# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
+  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - conda update --yes conda
+  # The next couple lines fix a crash with multiprocessing on Travis and are not specific to using Miniconda
+  #- sudo rm -rf /dev/shm
+  #- sudo ln -s /run/shm /dev/shm
 install:
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy scipy matplotlib nose pandas
+  # Coverage packages are on my binstar channel
+  - conda install --yes -c dan_blanchard python-coveralls nose-cov
+  #- pip install numpy
   - pip install requests
   - pip install astropy
-  - pip install pandas
+  #- pip install pandas
 # command to run tests, e.g. python setup.py test
 script:
   - cd gPhoton

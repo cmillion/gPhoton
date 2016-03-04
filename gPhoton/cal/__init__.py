@@ -1,4 +1,5 @@
 import os as _os
+import numpy as np
 from .. import cal_dir
 from ..MCUtils import get_fits_data, get_fits_header, get_tbl_data
 
@@ -52,9 +53,21 @@ def linearity(band,xy):
             b=check_band(band),d=check_xy(xy))
     return read_data(fn)
 
-def flat(band):
+def addbuffer(fn):
+# Adds a 1 pixel buffer around all masked (==0) regions of a map.
+    m,h = read_data(fn)
+    ix = np.where(m==0)
+    for i in range(-1,2):
+        for j in range(-1,2):
+            try:
+                m[ix[0]+i,ix[1]+j]=0
+            except IndexError:
+                continue
+    return m,h
+
+def flat(band,buffer=False):
     fn = '{b}_flat.fits'.format(b=check_band(band))
-    return read_data(fn)
+    return addbuffer(fn) if buffer else read_data(fn)
 
 def distortion(band,xy,eclipse,raw_stimsep):
     index = ''
@@ -74,6 +87,6 @@ def offset(xy):
     fn = 'fuv_d{d}_fdttdc_coef_0.tbl'.format(d=check_xy(xy))
     return read_data(fn)
 
-def mask(band):
+def mask(band,buffer=False):
     fn = '{b}_mask.fits'.format(b=check_band(band))
-    return read_data(fn)
+    return addbuffer(fn) if buffer else read_data(fn)
