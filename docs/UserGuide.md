@@ -172,8 +172,11 @@ For any command, you can always request more information be printed to the termi
 
 ####Lightcurve File Column Definitions
 **NOTE:** The column definitions for the .csv output from _gAperture_ are in flux. These are the column definitions as of the v1.27.0 build.
+
 **NOTE:** The columns are not necessarily written to the output file in the order given. Nor are the columns necessarily fixed in order at all. You should parse the lightcurve file on the column _name_ and not the column number.
+
 **NOTE:** Each row of the light curve file corresponds to a single time bin. So assume that every description below includes the implicit appendix of "within the time bin" unless stated otherwise.
+
 **NOTE:** All times ware in GALEX seconds. Positions are in degrees. Areas are in square degrees. Fluxes are in units of erg sec^-1 cm^-2 Å^-1.
 
 1. flat_counts - The sum over all flat-corrected counts within the aperture.
