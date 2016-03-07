@@ -49,7 +49,7 @@ Advanced users and developers will want more control over their installation and
 Note: If you want to run the command line scripts (`gMap`, `gAperture`, `gFind`, and `gPipeline`) from your github checkout, you'll need to move them into the correct directory relative to the main module. They currently reside in the _bin_ directory directly under the repo (from which the PyPI installation puts them into _/usr/bin/_). You should copy them to the top level directory (which contains _gPhoton_, _docs_, etc.) and run them as scripts from there. (Running the scripts straight from _bin_ will result in an error like "ValueError: Attempted relative import beyond toplevel package")
 
 #####Managing dependencies
-You will need to install _python2.7_, _numpy_, _scipy_, _astropy_, _requests_ and _pandas_. The recommended commands for doing this appear below under the appropriate operating system.
+You will need to install _python2.7_, _numpy_, _scipy_, _astropy_, _requests_ (>=v2.4.0) and _pandas_. The recommended commands for doing this appear below under the appropriate operating system.
 
 The best specific tools for package installation and management shift rapidly. We'll try to keep this section up to date. If anything suggested here is actually _broken_, please let us know.
 
