@@ -314,11 +314,11 @@ Again, if you do not specify `-a` at all, then the software will query the aspec
 The column definitions for the .csv file output by gPhoton.py are as follows.
 
 1. _t_ - time of the event (in "GALEX Time" = "UNIX Time" - 315964800)
-2. _x_ - detector x position
-3. _y_ - detector y position
-4. _xa_ - (if you don't already know, it's not important)
-5. _ya_ - (ditto)
-6. _q_ - (also ditto)
+2. _x_ - event detector x position
+3. _y_ - event detector y position
+4. _xa_ - wiggle (the phase of the TAC)
+5. _ya_ - derived value from xa needed for post-CSP corrections
+6. _q_ - detected pulse height
 7. _xi_ - aspect corrected detector position
 8. _eta_ - aspect corrected detector position
 9. _ra_ - aspect corrected right ascension of the event (decimal degrees)
