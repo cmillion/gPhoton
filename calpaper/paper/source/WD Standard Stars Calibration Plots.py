@@ -147,7 +147,7 @@ for i,band in enumerate(data.keys()):
     plt.tick_params(axis='both', which='major', labelsize=12)
     plt.savefig('{path}/{target}_ABMag_dist.pdf'.format(path=outpath,
                 target=target,b=band),format='pdf',dpi=1000,bbox_inches='tight')
-    plt.close()
+plt.close()
 
 # Overplot MCAT photometry of LDS749B on the reference magnitude and
 # modeled 3-sigma error bounds as a function of exposure time.
@@ -220,4 +220,4 @@ for i,band in enumerate(data.keys()):
     plt.legend(loc=2,fontsize=14)
     plt.savefig('{path}/{target}_ABMag_dist_MCAT.pdf'.format(path=outpath,
                 target=target,b=band),format='pdf',dpi=1000,bbox_inches='tight')
-    plt.close()
+plt.close()

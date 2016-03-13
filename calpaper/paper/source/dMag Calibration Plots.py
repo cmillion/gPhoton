@@ -11,16 +11,18 @@ take a while to run (like a few days).
 """
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plot
 
 from gPhoton.regtestutils import datamaker
 import gPhoton.galextools as gt
 import gPhoton.MCUtils as mc
-import pandas as pd
 import gPhoton.gphoton_utils as gu
 import gPhoton.gFind
-import numpy as np
 import matplotlib.pyplot as plt
+
+import astropy.coordinates as coord
+import astropy.units as u
 
 from sklearn.neighbors import KernelDensity
 from sklearn.grid_search import GridSearchCV
@@ -39,14 +41,30 @@ data = {}
 for band in bands:
     filename = '{path}/{base}{band}.csv'.format(path=inpath,base=base,band=band)
     print filename
-    data[band] = pd.read_csv(filename)
+    data[band] = pd.read_csv(filename).sample(
+                        10000 if band is 'FUV' else 20000,random_state=23)
     print '{band} sources: {cnt}'.format(
                                 band=band,cnt=data[band]['objid'].shape[0])
+
+# Generate a plot of the distribution of sources on the sky
+fig = plt.figure(figsize=(16,6))
+for i, band in enumerate(['FUV','NUV']):
+    ra = coord.Angle(np.array(data[band]['ra'])*u.degree)
+    ra = ra.wrap_at(180*u.degree)
+    dec = coord.Angle(np.array(data[band]['dec'])*u.degree)
+    plt.subplot(2,1,i+1,projection="mollweide")
+    plt.plot(ra.radian, dec.radian,'.',color='k')
+    plt.title('{b} Source Positions'.format(b=band))
+    plt.grid(True)
+fig.savefig('{path}/dMag_mollwwide.pdf'.format(path=outpath),format='pdf',
+                                                dpi=1000,bbox_inches='tight')
+plt.close()
 
 def make_kde(data,datarange,bwrange=[0.01,1]):
     # A function for producing Kernel Density Estimates
     # Based on code from:
     #   https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
+    print 'Building KDE.'
     grid = GridSearchCV(KernelDensity(),
         {'bandwidth': np.linspace(bwrange[0],bwrange[1],100)},cv=20,n_jobs=4)
     grid.fit(data[:, None])
@@ -84,9 +102,10 @@ for band in bands:
         plt.tick_params(axis='both', which='major', labelsize=12)
         plt.xlim([14,24])
         plt.ylim(dmagrange)
+        # Compute moving median value in 1-mag bins
         for i,m in enumerate(magrange[:-1]):
             mix = ((data[band]['flags']==0) & (data[band]['aper4']>=m) &
-                (data[band]['aper4']<m+1))
+                (data[band]['aper4']<m+1) & np.isfinite(dmag[bgmode]))
             magmedian[i]=dmag[bgmode][mix].median()
         plt.plot(data[band]['aper4'][ix],dmag[bgmode][ix],'.',color='k',
             alpha=0.1 if band is 'FUV' else 0.05)
@@ -106,12 +125,12 @@ for band in bands:
         plt.plot(y,x) # Flipped to cheat the horizontal rotation
         plt.axhline(peak, color='k', linestyle='dotted', linewidth=2,
             label='KDE Peak: {p}'.format(p='{0:.2f}'.format(round(peak,2))))
-        plt.axhline(np.median(dmag[bgmode][ix]), color='r', linestyle='dashed',
-            linewidth=4,
-            label='Median: {m}'.format(m=round(np.median(dmag[bgmode][ix]),2)))
+        plt.axhline(dmag[bgmode][ix].median(),
+            color='r', linestyle='dashed',linewidth=4,
+            label='Median: {m}'.format(m=round(
+                dmag[bgmode][ix].median(),2)))
         plt.text(0.5, -0.7, '50% of data within {pm}{p90}'.format(pm=r'$\pm$',
-            p90=round(np.percentile(np.abs(np.array(
-            dmag[bgmode][ix]))[np.where(np.isfinite(dmag[bgmode][ix]))],50),2)),
+            p90=round(np.percentile(np.abs(np.array(dmag[bgmode][ix])),50),2)),
             fontsize=15)
         plt.legend(fontsize=14)
         fig.savefig('{path}/FigRelPhot{band}-{bg}_bg.pdf'.format(path=outpath,
@@ -136,9 +155,9 @@ for i,band in enumerate(bands):
     plt.hist(delta[ix],bins=bincnt,range=dmagrange,color='k',histtype='step',
         normed=1)
     x,y,peak,bandwidth = make_kde(delta[ix],dmagrange)
-    print '{b}: peak={p} +/- {p90} ({bw})'.format(b=band,p=peak,bw=bandwidth,
-        p90=np.percentile(np.abs(np.array(
-        delta[ix]))[np.where(np.isfinite(dmag[bgmode][ix]))],90))
+    #print '{b}: peak={p} +/- {p90} ({bw})'.format(b=band,p=peak,bw=bandwidth,
+    #    p90=np.percentile(np.abs(np.array(
+    #    delta[ix]))[np.where(np.isfinite(np.array(dmag[bgmode])[ix]))],90))
     plt.plot(x,y)
     plt.axvline(peak, color='k', linestyle='dotted', linewidth=2,
         label='KDE Peak: {p}'.format(p=round(peak,2)))
