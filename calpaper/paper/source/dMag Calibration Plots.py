@@ -130,7 +130,9 @@ for band in bands:
             label='Median: {m}'.format(m=round(
                 dmag[bgmode][ix].median(),2)))
         plt.text(0.5, -0.7, '50% of data within {pm}{p90}'.format(pm=r'$\pm$',
-            p90=round(np.percentile(np.abs(np.array(dmag[bgmode][ix])),50),2)),
+            p90=round(np.percentile(np.abs(np.array(
+                dmag[bgmode][ix]))[np.where(
+                                np.isfinite(dmag[bgmode][ix]))],50),2)),
             fontsize=15)
         plt.legend(fontsize=14)
         fig.savefig('{path}/FigRelPhot{band}-{bg}_bg.pdf'.format(path=outpath,
