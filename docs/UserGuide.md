@@ -1,4 +1,4 @@
-**User Documentation for the MAST/GALEX Photon Database and Tools**
+**User Documentation for gPhoton, the MAST/GALEX Photon Database and Tools**
 
 Chase Million<sup>1</sup>, Bernie Shiao<sup>2</sup>, Scott Fleming<sup>2</sup>,
 Myron Smith<sup>2</sup>
