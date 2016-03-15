@@ -113,7 +113,7 @@ print y.min(),y.max(),yerr.min(),yerr.max()
 # plt.show()
 
 # Build a linear mixture model. Run MCMC on it.
-# Based on [example by DFM].
+# Based on http://dan.iel.fm/emcee/current/user/line/
 # Define the probabilistic model...
 def lnprior(p,bounds):
     # We'll just put reasonable uniform priors on all the parameters.
@@ -291,7 +291,7 @@ print y.min(),y.max(),yerr.min(),yerr.max()
 # plt.show()
 
 # Build a linear mixture model. Run MCMC on it.
-# Based on [example by DFM].
+# Based on http://dan.iel.fm/emcee/current/user/line/
 # Define the probabilistic model...
 def lnprior(p,bounds):
     # We'll just put reasonable uniform priors on all the parameters.

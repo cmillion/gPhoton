@@ -46,20 +46,6 @@ for band in bands:
     print '{band} sources: {cnt}'.format(
                                 band=band,cnt=data[band]['objid'].shape[0])
 
-# Generate a plot of the distribution of sources on the sky
-fig = plt.figure(figsize=(16,6))
-for i, band in enumerate(['FUV','NUV']):
-    ra = coord.Angle(np.array(data[band]['ra'])*u.degree)
-    ra = ra.wrap_at(180*u.degree)
-    dec = coord.Angle(np.array(data[band]['dec'])*u.degree)
-    plt.subplot(2,1,i+1,projection="mollweide")
-    plt.plot(ra.radian, dec.radian,'.',color='k')
-    plt.title('{b} Source Positions'.format(b=band))
-    plt.grid(True)
-fig.savefig('{path}/dMag_mollwwide.pdf'.format(path=outpath),format='pdf',
-                                                dpi=1000,bbox_inches='tight')
-plt.close()
-
 def make_kde(data,datarange,bwrange=[0.01,1]):
     # A function for producing Kernel Density Estimates
     # Based on code from:
