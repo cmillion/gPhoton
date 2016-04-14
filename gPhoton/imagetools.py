@@ -203,7 +203,7 @@ def makemap(band, skypos, trange, skyrange, response=False, verbose=0,
 
     :type detsize: float
 
-    :returns: numpy.ndarray - The bi-dimensional histogram of x and y.
+    :returns: numpy.ndarray - The bi-dimensional histogram of ra and dec.
     """
 
     imsz = gxt.deg2pix(skypos, skyrange)
@@ -310,9 +310,9 @@ def integrate_map(band, skypos, tranges, skyrange, verbose=0, memlight=None,
         step = memlight if memlight else trange[1]-trange[0]
 
         for i in np.arange(trange[0], trange[1], step):
-            t0, t1 = i, i+step
+            t0, t1 = i, i+step if i+step<=trange[1] else trange[1]
             if verbose:
-                mc.print_inline('Coadding '+str(t0)+' to '+str(t1))
+                mc.print_inline('Processing '+str(t0)+' to '+str(t1))
             img += makemap(band, skypos, [t0, t1], skyrange, response=response,
                            verbose=verbose, detsize=detsize)
 
