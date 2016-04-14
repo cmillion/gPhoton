@@ -13,7 +13,7 @@ from galextools import isPostCSP
 from gPhoton import time_id
 
 # ------------------------------------------------------------------------------
-# Time in the database is "integer-ized" by multiplying by this
+# To save space, times in the database are "integer-ized" by multiplying by 1000
 tscale = 1000.
 
 # The following three global variables are used in constructing a properly
@@ -74,6 +74,12 @@ def getValue(query, verbose=0, retries=100):
     if out is not None:
         try:
             out = float(out.json()['data']['Tables'][0]['Rows'][0][0])
+        except ValueError:
+            try:
+                out = str(out.json()['data']['Tables'][0]['Rows'][0][0])
+            except:
+                print 'Failed: {q}'.format(q=query)
+                raise
         except:
             print 'Failed: {q}'.format(q=query)
             raise
@@ -189,7 +195,7 @@ def obstype(objid):
     """
     Get the dither pattern type based on the object id.
 
-    :param objid: The MCAT Object ID to return the observation type from.
+    :param objid: The MCAT Object ID to return the observation type data from.
 
     :type objid: long
 
@@ -217,7 +223,9 @@ def mcat_visit_sources(ra0, dec0, radius):
     [11,NUV_expt],[12:18,FUV_mag_aper_1:7],[19:25,NUV_mag_aper_1:7],
     [26:32,FUV_magerr_aper_1:7],[33:39,NUV_magerr_aper_1:7],[40,Nobssecs],
     [41,Fobssecs],[42,NUV_artifact],[43,FUV_artifact],[44,FUV_obstart],
-    [45,FUV_obsend],[46,NUV_obstart],[47,NUV_obsend]
+    [45,FUV_obsend],[46,NUV_obstart],[47,NUV_obsend],
+    [48,FUV_ALPHA_J2000],[49,FUV_DELTA_J2000],
+    [50,NUV_ALPHA_J2000],[51,NUV_DELTA_J2000]
 
     :param ra0: The right ascension, in degrees, around which to search.
 
@@ -248,7 +256,9 @@ def mcat_visit_sources(ra0, dec0, radius):
         " nuv_magerr_aper_3, nuv_magerr_aper_4, nuv_magerr_aper_5,"
         " nuv_magerr_aper_6, nuv_magerr_aper_7, nobssecs, fobssecs,"
         " nuv_artifact, fuv_artifact, vpe.fexpstar, vpe.fexpend,"
-        " vpe.nexpstar, vpe.nexpend from {MCATDB}.visitphotoobjall as vpo"
+        " vpe.nexpstar, vpe.nexpend, FUV_ALPHA_J2000, FUV_DELTA_J2000,"
+        " NUV_ALPHA_J2000, NUV_DELTA_J2000"
+        " from {MCATDB}.visitphotoobjall as vpo"
         " inner join {MCATDB}.visitphotoextract as vpe on"
         " vpo.photoextractid=vpe.photoextractid inner join"
         " {MCATDB}.fGetNearbyVisitObjEq({ra0},{dec0},{radius}) as nb on"
@@ -264,7 +274,7 @@ def mcat_objid_search(objid):
     Return a bunch of observation data for a visit level objid (ggoid).
     Doing the same for coadd level data is not yet supported.
 
-    :param objid: The MCAT Object ID to return the observation type from.
+    :param objid: The MCAT Object ID to return the observation data from.
 
     :type objid: long
 
@@ -939,13 +949,15 @@ def allphotons(band, ra0, dec0, t0, t1, radius, flag=0):
     :type radius: float
 
     :param flag: Only return times with this flag value. Zero is nominal.
+    NOTE: 'Flag' is not a reliable way to parse data at this time. You
+    should compare event timestamps against the aspect file.
 
     :type flag: int
 
     :returns: str -- The query to submit to the database.
     """
 
-    return ('{baseURL}select time,ra,dec,xi,eta,x,y from '
+    return ('{baseURL}select time,ra,dec,xi,eta,x,y,flag from '
             '{baseDB}.fGetNearbyObjEq{band}AllColumns({ra0},{dec0},{radius},'
             '{t0},{t1},{flag}){formatURL}').format(
                 baseURL=baseURL, baseDB=baseDB, band=band, ra0=repr(float(ra0)),
