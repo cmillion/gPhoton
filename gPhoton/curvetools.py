@@ -212,7 +212,8 @@ def read_photons(photonfile, ra0, dec0, tranges, radius, verbose=0,
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0):
+def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
+                  detsize=1.25):
     """
     Retrieve photons within an aperture from the database.
 
@@ -243,14 +244,16 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0):
     :type verbose: int
 
     :param flag: Photon list flag value upon which to select. Default of 0
-    corresponds to nominally corrected data with no issues.
+    corresponds to nominally corrected data with no issues. NOTE: 'Flag' is
+    not a reliable way to parse data at this time. You should compare
+    timestamps against the aspect file.
 
     :type flag: int
 
     :returns: dict -- The set of photon events with their properties.
     """
 
-    # [Future]: This should be moved to 'dbasetools'.
+    # [Future]: This should probably be moved to 'dbasetools'.
     stream = []
     if verbose:
         print "Retrieving photons within {rad} degrees of [{r}, {d}]".format(
@@ -259,14 +262,20 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0):
         if verbose:
             mc.print_inline(" and between {t0} and {t1}.".format(t0=trange[0],
                                                                  t1=trange[1]))
-        thisstream = gQuery.getArray(
-            gQuery.allphotons(band, ra0, dec0, trange[0], trange[1], radius,
-                              flag=flag), verbose=verbose, retries=100)
-        stream.extend(thisstream)
+
+        # [Future]: This call to fGetTimeRanges prevents the downloading of
+        # events with bad aspect solutions which currently have incorrect
+        # quality flags (of zero) in the photon database.
+        trs = dbt.fGetTimeRanges(band,[ra0,dec0],trange=trange,detsize=detsize)
+        for tr in trs:
+            thisstream = gQuery.getArray(
+                gQuery.allphotons(band, ra0, dec0, tr[0], tr[1], radius,
+                                flag=flag), verbose=verbose, retries=100)
+            stream.extend(thisstream)
 
     stream = np.array(stream, 'f8').T
-    colnames = ['t', 'ra', 'dec', 'xi', 'eta', 'x', 'y']
-    dtypes = ['f8', 'f8', 'f8', 'f4', 'f4', 'f4', 'f4']
+    colnames = ['t', 'ra', 'dec', 'xi', 'eta', 'x', 'y', 'flag']
+    dtypes = ['f8', 'f8', 'f8', 'f4', 'f4', 'f4', 'f4', 'i4']
     cols = map(np.asarray, stream, dtypes)
 
     events = dict(zip(colnames, cols))
@@ -279,7 +288,7 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0):
 
 # ------------------------------------------------------------------------------
 def pullphotons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
-                photonfile=None):
+                photonfile=None, detsize=1.25):
     """
     Reads photon list data from the MAST database using a cone search.
 
@@ -314,7 +323,9 @@ def pullphotons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
     :type photonfile: str
 
     :param flag: Photon list flag value upon which to select. Default of 0
-    corresponds to nominally corrected data with no issues.
+    corresponds to nominally corrected data with no issues. NOTE: 'Flag' is
+    not a reliable way to parse data at this time. You should compare
+    timestamps against the aspect file.
 
     :type flag: int
 
@@ -326,7 +337,7 @@ def pullphotons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
                               verbose=verbose)
     else:
         events = query_photons(band, ra0, dec0, tranges, radius,
-                               verbose=verbose, flag=flag)
+                               verbose=verbose, flag=flag, detsize=detsize)
 
     events = hashresponse(band, events, verbose=verbose)
 
@@ -407,7 +418,7 @@ def reduce_lcurve(bin_ix, region_ix, data, function, dtype='float64'):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def maskwarning(band, bin_ix, events, verbose=0, mapkey='H'):
+def maskwarning(band, bin_ix, events, verbose=0, mapkey='H', mode=None):
     """
     Test if any given events are near a masked detector region.
 
@@ -442,11 +453,42 @@ def maskwarning(band, bin_ix, events, verbose=0, mapkey='H'):
 
     img, _ = maps[mapkey](band, buffer=True)
 
-    ix = np.where(
-        img[np.array(events['photons']['col'][bin_ix], dtype='int16'),
-            np.array(events['photons']['row'][bin_ix], dtype='int16')] == 0)
+    if mode is None:
+        reg_ix = np.where(events['photons']['col'][bin_ix]) # i.e. all of them
+    elif mode is 'aper':
+        reg_ix = np.where(
+            mc.angularSeparation(events['params']['skypos'][0],
+                                events['params']['skypos'][1],
+                                events['photons']['ra'],
+                                events['photons']['dec'])[bin_ix]<=
+                                events['params']['radius'])
+    elif mode is 'bg':
+        reg_ix = np.where(
+            (mc.angularSeparation(events['params']['skypos'][0],
+                                        events['params']['skypos'][1],
+                                        events['photons']['ra'],
+                                        events['photons']['dec'])[bin_ix]<=
+                                        events['params']['annulus'][0]) &
+            (mc.angularSeparation(events['params']['skypos'][0],
+                                        events['params']['skypos'][1],
+                                        events['photons']['ra'],
+                                        events['photons']['dec'])[bin_ix]<
+                                        events['params']['annulus'][1]))
+    else:
+        print 'Unknown mask flag mode of: {m}'.format(m=mode)
+        raise
 
-    return True if len(ix[0]) else False
+    for xoff in [-1,0,1]:
+        for yoff in [-1,0,1]:
+            if np.shape(np.where(
+                img[np.array(
+                events['photons']['col'][bin_ix][reg_ix],dtype='int32')+xoff,
+                np.array(
+                events['photons']['row'][bin_ix][reg_ix],dtype='int32')
+                                        +yoff]==0))[1]>0:
+                return True
+
+    return False#True if len(ix[0]) else False
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -593,12 +635,14 @@ def getflags(band, bin_ix, events, verbose=0):
     """
     Pass flags if data meets conditions that are likely to create
     misleading photometry. The flags are binary, with bins set as follows:
-    1 - 'hotspot' - events in pixels contiguous to a hotspot masked region
-    2 - 'mask edge' - events in pixels contiguous to the detector edge
+    1 - 'hotspot' - aperture events in pixels contiguous to a masked hotspot
+    2 - 'mask edge' - aperture events in pixels contiguous to the detector edge
     4 - 'exptime' - bin contains < 50% exposure time coverage
     8 - 'respose' - events weighted with response < 0.7
     16 - 'nonlinearity' - local countrate exceeds 10% response dropoff
     32 - 'detector edge' - events outside of 0.5 degrees of detector center
+    64 - 'bg hotspot' - annulus events in pixels contiguous to a masked hotspot
+    128 - 'bg mask' - annulus events in pixels contiguous to detector edge
 
     :param band: The band being used, either 'FUV' or 'NUV'.
 
@@ -624,26 +668,35 @@ def getflags(band, bin_ix, events, verbose=0):
     flags = np.zeros(len(bin_num))
 
     for i, b in enumerate(bin_num):
-        try:
-            ix = bin_ix[np.where(bin_ix == bin)]
+        ix = np.where(bin_ix == b)
+        if len(ix):
+            #ix = bin_ix[np.where(bin_ix == bin)]
+            try:
+                if maskwarning(band, ix, events, mapkey='H',
+                                            mode='aper', verbose=verbose):
+                    flags[i] += 1
+                if maskwarning(band, ix, events, mapkey='E',
+                                            mode='aper', verbose=verbose):
+                    flags[i] += 2
+                if exptimewarning(i, events, verbose=verbose):
+                    flags[i] += 4
+                if lowresponsewarning(ix, events, verbose=verbose):
+                    flags[i] += 8
+                if nonlinearitywarning(band, i, events, verbose=verbose):
+                    flags[i] += 16
+                if detedgewarning(ix, events, verbose=verbose):
+                    flags[i] += 32
+                if maskwarning(band, ix, events, mapkey='H',
+                                            mode='bg', verbose=verbose):
+                    flags[i] += 64
+                if maskwarning(band, ix, events, mapkey='E',
+                                            mode='bg', verbose=verbose):
+                    flags[i] += 128
 
-            if maskwarning(band, ix, events, mapkey='H', verbose=verbose):
-                flags[i] += 1
-            if maskwarning(band, ix, events, mapkey='E', verbose=verbose):
-                flags[i] += 2
-            if exptimewarning(i, events, verbose=verbose):
-                flags[i] += 4
-            if lowresponsewarning(ix, events, verbose=verbose):
-                flags[i] += 8
-            if nonlinearitywarning(band, i, events, verbose=verbose):
-                flags[i] += 16
-            if detedgewarning(ix, events, verbose=verbose):
-                flags[i] += 32
-
-        except IndexError:
-            return np.array([np.nan])
-        except:
-            raise
+            except:
+                raise
+        else:
+            flags[i] = np.nan
 
     return np.array(flags)
 # ------------------------------------------------------------------------------
@@ -701,7 +754,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
     if verbose:
         mc.print_inline("Retrieving all of the target events.")
     searchradius = radius if annulus is None else annulus[1]
-    data = pullphotons(band, ra0, dec0, tranges, searchradius, verbose=verbose)
+    data = pullphotons(band, ra0, dec0, tranges, searchradius, verbose=verbose,
+                       detsize=detsize)
 
     if verbose:
         mc.print_inline("Binning data according to requested depth.")
@@ -731,10 +785,10 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
         lcurve['t0'] = bins[np.unique(bin_ix)-1]
         lcurve['t1'] = bins[np.unique(bin_ix)]
         lcurve['exptime'] = np.array(
-            dbt.compute_exptime(band, tranges if coadd else zip(lcurve['t0'],
-                                                                lcurve['t1']),
-                                verbose=verbose, coadd=coadd, detsize=detsize,
-                                skypos=[ra0, dec0]))
+            dbt.compute_exptime(band,
+                tranges if coadd else zip(lcurve['t0'],lcurve['t1']),
+                            verbose=verbose, coadd=coadd, detsize=detsize,
+                                                            skypos=[ra0, dec0]))
     except IndexError:
         if np.isnan(data['t']):
             print "No valid data available in {t}".format(t=tranges)
