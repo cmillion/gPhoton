@@ -53,7 +53,8 @@ def file_setup(outfile):
                     'mag_mcatbgsub_err_2', 'flux', 'mag_mcatbgsub_err_1',
                     'flags', 'mag_bgsub_err_2', 'detrad', 'cps',
                     'flux_mcatbgsub_err', 'flux_mcatbgsub', 'mcat_expt', 'ra',
-                    'dec', 'aper4', 'aper4_err', 'mcat_bg']
+                    'dec', 'aper4', 'aper4_err', 'mcat_bg',
+                    'aper7', 'aper7_err']
 
             spreadsheet = csv.writer(csvfile, delimiter=',', quotechar='|',
                                      quoting=csv.QUOTE_MINIMAL)
@@ -108,9 +109,12 @@ def construct_row(i, band, objid, mcat, data):
             data['flux'][0], data['mag_mcatbgsub_err_1'][0], data['flags'][0],
             data['mag_bgsub_err_2'][0], data['detrad'][0], data['cps'][0],
             data['flux_mcatbgsub_err'][0], data['flux_mcatbgsub'][0],
-            mcat[band]['expt'][i], np.array(mcat['ra'][i], dtype='float32'),
-            np.array(mcat['dec'][i], dtype='float32'), mcat[band][4]['mag'][i],
-            mcat[band][4]['err'][i], mcat[band]['skybg'][i])
+            mcat[band]['expt'][i],
+            np.array(mcat[band]['ra'][i], dtype='float32'),
+            np.array(mcat[band]['dec'][i], dtype='float32'),
+            mcat[band][4]['mag'][i],
+            mcat[band][4]['err'][i], mcat[band]['skybg'][i],
+            mcat[band][7]['mag'][i], mcat[band][7]['err'][i])
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -188,10 +192,9 @@ def datamaker(band, skypos, outfile, maglimit=20., margin=0.005,
                 continue
             print [mcat['ra'][i], mcat['dec'][i]]
             print [exp[band]['t0'], exp[band]['t1']]
-            data = gAperture(band, [mcat['ra'][i], mcat['dec'][i]], radius,
-                             annulus=annulus, verbose=verbose, coadd=True,
-                             trange=[exp[band]['t0'], exp[band]['t1']],
-                             detsize=1.25)
+            data = gAperture(band, [mcat[band]['ra'][i], mcat[band]['dec'][i]],
+                             radius, annulus=annulus, verbose=verbose,
+                             coadd=True, trange=[exp[band]['t0'], exp[band]['t1']], detsize=1.25)
             try:
                 csv_construct = construct_row(i, band, objid, mcat, data)
                 print csv_construct
