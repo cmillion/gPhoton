@@ -66,6 +66,31 @@ def get_aspect(band, skypos, trange=[6e8, 11e8], verbose=0, detsize=1.25):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+def distinct_tranges(times, maxgap=1.):
+    """
+    Produces a list of pairs of start / stop times delimiting distinct
+    unique time ranges, given that gaps of >maxgap initiate a new time period.
+
+    :param times: A set of time stamps to extract unique time ranges from.
+
+    :type times: list
+
+    :param maxgap:  Maximum gap size, in seconds, for data to be considered
+    contiguous.
+
+    :type maxgap: float
+
+    :returns: list -- The set of distinct time ranges.
+    """
+
+    ix = np.where(times[1:]-times[:-1] > maxgap)
+
+    ixs = [-1] + list(ix[0]) + [len(times)-1]
+
+    return [[times[ixs[i]+1], times[ixs[i+1]]] for i, b in enumerate(ixs[:-1])]
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
                     skyrange=None):
     """
@@ -133,39 +158,35 @@ def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
         except IndexError:
             if verbose:
                 print "No exposure time available at {pos}".format(pos=skypos)
-                return np.array([], dtype='float64')
+            return np.array([], dtype='float64')
         except TypeError:
             print "Is one of the inputs malformed?"
             raise
         except:
             raise
 
-    return np.sort(np.unique(times))
-# ------------------------------------------------------------------------------
+    # The following section should account for the fact that the use of band
+    # in gQuery.exposure_ranges() doesn't seem to work like it should.
+    # Specifically, it often returns time ranges as valid for FUV when there
+    # are not actually any global events recorded by that detector.
+    newtimes = []
+    try:
+        aspranges = distinct_tranges(np.sort(np.unique(times)))
+    except IndexError:
+        return np.array([], dtype='float64')
+    except:
+        raise
 
-# ------------------------------------------------------------------------------
-def distinct_tranges(times, maxgap=1.):
-    """
-    Produces a list of pairs of start / stop times delimiting distinct
-    unique time ranges, given that gaps of >maxgap initiate a new time period.
+    for trange in aspranges:
+        photontimes = np.array(gQuery.getArray(
+            gQuery.uniquetimes(band,trange[0],trange[1],flag=0)),
+                                            dtype='float64').flatten()/1000.
+        ix = np.where((photontimes.flatten()>=trange[0]) &
+                                        (photontimes.flatten()<trange[1]+1))
+        if len(ix[0]):
+            newtimes+=np.arange(trange[0],trange[1]+1).tolist()
 
-    :param times: A set of time stamps to extract unique time ranges from.
-
-    :type times: list
-
-    :param maxgap:  Maximum gap size, in seconds, for data to be considered
-    contiguous.
-
-    :type maxgap: float
-
-    :returns: list -- The set of distinct time ranges.
-    """
-
-    ix = np.where(times[1:]-times[:-1] > maxgap)
-
-    ixs = [-1] + list(ix[0]) + [len(times)-1]
-
-    return [[times[ixs[i]+1], times[ixs[i+1]]] for i, b in enumerate(ixs[:-1])]
+    return np.sort(np.unique(newtimes))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -460,8 +481,7 @@ def exposure(band, trange, verbose=0):
 
     try:
         t = np.array(gQuery.getArray(gQuery.uniquetimes(band, trange[0],
-                                                        trange[1], flag=True),
-                                     verbose=verbose),
+                            trange[1], flag=True),verbose=verbose),
                      dtype='float64')[:, 0]/gQuery.tscale
     except IndexError: # Shutter this whole time range.
         if verbose:
@@ -577,6 +597,8 @@ def get_mcat_data(skypos, rad):
                        'fwhm':np.array(out[:, 8], dtype='float32'),
                        'obssecs':np.array(out[:, 40], dtype='float64'),
                        'artifact':np.array(out[:, 42], dtype='int32'),
+                       'ra':np.array(out[:, 50], dtype='float32'),
+                       'dec':np.array(out[:, 51], dtype='float32'),
                        1:{'mag':np.array(out[:, 19],
                                          dtype='float32')+zpmag('NUV'),
                           'err':np.array(out[:, 33], dtype='float32')},
@@ -607,6 +629,8 @@ def get_mcat_data(skypos, rad):
                        'fwhm':np.array(out[:, 9], dtype='float32'),
                        'obssecs':np.array(out[:, 41], dtype='float64'),
                        'artifact':np.array(out[:, 43], dtype='int32'),
+                       'ra':np.array(out[:, 48], dtype='float32'),
+                       'dec':np.array(out[:, 49], dtype='float32'),
                        1:{'mag':np.array(out[:, 12],
                                          dtype='float32')+zpmag('FUV'),
                           'err':np.array(out[:, 26], dtype='float32')},
