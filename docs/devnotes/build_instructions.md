@@ -15,7 +15,7 @@
 9. `pip uninstall gPhoton`
 
 **Procedure for building:**
-Identical to above except that `testpypi` becomes `pypi` everywhere, and the download_url points to MAST, which means that someone needs to put the tar.gz in the appropriate place there.
+Identical to above except that `pypitest` becomes `pypi` everywhere, and the download_url points to MAST, which means that someone needs to put the tar.gz in the appropriate place there.
 
 `python setup.py register -r pypi`
 
