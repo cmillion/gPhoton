@@ -463,6 +463,9 @@ def maskwarning(band, bin_ix, events, verbose=0, mapkey='H', mode=None):
                                 events['photons']['dec'])[bin_ix]<=
                                 events['params']['radius'])
     elif mode is 'bg':
+        if not (events['params']['annulus'][0] or
+                                    events['params']['annulus'][1]):
+            return False
         reg_ix = np.where(
             (mc.angularSeparation(events['params']['skypos'][0],
                                         events['params']['skypos'][1],
