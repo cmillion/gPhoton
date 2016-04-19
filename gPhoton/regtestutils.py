@@ -183,18 +183,21 @@ def datamaker(band, skypos, outfile, maglimit=20., margin=0.005,
             continue
         extant_objids = file_setup(outfile)
         for i, objid in enumerate(mcat['objid']):
+            if (mcat[band]['ra'][i]==-99. and mcat[band]['dec'][i]==-99.):
+                print 'No {b} source'.format(b=band)
+                continue
             if objid in extant_objids:
                 print 'Already processed.'
                 continue
-            exp = dt.exp_from_objid(objid)
-            if exp[band]['t0'] < 0:
-                print 'skip'
+            #exp = dt.exp_from_objid(objid)
+            if mcat[band]['t0'][i] < 0:
+                print 'No MCAT exposure: skipping'
                 continue
-            print [mcat['ra'][i], mcat['dec'][i]]
-            print [exp[band]['t0'], exp[band]['t1']]
+            print [mcat[band]['ra'][i], mcat[band]['dec'][i]]
+            print [mcat[band]['t0'][i], mcat[band]['t1'][i]]
             data = gAperture(band, [mcat[band]['ra'][i], mcat[band]['dec'][i]],
                              radius, annulus=annulus, verbose=verbose,
-                             coadd=True, trange=[exp[band]['t0'], exp[band]['t1']], detsize=1.25)
+                             coadd=True, trange=[mcat[band]['t0'][i], mcat[band]['t1'][i]], detsize=1.25)
             try:
                 csv_construct = construct_row(i, band, objid, mcat, data)
                 print csv_construct
