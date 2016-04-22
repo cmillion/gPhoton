@@ -51,7 +51,7 @@ class TestRegression(unittest.TestCase):
         for i, expt in enumerate([ 1229.34564077, 108.04223136, 914.1187588 ]):
             self.assertAlmostEqual(out['exptime'][i],expt)
         # Regtest the magnitudes (no bg subtraction)
-        for i, mag in enumerate([ 13.55122452  19.17929293  19.07231177]):
+        for i, mag in enumerate([ 13.55122452,  19.17929293,  19.07231177]):
             self.assertAlmostEqual(out['mag'][i],mag)
 
     def test_lcurve_query_NUV(self):
