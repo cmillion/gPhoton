@@ -267,6 +267,8 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
         # events with bad aspect solutions which currently have incorrect
         # quality flags (of zero) in the photon database.
         trs = dbt.fGetTimeRanges(band,[ra0,dec0],trange=trange,detsize=detsize)
+        if not trs.any():
+            continue
         for tr in trs:
             thisstream = gQuery.getArray(
                 gQuery.allphotons(band, ra0, dec0, tr[0], tr[1], radius,
