@@ -52,7 +52,7 @@ def zpmag(band):
     :returns: float -- The zero point magnitude offset.
     """
 
-    return {'NUV':20.08238, 'FUV':18.81707}[band]
+    return {'NUV':20.08, 'FUV':18.82}[band]
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ def apcorrect2(radius, band):
     """
     Compute an aperture correction in mag based upon an aperture radius in
     degrees. Second way. Uses the data in Table 1 from
-    www.galex.caltech.edu/research/techdoch-ch5.html
+    http://www.galex.caltech.edu/researcher/techdoc-ch5.html
 
     :param radius: The photometric radius, in degrees.
 

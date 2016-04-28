@@ -51,7 +51,7 @@ class TestRegression(unittest.TestCase):
         for i, expt in enumerate([ 1229.34564077, 108.04223136, 914.1187588 ]):
             self.assertAlmostEqual(out['exptime'][i],expt)
         # Regtest the magnitudes (no bg subtraction)
-        for i, mag in enumerate([ 13.55122452, 19.17929293, 19.06812316]):
+        for i, mag in enumerate([ 13.55122452,  19.17929293,  19.07231177]):
             self.assertAlmostEqual(out['mag'][i],mag)
 
     def test_lcurve_query_NUV(self):
@@ -193,7 +193,7 @@ class TestRegression(unittest.TestCase):
         # Exposure time of coadd must be sum of individual visits.
         self.assertEqual(sum(out2['exptime']), out['exptime'][0])
         # Check value of coadded magnitude.
-        self.assertAlmostEqual(out['mag'][0],14.149826476039348)
+        self.assertAlmostEqual(out['mag'][0],14.1498456983)
         # Check that the uncertaintiy in the mag is less than the individual
         # visits.
         for x in out2['mag_err_1']:
