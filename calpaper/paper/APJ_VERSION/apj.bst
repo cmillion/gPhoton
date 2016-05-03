@@ -1,14 +1,5 @@
 %%
 %% $Log: apj.bst,v $
-
-%% Revision 1.12 2016/2/11 Amy
-%% Changes to @misc function to specifications by Dr. August Muench.
-%% Made comma appear between title and publisher whether or not there is a version number.
-
-%% Revision 1.11 2015/12/31 Amy
-%% Changes to @misc function to specifications by Dr. August Muench.
-%% Added version and publisher fields.
-
 %% Revision 1.10 2013/03/11 13:01:55 alberto
 %% Reworked code to use format.pid for articles without proper
 %% pagination which then leads the system to use either an eprint
@@ -132,11 +123,9 @@ ENTRY
     school
     series
     title
-misctitle
     type
     volume
     year
-    version
   }
   {}
   { label extra.label sort.label short.list }
@@ -286,9 +275,6 @@ FUNCTION {bbl.edition}
 
 FUNCTION {bbl.volume}
 { "Vol." }
-
-FUNCTION {bbl.version}
-{ "v." }
 
 FUNCTION {bbl.of}
 { "of" }
@@ -546,22 +532,6 @@ FUNCTION {format.title}
     }
   if$
 }
-
-
-FUNCTION {format.version}
-{ version empty$
-    { "" }
-    { bbl.version version  * ", " *}
-  if$
-}
-
-FUNCTION {format.miscversion}
-{ version empty$
-    { "" }
-    { bbl.version version  * "" *}
-  if$
-}
-
 
 FUNCTION {format.full.names}
 {'s :=
@@ -1025,37 +995,6 @@ FUNCTION {format.publisher}
   output
 }
 
-FUNCTION {format.aaspublisher}
-{ publisher empty$
-    { "empty publisher in " cite$ * warning$ }
-    'skip$
-  if$
-  ", "
-  address empty$ publisher empty$ and
-    'skip$
-    {
-      add.blank "" *
-      address empty$
-        'skip$
-        { address * }
-      if$
-      publisher empty$
-        'skip$
-        { address empty$
-            'skip$
-            { ": " * }
-          if$
-          publisher *
-        }
-      if$
-      "" *
-    }
-  if$
-  output
-}
-
-
-
 STRINGS {oldname}
 
 FUNCTION {name.or.dash}
@@ -1329,7 +1268,7 @@ FUNCTION {mastersthesis}
 }
 
 FUNCTION {misc}
-{output.bibitem
+{ output.bibitem
   format.authors output
   author format.key output
   name.or.dash
@@ -1337,8 +1276,6 @@ FUNCTION {misc}
   date.block
   format.title output
   howpublished output
-  format.miscversion output
-  format.aaspublisher 
   format.note output
   format.pid output
   fin.entry
