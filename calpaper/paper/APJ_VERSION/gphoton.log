@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/MacPorts 2015_9) (preloaded format=latex 2016.2.18)  3 MAY 2016 18:24
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/MacPorts 2015_9) (preloaded format=latex 2016.2.18)  4 MAY 2016 13:08
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -370,106 +370,106 @@ LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 69.
  [4] [5]
 [6] [7] [8] [9] [10]
-Overfull \hbox (57.189pt too wide) in paragraph at lines 138--138
+Overfull \hbox (57.189pt too wide) in paragraph at lines 140--140
 [][][][][][][][][]| 
  []
 
 [11] [12] [13] [14] [15] [16] [17] [18] (./gphoton.bbl [19]) [20]
-Overfull \hbox (39.77097pt too wide) in alignment at lines 242--242
+Overfull \hbox (39.77097pt too wide) in alignment at lines 244--244
 [][][][][] 
  []
 
 
-Underfull \hbox (badness 2080) in paragraph at lines 251--251
+Underfull \hbox (badness 2080) in paragraph at lines 253--253
 \OT1/cmr/m/n/10.95 pho-ton event database that the
  []
 
 
-Underfull \hbox (badness 1484) in paragraph at lines 253--253
+Underfull \hbox (badness 1484) in paragraph at lines 255--255
 \OT1/cmr/m/n/10.95 given co-or-di-nate, time sam-pling,
  []
 
 
-Underfull \hbox (badness 2512) in paragraph at lines 254--255
+Underfull \hbox (badness 2512) in paragraph at lines 256--257
 \OT1/cmr/m/n/10.95 and/or cal-i-brated fluxes), for a
  []
 
 [21] [22]
 File: Fig01.eps Graphic file (type eps)
  <Fig01.eps>
-Overfull \hbox (4.51366pt too wide) in paragraph at lines 268--269
+Overfull \hbox (4.51366pt too wide) in paragraph at lines 270--271
 [][] 
  []
 
 File: Fig02.eps Graphic file (type eps)
 <Fig02.eps>
-Overfull \hbox (6.5199pt too wide) in paragraph at lines 274--276
+Overfull \hbox (6.5199pt too wide) in paragraph at lines 276--278
 [][] 
  []
 
 File: Fig03.eps Graphic file (type eps)
 <Fig03.eps>
-Overfull \hbox (6.5199pt too wide) in paragraph at lines 281--283
+Overfull \hbox (6.5199pt too wide) in paragraph at lines 283--285
 [][] 
  []
 
 File: Fig04.eps Graphic file (type eps)
 <Fig04.eps>
-Overfull \hbox (6.5516pt too wide) in paragraph at lines 288--290
+Overfull \hbox (6.5516pt too wide) in paragraph at lines 290--292
 [][] 
  []
 
 File: Fig05.eps Graphic file (type eps)
 <Fig05.eps>
-Overfull \hbox (5.62053pt too wide) in paragraph at lines 295--297
+Overfull \hbox (5.62053pt too wide) in paragraph at lines 297--299
 [][] 
  []
 
 File: Fig06.eps Graphic file (type eps)
 <Fig06.eps>
-Overfull \hbox (5.62053pt too wide) in paragraph at lines 302--304
+Overfull \hbox (5.62053pt too wide) in paragraph at lines 304--306
 [][] 
  []
 
 File: Fig07.eps Graphic file (type eps)
 <Fig07.eps>
-Overfull \hbox (5.62053pt too wide) in paragraph at lines 309--311
+Overfull \hbox (5.62053pt too wide) in paragraph at lines 311--313
 [][] 
  []
 
 File: Fig08.eps Graphic file (type eps)
 <Fig08.eps>
-Overfull \hbox (5.62053pt too wide) in paragraph at lines 316--318
+Overfull \hbox (5.62053pt too wide) in paragraph at lines 318--320
 [][] 
  []
 
 File: Fig09.eps Graphic file (type eps)
 <Fig09.eps>
-Overfull \hbox (3.88953pt too wide) in paragraph at lines 323--325
+Overfull \hbox (3.88953pt too wide) in paragraph at lines 325--327
 [][] 
  []
 
 File: Fig10.eps Graphic file (type eps)
 <Fig10.eps>
-Overfull \hbox (3.88953pt too wide) in paragraph at lines 330--332
+Overfull \hbox (3.88953pt too wide) in paragraph at lines 332--334
 [][] 
  []
 
 File: Fig11.eps Graphic file (type eps)
 <Fig11.eps>
-Overfull \hbox (2.26105pt too wide) in paragraph at lines 337--339
+Overfull \hbox (2.26105pt too wide) in paragraph at lines 339--341
 [][] 
  []
 
 File: Fig12.eps Graphic file (type eps)
 <Fig12.eps>
-Overfull \hbox (3.88953pt too wide) in paragraph at lines 344--346
+Overfull \hbox (3.88953pt too wide) in paragraph at lines 346--348
 [][] 
  []
 
 File: Fig13.eps Graphic file (type eps)
 <Fig13.eps>
-Overfull \hbox (3.88953pt too wide) in paragraph at lines 351--353
+Overfull \hbox (3.88953pt too wide) in paragraph at lines 353--355
 [][] 
  []
 
@@ -477,13 +477,13 @@ File: Fig14.eps Graphic file (type eps)
 <Fig14.eps>
 File: Fig15.eps Graphic file (type eps)
  <Fig15.eps>
-Overfull \hbox (43.66597pt too wide) in paragraph at lines 365--367
+Overfull \hbox (43.66597pt too wide) in paragraph at lines 367--369
 [][] 
  []
 
 File: Fig16.eps Graphic file (type eps)
 <Fig16.eps>
-Overfull \hbox (7.0247pt too wide) in paragraph at lines 372--374
+Overfull \hbox (7.0247pt too wide) in paragraph at lines 374--376
 [][] 
  []
 
@@ -496,23 +496,23 @@ File: Fig19.eps Graphic file (type eps)
  <Fig19.eps> [39]
 File: Fig20.eps Graphic file (type eps)
  <Fig20.eps>
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 406.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 408.
  [40]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 406.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 408.
  (./gphoton.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 406.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 406.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 408.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 408.
 Package rerunfilecheck Info: File `gphoton.out' has not changed.
 (rerunfilecheck)             Checksum: BAAD2E6FD85AF31EA409552F4348D66F;1816.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 406.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 408.
  ) 
 Here is how much of TeX's memory you used:
- 6477 strings out of 494186
- 92140 string characters out of 6156914
- 207732 words of memory out of 5000000
- 9703 multiletter control sequences out of 15000+600000
+ 6483 strings out of 494186
+ 92227 string characters out of 6156914
+ 209064 words of memory out of 5000000
+ 9709 multiletter control sequences out of 15000+600000
  12434 words of font info for 51 fonts, out of 8000000 for 9000
  430 hyphenation exceptions out of 8191
- 32i,10n,28p,1800b,422s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 32i,10n,29p,1857b,401s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on gphoton.dvi (40 pages, 153700 bytes).
+Output written on gphoton.dvi (40 pages, 155824 bytes).
