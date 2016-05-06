@@ -147,14 +147,14 @@ During development, we explored two methods that might have mitigated the presen
 
 \subsection{Relative Flux Precision}
 \label{relflux}
-As a test of the relative photometric precision from gPhoton, we plot the difference between the MCAT magnitude and gAperture magnitude against the MCAT magnitude for 3498 and 8615 randomly selected MCAT sources in FUV and NUV respectively. When using the annulus method, FUV agrees with the MCAT within $\sim 2$\% and NUV within $\sim 11$\% (Figures \ref{fuvrelphot} and \ref{nuvrelphot}). The NUV agreement is worse for dimmer sources, consistent with the result in \ref{bgcorr}. When using the per-visit MCAT background method, FUV agrees within $\sim 4$\% and NUV within $\sim 2$\%, with good symmetry even for dim sources (Figures \ref{fuvrelphotmcat} and \ref{nuvrelphotmcat}). Based on this analysis, it may seem that the MCAT method is always superior, but it would fail to account for changes in field brightness at sub-visit timescales. Users should choose an appropriate background method given the use case.
+As a test of the relative photometric precision from gPhoton, we plot the difference between the MCAT magnitude and gAperture magnitude against the MCAT magnitude for 3498 and 8615 randomly selected MCAT sources in FUV and NUV respectively. When using the annulus method, FUV agrees with the MCAT within $\sim 2$\% and NUV within $\sim 11$\% (Figure \ref{fuvnuvrelphot}). The NUV agreement is worse for dimmer sources, consistent with the result in \ref{bgcorr}. When using the per-visit MCAT background method, FUV agrees within $\sim 4$\% and NUV within $\sim 2$\%, with good symmetry even for dim sources (Figure \ref{fuvnuvrelphotmcat}). Based on this analysis, it may seem that the MCAT method is always superior, but it would fail to account for changes in field brightness at sub-visit timescales. Users should choose an appropriate background method given the use case.
 
 \subsection{Absolute Flux Precision}
-As described in \citet{mor2007}, the GALEX mission used the white dwarf LDS749B as the primary calibration reference source. We use the refined reference magnitudes of 15.6 AB Mag in FUV and 14.76 AB Mag in NUV quoted by \cite{camarota2014white} based on the results of \cite{bohlin2008absolute}. Figures \ref{ldsabsphotfuv} and \ref{ldsabsphotnuv} display the results of a re-extraction of LDS749B photometry as a test of the absolute flux precision of gAperture. This sample contains all visit-level MCAT detections within 0.001 degrees of the nominal source position, with gAperture parameters set to precisely match time ranges and sky positions in each band. We used a photometric aperture with a $17.3''$ radius, equivalent to MCAT \emph{APER7}, and background estimates from the MCAT. To provide a high quality sample, only those sources were considered that did not have a relevant gAperture quality flag, fell within $1200''$ of the detector center, and were observed prior to the CSP; this cut resulted in a final sample of 452 visits in FUV and 867 in NUV. We compare the distributions of fluxes to the predicted 3$\sigma$ counting error, as a function of exposure time, assuming the reference magnitude and no contribution from background. Figure \ref{magdist} provides the magnitude distribution for all observations. To provide a reference point, Figures \ref{ldsabsphotfuvmcat}, \ref{ldsabsphotnuvmcat}, and \ref{magdistmcat} contain data for the same observations as pulled directly from the \emph{APER7} column of the MCAT. The aperture correction in both bands was 0.07 AB Magnitude.
+As described in \citet{mor2007}, the GALEX mission used the white dwarf LDS749B as the primary calibration reference source. We use the refined reference magnitudes of 15.6 AB Mag in FUV and 14.76 AB Mag in NUV quoted by \cite{camarota2014white} based on the results of \cite{bohlin2008absolute}. The top portions of Figures \ref{ldsabsphotfuv} and \ref{ldsabsphotnuv} display the results of a re-extraction of LDS749B photometry as a test of the absolute flux precision of gAperture. This sample contains all visit-level MCAT detections within 0.001 degrees of the nominal source position, with gAperture parameters set to precisely match time ranges and sky positions in each band. We used a photometric aperture with a $17.3''$ radius, equivalent to MCAT \emph{APER7}, and background estimates from the MCAT. To provide a high quality sample, only those sources were considered that did not have a relevant gAperture quality flag, fell within $1200''$ of the detector center, and were observed prior to the CSP; this cut resulted in a final sample of 452 visits in FUV and 867 in NUV. We compare the distributions of fluxes to the predicted 3$\sigma$ counting error, as a function of exposure time, assuming the reference magnitude and no contribution from background. Figure \ref{magdist} provides the magnitude distribution for all observations. To provide a reference point, the bottom portions of Figures \ref{ldsabsphotfuv} and \ref{ldsabsphotnuv}, as well as \ref{magdistmcat}, contain data for the same observations as pulled directly from the \emph{APER7} column of the MCAT. The aperture correction in both bands was 0.07 AB Magnitude.
 
 In FUV, gAperture produces photometry of LDS749B with a peak density at 15.65 AB Magnitude, with 52\% of the data falling within 3$\sigma$ of the reference value of 15.6 AB Mag. In comparison, the MCAT values have a peak of 15.62 AB Mag, and 88\% fall within 3$\sigma$ of the reference value. In NUV, gAperture produces photometry with a peak density at 14.76 AB Mag, with 89\% of the data falling within 3$\sigma$ of the reference value of 14.76 AB Mag. In comparison, the MCAT values peak at 14.75 AB Mag, with 80\% falling within 3$\sigma$.
 
-We have not yet been able to determine the cause of the larger dispersion in FUV (Figure \ref{ldsabsphotfuv}). It is easily detected as a multi-modality in magnitude differences between gAperture and MCAT photometry of the same source. The photometry produced by gAperture consistently reports dimmer values than the MCAT, with clusters at offsets of approximately 1\% and 3\% and between 5\% and 15\%. In order to thoroughly sample the detector with the calibration standards, many calibration survey (CAI) observations were collected in petal-pattern mode, but each individual leg was processed as a unique visit in the style of AIS. The most extreme of these outliers are almost exclusively confined to the first three legs of these observation sequences (Figure \ref{ldslegs}). We have found this behavior in some but not all other brighter sources in the LDS749B field and in observations of the LB227 calibration standard. We have not found clear evidence of the multi-modality in deep ``dither-style'' observations of other FUV sources, but there are not sufficient observations of a single source in AIS-mode in any survey outside of CAI for us to be able to clearly identify the behavior. The fact that no such multi-modality shows up in the tests of relative flux precision (Figure \ref{fuvrelphot}) suggests that the problem might be limited to CAI data. With the most severe outliers filterable by leg (down to about the $4$\% level), this issue should not preclude the use of most gAperture FUV photometry. When observations from the first three legs are excluded, gAperture produces FUV photometry of LDS749B with a peak density at 15.63 AB Magnitude and 75\% of the data falling within 3$\sigma$ of the reference value of 15.6 AB Mag. Understanding and addressing this issue is a top priority for future work.
+We have not yet been able to determine the cause of the larger dispersion in FUV (Figure \ref{ldsabsphotfuv}, top). It is easily detected as a multi-modality in magnitude differences between gAperture and MCAT photometry of the same source. The photometry produced by gAperture consistently reports dimmer values than the MCAT, with clusters at offsets of approximately 1\% and 3\% and between 5\% and 15\%. In order to thoroughly sample the detector with the calibration standards, many calibration survey (CAI) observations were collected in petal-pattern mode, but each individual leg was processed as a unique visit in the style of AIS. The most extreme of these outliers are almost exclusively confined to the first three legs of these observation sequences (Figure \ref{ldslegs}). We have found this behavior in some but not all other brighter sources in the LDS749B field and in observations of the LB227 calibration standard. We have not found clear evidence of the multi-modality in deep ``dither-style'' observations of other FUV sources, but there are not sufficient observations of a single source in AIS-mode in any survey outside of CAI for us to be able to clearly identify the behavior. The fact that no such multi-modality shows up in the tests of relative flux precision (Figure \ref{fuvnuvrelphot}, top) suggests that the problem might be limited to CAI data. With the most severe outliers filterable by leg (down to about the $4$\% level), this issue should not preclude the use of most gAperture FUV photometry. When observations from the first three legs are excluded, gAperture produces FUV photometry of LDS749B with a peak density at 15.63 AB Magnitude and 75\% of the data falling within 3$\sigma$ of the reference value of 15.6 AB Mag. Understanding and addressing this issue is a top priority for future work.
 
 \section{Implementation Notes}
 \label{implementation}
@@ -177,7 +177,7 @@ While the stim rate technique used by the mission works well over long integrati
 
 gPhoton mitigates this by using the linear relationship between global count rate and dead time, which holds for the majority of global count rates observed by GALEX up through GR7, to produce an empirical exposure time correction as a function of global count rate. GALEX has typical global count rates of 10,000 cps or more, making the 1$\sigma$ error due to counting statistics truly negligible even for short integrations. The GALEX team did produce (but did not publish) such an empirical dead time formula; while the result was recorded, the actual methodology was not, making it impossible to verify. We know that the behavior of the two detectors was deemed in that analysis to be sufficiently similar that an identical model fit was used to describe both of them, and the nominal / commanded stim rate was assumed to be \emph{true} (i.e. the stim rate at ``zero'' global counts was fixed to 79 cps). For completeness and consistency, we have redone this empirical deadtime analysis without those two assumptions.
 
-In figures \ref{fuvstim} and \ref{nuvstim}, we plot global detector count rates against stim count rates with 1$\sigma$ errors based on counting statistics. In calculating these rates, exposure times have been corrected for shutter (see Section \ref{effexptime}), but not dead time. We fit a linear mixture model to the data, with both ``foreground'' and ``noise'' parameters. The model was sampled by Markov Chain Monte Carlo (MCMC) using the ``emcee'' package \citep{for2013} against the data for $\sim 2000$ observations in each band to produce maximum likelihood model parameters for the stim count rate as functions of global count rates, which can be converted to a fractional dead time by comparing the stim count rate against the reference rate. Rather than directly adopting the quoted stim reference rate of 79 cps for both bands, we used the maximum likely y-intercept value corresponding to ``zero'' global counts per second. At 77.2 and 76.3 cps in NUV and FUV respectively, the maximum likely stim count rates differ by 1.2\% from each other, and 2.3\% and 3.5\% from the commanded rate of 79 cps. The analysis suggests slopes that differ in each band by about 6.5\%. Less than $1\%$ of data in both bands were classified as noise by the model.
+In Figure \ref{fuvnuvstim}, we plot global detector count rates against stim count rates with 1$\sigma$ errors based on counting statistics for both bands. In calculating these rates, exposure times have been corrected for shutter (see Section \ref{effexptime}), but not dead time. We fit a linear mixture model to the data, with both ``foreground'' and ``noise'' parameters. The model was sampled by Markov Chain Monte Carlo (MCMC) using the ``emcee'' package \citep{for2013} against the data for $\sim 2000$ observations in each band to produce maximum likelihood model parameters for the stim count rate as functions of global count rates, which can be converted to a fractional dead time by comparing the stim count rate against the reference rate. Rather than directly adopting the quoted stim reference rate of 79 cps for both bands, we used the maximum likely y-intercept value corresponding to ``zero'' global counts per second. At 77.2 and 76.3 cps in NUV and FUV respectively, the maximum likely stim count rates differ by 1.2\% from each other, and 2.3\% and 3.5\% from the commanded rate of 79 cps. The analysis suggests slopes that differ in each band by about 6.5\%. Less than $1\%$ of data in both bands were classified as noise by the model.
 
 The linear empirical deadtime correction will overestimate effective exposure times for very bright fields (where gAperture will produce erroneously dim flux estimates). The deviation from a linear relationship between the global and stim count rates above 50,000 cps in NUV could indicate some combination of the onset of the non-linearity in the dead time correction that is expected at high correction factors or other gain-sag effects inherent to the detector (see \citep{mor2007} for a discussion of these effects). The majority of observations through GR7 fall within the linear regime, but the non-linearity in exposure time correction may be a major consideration for data collected late in the mission or during the CAUSE phase when global and local detector brightness limits were relaxed.
 
@@ -293,114 +293,101 @@ DB & min $\delta$ & max $\delta$ & N\_FUV & N\_NUV\\
 \end{figure}
 
 
-\begin{figure}
-\includegraphics[scale=0.64]{Fig05.eps}
-\caption{Comparison between MCAT and gAperture FUV fluxes for 3498 randomly selected sources, using $6''$ radius aperture annuli and backgrounds estimated from an unmasked annuli extending from $30''$ to $90''$. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 2$\%, on average, down to 22.5 AB Magnitude, and half of the data fall within $\sim 8$\%.
-\label{fuvrelphot}}
+\begin{figure}[t!]
+\begin{minipage}[c][11cm][c]{1.\textwidth}
+\centering
+\includegraphics[scale=0.64]{Fig05a.eps}
+\includegraphics[scale=0.64]{Fig05b.eps}
+\caption{TOP: Comparison between MCAT and gAperture FUV fluxes for 3498 randomly selected sources, using $6''$ radius aperture annuli and backgrounds estimated from an unmasked annuli extending from $30''$ to $90''$. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 2$\%, on average, down to 22.5 AB Magnitude, and half of the data fall within $\sim 8$\%.  BOTTOM: Comparison between MCAT and gAperture NUV fluxes for 8615 randomly selected sources, using $6''$ radius aperture and backgrounds estimated from an unmasked annuli extending from $30''$ to $90''$. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 7$\% on average, down to 22.5 AB Magnitude, with an increasing offset at magnitudes dimmer than ~$19$. Half of the data fall within $\sim 15$\%. The behavior for dim sources is consistent with Fig. \ref{bgrelphot} and would be mitigated if background apertures were customized to avoid any nearby, contaminating sources.
+\label{fuvnuvrelphot}}
+\end{minipage}
 \end{figure}
 
 
-\begin{figure}
-\includegraphics[scale=0.64]{Fig06.eps}
-\caption{Comparison between MCAT and gAperture NUV fluxes for 8615 randomly selected sources, using $6''$ radius aperture and backgrounds estimated from an unmasked annuli extending from $30''$ to $90''$. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 7$\% on average, down to 22.5 AB Magnitude, with an increasing offset at magnitudes dimmer than ~$19$. Half of the data fall within $\sim 15$\%. The behavior for dim sources is consistent with Fig. \ref{bgrelphot} and would be mitigated if background apertures were customized to avoid any nearby, contaminating sources.
-\label{nuvrelphot}}
+\begin{figure}[t!]
+\begin{minipage}[c][11cm][c]{1.\textwidth}
+\centering
+\includegraphics[scale=0.64]{Fig06a.eps}
+\includegraphics[scale=0.64]{Fig06b.eps}
+\caption{TOP: Comparison between MCAT and gAperture FUV fluxes for 3498 randomly selected sources, using $6''$ radius aperture and MCAT background estimates. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 4$\% on average down to 22.5 AB Magnitude, and half of the data fall within $\sim 7$\%.  BOTTOM: Comparison between MCAT and gAperture NUV fluxes for 8615 randomly selected sources, using $6''$ radius aperture and MCAT background estimates. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 2$\% on average down to 22.5 AB Magnitude, and half of the data fall within $\sim 7$\%.
+\label{fuvnuvrelphotmcat}}
+\end{minipage}
 \end{figure}
 
 
-\begin{figure}
-\includegraphics[scale=0.64]{Fig07.eps}
-\caption{Comparison between MCAT and gAperture FUV fluxes for 3498 randomly selected sources, using $6''$ radius aperture and MCAT background estimates. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 4$\% on average down to 22.5 AB Magnitude, and half of the data fall within $\sim 7$\%.
-\label{fuvrelphotmcat}}
-\end{figure}
-
-
-\begin{figure}
-\includegraphics[scale=0.64]{Fig08.eps}
-\caption{Comparison between MCAT and gAperture NUV fluxes for 8615 randomly selected sources, using $6''$ radius aperture and MCAT background estimates. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 2$\% on average down to 22.5 AB Magnitude, and half of the data fall within $\sim 7$\%.
-\label{nuvrelphotmcat}}
-\end{figure}
-
-
-\begin{figure}
-\includegraphics[scale=0.625]{Fig09.eps}
-\caption{Comparison of gAperture FUV fluxes for LDS749B to the reference value of 15.6 AB Mag (solid line) as a function of exposure depth. The aperture had a radius of $17.3''$, which corresponds to MCAT column APER7, and backgrounds estimated from the MCAT. The error bars on the points denote 1$\sigma$ as reported by gAperture. The dashed lines denote theoretically predicted 3$\sigma$ scatter as predicted from counting statistics; 52\% of the FUV data lie within 3$\sigma$. The data points shown in red with x symbols correspond to observations collected during the first three legs of a calibration pattern, which are known to be especially large outliers per Fig. \ref{ldslegs}. When these observations are eliminated from the calculation, 75\% of the FUV data lie within 3 $\sigma$.
+\begin{figure}[t!]
+\begin{minipage}[c][11cm][c]{1.\textwidth}
+\centering
+\includegraphics[scale=0.625]{Fig07a.eps}
+\includegraphics[scale=0.625]{Fig07b.eps}
+\caption{TOP: Comparison of gAperture FUV fluxes for LDS749B to the reference value of 15.6 AB Mag (solid line) as a function of exposure depth. The aperture had a radius of $17.3''$, which corresponds to MCAT column APER7, and backgrounds estimated from the MCAT. The error bars on the points denote 1$\sigma$ as reported by gAperture. The dashed lines denote theoretically predicted 3$\sigma$ scatter as predicted from counting statistics; 52\% of the FUV data lie within 3$\sigma$. The data points shown in red with x symbols correspond to observations collected during the first three legs of a calibration pattern, which are known to be especially large outliers per Fig. \ref{ldslegs}. When these observations are eliminated from the calculation, 75\% of the FUV data lie within 3 $\sigma$. BOTTOM: Comparison of MCAT APER7 ($17.3"$ radius aperture) FUV fluxes for LDS749B to the reference value of 15.6 AB Mag (solid line) as a function of exposure depth. The error bars on the points denote 1$\sigma$ as reported by the MCAT. The dashed lines denote ideal 3$\sigma$ scatter as predicted from counting statistics; 88\% of the FUV data lie within 3$\sigma$.
 \label{ldsabsphotfuv}}
+\end{minipage}
 \end{figure}
 
 
-\begin{figure}
-\includegraphics[scale=0.625]{Fig10.eps}
-\caption{Comparison of gAperture NUV fluxes for LDS749B to the reference value of 14.76 AB Mag (solid line) as a function of exposure depth. The aperture had a radius of $17.3''$, which corresponds to MCAT column APER7, and backgrounds estimated from the MCAT. The error bars on the points denote 1$\sigma$ as reported by gAperture. The dashed lines denote theoretically predicted 3$\sigma$ scatter as predicted from counting statistics; 89\% of the NUV data lie within 3$\sigma$.
+\begin{figure}[t!]
+\begin{minipage}[c][11cm][c]{1.\textwidth}
+\centering
+\includegraphics[scale=0.625]{Fig08a.eps}
+\includegraphics[scale=0.625]{Fig08b.eps}
+\caption{TOP: Comparison of gAperture NUV fluxes for LDS749B to the reference value of 14.76 AB Mag (solid line) as a function of exposure depth. The aperture had a radius of $17.3''$, which corresponds to MCAT column APER7, and backgrounds estimated from the MCAT. The error bars on the points denote 1$\sigma$ as reported by gAperture. The dashed lines denote theoretically predicted 3$\sigma$ scatter as predicted from counting statistics; 89\% of the NUV data lie within 3$\sigma$.  BOTTOM: Comparison of MCAT APER7 ($17.3"$ radius aperture) NUV fluxes for LDS749B to the reference value of 14.76 AB Mag (solid line) as a function of exposure depth. The error bars on the points denote 1$\sigma$ as reported by the MCAT. The dashed lines denote ideal 3$\sigma$ scatter as predicted from counting statistics; 80\% of the NUV data lie within 3$\sigma$.
 \label{ldsabsphotnuv}}
+\end{minipage}
 \end{figure}
 
 
 \begin{figure}
-\includegraphics[scale=0.55]{Fig11.eps}
-\caption{The left and right panels give the magnitude distributions of gAperture photometry of LDS749B given in Figs. \ref{ldsabsphotfuv} and \ref{ldsabsphotnuv} respectively. The peak density of magnitudes falls within $\sim 5$\% in FUV of the reference value and well under $1$\% for NUV. When the first three legs are excluded from the calculation, the FUV has a peak density at 15.63 AB Magnitudes, a $\sim 3$\% offset from the reference value.
+\includegraphics[scale=0.55]{Fig09.eps}
+\caption{The left and right panels give the magnitude distributions of gAperture photometry of LDS749B given in the top portions of Figs. \ref{ldsabsphotfuv} and \ref{ldsabsphotnuv} respectively. The peak density of magnitudes falls within $\sim 5$\% in FUV of the reference value and well under $1$\% for NUV. When the first three legs are excluded from the calculation, the FUV has a peak density at 15.63 AB Magnitudes, a $\sim 3$\% offset from the reference value.
 \label{magdist}}
 \end{figure}
 
 
 \begin{figure}
-\includegraphics[scale=0.625]{Fig12.eps}
-\caption{Comparison of MCAT APER7 ($17.3"$ radius aperture) FUV fluxes for LDS749B to the reference value of 15.6 AB Mag (solid line) as a function of exposure depth. The error bars on the points denote 1$\sigma$ as reported by the MCAT. The dashed lines denote ideal 3$\sigma$ scatter as predicted from counting statistics; 88\% of the FUV data lie within 3$\sigma$.
-\label{ldsabsphotfuvmcat}}
-\end{figure}
-
-
-\begin{figure}
-\includegraphics[scale=0.625]{Fig13.eps}
-\caption{Comparison of MCAT APER7 ($17.3"$ radius aperture) NUV fluxes for LDS749B to the reference value of 14.76 AB Mag (solid line) as a function of exposure depth. The error bars on the points denote 1$\sigma$ as reported by the MCAT. The dashed lines denote ideal 3$\sigma$ scatter as predicted from counting statistics; 80\% of the NUV data lie within 3$\sigma$.
-\label{ldsabsphotnuvmcat}}
-\end{figure}
-
-
-\begin{figure}
-\includegraphics[scale=0.50]{Fig14.eps}
-\caption{The left and right panels give the magnitude distributions of MCAT photometry of LDS749B given in Figs. \ref{ldsabsphotfuvmcat} and \ref{ldsabsphotnuvmcat} respectively. The peak density of magnitudes falls within $\sim 2$\% in FUV of the reference value and $\sim 1$\% for NUV.
+\includegraphics[scale=0.50]{Fig10.eps}
+\caption{The left and right panels give the magnitude distributions of MCAT photometry of LDS749B given in the bottom portions of Figs. \ref{ldsabsphotfuv} and \ref{ldsabsphotnuv} respectively. The peak density of magnitudes falls within $\sim 2$\% in FUV of the reference value and $\sim 1$\% for NUV.
 \label{magdistmcat}}
 \end{figure}
 
 
 \begin{figure}
-\includegraphics[scale=0.55]{Fig15.eps}
+\includegraphics[scale=0.55]{Fig11.eps}
 \caption{There is a multi-modal distribution in the difference between gAperture and MCAT magnitudes of some sources, especially obvious for relatively bright stars observed as part of the calibration survey (CAI). Modes appear to be centered around offsets of 1\%, 3\%, and 15\%, with gAperture consistently producing dimmer photometry than the mission. The worst of these outliers are strongly correlated with the first three legs of the calibration aspect pattern, but the cause is currently unknown.
 \label{ldslegs}}
 \end{figure}
 
 
-\begin{figure}
-\includegraphics[scale=0.95]{Fig16.eps}
-\caption{For the fit of a linear mixture model to stim count rates as a function of global count rate for 1970 FUV visits, values for $16\%$, $50\%$ and $84\%$ confidence intervals in offset and slope are provided. The small number of data points indicated by a filled in circle were rejected by the mixture model and not used in the fit.
-\label{fuvstim}}
+\begin{figure}[t!]
+\begin{minipage}[c][11cm][c]{1.\textwidth}
+\centering
+\includegraphics[scale=0.95]{Fig12a.eps}
+\includegraphics[scale=0.90]{Fig12b.eps}
+\caption{TOP: FUV stim rates and fit of a linear mixture model to stim count rates as a function of global count rate for 1970 FUV visits. Values for $16\%$, $50\%$ and $84\%$ confidence intervals in offset and slope are provided. The small number of data points indicated by a filled in circle were rejected by the mixture model and not used in the fit.  BOTTOM: NUV stim rates and fit of a linear mixture model to stim count rates as a function of global count rate for 2001 NUV visits. Values for $16\%$, $50\%$ and $84\%$ confidence intervals in offset and slope are provided. The non-linear rolloff of data starting near 60,000 cps is likely a real effect due to global detector gain sag. The small number of data points indicated by a filled in circle were rejected by the mixture model and not used in the fit.
+\label{fuvnuvstim}}
+\end{minipage}
 \end{figure}
 
 
 \begin{figure}
-\includegraphics[scale=0.9]{Fig17.eps}
-\caption{For the fit of a linear mixture model to stim count rates as a function of global count rate for 2001 NUV visits, values for $16\%$, $50\%$ and $84\%$ confidence intervals in offset and slope are provided. The non-linear rolloff of data starting near 60,000 cps is likely a real effect due to global detector gain sag. The small number of data points indicated by a filled in circle were rejected by the mixture model and not used in the fit.
-\label{nuvstim}}
-\end{figure}
-
-
-\begin{figure}
-\includegraphics[scale=0.49]{Fig18.eps}
+\includegraphics[scale=0.49]{Fig13.eps}
 \caption{Optimal light curve bin sizes depend on a number of factors, most prominent of which are the GALEX band in which the analysis is being performed, the AB Magnitude of the target being observed, and the desired precision of the measurement of source brightness or change in source brightness. These figures provide estimates of 3$\sigma$ measurement errors in both bands, based on counting statistics \emph{with no contribution from background}, for a range of target brightnesses and exposure depths up to a full eclipse.
 \label{sigmadetlim}}
 \end{figure}
 
+
 \clearpage
 
 \begin{figure}
-\includegraphics[scale=0.375]{Fig19.eps}
+\includegraphics[scale=0.375]{Fig14.eps}
 \caption{Flares detected on CR Draconis using gPhoton, across the lifetime of the mission with a 10 second cadence. When available, FUV light curves are plotted (in blue) along with the NUV curves (in black). Fluxes have not been aperture corrected. \label{crdraflares}}
 \end{figure}
 
+
 \clearpage
 
 \begin{figure}
-\includegraphics[scale=0.375]{Fig20.eps}
+\includegraphics[scale=0.375]{Fig15.eps}
 \caption{Deep coadd image of CR Draconis using all available NUV photon events. The image is in counts, since we are only looking to define our photometric aperture and search for possible contamination sources. The aperture, inner annulus, and outer annulus for photometry are represented by the green, orange, and red circles, respectively.  There is a source to the lower left that is $\sim 0.5$\% the peak of CR Draconis itself. Although testing showed it did not significantly impact the photometry, we define our apertures such that it is not included within them.\label{crdracoadd}}
 \end{figure}
 %%%%%%%%%%%%%%%%%% end figures %%%%%%%%%%%%%%%%%%
