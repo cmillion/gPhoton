@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/MacPorts 2015_9) (preloaded format=latex 2016.2.18)  6 MAY 2016 17:23
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/MacPorts 2015_9) (preloaded format=latex 2016.2.18)  6 MAY 2016 17:31
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -342,8 +342,16 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 46.
 (/opt/local/share/texmf-texlive/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-Underfull \hbox (badness 10000) in paragraph at lines 46--46
-[][][][][][][][][] \OT1/cmr/m/n/9 | [][][][] |
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 46.
+
+(/opt/local/share/texmf-texlive/tex/latex/base/omscmr.fd
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <9> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 46.
+
+Overfull \hbox (9.7396pt too wide) in paragraph at lines 46--46
+[][][][][][][][][] \OMS/cmsy/m/n/9 j[][][][] j[][][][]| 
  []
 
 Missing character: There is no ï in font cmr10!
@@ -362,14 +370,9 @@ LaTeX Warning: Command \r invalid in math mode on input line 53.
 LaTeX Warning: Command \r invalid in math mode on input line 53.
 
 [2] [3]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 69.
- (/opt/local/share/texmf-texlive/tex/latex/base/omscmr.fd
-File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
-)
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 69.
- [4] [5]
-[6] [7] [8] [9] [10]
+ [4] [5] [6] [7] [8] [9] [10]
 Overfull \hbox (57.189pt too wide) in paragraph at lines 140--140
 [][][][][][][][][]| 
  []
@@ -513,12 +516,12 @@ Package rerunfilecheck Info: File `gphoton.out' has not changed.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 395.
  ) 
 Here is how much of TeX's memory you used:
- 6478 strings out of 494186
- 92181 string characters out of 6156914
+ 6480 strings out of 494186
+ 92205 string characters out of 6156914
  208927 words of memory out of 5000000
- 9704 multiletter control sequences out of 15000+600000
+ 9706 multiletter control sequences out of 15000+600000
  12434 words of font info for 51 fonts, out of 8000000 for 9000
  430 hyphenation exceptions out of 8191
  32i,10n,29p,1872b,401s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on gphoton.dvi (37 pages, 153788 bytes).
+Output written on gphoton.dvi (37 pages, 153816 bytes).
