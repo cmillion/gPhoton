@@ -21,9 +21,9 @@ for sigma in [3]:
         plt.subplot(2,1,i+1)
         plt.semilogx()
         plt.xlim(1,1600)
-        plt.title('{b} Bin Depths vs. Error'.format(b=band),fontsize=16)
+        #plt.title('{b} Bin Depths vs. Error'.format(b=band),fontsize=16)
         plt.xlabel('Exposure Bin Depth (s)',fontsize=14)
-        plt.ylabel('{n}{s} Error (AB Mag)'.format(n=sigma,s=r'$\sigma$'),fontsize=14)
+        plt.ylabel('{b} {n}{s} Error (AB Mag)'.format(b=band,n=sigma,s=r'$\sigma$'),fontsize=14)
         plt.tick_params(axis='both', which='major', labelsize=12)
         for mag in magrange:
             cps = gt.mag2counts(mag,band)
@@ -33,5 +33,5 @@ for sigma in [3]:
         for l in [30]:
             plt.axvline(l, color='k', linestyle='dotted', linewidth=2, label='{n} Seconds'.format(n=l))
         plt.legend(fontsize=14)
-    plt.savefig('{p}/{n}SigmaDetLimits.pdf'.format(p=outpath,n=sigma),
+    plt.savefig('{p}/Fig11.pdf'.format(p=outpath,n=sigma),
         format='pdf',dpi=1000,bbox_inches='tight')

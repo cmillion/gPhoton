@@ -19,36 +19,36 @@
 
 % Authors section.
 \author{
-  Chase Million\altaffilmark{1},
-  Scott W. Fleming\altaffilmark{2,3},
-  Bernie Shiao\altaffilmark{2},
-  Mark Seibert\altaffilmark{4},
-  Parke Loyd\altaffilmark{5},
-  Michael Tucker\altaffilmark{6},
-  Myron Smith\altaffilmark{2,7},
-  Randy Thompson\altaffilmark{2,3},
-  Richard L. White\altaffilmark{2}
+  Chase Million\altaffilmark{a},
+  Scott W. Fleming\altaffilmark{b,c},
+  Bernie Shiao\altaffilmark{b},
+  Mark Seibert\altaffilmark{d},
+  Parke Loyd\altaffilmark{e},
+  Michael Tucker\altaffilmark{f},
+  Myron Smith\altaffilmark{b,g},
+  Randy Thompson\altaffilmark{b,c},
+  Richard L. White\altaffilmark{b}
 }
 
 % Addresses section.
-\altaffiltext{1}{Million Concepts LLC, PO Box 119, 141 Mary St, Lemont, PA 16851, USA}
-\altaffiltext{2}{Space Telescope Science Institute, 3700 San Martin Dr, Baltimore, MD 21218, USA}
-\altaffiltext{3}{CSRA, Inc., 3700 San Martin Dr, Baltimore, MD 21218, USA}
-\altaffiltext{4}{The Observatories of the Carnegie Institution of Washington, 813 Santa Barbara Street, Pasadena, CA 91101, USA}
-\altaffiltext{5}{Laboratory for Atmospheric and Space Physics, Boulder, Colorado,  80309}
-\altaffiltext{6}{Dept. of Physics and Astronomy, Appalachian State University, Boone, NC 28608, USA}
-\altaffiltext{7}{Current Address: National Optical Astronomy Observatory, 950 N. Cherry Ave., Tucson, AZ 85719}
+\altaffiltext{a}{Million Concepts LLC, PO Box 119, 141 Mary St, Lemont, PA 16851, USA}
+\altaffiltext{b}{Space Telescope Science Institute, 3700 San Martin Dr, Baltimore, MD 21218, USA}
+\altaffiltext{c}{CSRA, Inc., 3700 San Martin Dr, Baltimore, MD 21218, USA}
+\altaffiltext{d}{The Observatories of the Carnegie Institution of Washington, 813 Santa Barbara Street, Pasadena, CA 91101, USA}
+\altaffiltext{e}{Laboratory for Atmospheric and Space Physics, Boulder, Colorado,  80309}
+\altaffiltext{f}{Dept. of Physics and Astronomy, Appalachian State University, Boone, NC 28608, USA}
+\altaffiltext{g}{Current Address: National Optical Astronomy Observatory, 950 N. Cherry Ave., Tucson, AZ 85719}
 
 % Since \fnref{} in the author page already defines a footnote with a '1' mark, increment the footnote counter now.
 %\addtocounter{footnote}{1}
 
 \begin{abstract}
-gPhoton\footnote{\url{http://dx.doi.org/doi:10.17909/T9CC7G} \textbar \url{http://ascl.net/1603.004} \textbar \url{https://github.com/cmillion/gPhoton}} is a new database product and software package that enables analysis of GALEX ultraviolet data at the photon event level. The project's stand-alone, pure-Python calibration pipeline reproduces the functionality of the original mission pipeline to reduce raw spacecraft data to lists of time-tagged, sky-projected photon events which are then hosted in a publicly available database by the Mikulski Archive at Space Telescope (MAST). This database contains approximately 130 terabytes of data describing approximately 1.1 trillion sky-projected events with a timestamp resolution of five milliseconds. A handful of Python and command line modules serve as a front-end to interact with the database and to generate calibrated light curves and images from the photon-level data at user-defined temporal and spatial scales. The gPhoton software and source code are in active development and publicly available under a permissive license. We describe the motivation, design, and implementation of the calibration pipeline, database, and tools, with emphasis on divergence from prior work, as well as challenges created by the large data volume. We summarize the astrometric and photometric performance of gPhoton relative to the original mission pipeline. For a brief example of short time domain science capabilities enabled by gPhoton, we show new flares from the known M dwarf flare star CR Draconis. The gPhoton software has permanent object identifiers with the ASCL (ascl:1603.004) and DOI (doi:10.17909/T9CC7G).
+gPhoton is a new database product and software package that enables analysis of GALEX ultraviolet data at the photon event level. The project's stand-alone, pure-Python calibration pipeline reproduces the functionality of the original mission pipeline to reduce raw spacecraft data to lists of time-tagged, sky-projected photon events which are then hosted in a publicly available database by the Mikulski Archive at Space Telescope (MAST). This database contains approximately 130 terabytes of data describing approximately 1.1 trillion sky-projected events with a timestamp resolution of five milliseconds. A handful of Python and command line modules serve as a front-end to interact with the database and to generate calibrated light curves and images from the photon-level data at user-defined temporal and spatial scales. The gPhoton software and source code are in active development and publicly available under a permissive license. We describe the motivation, design, and implementation of the calibration pipeline, database, and tools, with emphasis on divergence from prior work, as well as challenges created by the large data volume. We summarize the astrometric and photometric performance of gPhoton relative to the original mission pipeline. For a brief example of short time domain science capabilities enabled by gPhoton, we show new flares from the known M dwarf flare star CR Draconis. The gPhoton software has permanent object identifiers with the ASCL (ascl:1603.004) and DOI (doi:10.17909/T9CC7G).
 \end{abstract}
 
 \section{Introduction}
 \subsection{GALEX Overview}
-The Galaxy Evolution Explorer \citep{mar2005} was a NASA Small Explorer (SMEX) telescope that surveyed the sky in the ultraviolet over ten years between launch on 28 April 2003 and spacecraft termination on 28 June 2013. The spacecraft, instruments, data, and calibration are well described in previous publications \citep{mor2005,mor2007} and the mission'��s online technical documentation.\footnote{\url{http://www.galex.caltech.edu/wiki/Public:Documentation}} We will restrict discussion to topics that are necessary for completeness, have not appeared elsewhere in the literature, or are of particular importance to the gPhoton project.
+The Galaxy Evolution Explorer \citep{mar2005} was a NASA Small Explorer (SMEX) telescope that surveyed the sky in the ultraviolet over ten years between launch on 28 April 2003 and spacecraft termination on 28 June 2013. The spacecraft, instruments, data, and calibration are well described in previous publications \citep{mor2005,mor2007} and the mission`s online technical documentation.\footnote{\url{http://www.galex.caltech.edu/wiki/Public:Documentation}} We will restrict discussion to topics that are necessary for completeness, have not appeared elsewhere in the literature, or are of particular importance to the gPhoton project.
 
 GALEX carried two micro-channel plate detectors (MCP) with 1.25 degree fields-of-view (FoV), simultaneously exposed via a dichroic. The detectors observed in two broad ultraviolet (UV) bands centered around $1528\,\rm{\AA}$ (Far Ultraviolet or ``FUV'') and $2271\,\rm{\AA}$ (Near Ultraviolet or ``NUV''). The FUV detector failed in May of 2009, but the NUV detector continued to operate until the end of the mission. The spacecraft could observe in either direct imaging or slitless spectroscopic (grism) modes. Observations were conducted while the spacecraft was on the night side of each orbit (an ``eclipse''), which lasted 1500-1800 seconds. To avoid detector burn-in or local gain sag effects caused by depletion of electrons in the multiplier plate, and to smooth over local irregularities in detector response, the telescope did not stare at a fixed location on the sky during an observation but continuously moved the boresight relative to the target position. Several boresight patterns, or ``modes,'' were used over the course of the mission, which impacted the nature of the corresponding observational data.
 
@@ -64,7 +64,7 @@ In Section \ref{motivation} we describe the motivation behind constructing the g
 \label{motivation}
 Micro-channel plate (MCP) detectors like those on GALEX are non-integrating imagers---sometimes called ``photon-counting''---that can record position and time information individually for every incident photon (``event''). The GALEX detectors were capable of recording data with a time resolution of five microseconds, though the vast majority of observations were made in a compressed mode at five millisecond resolution. Due primarily to computer storage and processing constraints, calibrated GALEX data were only released and archived by the mission as either per-observation or multi-observation (coadded) image maps with exposure depths on the order of hundreds to thousands of seconds. Although the GALEX mission's data calibration pipeline (hereafter referred to as the ``mission pipeline'') was capable of producing aspect-corrected photon list files (called ``extended'' or ``x-files''), this was rarely done only as part of instrument diagnostics or by special request of members of the scientific community \citep{rob2005, wel2006, wel2007}. The team produced very little documentation about the detector performance or calibration on timescales shorter than $100$ seconds.
 
-Advances in data storage and processing capabilities now make archiving, distribution, and analysis of the photon-level data technologically feasible. By the end of the mission, however, the mission pipeline had grown to sufficient complexity and dependence on its software and hardware operating environment that attempts to run it outside of the networked infrastructure upon which it was developed at Caltech proved unsuccessful. We undertook the gPhoton project, in part, to migrate key functionality of the mission pipeline into a stand-alone, open source software base that is robust enough to operating environment to serve as a jumping off point for future researchers to modify or improve the calibration or otherwise build on the legacy of this unique data set. Another major objective was to enable the creation of calibrated light curves and images at user-specified spatial and temporal scales, permitting studies of short time-domain variability in the ultraviolet over a significant fraction of the sky for the first time. The gPhoton project design goals included the following key features:
+Advances in data storage and processing capabilities now make archiving, distribution, and analysis of the photon-level data technologically feasible. By the end of the mission, however, the mission pipeline had grown to sufficient complexity and dependence on its software and hardware operating environment that attempts to run it outside of the networked infrastructure upon which it was developed at Caltech proved unsuccessful. We undertook the gPhoton project,\footnote{\url{http://dx.doi.org/doi:10.17909/T9CC7G} \textbar \url{http://ascl.net/1603.004} \textbar \url{https://github.com/cmillion/gPhoton}} in part, to migrate key functionality of the mission pipeline into a stand-alone, open source software base that is robust enough to operating environment to serve as a jumping off point for future researchers to modify or improve the calibration or otherwise build on the legacy of this unique data set. Another major objective was to enable the creation of calibrated light curves and images at user-specified spatial and temporal scales, permitting studies of short time-domain variability in the ultraviolet over a significant fraction of the sky for the first time. The gPhoton project design goals included the following key features:
 \begin{itemize}
 \item{A stand-alone GALEX calibration pipeline that reproduces the capabilities of the mission pipeline to reduce spacecraft data to time-tagged, aspect-corrected photon event data.}
 \item{A publicly accessible database containing nearly all photon events from the mission.}
@@ -126,14 +126,14 @@ This module creates integrated images and/or image cubes for targeted regions of
 \label{calibration}
 We performed both relative and absolute tests of gAperture performance, comparing gPhoton output to that of the mission's merged catalog (MCAT) and standard white dwarf calibration star, LDS749B. In all cases of relative comparisons against the MCAT, the catalog source center positions and observation time ranges were used as inputs to gAperture on a per-visit basis.
 
-For tests of relative astrometry and photometry, a circular photometric aperture with a radius of $6''$ was used, equivalent to the MCAT \emph{APER4} column, and the gAperture background annulus was defined to extend from $30''$ to $90''$. When appropriate, measured source magnitudes (from both gAperture and MCAT) were aperture corrected using the table defined in Figure 4 of \cite{mor2007}. ``Random'' source positions were determined by using a random number generator to draw right ascension and declination pairs as the centers of $0.1$ degree cone searches of the MCAT for all sources between 14 and 22.5 AB Magnitude with less than 5000 seconds of total raw exposure coverage (to avoid biasing the analysis with a small number of sources from a handful of very deep fields). The total sample was 10282 in FUV and 22674 in NUV. Any integrations for which gAperture returned a non-zero flag value were excluded, except for flags related to masked regions in the annulus. (Because the annulus was so large, this would have eliminated many otherwise valid observations). The unflagged sample used in analysis was 3498 sources in FUV and 8615 in NUV, respectively, representing a broad sampling in both space and time.
+For tests of relative astrometry and photometry, a circular photometric aperture with a radius of $6''$ was used, equivalent to the MCAT \emph{APER4} column, and the gAperture background annulus was defined to extend from $30''$ to $90''$. When appropriate, measured source magnitudes (from both gAperture and MCAT) were aperture corrected using the table defined in Figure 4 of \cite{mor2007}. ``Random'' source positions were determined by using a random number generator to draw right ascension and declination pairs as the centers of $0.1$ degree cone searches of the MCAT for all sources between 14 and 22.5 AB Magnitude with less than 5000 seconds of total raw exposure coverage (to avoid biasing the analysis with a small number of sources from a handful of very deep fields). The total sample was 10282 in FUV and 22674 in NUV. Unless stated otherwise, any integrations for which gAperture returned a non-zero flag value were excluded, except for flags related to masked regions in the annulus. (Because the annulus was so large, this would have eliminated many otherwise valid observations). The unflagged sample used in analysis was 3498 sources in FUV and 8615 in NUV, respectively, representing a broad sampling in both space and time.
 
 In Figures 2-14, Gaussian Kernel Density Estimates (KDE) with bandwidths chosen by brute force cross-validation are represented by blue curves. The peak of the KDE is reported as the peak of the distribution of data. To give a sense of the skew of the distribution, we also report the median value of all data along the same axis. For ease of interpretation, it will be useful to note that a difference of magnitudes can be interpreted as a percent difference in flux under a linear approximation near zero.
 
 The source data for all plots, the commands and scripts used to generate the source data, and the scripts used to create the graphics and results are included as online supplements to this paper. Similar resources reside in our Github project repository. We encourage researchers to use these as starting points to generate error analyses appropriate to their specific projects.
 
 \subsection{Relative Astrometry}
-In figures \ref{fuvastrometry} and \ref{nuvastrometry}, we compare the MCAT source center positions to the centers-of-brightness (that is to say, the mean photon position) within a $6''$ aperture. The relative astrometry is very good, with sharp and symmetrical distributions around zero in both Right Ascension (RA) and Declination (Dec) for both bands. A possible cause of divergence in astrometry between gAperture and the MCAT is that the center of brightness was calculated by the mission pipeline on an image with $1.5''$ pixels, necessarily requiring interpolation, whereas gAperture directly samples the detector positions of the incident photons.
+In figure \ref{astrometry}, we compare the MCAT source center positions to the centers-of-brightness (that is to say, the mean photon position) within a $6''$ aperture. The relative astrometry is very good, with sharp and symmetrical distributions around zero in both Right Ascension (RA) and Declination (Dec) for both bands. A possible cause of divergence in astrometry between gAperture and the MCAT is that the center of brightness was calculated by the mission pipeline on an image with $1.5''$ pixels, necessarily requiring interpolation, whereas gAperture directly samples the detector positions of the incident photons.
 
 \subsection{Background Correction}
 \label{bgcorr}
@@ -141,7 +141,7 @@ At present, gAperture implements two methods to estimate sky background. The fir
 
 The second background method implemented by gAperture is a simple annulus estimate where the surface flux within a user-defined annulus surrounding the extraction aperture is scaled to the area of the aperture and subtracted from the source flux. The annulus background method can produce biased results in cases where it captures light from relatively bright nearby sources, although that effect can often be mitigated by carefully defining the annulus to avoid such contamination. As discussed further in Section \ref{deadtimedesc}, the diffuse sky background in GALEX observations can vary over the course of an eclipse due to changes in the ambient terrestrial airglow as the spacecraft traveled from limb to limb. When constructing light curves with the intention of looking for short time domain variability, the annulus background method will correct for this variable diffuse background.
 
-A comparison of background surface brightnesses produced by the two methods (Fig. \ref{bgrelphot}) demonstrates that the annulus background estimation method overestimates the background surface flux in both bands as compared to the MCAT, as expected by the possibility of unmasked background sources. The overestimate is more severe in NUV (at $\sim 13\%$ difference on average) than FUV ($\sim 1\%$), probably because there are simply fewer total GALEX-resolvable FUV sources in the sky. It's worth emphasizing again that the analysis in this calibration test naively used the same annulus definition for all sources; the relative difference between the methods could be mitigated in many cases by carefully (i.e. manually) defining the extents of annuli independently for each source. We suggest that researchers routinely check the MCAT as well as a gMap-produced images of the targeted regions for nearby sources that might bias gAperture photometry.
+A comparison of background surface brightnesses produced by the two methods is presented in (Fig. \ref{bgrelphot}). Because the flux within the aperture was not of interest here, this analysis included sources which had a gAperture mask flag associated with the aperture, resulting in sample sizes of 11917 and 4447 in NUV and FUV respectively. The annulus background estimation method overestimates the background surface flux in both bands as compared to the MCAT, as expected by the possibility of unmasked background sources. The overestimate is more severe in NUV (at $\sim 13\%$ difference on average) than FUV ($\sim 1\%$), probably because there are simply fewer total GALEX-resolvable FUV sources in the sky. It's worth emphasizing again that the analysis in this calibration test naively used the same annulus definition for all sources; the relative difference between the methods could be mitigated in many cases by carefully (i.e. manually) defining the extents of annuli independently for each source. We suggest that researchers routinely check the MCAT as well as a gMap-produced images of the targeted regions for nearby sources that might bias gAperture photometry.
 
 During development, we explored two methods that might have mitigated the presence of stars in or near the background annulus. The first, which we called ``swiss cheese,'' mimicked the method used in the analysis of the GALEX standard star LDS749B described in \citep{mor2007}: events corresponding to nearby bright stars (as defined by the MCAT) were masked and excluded from subsequent calculations. The second method was an attempt at a direct port of the ``sigma-clipping'' algorithm used by the mission pipeline. Both of these methods were abandoned because they were computationally complex, sensitive to somewhat arbitrary input parameters, and produced poor agreement with catalog fluxes. We might revisit these or other methods for background estimation in future work.
 
@@ -152,7 +152,7 @@ As a test of the relative photometric precision from gPhoton, we plot the differ
 \subsection{Absolute Flux Precision}
 As described in \citet{mor2007}, the GALEX mission used the white dwarf LDS749B as the primary calibration reference source. We use the refined reference magnitudes of 15.6 AB Mag in FUV and 14.76 AB Mag in NUV quoted by \cite{camarota2014white} based on the results of \cite{bohlin2008absolute}. The top portions of Figures \ref{ldsabsphotfuv} and \ref{ldsabsphotnuv} display the results of a re-extraction of LDS749B photometry as a test of the absolute flux precision of gAperture. This sample contains all visit-level MCAT detections within 0.001 degrees of the nominal source position, with gAperture parameters set to precisely match time ranges and sky positions in each band. We used a photometric aperture with a $17.3''$ radius, equivalent to MCAT \emph{APER7}, and background estimates from the MCAT. To provide a high quality sample, only those sources were considered that did not have a relevant gAperture quality flag, fell within $1200''$ of the detector center, and were observed prior to the CSP; this cut resulted in a final sample of 452 visits in FUV and 867 in NUV. We compare the distributions of fluxes to the predicted 3$\sigma$ counting error, as a function of exposure time, assuming the reference magnitude and no contribution from background. Figure \ref{magdist} provides the magnitude distribution for all observations. To provide a reference point, the bottom portions of Figures \ref{ldsabsphotfuv} and \ref{ldsabsphotnuv}, as well as \ref{magdistmcat}, contain data for the same observations as pulled directly from the \emph{APER7} column of the MCAT. The aperture correction in both bands was 0.07 AB Magnitude.
 
-In FUV, gAperture produces photometry of LDS749B with a peak density at 15.65 AB Magnitude, with 52\% of the data falling within 3$\sigma$ of the reference value of 15.6 AB Mag. In comparison, the MCAT values have a peak of 15.62 AB Mag, and 88\% fall within 3$\sigma$ of the reference value. In NUV, gAperture produces photometry with a peak density at 14.76 AB Mag, with 89\% of the data falling within 3$\sigma$ of the reference value of 14.76 AB Mag. In comparison, the MCAT values peak at 14.75 AB Mag, with 80\% falling within 3$\sigma$.
+In NUV, gAperture produces photometry with a peak density at 14.76 AB Mag, with 89\% of the data falling within 3$\sigma$ of the reference value of 14.76 AB Mag. In comparison, the MCAT values peak at 14.75 AB Mag, with 80\% falling within 3$\sigma$. In FUV, gAperture produces photometry of LDS749B with a peak density at 15.65 AB Magnitude, with 52\% of the data falling within 3$\sigma$ of the reference value of 15.6 AB Mag. In comparison, the MCAT values have a peak of 15.62 AB Mag, and 88\% fall within 3$\sigma$ of the reference value.
 
 We have not yet been able to determine the cause of the larger dispersion in FUV (Figure \ref{ldsabsphotfuv}, top). It is easily detected as a multi-modality in magnitude differences between gAperture and MCAT photometry of the same source. The photometry produced by gAperture consistently reports dimmer values than the MCAT, with clusters at offsets of approximately 1\% and 3\% and between 5\% and 15\%. There is a bulk offset in all data of a few percent between data collected before November of 2007 and after June of 2008, which accounts for the modes at 1\% and 3\%. While dates are consistent with recovery from an FUV anomaly in November 2007 and an instrument shutdown in June of 2008, we have no explanation for why these events would create a discrepancy between gPhoton and MCAT photometry. The more severe outliers at $\sim10\%$ are strongly correlated with observation leg number. In order to thoroughly sample the detector with the calibration standards, many calibration survey (CAI) observations were collected in petal-pattern mode, but each individual leg was processed as a unique visit in the style of AIS. The most extreme of these outliers are almost exclusively confined to the first three legs of these observation sequences (Figure \ref{ldslegs}).
 
@@ -275,22 +275,18 @@ DB & min $\delta$ & max $\delta$ & N\_FUV & N\_NUV\\
 
 
 \begin{figure}
-\includegraphics[scale=0.65]{Fig02.eps}
-\caption{Relative offsets between mission catalog (MCAT) source positions and gAperture centers-of-brightness, in the FUV band, within photometric apertures with $6''$ radii.
-\label{fuvastrometry}}
+\begin{tabular}{cc}
+\includegraphics[scale=0.43]{Fig02a.eps}&
+\includegraphics[scale=0.43]{Fig02b.eps}\\
+\end{tabular}
+\caption{Relative offsets between mission catalog (MCAT) source positions and gAperture centers-of-brightness, in the FUV band, within photometric apertures with $6''$ radii. The relative astrometry is within $0.01''$ in right ascension and declination in both bands.
+\label{astrometry}}
 \end{figure}
 
 
 \begin{figure}
-\includegraphics[scale=0.65]{Fig03.eps}
-\caption{Relative offsets between mission catalog (MCAT) source positions and gAperture centers-of-brightness, in the NUV band, within photometric apertures with $6''$ radii.
-\label{nuvastrometry}}
-\end{figure}
-
-
-\begin{figure}
-\includegraphics[scale=0.675]{Fig04.eps}
-\caption{Effective background surface brightness within a $6''$ aperture for the gAperture unmasked annulus method of background methods as compared to values in the visit-level MCAT. Estimates are within $\sim 1\%$ on average in FUV and $\sim 13\%$ on average in NUV. The larger difference in NUV is attributable to more and brighter possible contaminating sources for NUV in the naively defined annulus extending $30"$ to $90"$ from the position of the primary source.
+\includegraphics[scale=0.675]{Fig03.eps}
+\caption{Effective background surface brightness within a $6''$ aperture for the gAperture unmasked annulus method of background methods as compared to values in the visit-level MCAT. Estimates are within $\sim 1\%$ on average in FUV and $\sim 13\%$ on average in NUV. The larger difference in NUV is attributable to more and brighter possible contaminating sources in the naively defined annulus extending $30"$ to $90"$ from the position of the primary source.
 \label{bgrelphot}}
 \end{figure}
 
@@ -298,9 +294,9 @@ DB & min $\delta$ & max $\delta$ & N\_FUV & N\_NUV\\
 \begin{figure}[t!]
 \begin{minipage}[c][11cm][c]{1.\textwidth}
 \centering
-\includegraphics[scale=0.64]{Fig05a.eps}
-\includegraphics[scale=0.64]{Fig05b.eps}
-\caption{TOP: Comparison between MCAT and gAperture FUV fluxes for 3498 randomly selected sources, using $6''$ radius aperture annuli and backgrounds estimated from an unmasked annuli extending from $30''$ to $90''$. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 2$\%, on average, down to 22.5 AB Magnitude, and half of the data fall within $\sim 8$\%.  BOTTOM: Comparison between MCAT and gAperture NUV fluxes for 8615 randomly selected sources, using $6''$ radius aperture and backgrounds estimated from an unmasked annuli extending from $30''$ to $90''$. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 7$\% on average, down to 22.5 AB Magnitude, with an increasing offset at magnitudes dimmer than ~$19$. Half of the data fall within $\sim 15$\%. The behavior for dim sources is consistent with Fig. \ref{bgrelphot} and would be mitigated if background apertures were customized to avoid any nearby, contaminating sources.
+\includegraphics[scale=0.64]{Fig04a.eps}
+\includegraphics[scale=0.64]{Fig04b.eps}
+\caption{TOP: Comparison between MCAT and gAperture NUV fluxes for 8615 randomly selected sources, using $6''$ radius aperture and backgrounds estimated from an unmasked annuli extending from $30''$ to $90''$. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 7$\% on average, down to 22.5 AB Magnitude, with an increasing offset at magnitudes dimmer than ~$19$. Half of the data fall within $\sim 15$\%. The behavior for dim sources is consistent with Fig. \ref{bgrelphot} and would be mitigated if background apertures were customized to avoid any nearby, contaminating sources. BOTTOM: Comparison between MCAT and gAperture FUV fluxes for 3498 randomly selected sources, using $6''$ radius aperture annuli and backgrounds estimated from an unmasked annuli extending from $30''$ to $90''$. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 2$\%, on average, down to 22.5 AB Magnitude, and half of the data fall within $\sim 8$\%.
 \label{fuvnuvrelphot}}
 \end{minipage}
 \end{figure}
@@ -309,10 +305,21 @@ DB & min $\delta$ & max $\delta$ & N\_FUV & N\_NUV\\
 \begin{figure}[t!]
 \begin{minipage}[c][11cm][c]{1.\textwidth}
 \centering
-\includegraphics[scale=0.64]{Fig06a.eps}
-\includegraphics[scale=0.64]{Fig06b.eps}
-\caption{TOP: Comparison between MCAT and gAperture FUV fluxes for 3498 randomly selected sources, using $6''$ radius aperture and MCAT background estimates. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 4$\% on average down to 22.5 AB Magnitude, and half of the data fall within $\sim 7$\%.  BOTTOM: Comparison between MCAT and gAperture NUV fluxes for 8615 randomly selected sources, using $6''$ radius aperture and MCAT background estimates. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 2$\% on average down to 22.5 AB Magnitude, and half of the data fall within $\sim 7$\%.
+\includegraphics[scale=0.64]{Fig05a.eps}
+\includegraphics[scale=0.64]{Fig05b.eps}
+\caption{TOP: Comparison between MCAT and gAperture NUV fluxes for 8615 randomly selected sources, using $6''$ radius aperture and MCAT background estimates. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 2$\% on average down to 22.5 AB Magnitude, and half of the data fall within $\sim 7$\%. BOTTOM: Comparison between MCAT and gAperture FUV fluxes for 3498 randomly selected sources, using $6''$ radius aperture and MCAT background estimates. The dashed line in the left panel denotes the median difference in one magnitude bins. The methods agree within $\sim 4$\% on average down to 22.5 AB Magnitude, and half of the data fall within $\sim 7$\%.
 \label{fuvnuvrelphotmcat}}
+\end{minipage}
+\end{figure}
+
+
+\begin{figure}[t!]
+\begin{minipage}[c][11cm][c]{1.\textwidth}
+\centering
+\includegraphics[scale=0.625]{Fig06a.eps}
+\includegraphics[scale=0.625]{Fig06b.eps}
+\caption{TOP: NUV gAperture LDS749B BOTTOM: NUV MCAT LDS749B
+\label{ldsabsphotfuv}}
 \end{minipage}
 \end{figure}
 
@@ -322,40 +329,27 @@ DB & min $\delta$ & max $\delta$ & N\_FUV & N\_NUV\\
 \centering
 \includegraphics[scale=0.625]{Fig07a.eps}
 \includegraphics[scale=0.625]{Fig07b.eps}
-\caption{TOP: Comparison of gAperture FUV fluxes for LDS749B to the reference value of 15.6 AB Mag (solid line) as a function of exposure depth. The aperture had a radius of $17.3''$, which corresponds to MCAT column APER7, and backgrounds estimated from the MCAT. The error bars on the points denote 1$\sigma$ as reported by gAperture. The dashed lines denote theoretically predicted 3$\sigma$ scatter as predicted from counting statistics; 52\% of the FUV data lie within 3$\sigma$. The data points shown in red with x symbols correspond to observations collected during the first three legs of a calibration pattern, which are known to be especially large outliers per Fig. \ref{ldslegs}. When these observations are eliminated from the calculation, 75\% of the FUV data lie within 3 $\sigma$. BOTTOM: Comparison of MCAT APER7 ($17.3"$ radius aperture) FUV fluxes for LDS749B to the reference value of 15.6 AB Mag (solid line) as a function of exposure depth. The error bars on the points denote 1$\sigma$ as reported by the MCAT. The dashed lines denote ideal 3$\sigma$ scatter as predicted from counting statistics; 88\% of the FUV data lie within 3$\sigma$.
-\label{ldsabsphotfuv}}
-\end{minipage}
-\end{figure}
-
-
-\begin{figure}[t!]
-\begin{minipage}[c][11cm][c]{1.\textwidth}
-\centering
-\includegraphics[scale=0.625]{Fig08a.eps}
-\includegraphics[scale=0.625]{Fig08b.eps}
-\caption{TOP: Comparison of gAperture NUV fluxes for LDS749B to the reference value of 14.76 AB Mag (solid line) as a function of exposure depth. The aperture had a radius of $17.3''$, which corresponds to MCAT column APER7, and backgrounds estimated from the MCAT. The error bars on the points denote 1$\sigma$ as reported by gAperture. The dashed lines denote theoretically predicted 3$\sigma$ scatter as predicted from counting statistics; 89\% of the NUV data lie within 3$\sigma$.  BOTTOM: Comparison of MCAT APER7 ($17.3"$ radius aperture) NUV fluxes for LDS749B to the reference value of 14.76 AB Mag (solid line) as a function of exposure depth. The error bars on the points denote 1$\sigma$ as reported by the MCAT. The dashed lines denote ideal 3$\sigma$ scatter as predicted from counting statistics; 80\% of the NUV data lie within 3$\sigma$.
+\caption{TOP: FUV gAperture LDS749B BOTTOM: FUV MCAT LDS749B
 \label{ldsabsphotnuv}}
 \end{minipage}
 \end{figure}
 
 
 \begin{figure}
-\includegraphics[scale=0.55]{Fig09.eps}
-\caption{The left and right panels give the magnitude distributions of gAperture photometry of LDS749B given in the top portions of Figs. \ref{ldsabsphotfuv} and \ref{ldsabsphotnuv} respectively. The peak density of magnitudes falls within $\sim 5$\% in FUV of the reference value and well under $1$\% for NUV. When the first three legs are excluded from the calculation, the FUV has a peak density at 15.63 AB Magnitudes, a $\sim 3$\% offset from the reference value.
+\includegraphics[scale=0.55]{Fig08a.eps}
+\includegraphics[scale=0.55]{Fig08b.eps}
+\caption{(a) (b) (c) (d)
 \label{magdist}}
 \end{figure}
 
 
 \begin{figure}
-\includegraphics[scale=0.50]{Fig10.eps}
-\caption{The left and right panels give the magnitude distributions of MCAT photometry of LDS749B given in the bottom portions of Figs. \ref{ldsabsphotfuv} and \ref{ldsabsphotnuv} respectively. The peak density of magnitudes falls within $\sim 2$\% in FUV of the reference value and $\sim 1$\% for NUV.
-\label{magdistmcat}}
-\end{figure}
-
-
-\begin{figure}
-\includegraphics[scale=0.55]{Fig11.eps}
-\caption{There is a multi-modal distribution in the difference between gAperture and MCAT magnitudes of some sources, especially obvious for relatively bright stars observed as part of the calibration survey (CAI). Modes appear to be centered around offsets of 1\%, 3\%, and 15\%, with gAperture consistently producing dimmer photometry than the mission. The worst of these outliers are strongly correlated with the first three legs of the calibration aspect pattern, but the cause is currently unknown.
+\includegraphics[scale=0.55]{Fig09a.eps}
+\begin{tabular}{cc}
+\includegraphics[scale=0.41]{Fig09b.eps}&
+\includegraphics[scale=0.41]{Fig09c.eps}\\
+\end{tabular}
+\caption{(a) There is a multi-modal distribution in the difference between gAperture and MCAT magnitudes of some sources, especially obvious for relatively bright stars observed as part of the calibration survey (CAI). Modes appear to be centered around offsets of 1\%, 3\%, and 15\%, with gAperture consistently producing dimmer photometry than the mission. The worst of these outliers are strongly correlated with the first three legs of the calibration aspect pattern, but the cause is currently unknown. (b) (c)
 \label{ldslegs}}
 \end{figure}
 
@@ -363,8 +357,8 @@ DB & min $\delta$ & max $\delta$ & N\_FUV & N\_NUV\\
 \begin{figure}[t!]
 \begin{minipage}[c][11cm][c]{1.\textwidth}
 \centering
-\includegraphics[scale=0.95]{Fig12a.eps}
-\includegraphics[scale=0.90]{Fig12b.eps}
+\includegraphics[scale=0.90]{Fig10a.eps}
+\includegraphics[scale=0.90]{Fig10b.eps}
 \caption{TOP: FUV stim rates and fit of a linear mixture model to stim count rates as a function of global count rate for 1970 FUV visits. Values for $16\%$, $50\%$ and $84\%$ confidence intervals in offset and slope are provided. The small number of data points indicated by a filled in circle were rejected by the mixture model and not used in the fit.  BOTTOM: NUV stim rates and fit of a linear mixture model to stim count rates as a function of global count rate for 2001 NUV visits. Values for $16\%$, $50\%$ and $84\%$ confidence intervals in offset and slope are provided. The non-linear rolloff of data starting near 60,000 cps is likely a real effect due to global detector gain sag. The small number of data points indicated by a filled in circle were rejected by the mixture model and not used in the fit.
 \label{fuvnuvstim}}
 \end{minipage}
@@ -372,7 +366,7 @@ DB & min $\delta$ & max $\delta$ & N\_FUV & N\_NUV\\
 
 
 \begin{figure}
-\includegraphics[scale=0.49]{Fig13.eps}
+\includegraphics[scale=0.49]{Fig11.eps}
 \caption{Optimal light curve bin sizes depend on a number of factors, most prominent of which are the GALEX band in which the analysis is being performed, the AB Magnitude of the target being observed, and the desired precision of the measurement of source brightness or change in source brightness. These figures provide estimates of 3$\sigma$ measurement errors in both bands, based on counting statistics \emph{with no contribution from background}, for a range of target brightnesses and exposure depths up to a full eclipse.
 \label{sigmadetlim}}
 \end{figure}
@@ -381,7 +375,7 @@ DB & min $\delta$ & max $\delta$ & N\_FUV & N\_NUV\\
 \clearpage
 
 \begin{figure}
-\includegraphics[scale=0.375]{Fig14.eps}
+\includegraphics[scale=0.375]{Fig12.eps}
 \caption{Flares detected on CR Draconis using gPhoton, across the lifetime of the mission with a 10 second cadence. When available, FUV light curves are plotted (in blue) along with the NUV curves (in black). Fluxes have not been aperture corrected. \label{crdraflares}}
 \end{figure}
 
@@ -389,7 +383,7 @@ DB & min $\delta$ & max $\delta$ & N\_FUV & N\_NUV\\
 \clearpage
 
 \begin{figure}
-\includegraphics[scale=0.375]{Fig15.eps}
+\includegraphics[scale=0.375]{Fig13.eps}
 \caption{Deep coadd image of CR Draconis using all available NUV photon events. The image is in counts, since we are only looking to define our photometric aperture and search for possible contamination sources. The aperture, inner annulus, and outer annulus for photometry are represented by the green, orange, and red circles, respectively.  There is a source to the lower left that is $\sim 0.5$\% the peak of CR Draconis itself. Although testing showed it did not significantly impact the photometry, we define our apertures such that it is not included within them.\label{crdracoadd}}
 \end{figure}
 %%%%%%%%%%%%%%%%%% end figures %%%%%%%%%%%%%%%%%%

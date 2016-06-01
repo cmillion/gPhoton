@@ -46,6 +46,7 @@ outpath = '.'
 bands = ['FUV','NUV']
 querydata = pd.read_csv('{path}/stimquery.csv'.format(path=inpath))
 
+''' Uncomment this block in order to rerun the database queries.
 dtdata = {}
 for band in bands:
     stimdata = pd.read_csv('{b}Stim.csv'.format(b=band))
@@ -74,7 +75,7 @@ output = open('{path}/stimdata.pkl'.format(path=inpath), 'wb')
 # Pickle dictionary using protocol 0.
 pickle.dump(dtdata, output)
 output.close()
-
+'''
 #------------------------------------
 # FUV linear mixture model
 
@@ -230,16 +231,17 @@ plt.text(5000, 76,
         bp='+{v}'.format(v=round(b_mcmc[1],2)),
         bm='-{v}'.format(v=round(b_mcmc[2],2))), fontsize=18)
 
-plt.title('{b} Stim vs. Global Countrate (n={n})'.format(
-    b=band,n=bg_ct+fg_ct),fontsize=16)
-plt.xlabel("Global Countrate (ct/s)",fontsize=14)
-plt.ylabel("Stim Countrate (ct/s)",fontsize=14)
+#plt.title('{b} Stim vs. Global Countrate (n={n})'.format(
+#    b=band,n=bg_ct+fg_ct),fontsize=16)
+plt.xlabel("{b} Global Countrate (ct/s, n={n})".format(
+    b=band,n=bg_ct+fg_ct),fontsize=14)
+plt.ylabel("{b} Stim Countrate (ct/s)".format(b=band),fontsize=14)
 plt.tick_params(axis='both', which='major', labelsize=12)
 plt.ylim(68, 78)
 plt.xlim(0, 17000)
-plt.savefig('{path}/Stim_v_GCR_{b}.pdf'.format(path=outpath,b=band),
+plt.savefig('{path}/Fig10a.pdf'.format(path=outpath,b=band),
     format='pdf',dpi=1000)
-plt.close()
+#plt.close()
 
 # Print a summary
 print("""FUV - MCMC result:
@@ -400,14 +402,15 @@ plt.text(15000, 45,
         bp='+{v}'.format(v=round(b_mcmc[1],2)),
         bm='-{v}'.format(v=round(b_mcmc[2],2))), fontsize=18)
 
-plt.title('{b} Stim vs. Global Countrate (n={n})'.format(
-    b=band,n=fg_ct+bg_ct),fontsize=16)
-plt.xlabel("Global Countrate (ct/s)",fontsize=14)
-plt.ylabel("Stim Countrate (ct/s)",fontsize=14)
+#plt.title('{b} Stim vs. Global Countrate (n={n})'.format(
+#    b=band,n=fg_ct+bg_ct),fontsize=16)
+plt.xlabel("{b} Global Countrate (ct/s, n={n})".format(
+    b=band,n=fg_ct+bg_ct),fontsize=14)
+plt.ylabel("{b} Stim Countrate (ct/s)".format(b=band),fontsize=14)
 plt.tick_params(axis='both', which='major', labelsize=12)
 plt.ylim(40, 75)
 plt.xlim(10000, 70000)
-plt.savefig('{path}/Stim_v_GCR_{b}.pdf'.format(path=outpath,b=band),
+plt.savefig('{path}/Fig10b.pdf'.format(path=outpath,b=band),
     format='pdf',dpi=1000)
 
 # Report some results.
