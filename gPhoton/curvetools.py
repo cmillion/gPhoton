@@ -621,7 +621,7 @@ def detedgewarning(bin_ix, events, verbose=0, valid_detrad=0.5):
     :param valid_detrad: The radius, in degrees, beyond which an edge warning is
     raised.
 
-    :type detrad: float
+    :type valid_detrad: float
 
     :returns: bool -- Returns True/False whether a given set of events are too
     close to the edge of the detector.
