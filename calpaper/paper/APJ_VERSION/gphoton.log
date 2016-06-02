@@ -1,19 +1,19 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/MacPorts 2015_9) (preloaded format=latex 2016.2.18)  6 MAY 2016 17:31
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014/Fink) (preloaded format=latex 2015.4.16)  2 JUN 2016 15:38
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **gphoton.tex
 (./gphoton.tex
-LaTeX2e <2015/01/01>
-Babel <3.9l> and hyphenation patterns for 44 languages loaded.
+LaTeX2e <2014/05/01>
+Babel <3.9k> and hyphenation patterns for 78 languages loaded.
 (./aastex.cls
 Document Class: aastex 2005/06/22 5.2/AAS markup document class
 Class aastex Info: Original \LaTeX2.09 style by Chris Biemesderfer (chris@seago
 at.com). Adapted to \LaTeXe by A. Ogawa (ogawa@teleport.com) on input line 83.
-(/opt/local/share/texmf-texlive/tex/latex/base/article.cls
-Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
-(/opt/local/share/texmf-texlive/tex/latex/base/size11.clo
-File: size11.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
+(/sw/share/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
+(/sw/share/texmf-dist/tex/latex/base/size11.clo
+File: size11.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count79
 \c@section=\count80
@@ -27,40 +27,40 @@ File: size11.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
 )
-(/opt/local/share/texmf-texlive/tex/latex/base/latexsym.sty
+(/sw/share/texmf-dist/tex/latex/base/latexsym.sty
 Package: latexsym 1998/08/17 v2.2e Standard LaTeX package (lasy symbols)
 \symlasy=\mathgroup4
 LaTeX Font Info:    Overwriting symbol font `lasy' in version `bold'
-(Font)                  U/lasy/m/n --> U/lasy/b/n on input line 52.
+(Font)                  U/lasy/m/n --> U/lasy/b/n on input line 47.
 )
-(/opt/local/share/texmf-texlive/tex/latex/graphics/graphicx.sty
-Package: graphicx 2014/10/28 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
+(/sw/share/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2014/04/25 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
 
-(/opt/local/share/texmf-texlive/tex/latex/graphics/keyval.sty
-Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+(/sw/share/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2014/05/08 v1.15 key=value parser (DPC)
 \KV@toks@=\toks14
 )
-(/opt/local/share/texmf-texlive/tex/latex/graphics/graphics.sty
-Package: graphics 2014/10/28 v1.0p Standard LaTeX Graphics (DPC,SPQR)
+(/sw/share/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
 
-(/opt/local/share/texmf-texlive/tex/latex/graphics/trig.sty
+(/sw/share/texmf-dist/tex/latex/graphics/trig.sty
 Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
 )
-(/opt/local/share/texmf-texlive/tex/latex/latexconfig/graphics.cfg
+(/sw/share/texmf-dist/tex/latex/latexconfig/graphics.cfg
 File: graphics.cfg 2010/04/23 v1.9 graphics configuration of TeX Live
 )
-Package graphics Info: Driver file: dvips.def on input line 94.
+Package graphics Info: Driver file: dvips.def on input line 91.
 
-(/opt/local/share/texmf-texlive/tex/latex/graphics/dvips.def
-File: dvips.def 2014/10/14 v3.0j Driver-dependent file (DPC,SPQR)
+(/sw/share/texmf-dist/tex/latex/graphics/dvips.def
+File: dvips.def 2014/04/23 v3.0j Driver-dependant file (DPC,SPQR)
 ))
 \Gin@req@height=\dimen103
 \Gin@req@width=\dimen104
 )
-(/opt/local/share/texmf-texlive/tex/latex/amsfonts/amssymb.sty
+(/sw/share/texmf-dist/tex/latex/amsfonts/amssymb.sty
 Package: amssymb 2013/01/14 v3.01 AMS font symbols
 
-(/opt/local/share/texmf-texlive/tex/latex/amsfonts/amsfonts.sty
+(/sw/share/texmf-dist/tex/latex/amsfonts/amsfonts.sty
 Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
 \@emptytoks=\toks15
 \symAMSa=\mathgroup5
@@ -68,15 +68,15 @@ Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
 LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
 (Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
 ))
-(/opt/local/share/texmf-texlive/tex/latex/natbib/natbib.sty
+(/sw/share/texmf-dist/tex/latex/natbib/natbib.sty
 Package: natbib 2010/09/13 8.31b (PWD, AO)
 \bibhang=\skip43
 \bibsep=\skip44
 LaTeX Info: Redefining \cite on input line 694.
 \c@NAT@ctr=\count87
 )
-(/opt/local/share/texmf-texlive/tex/latex/tools/verbatim.sty
-Package: verbatim 2014/10/28 v1.5q LaTeX2e package for verbatim enhancements
+(/sw/share/texmf-dist/tex/latex/tools/verbatim.sty
+Package: verbatim 2003/08/22 v1.5q LaTeX2e package for verbatim enhancements
 \every@verbatim=\toks16
 \verbatim@line=\toks17
 \verbatim@in@stream=\read1
@@ -107,7 +107,7 @@ Package: verbatim 2014/10/28 v1.5q LaTeX2e package for verbatim enhancements
 \c@plate=\count95
 \my@footins=\box31
 )
-(/opt/local/share/texmf-texlive/tex/latex/lineno/lineno.sty
+(/sw/share/texmf-dist/tex/latex/lineno/lineno.sty
 Package: lineno 2005/11/02 line numbers on paragraphs v4.41
 \linenopenalty=\count96
 \output=\toks18
@@ -125,14 +125,14 @@ Package: lineno 2005/11/02 line numbers on paragraphs v4.41
 \bframebox=\box32
 LaTeX Info: Redefining \\ on input line 3056.
 )
-(/opt/local/share/texmf-texlive/tex/latex/hyperref/hyperref.sty
+(/sw/share/texmf-dist/tex/latex/hyperref/hyperref.sty
 Package: hyperref 2012/11/06 v6.83m Hypertext links for LaTeX
 
-(/opt/local/share/texmf-texlive/tex/generic/oberdiek/hobsub-hyperref.sty
+(/sw/share/texmf-dist/tex/generic/oberdiek/hobsub-hyperref.sty
 Package: hobsub-hyperref 2012/05/28 v1.13 Bundle oberdiek, subset hyperref (HO)
 
 
-(/opt/local/share/texmf-texlive/tex/generic/oberdiek/hobsub-generic.sty
+(/sw/share/texmf-dist/tex/generic/oberdiek/hobsub-generic.sty
 Package: hobsub-generic 2012/05/28 v1.13 Bundle oberdiek, subset generic (HO)
 Package: hobsub 2012/05/28 v1.13 Construct package bundles (HO)
 Package: infwarerr 2010/04/08 v1.3 Providing info/warning/error messages (HO)
@@ -173,25 +173,25 @@ Package: atbegshi 2011/10/05 v1.16 At begin shipout hook (HO)
 Package: refcount 2011/10/16 v3.4 Data extraction from label references (HO)
 Package: hycolor 2011/01/30 v1.7 Color options for hyperref/bookmark (HO)
 )
-(/opt/local/share/texmf-texlive/tex/generic/ifxetex/ifxetex.sty
+(/sw/share/texmf-dist/tex/generic/ifxetex/ifxetex.sty
 Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 )
-(/opt/local/share/texmf-texlive/tex/latex/oberdiek/auxhook.sty
+(/sw/share/texmf-dist/tex/latex/oberdiek/auxhook.sty
 Package: auxhook 2011/03/04 v1.3 Hooks for auxiliary files (HO)
 )
-(/opt/local/share/texmf-texlive/tex/latex/oberdiek/kvoptions.sty
+(/sw/share/texmf-dist/tex/latex/oberdiek/kvoptions.sty
 Package: kvoptions 2011/06/30 v3.11 Key value format for package options (HO)
 )
 \@linkdim=\dimen120
 \Hy@linkcounter=\count103
 \Hy@pagecounter=\count104
 
-(/opt/local/share/texmf-texlive/tex/latex/hyperref/pd1enc.def
+(/sw/share/texmf-dist/tex/latex/hyperref/pd1enc.def
 File: pd1enc.def 2012/11/06 v6.83m Hyperref: PDFDocEncoding definition (HO)
 )
 \Hy@SavedSpaceFactor=\count105
 
-(/opt/local/share/texmf-texlive/tex/latex/latexconfig/hyperref.cfg
+(/sw/share/texmf-dist/tex/latex/latexconfig/hyperref.cfg
 File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
 )
 Package hyperref Info: Hyper figures OFF on input line 4443.
@@ -203,7 +203,7 @@ Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4688.
 \c@Hy@tempcnt=\count106
 
-(/opt/local/share/texmf-texlive/tex/latex/url/url.sty
+(/sw/share/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip10
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
@@ -228,10 +228,10 @@ LaTeX Info: Redefining \pageref on input line 6369.
 
 Package hyperref Message: Driver (default): hdvips.
 
-(/opt/local/share/texmf-texlive/tex/latex/hyperref/hdvips.def
+(/sw/share/texmf-dist/tex/latex/hyperref/hdvips.def
 File: hdvips.def 2012/11/06 v6.83m Hyperref driver for dvips
 
-(/opt/local/share/texmf-texlive/tex/latex/hyperref/pdfmark.def
+(/sw/share/texmf-dist/tex/latex/hyperref/pdfmark.def
 File: pdfmark.def 2012/11/06 v6.83m Hyperref definitions for pdfmark specials
 \pdf@docset=\toks19
 \pdf@box=\box33
@@ -241,18 +241,18 @@ File: pdfmark.def 2012/11/06 v6.83m Hyperref definitions for pdfmark specials
 \Fld@listcount=\count112
 \c@bookmark@seq@number=\count113
 
-(/opt/local/share/texmf-texlive/tex/latex/oberdiek/rerunfilecheck.sty
+(/sw/share/texmf-dist/tex/latex/oberdiek/rerunfilecheck.sty
 Package: rerunfilecheck 2011/04/15 v1.7 Rerun checks for auxiliary files (HO)
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 82.
 )
 \Hy@SectionHShift=\skip46
 ))
-(/opt/local/share/texmf-texlive/tex/latex/tools/tabularx.sty
-Package: tabularx 2014/10/28 v2.10 `tabularx' package (DPC)
+(/sw/share/texmf-dist/tex/latex/tools/tabularx.sty
+Package: tabularx 2014/05/13 v2.10 `tabularx' package (DPC)
 
-(/opt/local/share/texmf-texlive/tex/latex/tools/array.sty
-Package: array 2014/10/28 v2.4c Tabular extension package (FMi)
+(/sw/share/texmf-dist/tex/latex/tools/array.sty
+Package: array 2008/09/09 v2.4c Tabular extension package (FMi)
 \col@sep=\dimen124
 \extrarowheight=\dimen125
 \NC@list=\toks22
@@ -267,24 +267,24 @@ Package: array 2014/10/28 v2.4c Tabular extension package (FMi)
 \TX@cols=\count114
 \TX@ftn=\toks23
 )
-(/opt/local/share/texmf-texlive/tex/latex/graphics/color.sty
-Package: color 2014/10/28 v1.1a Standard LaTeX Color (DPC)
+(/sw/share/texmf-dist/tex/latex/graphics/color.sty
+Package: color 2014/04/23 v1.1a Standard LaTeX Color (DPC)
 
-(/opt/local/share/texmf-texlive/tex/latex/latexconfig/color.cfg
+(/sw/share/texmf-dist/tex/latex/latexconfig/color.cfg
 File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
 )
-Package color Info: Driver file: dvips.def on input line 142.
+Package color Info: Driver file: dvips.def on input line 137.
 
-(/opt/local/share/texmf-texlive/tex/latex/graphics/dvipsnam.def
-File: dvipsnam.def 2014/10/14 v3.0j Driver-dependent file (DPC,SPQR)
+(/sw/share/texmf-dist/tex/latex/graphics/dvipsnam.def
+File: dvipsnam.def 2014/04/23 v3.0j Driver-dependant file (DPC,SPQR)
 ))
-(/opt/local/share/texmf-texlive/tex/latex/oberdiek/epstopdf.sty
+(/sw/share/texmf-dist/tex/latex/oberdiek/epstopdf.sty
 Package: epstopdf 2010/02/09 v2.5 Conversion with epstopdf on the fly (HO)
 
-(/opt/local/share/texmf-texlive/tex/latex/oberdiek/epstopdf-base.sty
+(/sw/share/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
 Package: epstopdf-base 2010/02/09 v2.5 Base part for package epstopdf
 
-(/opt/local/share/texmf-texlive/tex/latex/oberdiek/grfext.sty
+(/sw/share/texmf-dist/tex/latex/oberdiek/grfext.sty
 Package: grfext 2010/08/19 v1.1 Manage graphics extensions (HO)
 )
 
@@ -311,10 +311,10 @@ LaTeX Font Info:    ... okay on input line 17.
 AAS preprint substyle, v5.2 <12 Dec 2003>.
 \AtBeginShipoutBox=\box34
 Package hyperref Info: Link coloring OFF on input line 17.
-(/opt/local/share/texmf-texlive/tex/latex/hyperref/nameref.sty
+(/sw/share/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2012/10/27 v2.43 Cross-referencing by name of section
 
-(/opt/local/share/texmf-texlive/tex/generic/oberdiek/gettitlestring.sty
+(/sw/share/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
 Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 )
 \c@section@level=\count115
@@ -322,45 +322,24 @@ Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 17.
 LaTeX Info: Redefining \pageref on input line 17.
 LaTeX Info: Redefining \nameref on input line 17.
-
-(./gphoton.out) (./gphoton.out)
+ (./gphoton.out) (./gphoton.out)
 \@outlinefile=\write3
 \openout3 = `gphoton.out'.
 
-LaTeX Font Info:    Try loading font information for U+lasy on input line 46.
-
-(/opt/local/share/texmf-texlive/tex/latex/base/ulasy.fd
+LaTeX Font Info:    Try loading font information for U+lasy on input line 49.
+ (/sw/share/texmf-dist/tex/latex/base/ulasy.fd
 File: ulasy.fd 1998/08/17 v2.2e LaTeX symbol font definitions
 )
-LaTeX Font Info:    Try loading font information for U+msa on input line 46.
+LaTeX Font Info:    Try loading font information for U+msa on input line 49.
 
-(/opt/local/share/texmf-texlive/tex/latex/amsfonts/umsa.fd
+(/sw/share/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 46.
+LaTeX Font Info:    Try loading font information for U+msb on input line 49.
 
-(/opt/local/share/texmf-texlive/tex/latex/amsfonts/umsb.fd
+(/sw/share/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-)
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 46.
-
-(/opt/local/share/texmf-texlive/tex/latex/base/omscmr.fd
-File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <9> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 46.
-
-Overfull \hbox (9.7396pt too wide) in paragraph at lines 46--46
-[][][][][][][][][] \OMS/cmsy/m/n/9 j[][][][] j[][][][]| 
- []
-
-Missing character: There is no ï in font cmr10!
-Missing character: There is no ¿ in font cmr10!
-Missing character: There is no ½ in font cmr10!
-Missing character: There is no ï in font cmr10!
-Missing character: There is no ¿ in font cmr10!
-Missing character: There is no ½ in font cmr10!
-[1
+) [1
 
 ]
 
@@ -370,158 +349,162 @@ LaTeX Warning: Command \r invalid in math mode on input line 53.
 LaTeX Warning: Command \r invalid in math mode on input line 53.
 
 [2] [3]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 67.
+ (/sw/share/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <9> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 67.
+
+Overfull \hbox (9.7396pt too wide) in paragraph at lines 67--67
+[][][][][][][][][] \OMS/cmsy/m/n/9 j[][][][] j[][][][]| 
+ []
+
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 69.
- [4] [5] [6] [7] [8] [9] [10]
+[4] [5] [6] [7] [8] [9] [10]
 Overfull \hbox (57.189pt too wide) in paragraph at lines 140--140
 [][][][][][][][][]| 
  []
 
-[11] [12] [13] [14] [15] [16] [17] [18] [19] (./gphoton.bbl) [20] [21
-
-]
-Overfull \hbox (39.77097pt too wide) in alignment at lines 244--244
+[11] [12] [13] [14] [15] [16] [17] [18] [19] (./gphoton.bbl [20]) [21]
+Overfull \hbox (39.77097pt too wide) in alignment at lines 246--246
 [][][][][] 
  []
 
 
-Underfull \hbox (badness 2080) in paragraph at lines 253--253
+Underfull \hbox (badness 2080) in paragraph at lines 255--255
 \OT1/cmr/m/n/10.95 pho-ton event database that the
  []
 
 
-Underfull \hbox (badness 1484) in paragraph at lines 255--255
+Underfull \hbox (badness 1484) in paragraph at lines 257--257
 \OT1/cmr/m/n/10.95 given co-or-di-nate, time sam-pling,
  []
 
 
-Underfull \hbox (badness 2512) in paragraph at lines 256--257
+Underfull \hbox (badness 2512) in paragraph at lines 258--259
 \OT1/cmr/m/n/10.95 and/or cal-i-brated fluxes), for a
  []
 
 [22] [23]
 File: Fig01.eps Graphic file (type eps)
  <Fig01.eps>
-Overfull \hbox (4.51366pt too wide) in paragraph at lines 270--271
+Overfull \hbox (4.51366pt too wide) in paragraph at lines 272--273
 [][] 
  []
 
-File: Fig02.eps Graphic file (type eps)
-<Fig02.eps>
-Overfull \hbox (6.5199pt too wide) in paragraph at lines 276--278
+File: Fig02a.eps Graphic file (type eps)
+<Fig02a.eps>
+File: Fig02b.eps Graphic file (type eps)
+ <Fig02b.eps>
+Overfull \hbox (15.1993pt too wide) in paragraph at lines 278--283
 [][] 
  []
 
 File: Fig03.eps Graphic file (type eps)
 <Fig03.eps>
-Overfull \hbox (6.5199pt too wide) in paragraph at lines 283--285
-[][] 
+File: Fig04a.eps Graphic file (type eps)
+ <Fig04a.eps>
+File: Fig04b.eps Graphic file (type eps)
+ <Fig04b.eps>
+Underfull \hbox (badness 10000) in paragraph at lines 295--298
+
  []
 
-File: Fig04.eps Graphic file (type eps)
-<Fig04.eps>
-Overfull \hbox (6.5516pt too wide) in paragraph at lines 290--292
-[][] 
- []
+
+LaTeX Warning: Float too large for page by 2.18446pt on input line 299.
 
 File: Fig05a.eps Graphic file (type eps)
 <Fig05a.eps>
 File: Fig05b.eps Graphic file (type eps)
  <Fig05b.eps>
-Overfull \hbox (5.62053pt too wide) in paragraph at lines 299--302
- [][] 
- []
+Underfull \hbox (badness 10000) in paragraph at lines 303--306
 
-
-Overfull \hbox (5.62053pt too wide) in paragraph at lines 299--302
- [] 
  []
 
 File: Fig06a.eps Graphic file (type eps)
 <Fig06a.eps>
 File: Fig06b.eps Graphic file (type eps)
  <Fig06b.eps>
-Overfull \hbox (5.62053pt too wide) in paragraph at lines 310--313
- [][] 
- []
+Underfull \hbox (badness 10000) in paragraph at lines 311--314
 
-
-Overfull \hbox (5.62053pt too wide) in paragraph at lines 310--313
- [] 
  []
 
 File: Fig07a.eps Graphic file (type eps)
 <Fig07a.eps>
 File: Fig07b.eps Graphic file (type eps)
  <Fig07b.eps>
-Overfull \hbox (3.88953pt too wide) in paragraph at lines 321--324
- [][] 
- []
+Underfull \hbox (badness 10000) in paragraph at lines 319--322
 
-
-Overfull \hbox (3.88953pt too wide) in paragraph at lines 321--324
- [] 
  []
 
 File: Fig08a.eps Graphic file (type eps)
 <Fig08a.eps>
 File: Fig08b.eps Graphic file (type eps)
  <Fig08b.eps>
-Overfull \hbox (3.88953pt too wide) in paragraph at lines 332--335
- [][] 
+Underfull \hbox (badness 10000) in paragraph at lines 327--330
+
  []
 
-
-Overfull \hbox (3.88953pt too wide) in paragraph at lines 332--335
- [] 
- []
-
-File: Fig09.eps Graphic file (type eps)
-<Fig09.eps>
-Overfull \hbox (2.26105pt too wide) in paragraph at lines 341--343
+File: Fig09a.eps Graphic file (type eps)
+<Fig09a.eps>
+File: Fig09b.eps Graphic file (type eps)
+ <Fig09b.eps>
+File: Fig09c.eps Graphic file (type eps)
+ <Fig09c.eps>
+Overfull \hbox (28.76021pt too wide) in paragraph at lines 335--341
 [][] 
  []
 
-File: Fig10.eps Graphic file (type eps)
-<Fig10.eps>
+
+Underfull \hbox (badness 10000) in paragraph at lines 335--341
+
+ []
+
+
+Overfull \hbox (36.15971pt too wide) in paragraph at lines 335--341
+[] 
+ []
+
+File: Fig10a.eps Graphic file (type eps)
+<Fig10a.eps>
+File: Fig10b.eps Graphic file (type eps)
+ <Fig10b.eps>
+Underfull \hbox (badness 10000) in paragraph at lines 346--349
+
+ []
+
+
+LaTeX Warning: Float too large for page by 1.92714pt on input line 350.
+
 File: Fig11.eps Graphic file (type eps)
- <Fig11.eps>
-Overfull \hbox (43.66597pt too wide) in paragraph at lines 355--357
-[][] 
- []
+<Fig11.eps> [24] [25] [26] [27] [28] [29] [30] [31] [32] [33] [34]
+File: Fig12.eps Graphic file (type eps)
+ <Fig12.eps>
 
-File: Fig12a.eps Graphic file (type eps)
-<Fig12a.eps>
-File: Fig12b.eps Graphic file (type eps)
- <Fig12b.eps>
-Overfull \hbox (7.0247pt too wide) in paragraph at lines 364--367
- [][] 
- []
+LaTeX Warning: Float too large for page by 57.07475pt on input line 366.
 
+[35]
 File: Fig13.eps Graphic file (type eps)
-<Fig13.eps> [24] [25] [26] [27] [28] [29] [30] [31] [32] [33] [34] [35]
-File: Fig14.eps Graphic file (type eps)
-
-<Fig14.eps> [36]
-File: Fig15.eps Graphic file (type eps)
- <Fig15.eps>
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 395.
- [37]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 395.
+ <Fig13.eps>
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 377.
+ [36]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 377.
  (./gphoton.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 395.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 395.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 377.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 377.
 Package rerunfilecheck Info: File `gphoton.out' has not changed.
 (rerunfilecheck)             Checksum: BAAD2E6FD85AF31EA409552F4348D66F;1816.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 395.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 377.
  ) 
 Here is how much of TeX's memory you used:
- 6480 strings out of 494186
- 92205 string characters out of 6156914
- 208927 words of memory out of 5000000
- 9706 multiletter control sequences out of 15000+600000
+ 6483 strings out of 493118
+ 91318 string characters out of 6141676
+ 206300 words of memory out of 5000000
+ 9854 multiletter control sequences out of 15000+600000
  12434 words of font info for 51 fonts, out of 8000000 for 9000
- 430 hyphenation exceptions out of 8191
- 32i,10n,29p,1872b,401s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 1141 hyphenation exceptions out of 8191
+ 32i,10n,29p,1726b,440s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on gphoton.dvi (37 pages, 153816 bytes).
+Output written on gphoton.dvi (36 pages, 153452 bytes).
