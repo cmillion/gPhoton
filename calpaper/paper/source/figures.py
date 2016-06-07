@@ -86,7 +86,7 @@ maglimits = [14,22.5]
 magrange = np.arange(maglimits[0],maglimits[1]+magstep,magstep)
 for band in bands:
     magmedian = np.zeros(len(magrange)-1)
-    dmag = {#'NoBg':data[band]['aper4']-data[band]['mag'],
+    dmag = {#'NoBg':data[band]['aper4']-data[band]['mag'], # Awful photometry!
             'Annulus':data[band][apertxt]-data[band]['mag_bgsub'],
             'MCAT':data[band][apertxt]-data[band]['mag_mcatbgsub']}
     for bgmode in dmag.keys():
@@ -115,6 +115,10 @@ for band in bands:
             alpha=0.1 if band is 'FUV' else 0.05)
         plt.plot(magrange[:-1]+magstep/2.,magmedian,color='r',
                                             linestyle='dashed',linewidth=4)
+        plt.text(15,0.3,
+            {'NoBg':'No Background Correction',
+             'Annulus':'Annulus Background Correction',
+             'MCAT':'MCAT Background Correction'}[bgmode],fontsize=15)
         plt.subplot(1,2,2,ylim=dmagrange,yticks=[],xticks=[])
         plt.hist(np.array(dmag[bgmode][ix]),bins=bincnt,range=dmagrange,
                  orientation='horizontal',color='k',histtype='step',normed=1)
@@ -133,16 +137,17 @@ for band in bands:
             color='r', linestyle='dashed',linewidth=4,
             label='Median: {m}'.format(m=round(
                 dmag[bgmode][ix].median(),2)))
-        plt.text(0.6, -0.4, '50% of data within {pm}{p90}'.format(pm=r'$\pm$',
-            p90=round(np.percentile(np.abs(np.array(
+        plt.text(0.5, -0.43, '50% of data within {pm}{p90} (n={n})'.format(
+            pm=r'$\pm$',p90=round(np.percentile(np.abs(np.array(
                 dmag[bgmode][ix]))[np.where(
-                                np.isfinite(dmag[bgmode][ix]))],50),2)),
+                        np.isfinite(dmag[bgmode][ix]))],50),2),
+                n=len(np.where(np.isfinite(dmag[bgmode][ix]))[0])),
             fontsize=15)
         plt.legend(fontsize=14)
         fig.savefig('{path}/Fig0{n}{l}.pdf'.format(path=outpath,
             n='4' if bgmode is 'Annulus' else '5',
             l='a' if band is 'NUV' else 'b',
-            band=band,bg=bgmode.lower()),format='pdf',dpi=1000)#,bbox_inches='tight')
+            band=band,bg=bgmode.lower()),format='pdf',dpi=1000)
 
 # Generate relative distributions (delta-mag) for background surface
 # brightnesses estimated using the annulus vs. MCAT methods.
@@ -171,9 +176,11 @@ for i,band in enumerate(bands):
         b=band,d=r'$\Delta$',exp=r'$^{2}$'),fontsize=14)
     plt.tick_params(axis='both', which='major', labelsize=12)
     plt.legend(loc=2,fontsize=12)
+    plt.text(-0.35,5 if band is 'NUV' else 23,
+        'n={n}'.format(n=len(delta[ix])),fontsize=16)
 fig.savefig('{path}/Fig03.pdf'.format(path=outpath),
-    format='pdf',dpi=1000)#,bbox_inches='tight')
-#plt.close()
+    format='pdf',dpi=1000)
+
 
 # Generate plots of relative astrometry between MCAT and gAperture using
 # the center of brightness (CoB) from gAperture and reported source positions
@@ -231,12 +238,12 @@ for i,band in enumerate(bands):
             dec_kdepeak='{0:.2f}'.format(round(dec_kdepeak,3)),
             dec_median='{0:.2f}'.format(round(dec_median,))),
         bbox=dict(boxstyle='square',facecolor='w',edgecolor='k'))
+    plt.text(-5.5,-5.5,'n={n}'.format(n=len(delta_ra[ix])),fontsize=16)
     plt.ylabel('{d} Declination (arcseconds)'.format(d=r'$\Delta$'),fontsize=16)
     fig.savefig('{path}/Fig02{l}.pdf'.format(
         path=outpath,l='a' if band is 'NUV' else 'b'),
-        format='pdf',dpi=1000)#,bbox_inches='tight')
+        format='pdf',dpi=1000)
 
-#plt.close('all')
 
 #############################
 
@@ -281,7 +288,6 @@ print 'Writing to: {o}'.format(o=outpath)
 inpath = '.'
 print 'Reading from: {i}'.format(i=inpath)
 
-
 # Setup reference variables.
 scl = 1.4
 bands = ['FUV','NUV']
@@ -297,6 +303,11 @@ data = {'FUV':read_lc('{path}/{s}_dm_FUV_{a}.csv'.format(
                                             s=source,path=inpath,a=aperas)),
         'NUV':read_lc('{path}/{s}_dm_NUV_{a}.csv'.format(
                                             s=source,path=inpath,a=aperas))}
+
+def magrange(band):
+    return refmag[band]-0.2,refmag[band]+0.6
+
+
 aper = 7
 radius = gt.aper2deg(aper)
 apertxt = 'aper{n}'.format(n=int(aper))
@@ -329,9 +340,8 @@ fig = plt.figure(figsize=(10*scl,4*scl))
 fig.subplots_adjust(left=0.12,right=0.95,wspace=0.05,bottom=0.15,top=0.9)
 band = 'FUV'
 plt.subplot(1,2,1)
-#plt.title('{s}: {b} Multi-modality'.format(s=source,b=band))
 plt.ylabel('{d} AB Magnitude (MCAT - gAperture)'.format(d=r'$\Delta$'))
-plt.xlabel('CAI Observation Leg ({b}, {target})'.format(
+plt.xlabel('CAI Observation Leg, {target} ({b})'.format(
                                     target=target.split('_')[0],b=band))
 plt.axhline(-0.015, color='g', linestyle='solid', linewidth=1)
 plt.axhline(-0.05, color='g', linestyle='solid', linewidth=1)
@@ -346,7 +356,7 @@ plt.hist(np.array(dmag)[ix[band]],bins=50,range=dmagrange,
 plt.axhline(-0.015, color='g', linestyle='solid', linewidth=1)
 plt.axhline(-0.05, color='g', linestyle='solid', linewidth=1)
 plt.savefig('{path}/Fig09a.pdf'.format(path=outpath),
-    format='pdf',dpi=1000)#,bbox_inches='tight')
+    format='pdf',dpi=1000)
 
 def make_kde(data,datarange,bwrange=[0.01,1]):
     # A function for producing Kernel Density Estimates
@@ -370,6 +380,7 @@ def make_kde(data,datarange,bwrange=[0.01,1]):
 nsigma = 3
 for band in data.keys():
     tmin,tmax = 0,300
+    magrange = [refmag[band]-0.2,refmag[band]+0.6]
     plt.figure(figsize=(8*scl,4*scl))
     plt.subplots_adjust(left=0.12,right=0.95,wspace=0.1,bottom=0.15,top=0.9)
     # Overplot data in AIS legs 1-3.
@@ -390,10 +401,9 @@ for band in data.keys():
     plt.plot(t,data_errors(refmag[band],band,t,sigma=nsigma)[0],'r--')
     plt.plot(t,data_errors(refmag[band],band,t,sigma=nsigma)[1],'r--')
     plt.xlim(tmin,tmax)
-    plt.ylim(refmag[band]-0.5,refmag[band]+1)
+    plt.ylim(magrange[0],magrange[1])
     plt.gca().invert_yaxis()
-    plt.xlabel('Effective Exposure Depth (s, n={n})'.format(
-        n=len(ix[band][0])),fontsize=16)
+    plt.xlabel('Effective Exposure Depth (s)',fontsize=16)
     plt.ylabel('{b} gAperture Magnitude ({target})'.format(
         target=target.split('_')[0],b=band),fontsize=16)
     plt.tick_params(axis='both', which='major', labelsize=14)
@@ -404,7 +414,7 @@ for band in data.keys():
          gt.apcorrect1(radius,band)>=b) &
         (np.array(data[band]['mag_mcatbgsub'])[ix[band]]-
          gt.apcorrect1(radius,band)<=a))[0])
-    print '{b}: {n} of {m} ({p}%) within {s} sigma'.format(
+    print '{b}: {n} of {m} ({p}%) within {s}'.format(
         b=band,n=cnt,m=len(ix[band][0]),p=100*cnt/len(ix[band][0]),s=nsigma)
     if band is 'FUV':
         lix = np.where((legs[band][ix[band]]>3) | (legs[band][ix[band]]<0))
@@ -415,18 +425,20 @@ for band in data.keys():
                  gt.apcorrect1(radius,band)<=a[lix]))[0])
         print 'w/o legs 1-3... {b}: {n} of {m} ({p}%) within {s} sigma'.format(
             b=band,n=cntlix,m=len(ix[band][0][lix]),p=100*cntlix/len(ix[band][0][lix]),s=nsigma)
-    plt.text(150, 16.3 if band=='FUV' else 15.4, '{p}% within {s}{sym}'.format(
-        p=100*cnt/len(ix[band][0]),s=nsigma,sym=r'$\sigma$'), fontsize=18)
+    plt.text(150, 15.9 if band=='FUV' else 15.1,
+        '{p}% within {s}{sym} (n={n})'.format(
+        p=100*cnt/len(ix[band][0]),s=nsigma,sym=r'$\sigma$',
+        n=len(ix[band][0])), fontsize=18)
     plt.savefig('{path}/Fig0{n}a.pdf'.format(path=outpath,
                 n='6' if band is 'NUV' else '7'),
-                format='pdf',dpi=1000)#,bbox_inches='tight')
+                format='pdf',dpi=1000)
 
 # Generate distribution plots for gAperture photometry of LDS749B
 bincnt=50
 fig = plt.figure(figsize=(10*scl,4*scl))
 fig.subplots_adjust(left=0.12,right=0.95,wspace=0.1,bottom=0.15,top=0.9)
 for i,band in enumerate(['NUV','FUV']):
-    magrange = [refmag[band]-0.2,refmag[band]+0.7]
+    magrange = [refmag[band]-0.2,refmag[band]+0.6]
     tmin,tmax = 0,350
     plt.subplot(1,2,i+1,xticks=np.arange(round(magrange[0],1),
         round(magrange[1]+0.01,1),0.2),yticks=[])
@@ -450,18 +462,21 @@ for i,band in enumerate(['NUV','FUV']):
     plt.xlim(magrange)
     plt.gca().invert_xaxis()
     plt.legend(loc=2,fontsize=14)
-    plt.xlabel('{b} gAperture Magnitude ({target}, n={n})'.format(
+    plt.xlabel('{b} gAperture AB Magnitude ({target})'.format(
         target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=14)
     plt.tick_params(axis='both', which='major', labelsize=12)
     plt.text(magrange[1]-0.1,3 if band is 'NUV' else 1,
                             '(a)' if band is 'NUV' else '(b)',fontsize=30)
+    plt.text(magrange[1]-0.05,17 if band is 'NUV' else 5,'n={n}'.format(
+        n=len(mags[ix[band]])),fontsize=16)
     plt.savefig('{path}/Fig08a.pdf'.format(path=outpath),
-        format='pdf',dpi=1000)#,bbox_inches='tight')
+        format='pdf',dpi=1000)
 
 # Overplot MCAT photometry of LDS749B on the reference magnitude and
 # modeled 3-sigma error bounds as a function of exposure time.
 for band in data.keys():
-    tmin,tmax = 0,300#data[band]['t_eff'].min(),data[band]['t_eff'].max()
+    tmin,tmax = 0,300
+    magrange = [refmag[band]-0.2,refmag[band]+0.6]
     plt.figure(figsize=(8*scl,4*scl))
     plt.subplots_adjust(left=0.12,right=0.95,wspace=0.1,bottom=0.15,top=0.9)
     plt.errorbar(np.array(data[band]['exptime'])[ix[band]],
@@ -474,7 +489,7 @@ for band in data.keys():
     plt.plot(t,data_errors(refmag[band],band,t,sigma=3)[0],'r--')
     plt.plot(t,data_errors(refmag[band],band,t,sigma=3)[1],'r--')
     plt.xlim(tmin,tmax)
-    plt.ylim(refmag[band]-0.5,refmag[band]+1)
+    plt.ylim(magrange[0],magrange[1])
     plt.gca().invert_yaxis()
     plt.xlabel('Effective Exposure Depth (s, n={n})'.format(
         n=len(ix[band][0])),fontsize=16)
@@ -489,11 +504,13 @@ for band in data.keys():
                                 gt.apcorrect1(gt.aper2deg(aper),band)<=a))[0])
     print '{b}: {n} of {m} ({p}%) within {s} sigma'.format(
         b=band,n=cnt,m=len(ix[band][0]),p=100*cnt/len(ix[band][0]),s=nsigma)
-    plt.text(150, 16.3 if band=='FUV' else 15.4, '{p}% within {s}{sym}'.format(
-        p=100*cnt/len(ix[band][0]),s=nsigma,sym=r'$\sigma$'), fontsize=18)
+    plt.text(150, 15.9 if band=='FUV' else 15.1,
+        '{p}% within {s}{sym} (n={n})'.format(
+        p=100*cnt/len(ix[band][0]),s=nsigma,sym=r'$\sigma$',n=len(ix[band][0])),
+        fontsize=18)
     plt.savefig('{path}/Fig0{n}b.pdf'.format(path=outpath,
                 n='6' if band is 'NUV' else '7'),
-                format='pdf',dpi=1000)#,bbox_inches='tight')
+                format='pdf',dpi=1000)
 
 # Generate distribution plots for MCAT photometry of LDS749B
 bincnt = 50
@@ -519,14 +536,16 @@ for i,band in enumerate(['NUV','FUV']):
         label='Median: {m}'.format(m=round(np.median(mags[ix[band]]),2)))
     plt.xlim(magrange)
     plt.gca().invert_xaxis()
-    plt.xlabel('{b} MCAT Magnitude ({target}, n={n})'.format(
+    plt.xlabel('{b} MCAT AB Magnitude ({target})'.format(
         target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=14)
     plt.tick_params(axis='both', which='major', labelsize=12)
     plt.legend(loc=2,fontsize=14)
     plt.text(magrange[1]-0.1,3 if band is 'NUV' else 2,
                             '(c)' if band is 'NUV' else '(d)',fontsize=30)
+    plt.text(magrange[1]-0.05,15 if band is 'NUV' else 8,'n={n}'.format(
+            n=len(mags[ix[band]])),fontsize=16)
     plt.savefig('{path}/Fig08b.pdf'.format(path=outpath),
-        format='pdf',dpi=1000)#,bbox_inches='tight')
+        format='pdf',dpi=1000)
 
 ####
 
@@ -536,6 +555,7 @@ for i,band in enumerate(['NUV','FUV']):
 nsigma = 3
 for band in ['FUV']:
     tmin,tmax = 0,300
+    magrange = [refmag[band]-0.2,refmag[band]+0.6]
     plt.figure(figsize=(8*scl,4*scl))
     plt.subplots_adjust(left=0.12,right=0.95,wspace=0.1,bottom=0.15,top=0.9)
     # Exclude data in AIS legs 1-3.
@@ -550,7 +570,7 @@ for band in ['FUV']:
     plt.plot(t,data_errors(refmag[band],band,t,sigma=nsigma)[0],'r--')
     plt.plot(t,data_errors(refmag[band],band,t,sigma=nsigma)[1],'r--')
     plt.xlim(tmin,tmax)
-    plt.ylim(refmag[band]-0.5,refmag[band]+1)
+    plt.ylim(magrange[0],magrange[1])
     plt.gca().invert_yaxis()
     plt.xlabel('Effective Exposure Depth (s, n={n})'.format(
         n=len(ix[band][0])),fontsize=16)
@@ -569,18 +589,19 @@ for band in ['FUV']:
         b=band,n=cnt,m=len(ix[band][0]),p=100*cnt/len(ix[band][0]),s=nsigma)
     print 'w/o legs 1-3... {b}: {n} of {m} ({p}%) within {s} sigma'.format(
             b=band,n=cntlix,m=len(ix[band][0][lix]),p=100*cntlix/len(ix[band][0][lix]),s=nsigma)
-    plt.text(150, 16.3 if band=='FUV' else 15.4, '{p}% within {s}{sym} (excluding legs 1-3)'.format(
-        p=100*cntlix/len(ix[band][0][lix]),s=nsigma,sym=r'$\sigma$'), fontsize=18)
+    plt.text(75, 15.9, '{p}% within {s}{sym} (excluding legs 1-3, n={n})'.format(
+        p=100*cntlix/len(ix[band][0][lix]),s=nsigma,sym=r'$\sigma$',
+        n=len(np.array(data[band]['mag_mcatbgsub'])[ix[band][0][lix]])), fontsize=18)
     plt.savefig('{path}/Fig09b.pdf'.format(path=outpath),
-        format='pdf',dpi=1000)#,bbox_inches='tight')
+        format='pdf',dpi=1000)
 
 # Generate distribution plots for gAperture photometry of LDS749B
-# EXLUCIND LEGS 1,2,3
+# EXCLUDING LEGS 1,2,3
 bincnt=50
 fig = plt.figure(figsize=(5*scl,4*scl))
 fig.subplots_adjust(left=0.12,right=0.95,wspace=0.1,bottom=0.15,top=0.9)
 for i,band in enumerate(['FUV']):
-    magrange = [refmag[band]-0.2,refmag[band]+0.7]
+    magrange = [refmag[band]-0.2,refmag[band]+0.6]
     tmin,tmax = 0,350
     lix = np.where(legs[band][ix[band]]>3)
     plt.subplot(1,1,i+1,xticks=np.arange(round(magrange[0],1),
@@ -605,14 +626,13 @@ for i,band in enumerate(['FUV']):
     plt.xlim(magrange)
     plt.gca().invert_xaxis()
     plt.legend(loc=2,fontsize=14)
-    plt.text(16.2,3,'Excludes legs 1-3.',fontsize=16)
+    plt.text(magrange[1]-0.05,3,'Excludes legs 1-3.',fontsize=16)
     plt.xlabel('{b} gAperture Magnitude ({target}, n={n})'.format(
         target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=14)
     plt.tick_params(axis='both', which='major', labelsize=12)
+    plt.text(magrange[1]-0.05,7,'n={n}'.format(n=len(mags[ix[band]][lix])),fontsize=16)
     plt.savefig('{path}/Fig09c.pdf'.format(path=outpath),
-        format='pdf',dpi=1000)#,bbox_inches='tight')
-
-#plt.close('all')
+        format='pdf',dpi=1000)
 
 #########################
 '''Stim rate / deadtime analyses.'''
@@ -823,7 +843,7 @@ for i in range(sampler.chain.shape[1]):
 post_prob /= norm
 
 # Plot the prediction.
-plt.figure(figsize=(8*1,4*1))
+plt.figure(figsize=(10,5))
 x0 = np.linspace(0,18000, 1000)
 A = np.vander(x0, 2)
 lines = np.dot(sampler.flatchain[:, :2], A.T)
@@ -849,8 +869,6 @@ plt.text(5000, 76,
         bp='+{v}'.format(v=round(b_mcmc[1],2)),
         bm='-{v}'.format(v=round(b_mcmc[2],2))), fontsize=18)
 
-#plt.title('{b} Stim vs. Global Countrate (n={n})'.format(
-#    b=band,n=bg_ct+fg_ct),fontsize=16)
 plt.xlabel("{b} Global Countrate (ct/s, n={n})".format(
     b=band,n=bg_ct+fg_ct),fontsize=14)
 plt.ylabel("{b} Stim Countrate (ct/s)".format(b=band),fontsize=14)
@@ -859,7 +877,6 @@ plt.ylim(68, 78)
 plt.xlim(0, 17000)
 plt.savefig('{path}/Fig10a.pdf'.format(path=outpath,b=band),
     format='pdf',dpi=1000)
-#plt.close()
 
 # Print a summary
 print("""FUV - MCMC result:
@@ -969,9 +986,6 @@ sampler.run_mcmc(pos, 1000);
 #     axes[i].yaxis.set_major_locator(MaxNLocator(5))
 #     axes[i].set_ylabel("${p}$".format(p=p))
 
-# Make "triangle" plots of every variable against every other. For diagnostics.
-# triangle.corner(sampler.flatchain, bins=50, extents=bounds, labels=params);
-
 samples = sampler.flatchain[:, :2]
 m_mcmc, b_mcmc = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
                              zip(*np.percentile(samples, [16, 50, 84],
@@ -995,7 +1009,7 @@ for i in range(sampler.chain.shape[1]):
         norm += 1
 post_prob /= norm
 
-plt.figure(figsize=(8*1,4*1))
+plt.figure(figsize=(10,5))
 # Plot the predition.
 x0 = np.linspace(0,80000, 1000)
 A = np.vander(x0, 2)
@@ -1020,8 +1034,6 @@ plt.text(15000, 45,
         bp='+{v}'.format(v=round(b_mcmc[1],2)),
         bm='-{v}'.format(v=round(b_mcmc[2],2))), fontsize=18)
 
-#plt.title('{b} Stim vs. Global Countrate (n={n})'.format(
-#    b=band,n=fg_ct+bg_ct),fontsize=16)
 plt.xlabel("{b} Global Countrate (ct/s, n={n})".format(
     b=band,n=fg_ct+bg_ct),fontsize=14)
 plt.ylabel("{b} Stim Countrate (ct/s)".format(b=band),fontsize=14)
@@ -1081,3 +1093,146 @@ for sigma in [3]:
         plt.legend(fontsize=14)
     plt.savefig('{p}/Fig11.pdf'.format(p=outpath,n=sigma),
         format='pdf',dpi=1000,bbox_inches='tight')
+
+##################
+
+"""
+   :synopsis: Create plots of flare events on CR Draconis from gAperture output.
+   .. moduleauthor:: Scott W. Fleming <fleming@stsci.edu>
+"""
+
+import matplotlib.pyplot as pyp
+from gPhoton.gphoton_utils import read_lc
+#from gPhoton.analysis.gtool_utils import calculate_caldat
+import numpy
+from astropy.time import Time
+
+def calculate_caldat(galex_time):
+    """
+    Calculates a Gregorian calendar date given a GALEX time, in the UTC
+    time scale.
+
+    :param galex_time: A GALEX timestamp.
+
+    :type galex_time: float
+
+    :returns: float -- The time converted to a Gregorian calendar date,
+    in the UTC time scale.
+    """
+
+    """ Convert the GALEX timestamp to a Unix timestamp. """
+    this_unix_time = Time(galex_time + 315964800., format="unix",
+                          scale="utc")
+
+    """ Convert the Unix timestamp to a Julian date, measured in the
+    TDB scale. """
+    this_caldat_time = this_unix_time.iso
+
+    return this_caldat_time
+
+def make_plots():
+    """
+    Creates a plot of the flares in CR Draconis from gAperture.
+    """
+
+    ifile_nuv = "cr_dra_lc_nuv.csv"
+    ifile_fuv = "cr_dra_lc_fuv.csv"
+    # which time in the output file to use?
+    time_to_use = "t_mean"
+
+    # Read in data.  First is NUV, second is FUV.
+    data_nuv = read_lc(ifile_nuv)
+    data_fuv = read_lc(ifile_fuv)
+
+    # Define the time ranges for the flares in GALEX time.
+    flare_1 = [741111251., 741111981.]
+    flare_2 = [799279801., 799280849.]
+    flare_3 = [806670389., 806670917.]
+    flare_4 = [837496202., 837497520.]
+    flare_5 = [929935832., 929936740.]
+    flare_6 = [956922970., 956924331.]
+    flare_7 = [961164443., 961165519.]
+    flare_8 = [991378742., 991379988.]
+
+    all_flares = [flare_1, flare_2, flare_3, flare_4, flare_5, flare_6,
+                  flare_7, flare_8]
+    this_figure, these_subplots = pyp.subplots(nrows=8, ncols=1,
+                                               figsize=(1024./96., 2048./96.),
+                                               dpi=96.)
+
+    # If set, will include FUV and Welsh et al. labels.
+    show_blue = True
+
+    # Name of output file.
+    file_name = "Fig12.eps"
+
+    # Define x-axis plot limits.
+    xlims = [(0., 12.), (0., 17.), (0., 8.5), (0., 22.), (0., 15.), (0., 22.5),
+             (0., 18.), (0., 21.)]
+
+    # This was used when doing 2-column subplots, not really needed anymore,
+    # but kept without having to re-write entire loop.
+    row = 0
+
+    for i in xrange(len(all_flares)):
+        if i != 0:
+            row = row + 1
+
+        # Label the y-axis if this is zero'th subplot.
+        if i == 0:
+            this_figure.text(0.06, 0.5, 'Flux (ergs/cm$^{2}\!$/sec/$\AA$)',
+                             ha='center', va='center', rotation='vertical',
+                             size="xx-large")
+
+        # Get the data for this flare based on time range.
+        these_indexes = [ii for ii, x in enumerate(data_nuv[time_to_use]) if
+                         x >= all_flares[i][0] and x <= all_flares[i][1]]
+
+        # NUV plot times and fluxes, always present.
+        these_times = data_nuv[time_to_use][these_indexes][1:-2]
+        x_offset = these_times[these_times.keys()[0]]
+        plot_times = [(x - x_offset)/60. for x in these_times]
+        these_fluxes = data_nuv['flux_bgsub'][these_indexes][1:-2]
+
+        # FUV plot times and fluxes, not always present.
+        these_indexes_fuv = [ii for ii, x in enumerate(data_fuv[time_to_use]) if
+                             x >= all_flares[i][0] and x <= all_flares[i][1]]
+        if len(these_indexes_fuv) > 0:
+            these_times_fuv = data_fuv[time_to_use][these_indexes_fuv][1:-2]
+            plot_times_fuv = [(x - x_offset)/60. for x in these_times_fuv]
+            these_fluxes_fuv = data_fuv['flux_bgsub'][these_indexes_fuv][1:-2]
+            n_fluxes_fuv = len(these_indexes_fuv)
+        else:
+            these_fluxes_fuv = [numpy.nan] * len(these_fluxes)
+            n_fluxes_fuv = 0
+
+        # Plot NUV curve.
+        these_subplots[row].plot(plot_times, these_fluxes, '-ko')
+
+        # Plot FUV curve if there is one.
+        if n_fluxes_fuv > 0:
+            these_subplots[row].plot(plot_times_fuv, these_fluxes_fuv, '-bo')
+
+        if i == 0 and show_blue:
+            these_subplots[row].text(2., 2.15E-14, "FUV = blue", color='b')
+        if i == 1 and show_blue:
+            these_subplots[row].text(10., 2.0E-13, "Welsh et al. (2006) Flare",
+                                     color='r')
+        if i == 3 and show_blue:
+            these_subplots[row].text(4., 1.4E-14, "FUV = blue", color='b')
+
+        # Get the approximate calendar date of the event.
+        mean_date = calculate_caldat(numpy.mean(these_times))
+        these_subplots[row].set_title(mean_date, fontsize=12)
+
+        # Label the x-axis, if this is the last subplot.
+        if row == len(all_flares)-1:
+            these_subplots[row].set_xlabel('Time Elapsed (Minutes)')
+
+        # Make sure x-axis plot limits are enforced.
+        these_subplots[row].set_xlim(xlims[i])
+
+    pyp.subplots_adjust(hspace=0.30)
+    pyp.savefig(file_name)
+
+make_plots()
