@@ -171,7 +171,7 @@ If you want to generate a light curve rather than an integrated value, pass the 
 For any command, you can always request more information be printed to the terminal by setting the `--verbose` or `-v` flag to a number between 1-3 (defualt is 0) where larger numbers indicate increasing levels of output. Setting `-v 3` will print out complete SQL commands and should really only be used for debugging.
 
 ####Lightcurve File Column Definitions
-**NOTE:** The column definitions for the .csv output from _gAperture_ are in flux. These are the column definitions as of the v1.27.0 build.
+**NOTE:** The column definitions for the .csv output from _gAperture_ are in flux. These are the column definitions as of the v1.27.1 build.
 
 **NOTE:** The columns are not necessarily written to the output file in the order given. Nor are the columns necessarily fixed in order at all. You should parse the lightcurve file on the column _name_ and not the column number.
 
@@ -179,53 +179,111 @@ For any command, you can always request more information be printed to the termi
 
 **NOTE:** All times ware in GALEX seconds. Positions are in degrees. Areas are in square degrees. Fluxes are in units of erg sec^-1 cm^-2 Å^-1.
 
-1. t0 - Lower time delimiting the bin.
-2. t1 - Upper time delimiting the bin.
-3. t0_data - Earliest timestamp of events within the aperture.
-4. t1_data - Final timestamp of events within the aperture.
-5. t_mean - Mean timestamp of events within the aperture.
-6. exptime - Estimated effective exposure time (correct for dead time and shutter).
-7. cps - Countrate within the aperture, uncorrected for background.
-8. cps_err - Estimated background in the countrate within the aperture, assuming no contribution from background. (i.e. sqrt(n))
-9. flux - Flux witin the aperture, uncorrected for background.
-10. flux_err - Estimated 1-sigma error in `flux` value.
-11. mag - AB Magnitude within the aperture, uncorrected for background.
-12. mag_err_1 - Estimated upper 1-sigma error in `mag` value.
-13. mag_err_2 - Estimated lower 1-sigma error on `mag` value.
-14. cps_bgsub - Countrate within the aperture, corrected by the background estimated from the annulus.
-15. cps_bgsub_err - Estimated 1-sigma error in `cps_bgsub` value.
-16. flux_bgsub - Flux within the aperture, corrected by the background estimated from the annulus.
-17. flux_bgsub_err - Estimated 1-sigma error in `flux_bgsub` value.
-18. mag_bgsub - AB Magnitude within the aperture, corrected by the background estimated from the annulus.
-19. mag_bgsub_err_1 - Estimated upper 1-sigma error on `mag_bgsub` value.
-20. mag_bgsub_err_2 - Estimated lower 1-sigma error on `mag_bgsub`.
-21. cps_mcatbgsub - Countrate within the aperture, corrected for background using the visit-level MCAT background estimates.
-22. cps_mcatbgsub_err - Estimated 1-sigma error on `cps_mcatbgsub` value.
-23. flux_mcatbgsub - Flux within the aperture, corrected for background using the visit-level MCAT values.
-24. flux_mcatbgsub_err - Estimated 1-sigma error on `flux_mcatbgsub` value.
-25. mag_mcatbgsub - AB Magnitude within the aperture, corrected for background using the visit-level MCAT background estimates.
-26. mag_mcatbgsub_err_1 - Estimated upper 1-sigma error on `mag_mcatbgsub` value.
-27. mag_mcatbgsub_err_2 - Estimated lower 1-sigma error on `mag_mcatbgsub` value.
-28. bg - Contribution of background, as estimated from the annulus and scaled to the area of the aperture.
-29. mcat_bg - Estimated background brightness as pulled from the visit-level MCAT and scaled to the area of the aperture.
-30. counts - Total number of uncorrected counts within the photometric aperture.
-31. flat_counts - The sum over all flat-corrected counts within the aperture.
-32. bg_counts - Raw number of counts within the background annulus.
-33. bg_flat_counts - Total of flat-corrected counts within the background annulus.
-34. responses - Mean value of the flat assigned to events within the aperture.
-35. detxs - Mean detector X position of all events within the aperture.
-36. detys - Mean detector Y position of events within the aperture.
-37. detrad - Mean detector radius (distance from detector center) for events within the aperture.
-38. racent - Mean right ascension of events within the aperture.
-39. deccent - Mean declination of events within the aperture.
-40. flags - Automatically generated gAperture quality flag. Bins with a flag that is non-zero should not be naively trusted. See flag definitions below for more information.
+| Time-Related | Annulus-Background-Corrected-Flux | MCAT-Background-Corrected-Flux | Background-Uncorrected-Flux | Total-Counts-Related | Calibration-Related |
+| ------------ | --------------------------------- | ------------------------------ | --------------------------- | -------------------- | ------------------- |
+| t0	       | cps_bgsub 		 	   | cps_mcatbgsub		    | cps	     	  	  | counts	     	 | exptime	       |
+| t1	       | cps_bgsub_err 		 	   | cps_mcatbgsub_err		    | cps_err	     	  	  | flat_counts	      	 | bg		       |
+| t0_data      | flux_bgsub	      	 	   | flux_mcatbgsub		    | flux	     	  	  | bg_counts		 | mcat_bg	       |
+| t1_data      | flux_bgsub_err      	 	   | flux_mcatbgsub_err	     	    | flux_err	     	  	  | bg_flat_counts     	 | responses	       |
+| t_mean       | mag_bgsub      	 	   | mag_mcatbgsub		    | mag	     	  	  |		      	 | detxs	       |
+| 	       | mag_bgsub_err_1    	 	   | mag_mcatbgsub_err_1     	    | mag_err_1	     	  	  |		      	 | detys	       |
+|	       | mag_bgsub_err_2    	 	   | mag_mcatbgsub_err_2     	    | mag_err_2	     	  	  |		      	 | detrad	       |
+|	       | 				   | 				    | 				  |			 | racent	       |
+|	       |				   |				    |				  |			 | deccent	       |
+|	       |				   |				    |				  |			 | flags	       |
+
+###### Time-Related
+&nbsp;&nbsp;**t0** - Lower time delimiting the bin.
+
+&nbsp;&nbsp;**t1** - Upper time delimiting the bin.
+
+&nbsp;&nbsp;**t0_data** - Earliest timestamp of events within the aperture.
+
+&nbsp;&nbsp;**t1_data** - Final timestamp of events within the aperture.
+
+&nbsp;&nbsp;**t_mean** - Mean timestamp of events within the aperture.
+
+###### Annulus-Background-Corrected-Flux
+&nbsp;&nbsp;**cps_bgsub** - Countrate within the aperture, corrected by the background estimated from the annulus.
+
+&nbsp;&nbsp;**cps_bgsub_err** - Estimated 1-sigma error in `cps_bgsub` value.
+
+&nbsp;&nbsp;**flux_bgsub** - Flux within the aperture, corrected by the background estimated from the annulus.
+
+&nbsp;&nbsp;**flux_bgsub_err** - Estimated 1-sigma error in `flux_bgsub` value.
+
+&nbsp;&nbsp;**mag_bgsub** - AB Magnitude within the aperture, corrected by the background estimated from the annulus.
+
+&nbsp;&nbsp;**mag_bgsub_err_1** - Estimated upper 1-sigma error on `mag_bgsub` value.
+
+&nbsp;&nbsp;**mag_bgsub_err_2** - Estimated lower 1-sigma error on `mag_bgsub`.
+
+###### MCAT-Background-Corrected-Flux
+&nbsp;&nbsp;**cps_mcatbgsub** - Countrate within the aperture, corrected for background using the visit-level MCAT background estimates.
+
+&nbsp;&nbsp;**cps_mcatbgsub_err** - Estimated 1-sigma error on `cps_mcatbgsub` value.
+
+&nbsp;&nbsp;**flux_mcatbgsub** - Flux within the aperture, corrected for background using the visit-level MCAT values.
+
+&nbsp;&nbsp;**flux_mcatbgsub_err** - Estimated 1-sigma error on `flux_mcatbgsub` value.
+
+&nbsp;&nbsp;**mag_mcatbgsub** - AB Magnitude within the aperture, corrected for background using the visit-level MCAT background estimates.
+
+&nbsp;&nbsp;**mag_mcatbgsub_err_1** - Estimated upper 1-sigma error on `mag_mcatbgsub` value.
+
+&nbsp;&nbsp;**mag_mcatbgsub_err_2** - Estimated lower 1-sigma error on `mag_mcatbgsub` value.
+
+###### Background-Uncorrected-Flux
+&nbsp;&nbsp;**cps** - Countrate within the aperture, uncorrected for background.
+
+&nbsp;&nbsp;**cps_err** - Estimated background in the countrate within the aperture, assuming no contribution from background. (i.e. sqrt(n))
+
+&nbsp;&nbsp;**flux** - Flux witin the aperture, uncorrected for background.
+
+&nbsp;&nbsp;**flux_err** - Estimated 1-sigma error in `flux` value.
+
+&nbsp;&nbsp;**mag** - AB Magnitude within the aperture, uncorrected for background.
+
+&nbsp;&nbsp;**mag_err_1** - Estimated upper 1-sigma error in `mag` value.
+
+&nbsp;&nbsp;**mag_err_2** - Estimated lower 1-sigma error on `mag` value.
+
+###### Total-Counts-Related
+&nbsp;&nbsp;**counts** - Total number of uncorrected counts within the photometric aperture.
+
+&nbsp;&nbsp;**flat_counts** - The sum over all flat-corrected counts within the aperture.
+
+&nbsp;&nbsp;**bg_counts** - Raw number of counts within the background annulus.
+
+&nbsp;&nbsp;**bg_flat_counts** - Total of flat-corrected counts within the background annulus.
+
+###### Calibration-Related
+&nbsp;&nbsp;**exptime** - Estimated effective exposure time (correct for dead time and shutter).
+
+&nbsp;&nbsp;**bg** - Contribution of background, as estimated from the annulus and scaled to the area of the aperture.
+
+&nbsp;&nbsp;**mcat_bg** - Estimated background brightness as pulled from the visit-level MCAT and scaled to the area of the aperture.
+
+&nbsp;&nbsp;**responses** - Mean value of the flat assigned to events within the aperture.
+
+&nbsp;&nbsp;**detxs** - Mean detector X position of all events within the aperture.
+
+&nbsp;&nbsp;**detys** - Mean detector Y position of events within the aperture.
+
+&nbsp;&nbsp;**detrad** - Mean detector radius (distance from detector center) for events within the aperture.
+
+&nbsp;&nbsp;**racent** - Mean right ascension of events within the aperture.
+
+&nbsp;&nbsp;**deccent** - Mean declination of events within the aperture.
+
+&nbsp;&nbsp;**flags** - Automatically generated gAperture quality flag. Bins with a flag that is non-zero should not be naively trusted. See flag definitions below for more information.
 
 #####Flag Column Definitions
 These flags are automatically set in software based upon conditions that we know to reproducibly generate misleading lightcurves. The flags are additive in binary, so it's possible to have more than one flag set at a time. They are defined as follows:
 
-1 - 'hotspot' - events in pixels contiguous to a hotspot masked region
+1 - 'hotspot' - aperture events in pixels contiguous to a masked hotspot
 
-2 - 'mask edge' - events in pixels contiguous to the detector edge
+2 - 'mask edge' - aperture events in pixels contiguous to the detector edge
 
 4 - 'exptime' - bin contains < 50% exposure time coverage
 
@@ -234,6 +292,10 @@ These flags are automatically set in software based upon conditions that we know
 16 - 'nonlinearity' - local countrate exceeds 10% response dropoff
 
 32 - 'detector edge' - events outside of 0.5 degrees of detector center
+
+64 - 'bg hotspot' - annulus events in pixels contiguous to a masked hotspot
+
+128 - 'bg mask' - annulus events in pixels contiguous to detector edge
 
 ####Calling from within the Python Interpreter
 You can also import and work with _gAperture_ and its modules from within the Python interpeter.
