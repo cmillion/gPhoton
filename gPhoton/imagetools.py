@@ -220,7 +220,7 @@ def makemap(band, skypos, trange, skyrange, response=False, verbose=0,
         if verbose > 2:
             print ('No events found at {s} +/- {r} in {t}.'.format(
                 s=skypos, r=skyrange, t=trange))
-        return np.zeros(imsz)
+        return np.zeros(np.int(imsz))
 
     # Trim the data on detsize
     col, row = ct.xieta2colrow(events['xi'], events['eta'], band)
@@ -229,7 +229,7 @@ def makemap(band, skypos, trange, skyrange, response=False, verbose=0,
     m = len(col)
 
     if n == 0:
-        return np.zeros(imsz)
+        return np.zeros(np.int(imsz))
 
     for k in events.keys():
         events[k] = events[k][ix]
@@ -299,7 +299,7 @@ def integrate_map(band, skypos, tranges, skyrange, verbose=0, memlight=None,
     """
 
     imsz = gxt.deg2pix(skypos, skyrange)
-    img = np.zeros(imsz)
+    img = np.zeros(np.int(imsz))
 
     for trange in tranges:
         # If memlight is requested, break the integration into
