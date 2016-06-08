@@ -10,7 +10,7 @@
 import numpy as np
 import gQuery
 from MCUtils import print_inline, area, distance, angularSeparation
-from galextools import GPSSECS, zpmag
+from galextools import GPSSECS, zpmag, aper2deg
 from gQuery import tscale
 
 # ------------------------------------------------------------------------------
@@ -560,8 +560,8 @@ def compute_exptime(band, tr, verbose=0, skypos=None, detsize=1.25,
 # ------------------------------------------------------------------------------
 def get_mcat_data(skypos, rad):
     """
-    Return MCAT sources and their catalog values within a give radius of the
-    specified sky position.
+    Return visit-level MCAT sources and their catalog values within a give
+    radius of the specified sky position.
 
     :param skypos: The right ascension and declination, in degrees, around
     which to search for MCAT sources.
@@ -741,6 +741,16 @@ def mcat_skybg(band, skypos, radius, verbose=0, trange=None):
             m='per-visit' if trange else 'median'))
 
     mcat = get_mcat_data(skypos, radius)
+    if not mcat[band]:
+        # Try with increasingly larger radii
+        for r in [aper2deg(7),0.01,0.025,0.05,0.1]:
+            if mcat[band]:
+                continue
+            mcat = get_mcat_data(skypos,r)
+    try:
+        test = mcat['objid']
+    except NameError:
+        raise 'No MCAT sources within 0.1 degrees of {p}'.format(p=skypos)
     skybg = None
 
     # [Future]: This is really slow for deep fields because it makes one
@@ -834,24 +844,7 @@ def get_mags(band, ra0, dec0, radius, maglimit, mode='coadd',
                        3:out[:, 18]+zpn, 4:out[:, 19]+zpn, 5:out[:, 20]+zpn,
                        6:out[:, 21]+zpn, 7:out[:, 22]+zpn}}
     elif mode == 'visit':
-        out = np.array(gQuery.getArray(gQuery.mcat_visit_sources(ra0, dec0,
-                                                                 radius),
-                                       verbose=verbose))
-        # NOTE: For runtime considerations, mcat_visit_sources() does not
-        # make any slices on time or maglimit, so we need to do it here.
-        ix = np.where((out[:, 2 if band == 'NUV' else 3] < maglimit) &
-                      (out[:, 2 if band == 'NUV' else 3] > 0))
-        return {'ra':out[:, 0][ix], 'dec':out[:, 1][ix],
-                'NUV':{'mag':out[:, 2][ix], 'expt':out[:, 8][ix],
-                       1:out[:, 18][ix]+zpn, 2:out[:, 19][ix]+zpn,
-                       3:out[:, 20][ix]+zpn, 4:out[:, 21][ix]+zpn,
-                       5:out[:, 22][ix]+zpn, 6:out[:, 23][ix]+zpn,
-                       7:out[:, 24][ix]+zpn},
-                'FUV':{'mag':out[:, 3][ix], 'expt':out[:, 9][ix],
-                       1:out[:, 11][ix]+zpf, 2:out[:, 12][ix]+zpf,
-                       3:out[:, 13][ix]+zpf, 4:out[:, 14][ix]+zpf,
-                       5:out[:, 15][ix]+zpf, 6:out[:, 16][ix]+zpf,
-                       7:out[:, 17][ix]+zpf}}
+        return get_mcat_data([ra0,dec0],radius)
     else:
         print "mode must be in [coadd,visit]"
         return None
