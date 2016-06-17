@@ -299,7 +299,7 @@ def integrate_map(band, skypos, tranges, skyrange, verbose=0, memlight=None,
     """
 
     imsz = gxt.deg2pix(skypos, skyrange)
-    img = np.zeros(np.int(imsz))
+    img = np.zeros(imsz)
 
     for trange in tranges:
         # If memlight is requested, break the integration into
@@ -448,7 +448,10 @@ def movie(band, skypos, tranges, skyrange, framesz=0, verbose=0,
     else:
         for trange in tranges:
             stepsz = framesz if framesz else trange[1]-trange[0]
-            steps = np.ceil((trange[1]-trange[0])/stepsz)
+            try:
+                steps = np.ceil((trange[1]-trange[0])/stepsz)
+            except IndexError:
+                return None # There is no data.
             for i, t0 in enumerate(np.arange(trange[0], trange[1], stepsz)):
                 if verbose > 1:
                     mc.print_inline('Movie frame '+str(i+1)+' of '+
@@ -628,6 +631,10 @@ def write_images(band, skypos, tranges, skyrange, write_cnt=None,
                                False),
                            response=(
                                True if i in ['int', 'int_coadd'] else False))
+        if img.tolist() is None:
+            if verbose:
+                print 'No data found.'
+            return
 
         # Add a conditional so that this is only created for multi-frame images
         tbl = movie_tbl(band, tranges, framesz=framesz, verbose=verbose,
