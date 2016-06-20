@@ -112,7 +112,8 @@ def gFind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
                             print ('    [ %.3f' % r[0] + ', %.3f' % r[1] +
                                    ' ], %.3f' % (r[1]-r[0]) + ' seconds')
             output[this_band] = {'expt':expt, 't0':ranges[:, 0],
-                                 't1':ranges[:, 1]}
+                                 't1':ranges[:, 1],
+                'nearest_source':dbt.find_nearest_mcat(this_band,skypos,0.05)}
 
     return output
 # ------------------------------------------------------------------------------

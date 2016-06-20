@@ -835,7 +835,7 @@ def get_mags(band, ra0, dec0, radius, maglimit, mode='coadd',
                                        verbose=verbose))
         if not len(out):
             print "Warning: No sources found!"
-            return 0
+            return None
         return {'ra':out[:, 0], 'dec':out[:, 1],
                 'FUV':{'mag':out[:, 3], 1:out[:, 9]+zpf, 2:out[:, 10]+zpf,
                        3:out[:, 11]+zpf, 4:out[:, 12]+zpf, 5:out[:, 13]+zpf,
@@ -848,6 +848,42 @@ def get_mags(band, ra0, dec0, radius, maglimit, mode='coadd',
     else:
         print "mode must be in [coadd,visit]"
         return None
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def find_nearest_mcat(band, skypos, radius, maglimit=30.):
+    """
+    Given a sky position and a search radius, find the nearest MCAT source
+    and return its position and magnitude in specified band.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param skypos: Two element array of RA and Dec in decimal degrees.
+
+    :type skypos: array
+
+    :param radius: Search radius in decimal degrees.
+
+    :type radius: float
+
+    :param maglimit: The NUV faint limit to return MCAT sources for.
+
+    :type maglimit: float
+    """
+
+    data = get_mags(band,skypos[0],skypos[1],radius,30)
+    if not data:
+        return None
+
+    separation = [angularSeparation(skypos[0],skypos[1],a[0],a[1])
+                                        for a in zip(data['ra'],data['dec'])]
+    minsep = np.where(separation==min(separation))
+
+    return {'mag':data[band]['mag'][minsep][0],
+            'skypos':np.array(zip(data['ra'],data['dec']))[minsep][0].tolist(),
+            'distance':min(separation)}
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
