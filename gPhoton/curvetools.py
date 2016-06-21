@@ -1103,10 +1103,57 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
         return None
 
     exclude_keys = ['photons', 'params']
-    minimal_columns = ['t0', 't1', 'exptime', 'flux', 'flux_err', 'flags']
 
-    if annulus:
-        minimal_columns += ['flux_bgsub', 'flux_bgsub_err']
+    if minimal_output:
+        # Initialize a list that will define the columns included in the
+        # minimal output option.
+        output_columns = ['t_mean']
+
+        # Only include the annulus-corrected fluxes if an annulus was specified.
+        if annulus:
+            output_columns += ['flux_bgsub', 'flux_bgsub_err']
+
+            # Then include these columns in all cases.
+            output_columns += ['flux_mcatbgsub', 'flux_mcatbgsub_err',
+                                'flags', 'counts', 'exptime', 'detrad']
+    else:
+        # Otherwise, define the order of the output columns to match the
+        # User Guide sorting.
+        time_related_cols = ['t0', 't1', 't_mean', 't0_data', 't1_data']
+        annulus_bkg_corrected_cols = ['cps_bgsub', 'cps_bgsub_err',
+                                      'flux_bgsub', 'flux_bgsub_err',
+                                      'mag_bgsub', 'mag_bgsub_err_1',
+                                      'mag_bgsub_err_2']
+        mcat_bkg_corrected_cols = ['cps_mcatbgsub', 'cps_mcatbgsub_err',
+                                      'flux_mcatbgsub', 'flux_mcatbgsub_err',
+                                      'mag_mcatbgsub', 'mag_mcatbgsub_err_1',
+                                      'mag_mcatbgsub_err_2']
+        bkg_uncorrected_cols = ['cps', 'cps_err',
+                                      'flux', 'flux_err',
+                                      'mag', 'mag_err_1', 'mag_err_2']
+        total_counts_cols = ['counts', 'flat_counts', 'bg_counts',
+                             'bg_flat_counts']
+        calibration_cols = ['exptime', 'bg', 'mcat_bg', 'responses', 'detxs',
+                            'detys', 'detrad', 'racent', 'deccent', 'flags']
+        output_columns = (time_related_cols + annulus_bkg_corrected_cols +
+                          mcat_bkg_corrected_cols + bkg_uncorrected_cols +
+                          total_counts_cols + calibration_cols)
+
+    # The output columns defined here must match all of those in the return
+    # data dict, if not, raise an error so it can be fixed by developers.
+    if minimal_output:
+        # Make sure each of these are included in data.keys()
+        if not set(output_columns) <= set(
+                [x for x in data.keys() if x not in exclude_keys]):
+            raise ValueError("Some output columns are not present in the"
+                             " data structure.  A developer needs to fix this.")
+    else:
+        if set(output_columns) != set(
+                [x for x in data.keys() if x not in exclude_keys]):
+            raise ValueError("Output columns do not match those returned in"
+                             " data structure.  A developer needs to fix this.")
+
+    import ipdb; ipdb.set_trace()
 
     if csvfile:
         if verbose:
@@ -1114,7 +1161,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
 
         frame, columns = {}, []
 
-        for k in minimal_columns if minimal_output else data.keys():
+        for k in output_columns:
             if k in exclude_keys:
                 continue
             frame[k] = data[k]
