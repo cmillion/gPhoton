@@ -297,6 +297,8 @@ These flags are automatically set in software based upon conditions that we know
 
 128 - 'bg mask' - annulus events in pixels contiguous to detector edge
 
+256 - 'FUV multimodality' - Includes data from the first three legs of a CAI observation in the FUV, which is strongly correlated to extreme (~15%) outliers in delta-mag vs. mag comparisons against the MCAT. See the gPhoton paper for more information.
+
 ####Calling from within the Python Interpreter
 You can also import and work with _gAperture_ and its modules from within the Python interpeter.
 
