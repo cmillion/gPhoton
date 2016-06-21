@@ -212,7 +212,11 @@ def obstype(objid):
             baseURL=baseURL, MCATDB=MCATDB, objid=objid, formatURL=formatURL))
 # ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------
+def obstype_from_t(t):
+    return "{baseURL}SELECT * from  {baseDB}.fGetLegObsType({t}){formatURL}".format(
+            baseURL=baseURL,baseDB=baseDB,t=repr(t*tscale),formatURL=formatURL)
+
+# -_----------------------------------------------------------------------------
 def mcat_visit_sources(ra0, dec0, radius):
     """
     Return the MCAT per-visit sources given sky position and search radius.

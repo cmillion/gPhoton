@@ -10,10 +10,24 @@
 
 import numpy as np
 from astropy import wcs as pywcs
+import datetime
+import time
 
 # ------------------------------------------------------------------------------
 GPSSECS = 315532800+432000
 # ------------------------------------------------------------------------------
+
+def recovery_tranges():
+    """
+    Defines and returns an array of time ranges during which the spacecraft
+    was in some sort of recovery mode (e.g. FUV cycling or CSP) and therefore
+    any data from these periods should be viewed skeptically (because of things
+    like observing while not at HVNOM).
+    """
+    return [# CSP (05-04-2010 to 06-23-2010)
+            [time.mktime(datetime.date(2010,5,4).timetuple())-GPSSECS,
+             time.mktime(datetime.date(2010,6,23).timetuple())-GPSSECS],
+        ]
 
 # ------------------------------------------------------------------------------
 def isPostCSP(t, switch=961986575.):

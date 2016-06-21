@@ -119,6 +119,9 @@ def gMap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,
     if len(np.array(trange).shape) == 1:
         trange = [trange]
 
+    # If trange is out of time order, this will put it back into order.
+    trange = np.array(trange)[np.argsort(np.array(trange)[:,0])]
+
     write_images(band.upper(), skypos, trange, skyrange, write_cnt=write_cnt,
         write_int=write_int, framesz=stepsz,
         overwrite=overwrite, verbose=verbose, memlight=memlight, coadd=coadd,

@@ -220,11 +220,11 @@ def makemap(band, skypos, trange, skyrange, response=False, verbose=0,
         if verbose > 2:
             print ('No events found at {s} +/- {r} in {t}.'.format(
                 s=skypos, r=skyrange, t=trange))
-        return np.zeros(np.int(imsz))
+        return np.zeros(np.array(imsz,dtype='int32'))
 
     # Trim the data on detsize
     col, row = ct.xieta2colrow(events['xi'], events['eta'], band)
-    ix = np.where((1.25/800.)*mc.distance(col, row, 400, 400) <= detsize)
+    ix = np.where(gxt.aper2deg(4)*mc.distance(col, row, 400, 400) <= detsize)
     n = len(ix[0])
     m = len(col)
 
