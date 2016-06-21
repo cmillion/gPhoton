@@ -479,9 +479,9 @@ def caiwarning(band,bin_ix,events,verbose=0):
     if band=='FUV':
         for trange in dbt.distinct_tranges(np.array(events['photons']['t'])[bin_ix]):
             t = np.median(trange)
-            obstype = gQuery.getArray(gQuery.obstype_from_t(t))
-            if ((str(gq.getArray(gq.obstype_from_t(t))[0][0]) is 'CAI')
-                and (gq.getArray(gq.obstype_from_t(t))[0][5]<=3)):
+            obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
+            if ((dbt.obstype(t,obsdata=obsdata) is 'CAI')
+                and (dbt.legnum(t,obsdata=obsdata)<=3)):
                 return True
     return False
 # ------------------------------------------------------------------------------

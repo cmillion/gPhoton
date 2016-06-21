@@ -695,6 +695,20 @@ def exp_from_objid(objid):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+def obstype(t,obsdata=None):
+    if obsdata is None:
+        obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
+    return str(obsdata[0][0])
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def legnum(t,obsdata=None):
+    if obsdata is None:
+        obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
+    return obsdata[0][5]
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 def obstype_from_objid(objid):
     """
     Return the number of legs and petal value for a given GALEX object ID.
