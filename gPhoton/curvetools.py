@@ -420,6 +420,41 @@ def reduce_lcurve(bin_ix, region_ix, data, function, dtype='float64'):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+def caiwarning(band,bin_ix,events,verbose=0):
+    """
+    Test whether a bin contains data from the first 3 legs of an FUV
+    observation as part of the calibration (CAI) survey.
+
+    :param band: The band being used, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param bin_ix: Array indices designating which events are in the time bin
+    of interest.
+
+    :type bin_ix: numpy.ndarray
+
+    :param events: Set of photon events to check if they are near a masked
+    detector region.
+
+    :type events: dict
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+    """
+
+    if band=='FUV':
+        for trange in dbt.distinct_tranges(np.array(events['photons']['t'])[bin_ix]):
+            t = np.median(trange)
+            obstype = gQuery.getArray(gQuery.obstype_from_t(t))
+            if ((str(gq.getArray(gq.obstype_from_t(t))[0][0]) is 'CAI')
+                and (gq.getArray(gq.obstype_from_t(t))[0][5]<=3)):
+                return True
+    return False
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 def maskwarning(band, bin_ix, events, verbose=0, mapkey='H', mode=None):
     """
     Test if any given events are near a masked detector region.
@@ -696,7 +731,8 @@ def getflags(band, bin_ix, events, verbose=0):
                 if maskwarning(band, ix, events, mapkey='E',
                                             mode='bg', verbose=verbose):
                     flags[i] += 128
-
+                if caiwarning(band, ix, events, verbose=verbose):
+                    flags[i] += 256
             except:
                 raise
         else:
