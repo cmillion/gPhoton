@@ -420,6 +420,39 @@ def reduce_lcurve(bin_ix, region_ix, data, function, dtype='float64'):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+def recoverywarning(band,bin_ix,events,verbose=0):
+    """
+    Test whether the bin contains data that was collected during a spacecraft
+    recovery period (e.g. FUV cycling) as defined by the lookup table in
+    galextools.recovery_tranges().
+
+    :param band: The band being used, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param bin_ix: Array indices designating which events are in the time bin
+    of interest.
+
+    :type bin_ix: numpy.ndarray
+
+    :param events: Set of photon events to check if they are near a masked
+    detector region.
+
+    :type events: dict
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+    """
+    tranges = gxt.recovery_tranges()
+    for trange in tranges:
+        t = np.array(events['photons']['t'])[bin_ix]
+        if ((trange[0]<=t) & (trange[1]>=t)).any():
+            return True
+    return False
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 def caiwarning(band,bin_ix,events,verbose=0):
     """
     Test whether a bin contains data from the first 3 legs of an FUV
@@ -443,7 +476,6 @@ def caiwarning(band,bin_ix,events,verbose=0):
 
     :type verbose: int
     """
-
     if band=='FUV':
         for trange in dbt.distinct_tranges(np.array(events['photons']['t'])[bin_ix]):
             t = np.median(trange)
@@ -733,6 +765,8 @@ def getflags(band, bin_ix, events, verbose=0):
                     flags[i] += 128
                 if caiwarning(band, ix, events, verbose=verbose):
                     flags[i] += 256
+                if recoverywarning(band, ix, events, verbose=verbose):
+                    flags[i] += 512
             except:
                 raise
         else:
