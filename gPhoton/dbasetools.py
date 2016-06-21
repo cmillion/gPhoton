@@ -698,7 +698,10 @@ def exp_from_objid(objid):
 def obstype(t,obsdata=None):
     if obsdata is None:
         obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
-    return str(obsdata[0][0])
+    try:
+        return str(obsdata[0][0])
+    except IndexError:
+        return "Unknown"
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
