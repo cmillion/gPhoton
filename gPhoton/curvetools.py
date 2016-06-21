@@ -1153,8 +1153,6 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
             raise ValueError("Output columns do not match those returned in"
                              " data structure.  A developer needs to fix this.")
 
-    import ipdb; ipdb.set_trace()
-
     if csvfile:
         if verbose:
             mc.print_inline('Building output data frame.')
