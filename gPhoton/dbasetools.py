@@ -136,13 +136,22 @@ def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
     # entire region of sky for data, but it's not hugely dumb and does work...
     skypos_list = [skypos]
     if skyrange:
-        for r in np.linspace(skypos[0]-skyrange[0]/2.,
-                             skypos[0]+skyrange[0]/2.,
-                             np.ceil(skyrange[0]/(detsize/2.)), endpoint=True):
-            for d in np.linspace(skypos[1]-skyrange[1]/2.,
-                                 skypos[1]+skyrange[1]/2.,
-                                 np.ceil(skyrange[1]/(detsize/2.)),
-                                 endpoint=True):
+        """ This massive construction with the hstack and separate calls to
+        linspace is to ensure that skypos (i.e. the target position) is
+        always uniquely searched.
+        In a perfect world, you would probably divice detsize by 2. The
+        detsize is divided by 3 to make sure to oversample the search just a
+        little bit."""
+        for r in np.unique(np.hstack([np.linspace(skypos[0],
+                skypos[0]+skyrange[0]/2.,
+                np.ceil(skyrange[0]/(detsize/3.)), endpoint=True),
+                np.linspace(skypos[0],skypos[0]-skyrange[0]/2.,
+                np.ceil(skyrange[0]/(detsize/3.)), endpoint=True)])):
+            for d in np.unique(np.hstack([np.linspace(skypos[1],
+                    skypos[1]+skyrange[1]/2.,
+                    np.ceil(skyrange[1]/(detsize/3.)), endpoint=True),
+                    np.linspace(skypos[1],skypos[1]-skyrange[1]/2.,
+                    np.ceil(skyrange[1]/(detsize/3.)), endpoint=True)])):
                 skypos_list += [[r, d]]
 
     times = []
