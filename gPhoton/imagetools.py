@@ -224,7 +224,7 @@ def makemap(band, skypos, trange, skyrange, response=False, verbose=0,
 
     # Trim the data on detsize
     col, row = ct.xieta2colrow(events['xi'], events['eta'], band)
-    ix = np.where((1.25/800.)*mc.distance(col, row, 400, 400) <= detsize)
+    ix = np.where(gxt.aper2deg(4)*mc.distance(col, row, 400, 400) <= detsize)
     n = len(ix[0])
     m = len(col)
 
