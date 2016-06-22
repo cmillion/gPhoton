@@ -792,7 +792,8 @@ def mcat_skybg(band, skypos, radius, verbose=0, trange=None):
 
     if not skybg:
         if trange and verbose:
-            print 'No bg data for this visit... Using median over all visits.'
+            print_inline(
+                'No bg data for this visit... Using median over all visits.')
         ix = np.where(mcat[band]['skybg'] >= 0)
         skybg = np.median(mcat[band]['skybg'][ix])
 
