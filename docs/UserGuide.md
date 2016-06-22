@@ -183,9 +183,9 @@ For any command, you can always request more information be printed to the termi
 | ------------ | --------------------------------- | ------------------------------ | --------------------------- | -------------------- | ------------------- |
 | t0	       | cps_bgsub 		 	   | cps_mcatbgsub		    | cps	     	  	  | counts	     	 | exptime	       |
 | t1	       | cps_bgsub_err 		 	   | cps_mcatbgsub_err		    | cps_err	     	  	  | flat_counts	      	 | bg		       |
-| t0_data      | flux_bgsub	      	 	   | flux_mcatbgsub		    | flux	     	  	  | bg_counts		 | mcat_bg	       |
-| t1_data      | flux_bgsub_err      	 	   | flux_mcatbgsub_err	     	    | flux_err	     	  	  | bg_flat_counts     	 | responses	       |
-| t_mean       | mag_bgsub      	 	   | mag_mcatbgsub		    | mag	     	  	  |		      	 | detxs	       |
+| t_mean       | flux_bgsub	      	 	   | flux_mcatbgsub		    | flux	     	  	  | bg_counts		 | mcat_bg	       |
+| t0_data      | flux_bgsub_err      	 	   | flux_mcatbgsub_err	     	    | flux_err	     	  	  | bg_flat_counts     	 | responses	       |
+| t1_data      | mag_bgsub      	 	   | mag_mcatbgsub		    | mag	     	  	  |		      	 | detxs	       |
 | 	       | mag_bgsub_err_1    	 	   | mag_mcatbgsub_err_1     	    | mag_err_1	     	  	  |		      	 | detys	       |
 |	       | mag_bgsub_err_2    	 	   | mag_mcatbgsub_err_2     	    | mag_err_2	     	  	  |		      	 | detrad	       |
 |	       | 				   | 				    | 				  |			 | racent	       |
@@ -197,11 +197,11 @@ For any command, you can always request more information be printed to the termi
 
 &nbsp;&nbsp;**t1** - Upper time delimiting the bin.
 
+&nbsp;&nbsp;**t_mean** - Mean timestamp of events within the aperture.
+
 &nbsp;&nbsp;**t0_data** - Earliest timestamp of events within the aperture.
 
 &nbsp;&nbsp;**t1_data** - Final timestamp of events within the aperture.
-
-&nbsp;&nbsp;**t_mean** - Mean timestamp of events within the aperture.
 
 ###### Annulus-Background-Corrected-Flux
 &nbsp;&nbsp;**cps_bgsub** - Countrate within the aperture, corrected by the background estimated from the annulus.
