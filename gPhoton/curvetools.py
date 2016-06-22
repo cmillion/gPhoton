@@ -480,6 +480,8 @@ def caiwarning(band,bin_ix,events,verbose=0):
         for trange in dbt.distinct_tranges(np.array(events['photons']['t'])[bin_ix]):
             t = np.median(trange)
             obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
+            if not obsdata:
+                continue
             if ((dbt.obstype(t,obsdata=obsdata) is 'CAI')
                 and (dbt.legnum(t,obsdata=obsdata)<=3)):
                 return True

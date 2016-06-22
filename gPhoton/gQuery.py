@@ -213,8 +213,9 @@ def obstype(objid):
 # ------------------------------------------------------------------------------
 
 def obstype_from_t(t):
-    return "{baseURL}SELECT * from  {baseDB}.fGetLegObsType({t}){formatURL}".format(
-            baseURL=baseURL,baseDB=baseDB,t=repr(t*tscale),formatURL=formatURL)
+    return "{baseURL}SELECT * from {baseDB}.fGetLegObsType({t}){formatURL}".format(
+            baseURL=baseURL,baseDB=baseDB,t=str(long(t*tscale)),
+            formatURL=formatURL)
 
 # -_----------------------------------------------------------------------------
 def mcat_visit_sources(ra0, dec0, radius):
