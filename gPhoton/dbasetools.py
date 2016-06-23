@@ -736,7 +736,8 @@ def obstype_from_objid(objid):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def mcat_skybg(band, skypos, radius, verbose=0, trange=None):
+def mcat_skybg(band, skypos, radius, verbose=0, trange=None, mcat=None,
+    searchradius=0.1):
     """
     Estimate the sky background using the MCAT 'skybg' for nearby sources.
 
@@ -764,13 +765,15 @@ def mcat_skybg(band, skypos, radius, verbose=0, trange=None):
     aperture, in counts per second.
     """
     # Search the visit-level MCAT for nearby detections.
-    mcat = get_mcat_data(skypos,0.1)
+    # Unless the MCAT data has already been handed off for detection purposes.
+    if not mcat:
+        mcat = get_mcat_data(skypos,searchradius)
     try:
         test = mcat[band]
     except:
         print_inline(
             'No {b} MCAT sources within {r} degrees of {p}'.format(
-                                            b=band,r=max(aper_range),p=skypos))
+                                            b=band,r=searchradius,p=skypos))
         return np.nan
 
     # Find the distance to each source.

@@ -889,8 +889,10 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
     lcurve['racent'] = reduce_lcurve(bin_ix, aper_ix, data['ra'], np.mean)
     lcurve['deccent'] = reduce_lcurve(bin_ix, aper_ix, data['dec'], np.mean)
 
+    skybgmcatdata = dbt.get_mcat_data([ra0,dec0],radius)
     lcurve['mcat_bg'] = lcurve['exptime']*np.array(
-        [dbt.mcat_skybg(band, [ra0, dec0], radius, trange=tr, verbose=verbose)
+        [dbt.mcat_skybg(band, [ra0, dec0], radius, trange=tr,
+                                        mcat=skybgmcatdata, verbose=verbose)
          for tr in zip(lcurve['t0'], lcurve['t1'])])
 
     if annulus is not None:
