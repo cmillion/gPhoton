@@ -696,8 +696,8 @@ def exp_from_objid(objid):
 
 # ------------------------------------------------------------------------------
 def obstype(t,obsdata=None):
-    if obsdata is None:
-        obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
+    if not obsdata:
+        obsdata=gQuery.getArray(gQuery.obstype_from_t(t))
     try:
         return str(obsdata[0][0])
     except IndexError:
@@ -706,9 +706,12 @@ def obstype(t,obsdata=None):
 
 # ------------------------------------------------------------------------------
 def legnum(t,obsdata=None):
-    if obsdata is None:
-        obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
-    return obsdata[0][5]
+    if not obsdata:
+        obsdata=gQuery.getArray(gQuery.obstype_from_t(t))
+    try:
+        return obsdata[0][5]
+    except IndexError:
+        return "Unknown"
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -760,48 +763,43 @@ def mcat_skybg(band, skypos, radius, verbose=0, trange=None):
     :returns: float -- The estimated sky background in the photometric
     aperture, in counts per second.
     """
-
-    # Setting maglimit to 30 so that it gets _everything_...
-    if verbose:
-        print_inline('Estimating background using {m} method...'.format(
-            m='per-visit' if trange else 'median'))
-
-    mcat = get_mcat_data(skypos, radius)
-    if not mcat[band]:
-        # Try with increasingly larger radii
-        for r in [aper2deg(7),0.01,0.025,0.05,0.1]:
-            if mcat[band]:
-                continue
-            mcat = get_mcat_data(skypos,r)
+    # Search the visit-level MCAT for nearby detections.
+    mcat = get_mcat_data(skypos,0.1)
     try:
-        test = mcat['objid']
-    except NameError:
-        raise 'No MCAT sources within 0.1 degrees of {p}'.format(p=skypos)
-    skybg = None
+        test = mcat[band]
+    except:
+        print_inline(
+            'No {b} MCAT sources within {r} degrees of {p}'.format(
+                                            b=band,r=max(aper_range),p=skypos))
+        return np.nan
 
-    # [Future]: This is really slow for deep fields because it makes one
-    # https request for every single objid until it gets a match. The time
-    # ranges need to be folded into the return from gQuery.mcat_visit_sources()
-    if trange:
-        for i, objid in enumerate(mcat['objid']):
-            if skybg:
-                continue
-            for i, (t0, t1) in enumerate(zip(mcat[band]['t0'],
-                                             mcat[band]['t1'])):
-                if (trange[0] <= t0 <= trange[1] or
-                        trange[0] <= t1 <= trange[1] or
-                        t0 <= trange[0] <= t1 or t0 <= trange[1] <= t1):
-                    skybg = mcat[band]['skybg'][i]
+    # Find the distance to each source.
+    dist = np.array([angularSeparation(skypos[0],skypos[1],a[0],a[1])
+                            for a in zip(mcat[band]['ra'],mcat[band]['dec'])])
 
-    if not skybg:
-        if trange and verbose:
-            print_inline(
-                'No bg data for this visit... Using median over all visits.')
-        ix = np.where(mcat[band]['skybg'] >= 0)
-        skybg = np.median(mcat[band]['skybg'][ix])
+    # Find visits that overlap in time.
+    if not trange:
+        tix = (np.array(range(len(mcat[band]['mag'])),dtype='int32'),)
+    else:
+        tix = np.where(
+            ((trange[0]>=mcat[band]['t0']) & (trange[0]<=mcat[band]['t1'])) |
+            ((trange[1]>=mcat[band]['t0']) & (trange[1]<=mcat[band]['t1'])) |
+            ((trange[0]<=mcat[band]['t0']) & (trange[1]>=mcat[band]['t1'])))
 
-    # Scale bg to area of aperture. Radius is in degrees.
-    return skybg*area(radius*60.*60.)
+    if not len(tix[0]):
+        print_inline('No concurrent {b} MCAT source nearby.'.format(b=band))
+        return np.nan # Might not be the preferred behavior here.
+
+    ix = np.where(dist[tix]==min(dist[tix]))
+
+    skybg = mcat[band]['skybg'][tix][ix]
+
+    # This should never happen, but return something helpful if it does.
+    if len(skybg)>1:
+        raise 'Duplicate {b} MCAT sources at {p}?!'.format(b=band,p=skypos)
+
+    return skybg[0]*area(radius*60.*60.)
+
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
