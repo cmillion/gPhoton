@@ -799,7 +799,7 @@ def mcat_skybg(band, skypos, radius, verbose=0, trange=None, mcat=None,
 
     # This should never happen, but return something helpful if it does.
     if len(skybg)>1:
-        raise 'Duplicate {b} MCAT sources at {p}?!'.format(b=band,p=skypos)
+        raise ValueError('Duplicate {b} MCAT sources at {p}?!'.format(b=band,p=skypos))
 
     return skybg[0]*area(radius*60.*60.)
 
