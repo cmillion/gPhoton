@@ -797,12 +797,17 @@ def mcat_skybg(band, skypos, radius, verbose=0, trange=None, mcat=None,
 
     skybg = mcat[band]['skybg'][tix][ix]
 
-    # This should never happen, but return something helpful if it does.
-    if len(skybg)>1:
-        raise ValueError('Duplicate {b} MCAT sources at {p}?!'.format(b=band,p=skypos))
+    # This should rarely happen, but sometimes there's a duplicate entry in
+    # the visit-level MCAT.
+    if len(skybg) > 1:
+        # If the skybg array is all the same value, it's a duplicate.
+        if np.all(skybg == skybg[0]):
+            skybg = np.asarray([skybg[0]])
+        else:
+            raise ValueError(
+                'Multiple {b} MCAT sources at {p}?!'.format(b=band,p=skypos))
 
     return skybg[0]*area(radius*60.*60.)
-
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
