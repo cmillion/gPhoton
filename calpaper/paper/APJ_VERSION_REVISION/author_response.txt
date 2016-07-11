@@ -57,7 +57,7 @@ AUTHOR RESPONSE: We've have added very basic examples of how to run the four mai
 The gPhoton project defines timestamps in units of "GALEX time" throughout, where GALEX time is defined as a linear offset from UNIX or POSIX time, where tGALEX = tUNIX − 315964800 seconds.
 However, UNIX time does not handle leap seconds properly. Two leap seconds occured during the GALEX mission. How is this dealt with?
 ---------------------------------------------------------------------------------
-AUTHOR RESPONSE:
+AUTHOR RESPONSE: 
 ---------------------------------------------------------------------------------
 
 The gPhoton software is described in several places as a dabase of individual photons. However, after reading this manuscript, the User Guide, and installing and playing around with the software, it is still unclear to me which steps allow the user to retrieve a full calibrated photon list. (gAperture only retunred binned quantities. gPipeline is supposed to return a photon list, but unlike the other tools it requires a raw6 and scst file as input. Where would I get those? Why can they not be downloaded automatically with the skypos and time as in gAperture?)
