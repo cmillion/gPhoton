@@ -5,9 +5,9 @@ The following terminal commands will generate files containing gAperture and
 MCAT photometry values for a large number of random-ish sources. They will
 take a while to run (like a few days).
 
-    ./gCalrun -f 'DPFCore_calrun_FUV.csv' -b 'FUV' --rarange [0,360] --decrange [-90,90] -n 150 --seed 323 -v 1
+    ./gCalrun -f 'DPFCore_calrun_FUV.csv' -b 'FUV' --rarange [0,360] --decrange [-90,90] -n 40000 --seed 323 -v 1
 
-    ./gCalrun -f 'DPFCore_calrun_NUV.csv' -b 'NUV' --rarange [0,360] --decrange [-90,90] -n 150 --seed 323 -v 1
+    ./gCalrun -f 'DPFCore_calrun_NUV.csv' -b 'NUV' --rarange [0,360] --decrange [-90,90] -n 40000 --seed 323 -v 1
 """
 
 import numpy as np
@@ -281,7 +281,6 @@ print 'Writing to: {o}'.format(o=outpath)
 inpath = '.'
 print 'Reading from: {i}'.format(i=inpath)
 
-
 # Setup reference variables.
 scl = 1.4
 bands = ['FUV','NUV']
@@ -303,9 +302,15 @@ apertxt = 'aper{n}'.format(n=int(aper))
 
 # To make a cut on AIS leg, run the following and then add the leg
 # condition in ix below.
-legs = {}
-legs['FUV'] = np.array([gq.getArray(
+try:
+    _ = len(data['FUV']['legs'])
+except KeyError:
+    print 'Retrieving observation leg information from database.'
+    data['FUV']['legs'] = np.array([gq.getArray(
             gq.obstype(o))[0][5] for o in np.array(data['FUV']['objid'])])
+    data['FUV'].to_csv('{path}/{s}_dm_FUV_{a}.csv'.format(
+                                                s=source,path=inpath,a=aperas))
+legs = {'FUV':np.array(data['FUV']['legs'])}
 
 # Provide some baseline statistics for the sample
 ix = {}
@@ -316,8 +321,8 @@ for band in bands:
                         (data[band]['t0']<961986575.) &
         (np.bitwise_and(np.array(data[band]['flags'].values,dtype='int16'),
                                         0b00111111)==0))# & (legs[band]>3)
-    print '{b}: {m} / {n}'.format(b=band,n=len(data[band][apertxt]),
-        m=len(ix[band][0]))
+    print '{b}: {m} / {n} data points used'.format(b=band,
+        n=len(data[band][apertxt]),m=len(ix[band][0]))
     print 'mcat: {m} (ref: {r})'.format(
         m = np.median(np.array(data[band][apertxt])[ix[band]]) -
                                                     gt.apcorrect1(radius,band),
@@ -338,7 +343,7 @@ plt.axhline(-0.05, color='g', linestyle='solid', linewidth=1)
 dmag = data[band]['aper{a}'.format(a=aper)]-data[band]['mag_mcatbgsub']
 dmagrange = [-0.2,0.025]
 plt.ylim(dmagrange)
-plt.plot(np.array(legs[band])[ix[band]],
+plt.plot(legs[band][ix[band]],
                         np.array(dmag)[ix[band]],'.',alpha=0.3,color='k')
 plt.subplot(1,2,2,yticks=[])
 plt.hist(np.array(dmag)[ix[band]],bins=50,range=dmagrange,
@@ -651,7 +656,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import gPhoton.dbasetools as dt
 import gPhoton.gQuery as gq
-import pprint, pickle
+import pprint
 import triangle
 import emcee
 

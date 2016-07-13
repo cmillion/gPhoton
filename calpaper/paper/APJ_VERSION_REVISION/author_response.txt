@@ -2,141 +2,137 @@ We thank the referee for their thorough review of both our paper and software.  
 
 
 
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 RESPONSES TO EDITOR COMMENTS
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 In addition to these comments, I just wanted to mention that while it's great that you have provided scripts to reproduce the plots in the paper, I would like to ask you to avoid including a Python pickle file, since these have no guarantee of working in the long term. Please use archival formats instead, whether plain text, JSON, FITS, HDF5, or other similar formats.
----------------------------------------------------------------------------------
-AUTHOR RESPONSE: We agree with this point, and have switched all pickle files to be plain text (csv files).
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+AUTHOR RESPONSE: The information that was previously contained in the pickle file has been moved to LDS749B_dm_FUV_35as.csv. The figures.py script has been updated to reflect this change.
+--------------------------------------------------------------------------------
 
 
-
-
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 RESPONSES TO REFEREE COMMENTS
----------------------------------------------------------------------------------
-
-
+--------------------------------------------------------------------------------
 
 Abstract
 --------
 
 "photon event" - This term may need a specific definition (are there other event types? Are there photons that are not events?). For the abstract I suggest to use the simple term "photon", leaving the exact definition for the text.
----------------------------------------------------------------------------------
-AUTHOR RESPONSE: We have simplified the abstract to refer to "photons" instead of "photon events", and in the Motivation section we describe exactly what we mean by "photon events".
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+AUTHOR RESPONSE: We have simplified the abstract to refer to "photons" instead of "photon events," and in the Motivation section we describe more precisely what we mean by "events" as distinct from "photons."
+--------------------------------------------------------------------------------
 
 Which version of the software does this describe? I understand that software evolves and articles do not, but the tests described here are done with one specific version e.g. when the authors say "summarize photometric and astrometric performance ...", those metrics might be version dependent.
----------------------------------------------------------------------------------
-AUTHOR RESPONSE: Upon paper acceptance, this will be based on the "v1.27.2" of the code, which will be merged into the master branch.  The version of the code is recored in two places, depending on installation method.  The pip package is bundled as that version, and can be identified using standard pip commands.  It's also recorded in the "__init__.py" file in the gPhoton directory.  We have added the version that this paper describes in the last paragraph of Section 1, and the last sentence of the Abstract.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+AUTHOR RESPONSE: The revised paper refers to v1.27.2 of the code, which is merged to master and available on PyPI at the time that we are submitting these revisions. The code version is recorded in the __init__.py, which is propagated to pip.  We have added the version that this paper describes in the last paragraph of Section 1, and the last sentence of the Abstract.
+--------------------------------------------------------------------------------
 
 The word "python" turns up a couple of times. In some places it is capitalized, in others it is not. According to the PSF (Python software foundation) "the name of our favourite programming language is always capitalized" (https://pl.python.org/docs/doc/style-guide.html).
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE: We have standardized capitalization of the use of "Python" throughout the document.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 
 Sect 1
 -------
 I'm missing a few more introductory sentences about "photon events".
 This is common in x-ray and gammy-ray astronomy, but even UV astronmers traditionally think about integrated quantities, fluxes etc.
----------------------------------------------------------------------------------
-AUTHOR RESPONSE: We have added a couple more sentences in the second paragraph of Section 1, describing what the MCPs record (events), and what they ultimately turn into (RA, DEC, time stamps, and fluxes) at a very high level.  This is in addition to the description in Section 2 where we talk a bit more about what causes events.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+AUTHOR RESPONSE: We have added a couple more sentences in the second paragraph of Section 1, describing what the MCPs record, and what they ultimately turn into (RA, DEC, time stamps, and fluxes) at a very high level.  This is in addition to the description in Section 2 where we talk a bit more about what causes events (i.e. not necessarily astrophysical photons).
+--------------------------------------------------------------------------------
 
 
 Sect 4
 -------
 Where individual tools are described, the reader would profit from a simple example for each of them that shows an examplary call on the command line or in the python interpreter (the documentation of all parameters an be left for the user manual).
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE: We've have added very basic examples of how to run the four main commands in Table 2 to their description within that table.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 The gPhoton project defines timestamps in units of "GALEX time" throughout, where GALEX time is defined as a linear offset from UNIX or POSIX time, where tGALEX = tUNIX − 315964800 seconds.
 However, UNIX time does not handle leap seconds properly. Two leap seconds occured during the GALEX mission. How is this dealt with?
----------------------------------------------------------------------------------
-AUTHOR RESPONSE: 
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+AUTHOR RESPONSE:
+--------------------------------------------------------------------------------
 
 The gPhoton software is described in several places as a dabase of individual photons. However, after reading this manuscript, the User Guide, and installing and playing around with the software, it is still unclear to me which steps allow the user to retrieve a full calibrated photon list. (gAperture only retunred binned quantities. gPipeline is supposed to return a photon list, but unlike the other tools it requires a raw6 and scst file as input. Where would I get those? Why can they not be downloaded automatically with the skypos and time as in gAperture?)
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE: The photon (events) are returned as part of the data structure returned from a call to gAperture when importing it as a module.  For example, if you set the return of gAperture to a variable: x = gAperture(...), the events would be stored in x['photons'].  We have added an optional output file for the photon events to be saved as a CSV file to the gAperture call in v1.27.2, which enables saving of the photon events to a file whether called from the command line or imported as a module.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 gPipeline: Do photon list files contain the values for the weighting factors for flat and dead time correction that are applied by gMap or gAperture tools? In other words, do the photon lists contain all the informnation needed for the analysis in some form or are the later tools required to download/calculate more information?
 The authors put an emphasis on the fact that single-photon retrievel is possible, so this point should be mentioned.
----------------------------------------------------------------------------------
-AUTHOR RESPONSE: Yes, the photon lists contain all information needed, including the flat values.  We have added more description in the document describing the single-photon retrieval capabilities.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+AUTHOR RESPONSE: Yes, the photon lists returned by gAperture contain all information needed, including the flat values.  We have added more description in the document describing the single-photon retrieval capabilities.
+--------------------------------------------------------------------------------
 
 In the high-energy community (X-ray, gammay ray), astronomers work almost exclusivley with single event data and methods and software packages exisit for e.g. source detection, or lightcurve analysis (e.g. Baysian block algorithm) that do not bin events, but treat individual events to calcualte likelyhoods. Those users would profit from having as much information as possible availalbe without the need to consult tools that bin the data into images or lightcurves.
----------------------------------------------------------------------------------
-AUTHOR RESPONSE: With the added option to save the photon events to a CSV file, users of either gAperture as an imported module or from the command line have access to the unbinned photon event data.  Indeed, the gPhoton team have made use of plotting the individual photon event data for both science analysis and debugging of our software.  We have also updated the UserGuide entry in gAperture to emphasize that users can store the individual photon events to files for post-analysis.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+AUTHOR RESPONSE: When used as imported module, the data structure returned by gAperture includes the unbinned data. We have also added the option to save photon events to a CSV file when running in command-line mode. We have also updated the UserGuide entry in gAperture to emphasize these features.
+--------------------------------------------------------------------------------
 
 Sect 5
 -------
 In Sect 5.2 the authors suggest that the difference in the background they see compared to the MCAT is due to sources in the background annulus and they suggest that software users manually identify contaminating sources in the images. They should try out this suggestion for a few cases and report the differene between the MCAT background and that measured from an annulus placed by hand to avoid contaminating sources, since this is what they recommend users to do.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE:
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 In Fig 6, there seems to be a systematic trend, such that all exposures > 150 s produce values above the expected magnitude. Is there a known reason?
----------------------------------------------------------------------------------
-AUTHOR RESPONSE:
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+AUTHOR RESPONSE: We do not know of a reason, nor did anyone on the mission team who we asked. It doesn't appear to be an issue for "normal" (non-calibration survey) data. We consider the fact that gPhoton reproduces this apparent systematic to be evidence of our successful reproduction of the mission calibration pipeline at the visit level.
+--------------------------------------------------------------------------------
 
 The last few sentences of Sect 5.4 suggest to filter on leg. Are there instructions for users how this can be done?
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE: We have added a description on how to filter on leg in the UserGuide.  We would prefer not to put that description in the paper, because the exact method may change (the current query does not run as fast as we'd like).  We will add a note in the paper draft, in Section 5.4, to consult the specific section of the UserGuide for exactly how to filter on leg, since this can be important to know (until the problem with legs #1-3 is better understood and/or fixed).
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 Sect 6
 -------
 6.3 Relative response correction: The authors describe that the original version of the pipeline used several interpolations to calcualte the appropriate response for each pixel on the detector. In contrast, the new software avoids that.
 One common reason for interpolating response maps is that the original flat-field data is noisy and has to be smoothed by interpolation. Did the authors verify that that is not a problem in this case?
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE: Flat-field noise can be a problem, but is generally restricted to the detector edges, where the flat is less well characterized.  Indeed, this is one of several reasons we caution the user to avoid the edges (and default many of the gPhoton routines to do so automatically).  Short time-domain light curves of sources that stay within the linear response regime of the detector and near the center of the field-of-view have not shown strong correlations with detector position in our tests.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 Sect 6.4 hotpsots: The authors acknowledge that overlooking that a source moved through a hot spot can lead to spourios time variability. I strongly encourge them to ensure that their software alerts a user to this condition e.g. by means of a warning or by returning nan values in the lightcurves or images.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE: The version 1.27.2 now flags for hotspots quite conservatively, so following the general advice to avoid any binned fluxes with non-zero flags will greatly reduce this problem.  Future software versions will attempt to improve the hotspot flagging to avoid rejecting too many valid events.  The hotspot flagging will never be perfect, however, so users should always inspect images to check for uncaught hotspots before proceeding with any in-depth analysis of flux decreases in a source.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 Sect 7
 ------
 Since this is meant as a usage example, I suggest to give the main commands that where used verbatim. There is no need to show all the plot code (I agree with the authors that makes a good attachement as a separate file), but as a reader I probably want to see an example of how to call the relevant modules at this point.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE:
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 Fig 12, caption:
 "such points can be identified by a flag" - I suggest giving the name of the flag here.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE:
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 Fig 13:
 I understand that this analysis is merely a usage example, but it should be correct and well readable.
 In this respect Fig 13 is lacking. What are the coordiantes on the x and y axis? What is the color scaling? Why is the background annulus (i) so close to CR Dra that is is visibly dominated by the wings of CR Dra's PSF? Why is it so small (since there are fewer counts in the background than in the source, I would expect that you chose a large background region. Otherwise the error on the CR Dra flux will be dominated by the counting statistics in the small background aperture)?
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE:
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 Figures
 -------
 There is no need to group figures and tables at the end of the manuscript any longer. ApJ/AJ used to have such a policy, but ended it many years ago and at least this referee finds it preferrable to place them in the text close to the position where they are discussed.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE: We have moved tables and figures to be placed near where they are first referenced in the manuscript.  We will produce a 2-column version using the "emulateapj" package before posting to the arXiv preprint server, upon paper acceptance.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 Figures look a little blurred. I can referee them fine, but I encourange the authors to make use of a vector graphics format such as pdf for most of their plots.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE:
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 
 Software on github
@@ -146,20 +142,20 @@ Installation
 ------------
 Manually modifying the PYTHONPATH is not the best practice solution because it might interfere with e.g. virtualenv, conda environments etc.
 The de-facto standard is using setuptools, where the names of relevant command line scripts are defined as "entry points".
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE:
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 Installations instructions Ubuntu: Note that you can get astropy through "apt-get" as well.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE:
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 When trying out the software I followed the instruction in docs/UserGuide.md
 and that did not work. pip installing into Anaconda will not activate the command line scripts (see note about "entry points" above). I strongly encourage the authors to fix this - incomplete installation instructions are probably the fasted way to turn a user to look elsewhere.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE:
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 Calling from within the Python interpreter
 ------------------------------------------
@@ -183,24 +179,24 @@ to include lines like:
 from gFind import gFine as gfind
 from gAperture import gAperture as gaperture
 ...
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE:
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 The authors could list just that 5-10 most important functions here.
 (Note that I changed the upper/lower case in my example. If the imported function has exactly the
 same name as a module, you could not reach the module any longer.)
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE:
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 
 Python version
 --------------
 The code is obviously written for python 2 and will fail on Python 3. It's probably not too hard to convert using 2to3 or six, but it should state somewhere which Python versions are supported and which versions of numpy, scipy, astropy, ... are tested and known to work.
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE:
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 
 Some comments on the code
@@ -217,10 +213,9 @@ While things work the way they are written, the authors could have made use of s
 
 gPhoton/gPipeline.py
 Most of what function check_args does is to check is arguments are present - this can be enforced by using the "required" keyword argument in "parser.add_argument" or to convert stuff to strings (again, the argparser can do that already).
----------------------------------------------------------------------------------
-AUTHOR RESPONSE:
----------------------------------------------------------------------------------
-
+--------------------------------------------------------------------------------
+AUTHOR RESPONSE: The argparse module only gets used when the tools are called from the command line. It's programmed in this way to enforce some minimal requirements when the tools are imported as modules.
+--------------------------------------------------------------------------------
 
 Readability counts
 ------------------
@@ -238,24 +233,24 @@ np.any(walk_y[q[ix], cut_fptry: cut_fptry + 2, cut_fptrx: cut_fptrx + 2] != -999
 cut_fptrx = np.array(fptrx[ix], dtype='int64')
 cut_fptry = np.array(fptry[ix], dtype='int64')
 so that this does not have to be repeated in every line applies to other code blocks as well, e.g. line 380).
----------------------------------------------------------------------------------
-AUTHOR RESPONSE:
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+AUTHOR RESPONSE: We agree that this would be a clarifying simplification, but don't want to change this particular module at this time because it is the heart of the software that produced the values now recorded in the database. We're planning an upcoming modification to the database (to restore data covered by the hotspot mask), which will involve changes to this module and extensive testing; we will make clarity revisions of PhotonPipe.py at that time.
+--------------------------------------------------------------------------------
 
 Docs
 ----
 The authors have written all docstrings in a format that sphinx will read. Are the rendered API docs available somewhere (e.g. readthedocs or on github pages)?
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 AUTHOR RESPONSE:
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 SUMMARY OF CHANGES BETWEEN SOFTWARE BRANCH v1.27.1 (on submission) and v1.27.2 (will be merged upon acceptance).
----------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
 
 We have run our full suite of regression tests, which include the astrometry, relative photometry, and absolute photometry presented in the paper, and have found minimal impact between the two branches.
 
-1.) We have slightly modified the method of computing the "MCAT" background for a target.  We have modified the description in the manuscript accordingly.
+1.) We have slightly modified the method of computing the "MCAT" background for a target.  We have modified the description in the manuscript accordingly, and rerun the calibration and plots. You'll note that the numbers have changed very slightly but not significantly.
 
-2.) We have modified the way we extract sources for dMag vs. Mag plots.  We have modified the description of the manuscript (and figures) accordingly.
+2.) We have modified the way we extract sources for dMag vs. Mag plots.  In particular, we do smaller cone searches for MCAT sources on random sky locations and sample more locations overall, providing a better statistic. We have modified the description of the manuscript (and figures) accordingly. You'll note that the numbers have changed slightly but not significantly. (Which means that our result is not hugely dependent on the sample!)
