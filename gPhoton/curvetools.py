@@ -482,8 +482,7 @@ def caiwarning(band,bin_ix,events,verbose=0):
             obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
             if not obsdata:
                 continue
-            if ((dbt.obstype(t,obsdata=obsdata) is 'CAI')
-                and (dbt.legnum(t,obsdata=obsdata)<=3)):
+            if ((str(obsdata[0][0]) is 'CAI') and (obsdata[0][5]<=3)):
                 return True
     return False
 # ------------------------------------------------------------------------------
@@ -765,8 +764,8 @@ def getflags(band, bin_ix, events, verbose=0):
                 if maskwarning(band, ix, events, mapkey='E',
                                             mode='bg', verbose=verbose):
                     flags[i] += 128
-                if caiwarning(band, ix, events, verbose=verbose):
-                    flags[i] += 256
+                #if caiwarning(band, ix, events, verbose=verbose):
+                #    flags[i] += 256
                 if recoverywarning(band, ix, events, verbose=verbose):
                     flags[i] += 512
             except:

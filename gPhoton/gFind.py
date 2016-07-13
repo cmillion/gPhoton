@@ -13,7 +13,7 @@ import dbasetools as dbt
 import gphoton_args as gargs
 
 # ------------------------------------------------------------------------------
-def gFind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
+def gfind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
           minexp=1.0, quiet=False, retries=100, skypos=None, trange=None,
           verbose=0, skyrange=None):
     """
@@ -189,7 +189,7 @@ def __main__():
     args = setup_parser().parse_args()
     args = check_args(args)
 
-    exp_times = gFind(band=args.band, detsize=args.detsize,
+    exp_times = gfind(band=args.band, detsize=args.detsize,
                       exponly=args.exponly, gaper=args.gaper,
                       maxgap=args.maxgap, minexp=args.minexp, quiet=args.quiet,
                       retries=args.retries, skypos=args.skypos,

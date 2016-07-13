@@ -22,7 +22,7 @@ from galextools import aper2deg
 from gPhoton import __version__
 
 # ------------------------------------------------------------------------------
-def gAperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
+def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
               stepsz=False, verbose=0, overwrite=False, trange=None,
               tranges=None, minexp=1., maxgap=1500., iocode='wb',
               detsize=1.1, minimal_output=False):
@@ -360,7 +360,7 @@ def __main__():
     stamp(args)
 
     # [Future]: add support for trange(s).
-    data = gAperture(args.band, args.skypos, args.radius, csvfile=args.csvfile,
+    data = gaperture(args.band, args.skypos, args.radius, csvfile=args.csvfile,
                      annulus=args.annulus, stepsz=args.stepsz,
                      verbose=args.verbose, overwrite=args.overwrite,
                      trange=[args.tmin, args.tmax], tranges=args.trange,

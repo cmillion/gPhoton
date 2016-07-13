@@ -16,7 +16,7 @@ import gphoton_args as gargs
 import numpy as np
 
 # ------------------------------------------------------------------------------
-def gMap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,
+def gmap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,
          skypos=None, maxgap=1500., memlight=100., minexp=1.,
          overwrite=False, retries=100, skyrange=None, stepsz=0., trange=None,
          verbose=0, cntcoaddfile=False, intcoaddfile=False):
@@ -262,7 +262,7 @@ def __main__():
             d=args.detsize)
         print '		in time range(s): {t}'.format(t=repr(args.trange))
 
-    gMap(band=args.band, cntfile=args.cntfile,
+    gmap(band=args.band, cntfile=args.cntfile,
          coadd=args.coadd, detsize=args.detsize, intfile=args.intfile,
          skypos=args.skypos, maxgap=args.maxgap,
          memlight=args.memlight, minexp=args.minexp, overwrite=args.overwrite,
