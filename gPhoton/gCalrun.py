@@ -13,7 +13,7 @@ import ast
 import argparse
 from regtestutils import datamaker
 import MCUtils as mc
-import gFind
+from gPhoton import gFind
 import numpy as np
 import os
 import galextools as gt
@@ -102,7 +102,7 @@ def calrun(outfile, band, nsamples=10, seed=323, rarange=[0., 360.],
         print '{pos}'.format(pos=zip(ra, dec))
 
     for skypos in zip(ra, dec):
-        expt = gFind.gFind(skypos=skypos, band=band, quiet=True)[band]['expt']
+        expt = gFind(skypos=skypos, band=band, quiet=True)[band]['expt']
         if exprange[0] <= expt <= exprange[1]:
             print skypos, expt, True
             datamaker(band, skypos, outfile, maglimit=maglimit, verbose=verbose,

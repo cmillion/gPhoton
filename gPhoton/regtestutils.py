@@ -13,7 +13,7 @@ import os
 import pandas as pd
 import galextools as gt
 import dbasetools as dt
-from gAperture import gAperture
+from gPhoton import gAperture
 
 # ------------------------------------------------------------------------------
 def file_setup(outfile):
