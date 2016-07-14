@@ -25,7 +25,7 @@ from gPhoton import __version__
 def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
               stepsz=False, verbose=0, overwrite=False, trange=None,
               tranges=None, minexp=1., maxgap=1500., iocode='wb',
-              detsize=1.1, minimal_output=False):
+              detsize=1.1, minimal_output=False, photoncsvfile=None):
     """
     Creates a light curve and returns the data in a python dict() and as
     a CSV file, if outfile is specified. Can be called from the interpreter.
@@ -42,7 +42,7 @@ def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
 
     :type radius: float
 
-    :param csvfile: Name of the photon event CSV file to use.
+    :param csvfile: Name of the photon event CSV file to use for lightcurve.
 
     :type csvfile: str
 
@@ -100,6 +100,10 @@ def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
 
     :type minimal_output: bool
 
+    :param photoncsvfile: Name of the photon event CSV file to use for photons.
+
+    :type photoncsvfile: str
+
     :returns: dict -- The light curve, including input parameters.
     """
 
@@ -120,7 +124,8 @@ def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
                           verbose=verbose, overwrite=overwrite, trange=trange,
                           tranges=tranges, coadd=coadd, minexp=minexp,
                           maxgap=maxgap, iocode=iocode, detsize=detsize,
-                          minimal_output=minimal_output)
+                          minimal_output=minimal_output,
+                          photoncsvfile=photoncsvfile)
 
     return data
 # ------------------------------------------------------------------------------
@@ -208,6 +213,9 @@ def setup_parser(iam='gaperture'):
     parser.add_argument("-f", "--file", "--outfile", "--csvfile",
                         action="store", type=str, dest="csvfile",
                         help="CSV output file")
+    parser.add_argument("--photoncsvfile",
+                        action="store", type=str, dest="photoncsvfile",
+                        help="CSV output file for photon list")
     parser.add_argument("--stamp", action="store", type=str, dest="stamp",
                         help="Filename for a JPEG preview stamp of the"
                         " targeted region.")
@@ -225,10 +233,8 @@ def setup_parser(iam='gaperture'):
                         " sigmas (assuming Gaussians)", type=float, default=1.5)
     parser.add_argument("--minimal_output", "--minout", action="store_true",
                         dest="minimal_output", help=("If csvfile is also set,"
-                                                     " writes only a small"
-                                                     " number of human-"
-                                                     "readable columns to the"
-                                                     " lightcurve file."))
+                        " writes only a small number of human-readable columns"
+                        "to the lightcurve file."))
 
     return parser
 # ------------------------------------------------------------------------------
@@ -366,7 +372,8 @@ def __main__():
                      trange=[args.tmin, args.tmax], tranges=args.trange,
                      coadd=args.coadd, minexp=args.minexp, maxgap=args.maxgap,
                      iocode=args.iocode, detsize=args.detsize,
-                     minimal_output=args.minimal_output)
+                     minimal_output=args.minimal_output,
+                     photoncsvfile=args.photoncsvfile)
 # ------------------------------------------------------------------------------
 
 if __name__ == "__main__":

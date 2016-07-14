@@ -1,4 +1,4 @@
-We thank the referee for their thorough review of both our paper and software.  In addition to addressing the referee's comments, we have made further improvements and additions between the version of the code that was submitted with the paper (v1.27.1, which was merged into the master branch upon submission), and the version that will be available at the time the paper would be accepted (v1.27.2, which we will merge into the master branch upon acceptance).  We address each of the referee's points below.  A summary of the additional changes made to the software to version 1.27.2 is provided at the bottom of this report.
+We thank the referee for their thorough review of both our paper and software.  In addition to addressing the referee's comments, we have made a few additional code changes between the version of the code that was submitted with the paper (v1.27.1, which was merged into the master branch upon submission), and the version which is available at the time that these revisions are being submitted (v1.27.2, which we will merge into the master branch upon acceptance).  We address each of the referee's points below.  A summary of the additional changes made to the software to version 1.27.2 is provided at the bottom of this report.
 
 
 
@@ -39,7 +39,7 @@ Sect 1
 I'm missing a few more introductory sentences about "photon events".
 This is common in x-ray and gammy-ray astronomy, but even UV astronmers traditionally think about integrated quantities, fluxes etc.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: We have added a couple more sentences in the second paragraph of Section 1, describing what the MCPs record, and what they ultimately turn into (RA, DEC, time stamps, and fluxes) at a very high level.  This is in addition to the description in Section 2 where we talk a bit more about what causes events (i.e. not necessarily astrophysical photons).
+AUTHOR RESPONSE: We have added sentences in the second paragraph of Section 1 describing what the MCPs record, and what they ultimately turn into (RA, DEC, time stamps, and fluxes) at a very high level.  This is in addition to the description in Section 2 where we talk a bit more about what causes events (i.e. not necessarily astrophysical photons).
 --------------------------------------------------------------------------------
 
 
@@ -47,13 +47,13 @@ Sect 4
 -------
 Where individual tools are described, the reader would profit from a simple example for each of them that shows an examplary call on the command line or in the python interpreter (the documentation of all parameters an be left for the user manual).
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: We've have added very basic examples of how to run the four main commands in Table 2 to their description within that table.
+AUTHOR RESPONSE: We have added very basic examples of how to run the four main commands in Table 2 to their description within that table.
 --------------------------------------------------------------------------------
 
 The gPhoton project defines timestamps in units of "GALEX time" throughout, where GALEX time is defined as a linear offset from UNIX or POSIX time, where tGALEX = tUNIX − 315964800 seconds.
 However, UNIX time does not handle leap seconds properly. Two leap seconds occured during the GALEX mission. How is this dealt with?
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE:
+AUTHOR RESPONSE: Like UNIX time on which it is based, GALEX time does not handle leap seconds. Users requiring this level of precision will need to apply a correction. We've added a note on this issue to the User Guide.
 --------------------------------------------------------------------------------
 
 The gPhoton software is described in several places as a dabase of individual photons. However, after reading this manuscript, the User Guide, and installing and playing around with the software, it is still unclear to me which steps allow the user to retrieve a full calibrated photon list. (gAperture only retunred binned quantities. gPipeline is supposed to return a photon list, but unlike the other tools it requires a raw6 and scst file as input. Where would I get those? Why can they not be downloaded automatically with the skypos and time as in gAperture?)

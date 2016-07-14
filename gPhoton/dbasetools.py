@@ -804,8 +804,7 @@ def mcat_skybg(band, skypos, radius, verbose=0, trange=None, mcat=None,
         if np.all(skybg == skybg[0]):
             skybg = np.asarray([skybg[0]])
         else:
-            raise ValueError(
-                'Multiple {b} MCAT sources at {p}?!'.format(b=band,p=skypos))
+            skybg = np.asarray([np.median(skybg)])
 
     return skybg[0]*area(radius*60.*60.)
 # ------------------------------------------------------------------------------

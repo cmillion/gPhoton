@@ -1051,7 +1051,7 @@ def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                 stepsz=None, trange=None, tranges=None, verbose=0, coadd=False,
                 iocode='wb', detsize=1.1, overwrite=False, minexp=1., maxgap=1.,
-                minimal_output=False):
+                minimal_output=False, photoncsvfile=None):
     """
     Generates a lightcurve and optionally writes the data to a CSV file.
 
@@ -1071,7 +1071,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
 
     :type radius: float
 
-    :param csvfile: Name of the photon event CSV file to use.
+    :param csvfile: Name of the photon event CSV file to use for the lightcurve.
 
     :type csvfile: str
 
@@ -1128,6 +1128,11 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
     number of columns.
 
     :type minimal_output: bool
+
+    :param photoncsvfile: Name of the photon event CSV file to write the
+    photon list data to.
+
+    :type photoncsvfile: str
 
     :returns: dict -- The light curve, including input parameters.
     """
@@ -1220,6 +1225,9 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
         if verbose or (not verbose and not csvfile):
             print "AB Magnitudes:               "
             print data['mag']
+
+    if photoncsvfile:
+        pd.DataFrame(data['photons']).to_csv(photoncsvfile,index=False)
 
     return data
 # ------------------------------------------------------------------------------
