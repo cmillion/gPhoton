@@ -188,7 +188,7 @@ def read_photons(photonfile, ra0, dec0, tranges, radius, verbose=0,
     # [Future]: Consider moving this method to 'dbasetools'.
 
     if verbose:
-        print 'Reading photon list file: {f}'.format(f=photonfile)
+        mc.print_inline('Reading photon list file: {f}'.format(f=photonfile))
 
     data = pd.io.parsers.read_csv(photonfile, names=colnames)
     ra, dec = np.array(data['ra']), np.array(data['dec'])
@@ -196,8 +196,6 @@ def read_photons(photonfile, ra0, dec0, tranges, radius, verbose=0,
 
     ix = np.array([])
     for trange in tranges:
-        if verbose:
-            print trange
         cut = np.where((angsep <= radius) & (np.isfinite(angsep)))[0]
         ix = np.concatenate((ix, cut), axis=0)
     events = {'t':np.array(data['t'][ix])/tscale,
@@ -256,8 +254,9 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
     # [Future]: This should probably be moved to 'dbasetools'.
     stream = []
     if verbose:
-        print "Retrieving photons within {rad} degrees of [{r}, {d}]".format(
-            rad=radius, r=ra0, d=dec0)
+        mc.print_inline(
+            "Retrieving photons within {rad} degrees of [{r}, {d}]".format(
+                rad=radius, r=ra0, d=dec0))
     for trange in tranges:
         if verbose:
             mc.print_inline(" and between {t0} and {t1}.".format(t0=trange[0],
@@ -278,18 +277,14 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
     stream = np.array(stream, 'f8').T
     colnames = ['t', 'ra', 'dec', 'xi', 'eta', 'x', 'y', 'flag']
     dtypes = ['f8', 'f8', 'f8', 'f4', 'f4', 'f4', 'f4', 'i4']
-    if stream.size > 0:
+    try:
         cols = map(np.asarray, stream, dtypes)
-    else:
-        cols = np.empty(len(colnames))
-        cols[:] = np.NAN
-
-    events = dict(zip(colnames, cols))
-
-    # Adjust the timestamp by tscale.
-    events['t'] /= tscale
-
-    return events
+        events = dict(zip(colnames, cols))
+        # Adjust the timestamp by tscale.
+        events['t'] /= tscale
+        return events
+    except TypeError:
+        return None
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -345,9 +340,11 @@ def pullphotons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
         events = query_photons(band, ra0, dec0, tranges, radius,
                                verbose=verbose, flag=flag, detsize=detsize)
 
-    events = hashresponse(band, events, verbose=verbose)
-
-    return events
+    try:
+        events = hashresponse(band, events, verbose=verbose)
+        return events
+    except TypeError:
+        return None
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -835,6 +832,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
     searchradius = radius if annulus is None else annulus[1]
     data = pullphotons(band, ra0, dec0, tranges, searchradius, verbose=verbose,
                        detsize=detsize)
+    if not data:
+        return None
 
     if verbose:
         mc.print_inline("Binning data according to requested depth.")
@@ -870,7 +869,9 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
                                                             skypos=[ra0, dec0]))
     except IndexError:
         if np.isnan(data['t']):
-            print "No valid data available in {t}".format(t=tranges)
+            if verbose:
+                mc.print_inline(
+                    "No valid data available in {t}".format(t=tranges))
         lcurve['t0'] = np.array([np.nan])
         lcurve['t1'] = np.array([np.nan])
         lcurve['exptime'] = np.array([0])
@@ -1038,11 +1039,15 @@ def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
                                      maxgap=maxgap, minexp=minexp,
                                      verbose=verbose, detsize=detsize)
     if not np.array(tranges).shape[1]:
-        print "No exposure time at this location: [{ra},{dec}]".format(
-            ra=ra0, dec=dec0)
+        if verbose:
+            mc.print_inline(
+                "No exposure time at this location: [{ra},{dec}]".format(
+                    ra=ra0, dec=dec0))
         return None
     lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
                       stepsz=stepsz, verbose=verbose, coadd=coadd)
+    if not lcurve:
+        return None
 
     if verbose:
         mc.print_inline("Done.")
@@ -1146,6 +1151,8 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                     coadd=coadd, minexp=minexp, maxgap=maxgap,
                     detsize=detsize)
     if not data:
+        if verbose:
+            print 'No events available at the requested location and time(s).'
         return None
 
     exclude_keys = ['photons', 'params']
