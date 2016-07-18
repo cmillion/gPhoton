@@ -1,6 +1,5 @@
 """
 .. module:: imagetools
-
    :synopsis: Tools for the cration of count and intensity images and movies.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
@@ -70,7 +69,7 @@ def movie_tbl(band, tranges, verbose=0, framesz=0., retries=100):
     :type band: str
 
     :param tranges: Set of time ranges to retrieve the photon events, in
-    GALEX time seconds.
+        GALEX time seconds.
 
     :type tranges: list
 
@@ -87,7 +86,7 @@ def movie_tbl(band, tranges, verbose=0, framesz=0., retries=100):
     :type retries: int
 
     :returns: astropy.fits.BinTableHDU object -- The set of frames as an HDU
-    object.
+        object.
     """
 
     if verbose:
@@ -128,7 +127,7 @@ def fits_header(band, skypos, tranges, skyrange, verbose=0, hdu=None,
     :type skypos: list
 
     :param tranges: Set of time ranges to retrieve the photon events, in
-    GALEX time seconds.
+        GALEX time seconds.
 
     :type tranges: list
 
@@ -251,7 +250,7 @@ def integrate_map(band, skypos, tranges, skyrange, verbose=0, memlight=None,
                   hdu=None, retries=100, response=False, detsize=1.1):
     """
     Integrate an image over some number of time ranges. Use a reduced
-	memory optimization (at the expense of more web queries) if requested.
+	    memory optimization (at the expense of more web queries) if requested.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -262,7 +261,7 @@ def integrate_map(band, skypos, tranges, skyrange, verbose=0, memlight=None,
     :type skypos: list
 
     :param tranges: Set of time ranges to retrieve the photon events, in
-    GALEX time seconds.
+        GALEX time seconds.
 
     :type tranges: list
 
@@ -275,7 +274,7 @@ def integrate_map(band, skypos, tranges, skyrange, verbose=0, memlight=None,
     :type verbose: int
 
     :param memlight: Reduce memory usage by breaking query into smaller
-    segments of this size in seconds.
+        segments of this size in seconds.
 
     :type memlight: float
 
@@ -342,7 +341,7 @@ def write_jpeg(filename, band, skypos, tranges, skyrange, stepsz=1.,
     :type skypos: list
 
     :param tranges: Set of time ranges to retrieve the photon events,
-    in GALEX time seconds.
+        in GALEX time seconds.
 
     :type tranges: list
 
@@ -389,7 +388,7 @@ def movie(band, skypos, tranges, skyrange, framesz=0, verbose=0,
     :type skypos: list
 
     :param tranges: Set of time ranges to retrieve the photon events,
-    in GALEX time seconds.
+        in GALEX time seconds.
 
     :type tranges: list
 
@@ -406,7 +405,7 @@ def movie(band, skypos, tranges, skyrange, framesz=0, verbose=0,
     :type verbose: int
 
     :param memlight: Reduce memory usage by breaking query into smaller
-    segments of this depth in seconds.
+        segments of this depth in seconds.
 
     :type memlight: float
 
@@ -480,7 +479,7 @@ def create_image(band, skypos, tranges, skyrange, framesz=0, verbose=0,
                  retries=100, detsize=1.1):
     """
     Generate count or intensity images or movies at a given sky position and
-    across given time ranges.
+        across given time ranges.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -491,7 +490,7 @@ def create_image(band, skypos, tranges, skyrange, framesz=0, verbose=0,
     :type skypos: list
 
     :param tranges: Set of time ranges to retrieve the photon events,
-    in GALEX time seconds.
+        in GALEX time seconds.
 
     :type tranges: list
 
@@ -508,7 +507,7 @@ def create_image(band, skypos, tranges, skyrange, framesz=0, verbose=0,
     :type verbose: int
 
     :param memlight: Reduce memory usage by breaking query into smaller
-    segments of this size in seconds.
+        segments of this size in seconds.
 
     :type memlight: float
 
@@ -560,7 +559,7 @@ def write_images(band, skypos, tranges, skyrange, write_cnt=None,
     :type skypos: list
 
     :param tranges: Set of time ranges to retrieve the photon events,
-    in GALEX time seconds.
+        in GALEX time seconds.
 
     :type tranges: list
 
@@ -585,7 +584,7 @@ def write_images(band, skypos, tranges, skyrange, write_cnt=None,
     :type verbose: int
 
     :param memlight: Reduce memory usage by breaking query into smaller
-    segments of this size in seconds.
+        segments of this size in seconds.
 
     :type memlight: float
 

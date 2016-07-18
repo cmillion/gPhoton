@@ -11,6 +11,12 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   gPipeline
+   gFind
+   gMap
+   gAperture
+   Other
+
 
 
 Indices and tables

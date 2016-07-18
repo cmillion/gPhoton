@@ -12,13 +12,33 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+from mock import Mock as MagicMock
 import sys
 import os
+
+class Mock(MagicMock):
+    @classmethod
+    def __getattr__(cls, name):
+        return Mock()
+    def __mul__(self, other):
+        return Mock()
+    def __rmul__(self, other):
+        return Mock()
+    def __pow__(self, other):
+        return Mock()
+    def __div__(self, other):
+        return Mock()
+    def __truediv__(self, other):
+        return Mock()
+
+MOCK_MODULES = ['astropy', 'astropy.io', 'matplotlib', 'matplotlib.pyplot', 'numpy', 'pandas', 'requests', 'scipy', 'scipy.misc', 'scipy.special', 'scipy.ndimage']
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = MagicMock()
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('../gPhoton/'))
 
 # -- General configuration ------------------------------------------------
 
@@ -70,7 +90,7 @@ release = '1.27.2'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+exclude_patterns = ['_build', 'conf.py', 'Makefile']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.

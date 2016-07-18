@@ -1,6 +1,5 @@
 """
 .. module:: regtestutils
-
    :synopsis: Functions for end-to-end photometric regression testing with
    emphasis on comparing gAperture values to MCAT values.
 
@@ -19,8 +18,8 @@ from gPhoton import gAperture
 def file_setup(outfile):
     """
     Checks for a CSV file in which to put all the data and initializes it
-    if it hasn't already been created. Loads already processed data, if any,
-    in order to continue interrupted runs.
+        if it hasn't already been created. Loads already processed data, if any,
+        in order to continue interrupted runs.
 
     :param outfile: Name of output file to make.
 
@@ -141,7 +140,7 @@ def datamaker(band, skypos, outfile, maglimit=20., margin=0.005,
     :type maglimit: float
 
     :param margin: The margin within which two sources are consider "the same,"
-    in degrees.
+        in degrees.
 
     :type margin: float
 
@@ -154,7 +153,7 @@ def datamaker(band, skypos, outfile, maglimit=20., margin=0.005,
     :type radius: float
 
     :param annulus: The inner and outer radii of the background annulus
-    in degrees.
+        in degrees.
 
     :type annulus: float
 

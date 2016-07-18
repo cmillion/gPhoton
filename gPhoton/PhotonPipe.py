@@ -1,10 +1,9 @@
 """
 .. module:: PhotonPipe
-
    :synopsis: A recreation / port of key functionality of the GALEX mission
-   pipeline to generate calibrated and sky-projected photon-level data from
-   raw spacecraft and detector telemetry. Generates time-tagged photon lists
-   given mission-produced -raw6, -scst, and -asprta data.
+       pipeline to generate calibrated and sky-projected photon-level data from
+       raw spacecraft and detector telemetry. Generates time-tagged photon lists
+       given mission-produced -raw6, -scst, and -asprta data.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -25,7 +24,7 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
                nullfile=None, verbose=0, retries=20):
     """
     Apply static and sky calibrations to -raw6 GALEX data, producing fully
-    aspect-corrected and time-tagged photon list files.
+        aspect-corrected and time-tagged photon list files.
 
     :param raw6file: Name of the raw6 file to use.
 
