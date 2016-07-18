@@ -72,11 +72,11 @@ def xieta2colrow(xi, eta, band, detsize=1.25):
     """
     Convert detector xi and eta into col and row.
 
-    :param xi: Sky-projected event "x" positions _in detetor coordinates_.
+    :param xi: Sky-projected event "x" positions *in detetor coordinates*.
 
     :type xi: numpy.ndarray
 
-    :param eta: Sky-projected event "y" positions _in detetor coordinates_.
+    :param eta: Sky-projected event "y" positions *in detetor coordinates*.
 
     :type eta: numpy.ndarray
 

@@ -1,8 +1,6 @@
 gMap API
 ********
 
-gMap
-====
 .. automodule:: gMap
     :members:
     :private-members:

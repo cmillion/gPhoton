@@ -2,7 +2,6 @@
 
 """
 .. module:: gMap
-
    :synopsis: Create images and image cubes.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
@@ -22,10 +21,10 @@ def gmap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,
          verbose=0, cntcoaddfile=False, intcoaddfile=False):
     """
     Use a mix of strings (if we want to make an output file) and Booleans
-    (False if we do not). I don't think this is the best way (I'd rather
-    have separate variables for the True/False to create an image, and a
-    string with the name of the output image), but for now this is kept since
-    this is how the code was originally written.
+        (False if we do not). I don't think this is the best way (I'd rather
+        have separate variables for the True/False to create an image, and a
+        string with the name of the output image), but for now this is kept
+        since this is how the code was originally written.
 
     :param band: The band being used, either 'FUV' or 'NUV'.
 
@@ -36,7 +35,7 @@ def gmap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,
     :type cntfile: str
 
     :param coadd: If true, create a coadd image using all available data within
-    the specified time range (don't use time bins).
+        the specified time range (don't use time bins).
 
     :type coadd: bool
 
@@ -53,17 +52,17 @@ def gmap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,
     :type skypos: list
 
     :param maxgap: Maximum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type maxgap: float
 
     :param memlight: If specified, breaks the queries into sections of this
-    many seconds.
+        many seconds.
 
     :type memlight: float
 
     :param minexp: Minimum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type minexp: float
 
@@ -76,8 +75,8 @@ def gmap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,
     :type retries: int
 
     :param skyrange: RA and Dec extents, in degrees, that define the lengths
-    of edges of a box on the sky, centered at skypos, that defines the
-    sky region of interest.
+        of edges of a box on the sky, centered at skypos, that defines the
+        sky region of interest.
 
     :type skyrange: list
 
@@ -86,7 +85,7 @@ def gmap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,
     :type stepsz: float
 
     :param trange: Minimum and maximum time range to make images for,
-    in GALEX time.
+        in GALEX time.
 
     :type trange: list
 
@@ -179,7 +178,7 @@ def setup_parser(iam='gmap'):
 def check_args(args, iam='gmap'):
     """
     Checks validity of command line arguments and, in some cases
-    modifies them a little bit.
+        modifies them a little bit.
 
     :param args: The command-line arguments.
 
@@ -190,7 +189,7 @@ def check_args(args, iam='gmap'):
     :type iam: str
 
     :returns: argparse.ArgumentParser Namespace -- The updated command-line
-    arguments.
+        arguments.
     """
 
     args = gargs.check_common_args(args, iam)

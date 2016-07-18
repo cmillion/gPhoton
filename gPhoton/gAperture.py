@@ -2,9 +2,8 @@
 
 """
 .. module:: gAperture
-
    :synopsis: Module for the creation of GALEX  light curves with user-defined
-   time bins and photometric apertures.
+       time bins and photometric apertures.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -28,7 +27,7 @@ def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
               detsize=1.1, minimal_output=False, photoncsvfile=None):
     """
     Creates a light curve and returns the data in a python dict() and as
-    a CSV file, if outfile is specified. Can be called from the interpreter.
+        a CSV file, if outfile is specified. Can be called from the interpreter.
 
     :param band: The band being used, either 'FUV' or 'NUV'.
 
@@ -47,12 +46,12 @@ def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
     :type csvfile: str
 
     :param annulus: Radii of the inner and outer of an annulus, in degrees,
-    within which to measure the background.
+        within which to measure the background.
 
     :type annulus: list
 
     :param coadd: Set to True if calculating a total flux instead of flux
-    from each time bin.
+        from each time bin.
 
     :type coadd: bool
 
@@ -69,7 +68,7 @@ def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
     :type overwrite: bool
 
     :param trange: Minimum and maximum time range to make a light curve,
-    in GALEX time seconds.
+        in GALEX time seconds.
 
     :type trange: list
 
@@ -78,12 +77,12 @@ def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
     :type tranges: list
 
     :param minexp: Minimum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type minexp: float
 
     :param maxgap: Maximum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type maxgap: float
 
@@ -96,7 +95,7 @@ def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
     :type detsize: float
 
     :param minimal_output: If True, produce an output file with a minimum
-    number of columns.
+        number of columns.
 
     :type minimal_output: bool
 
@@ -140,7 +139,7 @@ def check_radius(args):
     :type args: argparse.ArgumentParser Namespace
 
     :returns: argparse.ArgumentParser Namespace -- The updated command-line
-    arguments.
+        arguments.
     """
 
     if not (args.radius or args.suggest or args.aperradius):
@@ -167,7 +166,7 @@ def check_annulus(args):
     :type args: argparse.ArgumentParser Namespace
 
     :returns: argparse.ArgumentParser Namespace -- The updated command-line
-    arguments.
+        arguments.
     """
 
     if not (args.annulus1 and args.annulus2) and not args.annulus:
@@ -243,7 +242,7 @@ def setup_parser(iam='gaperture'):
 def check_args(args, iam='gaperture'):
     """
     Checks validity of command line arguments and, in some cases
-    modifies them a little bit.
+        modifies them a little bit.
 
     :param args: The command-line arguments.
 
@@ -254,7 +253,7 @@ def check_args(args, iam='gaperture'):
     :type iam: str
 
     :returns: argparse.ArgumentParser Namespace -- The updated command-line
-    arguments.
+        arguments.
     """
 
     args = gargs.check_common_args(args, iam)
@@ -292,14 +291,14 @@ def reconstruct_command(args):
 def setup_file(args):
     """
     If requested, create a header for the CSV that includes the column
-    names and a reconstruction of the command line call.
+        names and a reconstruction of the command line call.
 
     :param args: The command-line arguments.
 
     :type args: argparse.ArgumentParser Namespace
 
     :returns: argparse.ArgumentParser Namespace -- The updated command-line
-    arguments.
+        arguments.
     """
 
     if not args.csvfile:

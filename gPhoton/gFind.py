@@ -2,7 +2,6 @@
 
 """
 .. module:: gFind
-
    :synopsis: Find total amount of available data by position.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
@@ -18,7 +17,7 @@ def gfind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
           verbose=0, skyrange=None):
     """
     Primary program in the module. Prints time ranges to the screen and
-    returns the total exposure time as a float.
+        returns the total exposure time as a float.
 
     :param band: The band being used, either 'BOTH', 'FUV', or 'NUV'.
 
@@ -33,17 +32,17 @@ def gfind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
     :type exponly: bool
 
     :param gaper: Return time ranges in a format that can be copy-pasted as
-    a valid gAperture call.
+        a valid gAperture call.
 
     :type gaper: bool
 
     :param maxgap: Maximum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type maxgap: float
 
     :param minexp: Minimum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type minexp: float
 
@@ -60,7 +59,7 @@ def gfind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
     :type skypos: list
 
     :param trange: Minimum and maximum time range to make a light curve,
-    in GALEX time.
+        in GALEX time.
 
     :type trange: list
 
@@ -69,7 +68,7 @@ def gfind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
     :type verbose: int
 
     :param skyrange: RA and Dec extents, in degrees, defining the lengths of
-    sides of a box on the sky that circumscribes the region of interest.
+        sides of a box on the sky that circumscribes the region of interest.
 
     :type skyrange: list
 
@@ -157,7 +156,7 @@ def setup_parser(iam='gfind', parser=None):
 def check_args(args, iam='gfind', allow_no_coords=False):
     """
     Checks validity of command line arguments and, in some cases,
-    modifies them a little bit.
+        modifies them a little bit.
 
     :param args: The command-line arguments.
 
@@ -172,7 +171,7 @@ def check_args(args, iam='gfind', allow_no_coords=False):
     :type allow_no_coords: bool
 
     :returns: argparse.ArgumentParser Namespace -- The updated command-line
-    arguments.
+        arguments.
     """
 
     args = gargs.check_common_args(args, iam, allow_no_coords=allow_no_coords)
