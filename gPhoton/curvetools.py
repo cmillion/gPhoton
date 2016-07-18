@@ -278,7 +278,11 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
     stream = np.array(stream, 'f8').T
     colnames = ['t', 'ra', 'dec', 'xi', 'eta', 'x', 'y', 'flag']
     dtypes = ['f8', 'f8', 'f8', 'f4', 'f4', 'f4', 'f4', 'i4']
-    cols = map(np.asarray, stream, dtypes)
+    if stream.size > 0:
+        cols = map(np.asarray, stream, dtypes)
+    else:
+        cols = np.empty(len(colnames))
+        cols[:] = np.NAN
 
     events = dict(zip(colnames, cols))
 
