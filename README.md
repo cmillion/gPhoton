@@ -1,6 +1,9 @@
 **gPhoton** is a project to calibrate, archive, and make available every photon event observed by the GALEX mission in an effort to dramatically improve the flexibility and utility of the data with specific emphasis on enabling short time domain photometric studies.
 
+<!-- Uncomment this and remove the v1272 line below once merge with the master branch is done.
 To get started, please read the [User Guide](https://github.com/cmillion/gPhoton/blob/master/docs/UserGuide.md).  You can also refer to the [Full API](http://gphoton.readthedocs.io/en/master/) available on ReadTheDocs.
+-->
+To get started, please read the [User Guide](https://github.com/cmillion/gPhoton/blob/master/docs/UserGuide.md).  You can also refer to the [Full API](http://gphoton.readthedocs.io/en/v1272/) available on ReadTheDocs.
 
 #####Database Status
 **Every photon observed through GR6/7 is now available in the database!** This includes every observation up to the start of the post-NASA or "CAUSE" phase of the mission.
