@@ -10,3 +10,4 @@ If you use gPhoton software in your research, please cite:
 Million, C., Fleming, S. W., Shiao, B. (2014) gPhoton. Software available at https://github.com/cmillion/gPhoton
 
 ![Logo](https://travis-ci.org/cmillion/gPhoton.svg?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/gphoton/badge/?version=master)](http://gphoton.readthedocs.io/en/master/?badge=master)

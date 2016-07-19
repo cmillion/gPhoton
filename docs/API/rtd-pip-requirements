@@ -1,1 +1,6 @@
 numpy
+astropy
+matplotlib
+pandas
+requests
+scipy
