@@ -86,7 +86,7 @@ release = '1.27.2'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', 'conf.py', 'Makefile']
+exclude_patterns = ['_build', 'conf.py', 'Makefile', '../UserGuide.md']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.

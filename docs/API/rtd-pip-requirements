@@ -1,5 +1,6 @@
 numpy
 astropy
+astropy.io
 matplotlib
 pandas
 requests
