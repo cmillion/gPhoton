@@ -20,14 +20,10 @@ class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
         return Mock()
-    def __div__(self, other):
-        return Mock()
-    def __truediv__(self, other):
-        return Mock()
 
 MOCK_MODULES = ['astropy', 'astropy.io', 'matplotlib', 'matplotlib.pyplot', 'pandas', 'requests', 'scipy', 'scipy.misc', 'scipy.special', 'scipy.ndimage']
 for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = MagicMock()
+    sys.modules[mod_name] = Mock()
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
