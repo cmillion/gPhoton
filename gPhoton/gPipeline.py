@@ -13,7 +13,7 @@ from PhotonPipe import photonpipe
 import argparse
 
 # ------------------------------------------------------------------------------
-def gPipeline(raw6file, scstfile, band, outbase, aspfile, ssdfile, nullout,
+def gpipeline(raw6file, scstfile, band, outbase, aspfile, ssdfile, nullout,
               retries=100):
     """
     Wrapper that calls the PhotonPipe method.
@@ -153,7 +153,7 @@ def __main__():
 
     args = check_args(args)
 
-    gPipeline(args.raw6file, args.scstfile, args.band, args.outbase,
+    gpipeline(args.raw6file, args.scstfile, args.band, args.outbase,
               args.aspfile, args.ssdfile, args.nullout, retries=args.retries)
 # ------------------------------------------------------------------------------
 
