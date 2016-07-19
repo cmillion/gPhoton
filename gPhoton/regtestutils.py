@@ -1,7 +1,7 @@
 """
 .. module:: regtestutils
    :synopsis: Functions for end-to-end photometric regression testing with
-   emphasis on comparing gAperture values to MCAT values.
+       emphasis on comparing gAperture values to MCAT values.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
