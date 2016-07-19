@@ -8,6 +8,10 @@ take a while to run (like a few days).
     ./gCalrun -f 'DPFCore_calrun_FUV.csv' -b 'FUV' --rarange [0,360] --decrange [-90,90] -n 40000 --seed 323 -v 1
 
     ./gCalrun -f 'DPFCore_calrun_NUV.csv' -b 'NUV' --rarange [0,360] --decrange [-90,90] -n 40000 --seed 323 -v 1
+
+The number of 'draws' defined by `-n` has been set to an arbitrarily high
+value. Only the first 10,000 entries in the output files are used in the
+subsequent analyses defined by the scripts that follow.
 """
 
 import numpy as np
@@ -45,7 +49,7 @@ data = {}
 for band in bands:
     filename = '{path}/{base}{band}.csv'.format(path=inpath,base=base,band=band)
     print filename
-    data[band] = pd.read_csv(filename)#,nrows=None if band is 'FUV' else 10000)
+    data[band] = pd.read_csv(filename,nrows=10000)
     print '{band} sources: {cnt}'.format(
                                 band=band,cnt=data[band]['objid'].shape[0])
 
