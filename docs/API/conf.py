@@ -20,18 +20,12 @@ class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
         return Mock()
-    def __mul__(self, other):
-        return Mock()
-    def __rmul__(self, other):
-        return Mock()
-    def __pow__(self, other):
-        return Mock()
     def __div__(self, other):
         return Mock()
     def __truediv__(self, other):
         return Mock()
 
-MOCK_MODULES = ['astropy', 'astropy.io', 'matplotlib', 'matplotlib.pyplot', 'numpy', 'pandas', 'requests', 'scipy', 'scipy.misc', 'scipy.special', 'scipy.ndimage']
+MOCK_MODULES = ['astropy', 'astropy.io', 'matplotlib', 'matplotlib.pyplot', 'pandas', 'requests', 'scipy', 'scipy.misc', 'scipy.special', 'scipy.ndimage']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = MagicMock()
 
