@@ -21,7 +21,21 @@ EITHER
 
 - Add option to return individual photon events to a separate CSV file when calling gAperture from a command line (and not as a module).  A ticket has been filed for this on github.  Also add section on saving the individual photon events to a file in the UserGuide.
 
+- Make sure any of the *methods* in the code examples and paper itself have their names and import syntax updated to reflect lowercase method names.
+
+- UserGuide needs to be sweeped and changed syntax for all-lowercase main methods now.
+
+- Need to add a note to gAperture in UserGuide about photoncsvfile option and emphasize how important/useful it can be.
+
 
 SCOTT
 -----
 - Make plot showing the first outliers of the delta Mag vs Mag plots are due to contaminating sources in the apertures, and show the agreement is better with refined apertures.  Will need to work with Chase on sending a list of the worst outliers.
+
+- Make sure if any of the CR Dra files are still being provided outside the document itself that they match the new commands in the paper itself.
+
+- Re-make Fig. 12 showing aperture to be based on a 10-sec image cube frame, include spatial scale, intensity stretch, etc.
+
+- Re-make Fig. 13 showing flares with new aperture based on image cube and making sure to avoid detector edges like the example does.
+
+- Make a version of gphoton.tex that uses emulateapj in 2-column format right before submission to make sure things look good still.  Use this one when posting to astro-ph.

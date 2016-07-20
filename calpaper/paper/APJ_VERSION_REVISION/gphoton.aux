@@ -14,11 +14,11 @@
 \fi}
 \global\let\hyper@last\relax 
 \gdef\HyperFirstAtBeginDocument#1{#1}
-\providecommand*\HyPL@Entry[1]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
 \bibstyle{apj}
 \citation{mar2005}
 \citation{mor2005,mor2007}
-\HyPL@Entry{0<</S/D>>}
 \@writefile{toc}{\contentsline {section}{\numberline {1}GALEX Overview}{2}{section.1}}
 \citation{rob2005,wel2006,wel2007}
 \@writefile{toc}{\contentsline {section}{\numberline {2}Motivation}{4}{section.2}}
@@ -99,23 +99,22 @@
 \citation{cri1970}
 \citation{whe2008}
 \citation{wel2006}
-\citation{wel2006}
-\citation{ram2013}
-\citation{tam2008}
 \@writefile{toc}{\contentsline {subsection}{\numberline {6.7}Client vs. Server Optimizations}{31}{subsection.6.7}}
 \newlabel{speedopt}{{6.7}{31}{Client vs. Server Optimizations}{subsection.6.7}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {7}Example Science Application - Stellar Flares From CR Draconis}{31}{section.7}}
 \newlabel{scienceexamples}{{7}{31}{Example Science Application - Stellar Flares From CR Draconis}{section.7}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Flares detected on CR Draconis using gPhoton, across the lifetime of the mission with a 10 second cadence. When available, FUV light curves are plotted (in blue) along with the NUV curves (in black). Fluxes have not been aperture corrected. Note that some of the larger flares reach sufficient brightness to exceed the non-linearity and saturation threshold of the detector; such points can be identified by a flag in the gAperture output. }}{33}{figure.12}}
-\newlabel{crdraflares}{{12}{33}{Flares detected on CR Draconis using gPhoton, across the lifetime of the mission with a 10 second cadence. When available, FUV light curves are plotted (in blue) along with the NUV curves (in black). Fluxes have not been aperture corrected. Note that some of the larger flares reach sufficient brightness to exceed the non-linearity and saturation threshold of the detector; such points can be identified by a flag in the gAperture output}{figure.12}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {12}{\ignorespaces Deep coadd image of CR Draconis using all available NUV photon events. The image is in counts, since we are only looking to define our photometric aperture and search for possible contamination sources. The aperture, inner annulus, and outer annulus for photometry are represented by the green, orange, and red circles, respectively. There is a source to the lower left that is $\sim 0.5$\% the peak of CR Draconis itself. Although testing showed it did not significantly impact the photometry, we define our apertures such that it is not included within them.}}{33}{figure.12}}
+\newlabel{crdracoadd}{{12}{33}{Deep coadd image of CR Draconis using all available NUV photon events. The image is in counts, since we are only looking to define our photometric aperture and search for possible contamination sources. The aperture, inner annulus, and outer annulus for photometry are represented by the green, orange, and red circles, respectively. There is a source to the lower left that is $\sim 0.5$\% the peak of CR Draconis itself. Although testing showed it did not significantly impact the photometry, we define our apertures such that it is not included within them}{figure.12}{}}
+\citation{wel2006}
+\citation{ram2013}
+\citation{tam2008}
+\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Flares detected on CR Draconis using gPhoton, across the lifetime of the mission with a 10 second cadence. When available, FUV light curves are plotted (in blue) along with the NUV curves (in black). Fluxes have not been aperture corrected. Note that some of the larger flares reach sufficient brightness to exceed the non-linearity and saturation threshold of the detector; such points can be identified by checking whether bit 4 (''nonlinearity'') is set in the flag column returned by gAperture. }}{35}{figure.13}}
+\newlabel{crdraflares}{{13}{35}{Flares detected on CR Draconis using gPhoton, across the lifetime of the mission with a 10 second cadence. When available, FUV light curves are plotted (in blue) along with the NUV curves (in black). Fluxes have not been aperture corrected. Note that some of the larger flares reach sufficient brightness to exceed the non-linearity and saturation threshold of the detector; such points can be identified by checking whether bit 4 (''nonlinearity'') is set in the flag column returned by gAperture}{figure.13}{}}
 \citation{mor2007}
 \citation{mor2007}
-\@writefile{lof}{\contentsline {figure}{\numberline {13}{\ignorespaces Deep coadd image of CR Draconis using all available NUV photon events. The image is in counts, since we are only looking to define our photometric aperture and search for possible contamination sources. The aperture, inner annulus, and outer annulus for photometry are represented by the green, orange, and red circles, respectively. There is a source to the lower left that is $\sim 0.5$\% the peak of CR Draconis itself. Although testing showed it did not significantly impact the photometry, we define our apertures such that it is not included within them.}}{35}{figure.13}}
-\newlabel{crdracoadd}{{13}{35}{Deep coadd image of CR Draconis using all available NUV photon events. The image is in counts, since we are only looking to define our photometric aperture and search for possible contamination sources. The aperture, inner annulus, and outer annulus for photometry are represented by the green, orange, and red circles, respectively. There is a source to the lower left that is $\sim 0.5$\% the peak of CR Draconis itself. Although testing showed it did not significantly impact the photometry, we define our apertures such that it is not included within them}{figure.13}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{36}{section.8}}
 \citation{astropy}
 \citation{simbad}
-\@writefile{toc}{\contentsline {section}{\numberline {8}Conclusion}{36}{section.8}}
-\@writefile{toc}{\contentsline {section}{\numberline {9}Acknowledgments}{36}{section.9}}
 \bibdata{gphoton}
 \bibcite{astropy}{{1}{2013}{{{Astropy Collaboration} {et~al.}}}{{{Astropy Collaboration}, {Robitaille}, {Tollerud}, {Greenfield}, {Droettboom}, {Bray}, {Aldcroft}, {Davis}, {Ginsburg}, {Price-Whelan}, {Kerzendorf}, {Conley}, {Crighton}, {Barbary}, {Muna}, {Ferguson}, {Grollier}, {Parikh}, {Nair}, {Unther}, {Deil}, {Woillez}, {Conseil}, {Kramer}, {Turner}, {Singer}, {Fox}, {Weaver}, {Zabalza}, {Edwards}, {Azalee Bostroem}, {Burke}, {Casey}, {Crawford}, {Dencheva}, {Ely}, {Jenness}, {Labrie}, {Lim}, {Pierfederici}, {Pontzen}, {Ptak}, {Refsdal}, {Servillat}, \& {Streicher}}}}
 \bibcite{bohlin2008absolute}{{2}{2008}{{Bohlin \& Koester}}{{}}}
@@ -126,6 +125,7 @@
 \bibcite{gra2006}{{7}{2006}{{Gray {et~al.}}}{{Gray, Nieto-Santisteban, \& Szalay}}}
 \bibcite{gre2002}{{8}{2002}{{{Greisen} \& {Calabretta}}}{{}}}
 \bibcite{mar2005}{{9}{2005}{{{Martin} {et~al.}}}{{{Martin}, {Fanson}, {Schiminovich}, {Morrissey}, {Friedman}, {Barlow}, {Conrow}, {Grange}, {Jelinsky}, {Milliard}, {Siegmund}, {Bianchi}, {Byun}, {Donas}, {Forster}, {Heckman}, {Lee}, {Madore}, {Malina}, {Neff}, {Rich}, {Small}, {Surber}, {Szalay}, {Welsh}, \& {Wyder}}}}
+\@writefile{toc}{\contentsline {section}{\numberline {9}Acknowledgments}{37}{section.9}}
 \bibcite{mor2005}{{10}{2005}{{{Morrissey} {et~al.}}}{{{Morrissey}, {Schiminovich}, {Barlow}, {Martin}, {Blakkolb}, {Conrow}, {Cooke}, {Erickson}, {Fanson}, {Friedman}, {Grange}, {Jelinsky}, {Lee}, {Liu}, {Mazer}, {McLean}, {Milliard}, {Randall}, {Schmitigal}, {Sen}, {Siegmund}, {Surber}, {Vaughan}, {Viton}, {Welsh}, {Bianchi}, {Byun}, {Donas}, {Forster}, {Heckman}, {Lee}, {Madore}, {Malina}, {Neff}, {Rich}, {Small}, {Szalay}, \& {Wyder}}}}
 \bibcite{mor2007}{{11}{2007}{{{Morrissey} {et~al.}}}{{{Morrissey}, {Conrow}, {Barlow}, {Small}, {Seibert}, {Wyder}, {Budav{\'a}ri}, {Arnouts}, {Friedman}, {Forster}, {Martin}, {Neff}, {Schiminovich}, {Bianchi}, {Donas}, {Heckman}, {Lee}, {Madore}, {Milliard}, {Rich}, {Szalay}, {Welsh}, \& {Yi}}}}
 \bibcite{pen2010}{{12}{2010}{{{Pence} {et~al.}}}{{{Pence}, {Chiappetti}, {Page}, {Shaw}, \& {Stobie}}}}

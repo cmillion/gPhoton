@@ -298,7 +298,7 @@ def integrate_map(band, skypos, tranges, skyrange, verbose=0, memlight=None,
     """
 
     imsz = gxt.deg2pix(skypos, skyrange)
-    img = np.zeros(imsz)
+    img = np.zeros(np.array(imsz,dtype='int32'))
 
     for trange in tranges:
         # If memlight is requested, break the integration into

@@ -106,13 +106,13 @@ Sect 7
 ------
 Since this is meant as a usage example, I suggest to give the main commands that where used verbatim. There is no need to show all the plot code (I agree with the authors that makes a good attachement as a separate file), but as a reader I probably want to see an example of how to call the relevant modules at this point.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE:
+AUTHOR RESPONSE: We have added a brief paragraph showing how we made use of gFind, gMap, and gAperture to create the CR Draconis light curves (2nd paragraph in Section 7 now).  In that paragraph we include the calls to gFind, gMap, and gAperture (examples are used when imported as modules, command-line would be almost the same).
 --------------------------------------------------------------------------------
 
 Fig 12, caption:
 "such points can be identified by a flag" - I suggest giving the name of the flag here.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE:
+AUTHOR RESPONSE: We've added the specific bit to check in the flag bitmask to the figure caption (bit 4 is the one for nonlinearity warning).  The bitmask look-up table is also in the UserGuide.
 --------------------------------------------------------------------------------
 
 Fig 13:
@@ -131,7 +131,7 @@ AUTHOR RESPONSE: We have moved tables and figures to be placed near where they a
 
 Figures look a little blurred. I can referee them fine, but I encourange the authors to make use of a vector graphics format such as pdf for most of their plots.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE:
+AUTHOR RESPONSE: We now use PDF versions of the figures instead of EPS (though the EPS were created from the PDF originally), which should hopefully improve readability across platforms.
 --------------------------------------------------------------------------------
 
 
@@ -180,14 +180,7 @@ from gFind import gFine as gfind
 from gAperture import gAperture as gaperture
 ...
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE:
---------------------------------------------------------------------------------
-
-The authors could list just that 5-10 most important functions here.
-(Note that I changed the upper/lower case in my example. If the imported function has exactly the
-same name as a module, you could not reach the module any longer.)
---------------------------------------------------------------------------------
-AUTHOR RESPONSE:
+AUTHOR RESPONSE: We have decided to take this opportunity to follow the referee's suggestion and have renamed the main methods to be differently cased than their modules, e.g., gFind.gfind now, to enable such imports.  The UserGuide has been updated accordingly.
 --------------------------------------------------------------------------------
 
 
@@ -195,7 +188,7 @@ Python version
 --------------
 The code is obviously written for python 2 and will fail on Python 3. It's probably not too hard to convert using 2to3 or six, but it should state somewhere which Python versions are supported and which versions of numpy, scipy, astropy, ... are tested and known to work.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE:
+AUTHOR RESPONSE: We plan to make gPhoton compatible with Python 3.x in addition to Python 2.7.x in the near future.  For now, the software has only been tested on Python 2.7.x.  We have added a note about this in the UserGuide.
 --------------------------------------------------------------------------------
 
 
@@ -214,7 +207,7 @@ While things work the way they are written, the authors could have made use of s
 gPhoton/gPipeline.py
 Most of what function check_args does is to check is arguments are present - this can be enforced by using the "required" keyword argument in "parser.add_argument" or to convert stuff to strings (again, the argparser can do that already).
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: The argparse module only gets used when the tools are called from the command line. It's programmed in this way to enforce some minimal requirements when the tools are imported as modules.
+AUTHOR RESPONSE: As far as we understand, the argparse module only gets used when the tools are called from the command line. It's programmed in this way to enforce some minimal requirements when the tools are imported as modules, since we want to enable both use cases.
 --------------------------------------------------------------------------------
 
 Readability counts
@@ -241,7 +234,7 @@ Docs
 ----
 The authors have written all docstrings in a format that sphinx will read. Are the rendered API docs available somewhere (e.g. readthedocs or on github pages)?
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE:
+AUTHOR RESPONSE: Indeed, we were planning on enabling API documentation in the future.  We have now added API documentation using sphinx autodoc and host it on readthedocs.  A link to the readthedocs API is now available on the main page in GitHub.
 --------------------------------------------------------------------------------
 
 
