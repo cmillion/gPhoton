@@ -663,6 +663,7 @@ import gPhoton.gQuery as gq
 import pprint
 import triangle
 import emcee
+import pickle
 
 inpath = '.'
 outpath = '.'
@@ -673,10 +674,11 @@ outpath = '.'
 bands = ['FUV','NUV']
 querydata = pd.read_csv('{path}/stimquery.csv'.format(path=inpath))
 
-''' Uncomment this block in order to rerun the database queries.
 dtdata = {}
 for band in bands:
-    stimdata = pd.read_csv('{b}Stim.csv'.format(b=band))
+    stimdata = pd.read_csv('{b}Stim.csv'.format(b=band),index_col=0)
+    if len(stimdata.keys())==10:
+        continue # The additional data has already been added to the file
     n = len(stimdata)
     dtdata[band] = {'t0':np.zeros(n),'t1':np.zeros(n),
                     'stimcount':np.zeros(n),'globalcount':np.zeros(n),
@@ -697,31 +699,29 @@ for band in bands:
         dtdata[band]['exptime'][i] = exptime
         dtdata[band]['deadtime'][i] = deadtime
 
-# Note that this actually writes to 'inpath' because it's read in below
-output = open('{path}/stimdata.pkl'.format(path=inpath), 'wb')
-# Pickle dictionary using protocol 0.
-pickle.dump(dtdata, output)
-output.close()
-'''
+    for k in dtdata[band].keys():
+        stimdata[k] = dtdata[band][k]
+    stimdata.to_csv('{b}Stim.csv'.format(b=band))
 #------------------------------------
 # FUV linear mixture model
 
 scl = 1.4
 
-pkl_file = open('{path}/stimdata.pkl'.format(path=inpath), 'rb')
-dtdata = pickle.load(pkl_file)
-pkl_file.close()
 band = 'FUV'
+dtdata = {'FUV':pd.read_csv(
+    '{path}/FUVStim.csv'.format(path=inpath),index_col=0)}
 print dtdata[band].keys()
 
 ix = np.where(np.isfinite(dtdata[band]['globalcount']) &
     np.isfinite(dtdata[band]['stimcount']) & (dtdata[band]['exptime']>0) &
     (dtdata[band]['stimcount']/dtdata[band]['exptime']<140))
-rawexpt = dtdata[band]['t1'][ix]-dtdata[band]['t0'][ix]
-x = dtdata[band]['globalcount'][ix]/rawexpt
-y = dtdata[band]['stimcount'][ix]/rawexpt
-xerr = np.sqrt(dtdata[band]['globalcount'][ix])/dtdata[band]['exptime'][ix]
-yerr = np.sqrt(dtdata[band]['stimcount'][ix])/dtdata[band]['exptime'][ix]
+rawexpt = np.array(dtdata[band]['t1'])[ix]-np.array(dtdata[band]['t0'])[ix]
+x = np.array(dtdata[band]['globalcount'])[ix]/rawexpt
+y = np.array(dtdata[band]['stimcount'])[ix]/rawexpt
+xerr = (np.sqrt(np.array(dtdata[band]['globalcount'])[ix])/
+                                        np.array(dtdata[band]['exptime'])[ix])
+yerr = (np.sqrt(np.array(dtdata[band]['stimcount'])[ix])/
+                                        np.array(dtdata[band]['exptime'])[ix])
 print x.min(),x.max(),xerr.min(),xerr.max()
 print y.min(),y.max(),yerr.min(),yerr.max()
 
@@ -887,20 +887,22 @@ scl = 1.4
 inpath = '.'
 outpath = '.'
 
-pkl_file = open('{path}/stimdata.pkl'.format(path=inpath), 'rb')
-dtdata = pickle.load(pkl_file)
-pkl_file.close()
-print dtdata.keys()
+band = 'NUV'
+dtdata = {'NUV':pd.read_csv(
+    '{path}/NUVStim.csv'.format(path=inpath),index_col=0)}
+print dtdata[band].keys()
 
 band = 'NUV'
 ix = np.where(np.isfinite(dtdata[band]['globalcount']) &
               np.isfinite(dtdata[band]['stimcount']) &
               (dtdata[band]['exptime']>0))
-rawexpt = dtdata[band]['t1'][ix]-dtdata[band]['t0'][ix]
-x = dtdata[band]['globalcount'][ix]/rawexpt
-y = dtdata[band]['stimcount'][ix]/rawexpt
-xerr = np.sqrt(dtdata[band]['globalcount'][ix])/dtdata[band]['exptime'][ix]
-yerr = np.sqrt(dtdata[band]['stimcount'][ix])/dtdata[band]['exptime'][ix]
+rawexpt = np.array(dtdata[band]['t1'])[ix]-np.array(dtdata[band]['t0'])[ix]
+x = np.array(dtdata[band]['globalcount'])[ix]/rawexpt
+y = np.array(dtdata[band]['stimcount'])[ix]/rawexpt
+xerr = (np.sqrt(np.array(dtdata[band]['globalcount'])[ix])/
+                                        np.array(dtdata[band]['exptime'])[ix])
+yerr = (np.sqrt(np.array(dtdata[band]['stimcount'])[ix])/
+                                        np.array(dtdata[band]['exptime'])[ix])
 print x.min(),x.max(),xerr.min(),xerr.max()
 print y.min(),y.max(),yerr.min(),yerr.max()
 
