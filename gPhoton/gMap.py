@@ -114,6 +114,9 @@ def gmap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,
         trange = dbt.fGetTimeRanges(band, skypos, trange=[6.E8, 11.E8],
                                     maxgap=maxgap, minexp=minexp,
                                     detsize=detsize, skyrange=skyrange)
+    if np.array(trange).size==0:
+        print 'No data available.'
+        return
 
     if len(np.array(trange).shape) == 1:
         trange = [trange]
