@@ -54,15 +54,15 @@ for band in bands:
                                 band=band,cnt=data[band]['objid'].shape[0])
 
 # The following plot will demonstrate that there is good sky sampling
-for band in bands:
-   ra = coord.Angle(data[band]['ra']*u.degree)
-   ra = ra.wrap_at(180*u.degree)
-   dec = coord.Angle(data[band]['dec']*u.degree)
-   plt.title(band)
-   fig = plt.figure(figsize=(8,6))
-   plt.title(band)
-   ax = fig.add_subplot(111, projection="mollweide")
-   ax.scatter(ra.radian, dec.radian)
+# for band in bands:
+#    ra = coord.Angle(data[band]['ra']*u.degree)
+#    ra = ra.wrap_at(180*u.degree)
+#    dec = coord.Angle(data[band]['dec']*u.degree)
+#    plt.title(band)
+#    fig = plt.figure(figsize=(8,6))
+#    plt.title(band)
+#    ax = fig.add_subplot(111, projection="mollweide")
+#    ax.scatter(ra.radian, dec.radian)
 
 def make_kde(data,datarange,bwrange=[0.01,1]):
     # A function for producing Kernel Density Estimates
