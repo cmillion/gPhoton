@@ -25,7 +25,7 @@ AUTHOR RESPONSE: We have simplified the abstract to refer to "photons" instead o
 
 Which version of the software does this describe? I understand that software evolves and articles do not, but the tests described here are done with one specific version e.g. when the authors say "summarize photometric and astrometric performance ...", those metrics might be version dependent.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: The revised paper refers to v1.27.2 of the code, which will be merged to master and available on PyPI at the time that we are submitting these revisions. The code version is recorded in the __init__.py, which is propagated to pip.  We have added the version that this paper describes in the last paragraph of Section 1, and the last sentence of the Abstract.
+AUTHOR RESPONSE: The revised paper refers to v1.27.2 of the code, which will be merged to master and available on PyPI at the time that we are submitting these revisions. The code version is recorded in the __init__.py, which is propagated to pip. We have added the version that this paper describes in the last paragraph of Section 1, and the last sentence of the Abstract.
 --------------------------------------------------------------------------------
 
 The word "python" turns up a couple of times. In some places it is capitalized, in others it is not. According to the PSF (Python software foundation) "the name of our favourite programming language is always capitalized" (https://pl.python.org/docs/doc/style-guide.html).
@@ -242,8 +242,8 @@ AUTHOR RESPONSE: Indeed, we were planning on enabling API documentation in the f
 SUMMARY OF CHANGES BETWEEN SOFTWARE BRANCH v1.27.1 (on submission) and v1.27.2 (will be merged upon acceptance).
 --------------------------------------------------------------------------------
 
-We have run our full suite of regression tests, which include the astrometry, relative photometry, and absolute photometry presented in the paper, and have found minimal impact between the two branches.
+We have run our full suite of regression tests, which include the astrometry, relative photometry, and absolute photometry presented in the paper, and have found minimal difference between the two branches. Software changes that might potentially have resulted in calibration changes (but did not) include the following.
 
-1.) We have slightly modified the method of computing the "MCAT" background for a target.  We have modified the description in the manuscript accordingly, and rerun the calibration and plots. You'll note that the numbers have changed very slightly but not significantly.
+1.) We have slightly modified the method of computing the "MCAT" background for a target. It still does exactly what is described in the paper, but it should do a better job of selecting the corresponding MCAT visit from which to draw a background estimate. The text (and User Guide) has been modified to describe the new feature that in rare cases that no appropriate visit is found, the MCAT estimated background is set to NaN. Note that the calibration results have not changed at the level of precision that they are reported in the paper.
 
-2.) We have modified the way we extract sources for dMag vs. Mag plots.  In particular, we do smaller cone searches for MCAT sources on random sky locations and sample more locations overall, providing a better statistic. We have modified the description of the manuscript (and figures) accordingly. You'll note that the numbers have changed slightly but not significantly. (Which means that our result is not hugely dependent on the sample!)
+2.) We took the opportunity of rerunning the calibration to make the baseline sample 10,000 in both bands to better permit direct comparison. We have modified the description of the manuscript (and figures) accordingly. Note that, despite the change in sample size, the calibration results have not changed at the level of precision that they are reported in the paper.

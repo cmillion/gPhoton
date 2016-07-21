@@ -297,14 +297,27 @@ These flags are automatically set in software based upon conditions that we know
 
 128 - 'bg mask' - annulus events in pixels contiguous to detector edge
 
-256 - 'FUV multimodality' - Includes data from the first three legs of a CAI observation in the FUV, which is strongly correlated to extreme (~15%) outliers in delta-mag vs. mag comparisons against the MCAT. See the gPhoton paper for more information.
+256 - 'FUV multimodality' - Includes data from the first three legs of a CAI observation in the FUV, which is strongly correlated to extreme (~15%) outliers in delta-mag vs. mag comparisons against the MCAT. See the gPhoton paper for more information. -- CURRENTLY DEPRECATED DUE TO RUNTIME OVERHEAD
 
-512 - 'Spacecraft Recovery' - Includes data collected during a spacecraft recovery period. This often involved unusual operating modes (like observing at low voltage) and should be regarded skeptically.
+512 - 'Spacecraft Recovery' - Includes data collected during a spacecraft recovery period. This often involved unusual operating modes (like observing at low voltage) and should be regarded skeptically. -- NOT YET FULLY POPULATED
 
 ####Calling from within the Python Interpreter
 You can also import and work with _gAperture_ and its modules from within the Python interpeter.
 
     import gPhoton.gAperture
+
+####Retrieving the Photon Events
+The individual photon events used in the creation of a light curve can be optionally written to a separate CSV file using the `--photoncsvfile` flag to gAperture. These data are also included under the _photons_ key of the dictionary data structure that is returned when gAperture is run as a Python module. These data may have scientific utility in "unbinned" analyses, and they are often extremely useful for troubleshooting. The available columns include everything described in Photon File Column Definitions below in addition to:
+
+&nbsp;&nbsp;**col** - The flat (and mask) image pixel row in which the event falls.
+
+&nbsp;&nbsp;**row** - The flat (and mask) image pixel row in which the event falls.
+
+&nbsp;&nbsp;**flat** - The detector flat value at the location of the event.
+
+&nbsp;&nbsp;**scale** - A time dependent scale factor applied to the flat.
+
+&nbsp;&nbsp;**response** - Equal to _flat_*_scale_.
 
 ###gMap.py
 
@@ -421,3 +434,11 @@ These are the definitions of various values of the _flag_ column in the gPhoton 
 7. **NaN values in `_mcatbgsub` columns.** This indicates that there were no simultaneous (in time) detections of any source near (<0.1 degrees) your query position. Rather than try to make something up, we just pass NaN. You should confirm with gMap that there is, in fact, a source at this location and then use the annulus background method.
 8. **UNIX time does not handle leap seconds correctly. Does GALEX time?**
 No, it does not. If you require this level of precision, you'll need to apply a correction.
+9. **How do I check if my FUV data is possibly affected by the large multi-modality / offset that afflicts calibration mode (CAI) data with AIS legs 1-3?**
+Where _t_ is a GALEX timestamp, run the following function, which will return `True` if these conditions are met:
+
+        from gPhoton import gQuery
+        def caiwarning(t,band='FUV'):
+            obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
+            return False if (not obsdata or not ((str(obsdata[0][0]) is 'CAI')
+                and (obsdata[0][5]<=3))) else True
