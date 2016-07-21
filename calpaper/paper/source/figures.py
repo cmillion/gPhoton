@@ -54,15 +54,15 @@ for band in bands:
                                 band=band,cnt=data[band]['objid'].shape[0])
 
 # The following plot will demonstrate that there is good sky sampling
-#for band in bands:
-#    ra = coord.Angle(data[band]['ra']*u.degree)
-#    ra = ra.wrap_at(180*u.degree)
-#    dec = coord.Angle(data[band]['dec']*u.degree)
-#    plt.title(band)
-#    fig = plt.figure(figsize=(8,6))
-#    plt.title(band)
-#    ax = fig.add_subplot(111, projection="mollweide")
-#    ax.scatter(ra.radian, dec.radian)
+for band in bands:
+   ra = coord.Angle(data[band]['ra']*u.degree)
+   ra = ra.wrap_at(180*u.degree)
+   dec = coord.Angle(data[band]['dec']*u.degree)
+   plt.title(band)
+   fig = plt.figure(figsize=(8,6))
+   plt.title(band)
+   ax = fig.add_subplot(111, projection="mollweide")
+   ax.scatter(ra.radian, dec.radian)
 
 def make_kde(data,datarange,bwrange=[0.01,1]):
     # A function for producing Kernel Density Estimates
@@ -88,6 +88,7 @@ bincnt = 50
 magstep = 1.
 maglimits = [14,22.5]
 magrange = np.arange(maglimits[0],maglimits[1]+magstep,magstep)
+print 'dMag v. Mag'
 for band in bands:
     magmedian = np.zeros(len(magrange)-1)
     dmag = {#'NoBg':data[band]['aper4']-data[band]['mag'],
@@ -102,6 +103,8 @@ for band in bands:
         ix = ((np.bitwise_and(np.array(data[band]['flags'].values,
                 dtype='int16'),0b00111111)==0) & (data[band][apertxt]>0) &
                 (data[band][apertxt]<=maglimits[1]))
+        print 'Using {n} of {m} {b} sources.'.format(n=np.where(ix)[0].size,
+            m=np.array(data[band]['flags']).size,b=band)
         plt.xlabel('{b} AB Magnitude (MCAT {at})'.format(
                                 b=band,at=str.upper(apertxt)),fontsize=14)
         plt.ylabel('{d}Magnitude (MCAT {at} - gAperture)'.format(
@@ -153,6 +156,7 @@ for band in bands:
 bincnt = 50
 fig = plt.figure(figsize=(8*scl,4*scl))
 fig.subplots_adjust(left=0.12,right=0.95,wspace=0.1,bottom=0.15,top=0.9)
+print 'bg dMag v. Mag (surface)'
 for i,band in enumerate(bands):
     dmagrange = [-0.4,0.05]
     gphot_bg = data[band]['bg']/data[band]['exptime']
@@ -160,6 +164,8 @@ for i,band in enumerate(bands):
     delta = mcat_bg - gphot_bg
     ix = (np.bitwise_and(np.array(data[band]['flags'].values,
             dtype='int16'),0b00111111)==0)
+    print 'Using {n} of {m} {b} sources.'.format(n=np.where(ix)[0].size,
+            m=np.array(data[band]['flags']).size,b=band)
     plt.subplot(1,2,i+1,yticks=[])
     plt.hist(delta[ix],bins=bincnt,range=dmagrange,color='k',histtype='step',
         normed=1)
@@ -185,6 +191,7 @@ fig.savefig('{path}/Fig03.pdf'.format(path=outpath),
 bincnt = 101
 a = 3600
 dasrange = [-6,6]
+print 'Astrometry'
 for i,band in enumerate(bands):
     fig = plt.figure(figsize=(8,8))
     gs = gridspec.GridSpec(2, 2, width_ratios=[3, 1], height_ratios=[3,1])
@@ -197,6 +204,8 @@ for i,band in enumerate(bands):
                             (data[band][apertxt]<=maglimits[1]) &
                             np.isfinite(delta_ra) &
                             np.isfinite(delta_dec))
+    print 'Using {n} of {m} {b} sources.'.format(n=np.where(ix)[0].size,
+            m=np.array(data[band]['flags']).size,b=band)
     plt.subplot(gs[2],xlim=dasrange,yticks=[])
     plt.gca().invert_yaxis()
     plt.xlabel('{d} Right Ascension (arcseconds)'.format(
@@ -866,6 +875,7 @@ plt.ylabel("{b} Stim Countrate (ct/s)".format(b=band),fontsize=14)
 plt.tick_params(axis='both', which='major', labelsize=12)
 plt.ylim(68, 78)
 plt.xlim(0, 17000)
+plt.tight_layout()
 plt.savefig('{path}/Fig10a.pdf'.format(path=outpath,b=band),
     format='pdf',dpi=1000)
 #plt.close()
@@ -1039,6 +1049,7 @@ plt.ylabel("{b} Stim Countrate (ct/s)".format(b=band),fontsize=14)
 plt.tick_params(axis='both', which='major', labelsize=12)
 plt.ylim(40, 75)
 plt.xlim(10000, 70000)
+plt.tight_layout()
 plt.savefig('{path}/Fig10b.pdf'.format(path=outpath,b=band),
     format='pdf',dpi=1000)
 
