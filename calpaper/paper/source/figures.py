@@ -5,9 +5,13 @@ The following terminal commands will generate files containing gAperture and
 MCAT photometry values for a large number of random-ish sources. They will
 take a while to run (like a few days).
 
-    ./gCalrun -f 'DPFCore_calrun_FUV.csv' -b 'FUV' --rarange [0,360] --decrange [-90,90] -n 150 --seed 323 -v 1
+    ./gCalrun -f 'DPFCore_calrun_FUV.csv' -b 'FUV' --rarange [0,360] --decrange [-90,90] -n 40000 --seed 323 -v 1
 
-    ./gCalrun -f 'DPFCore_calrun_NUV.csv' -b 'NUV' --rarange [0,360] --decrange [-90,90] -n 150 --seed 323 -v 1
+    ./gCalrun -f 'DPFCore_calrun_NUV.csv' -b 'NUV' --rarange [0,360] --decrange [-90,90] -n 40000 --seed 323 -v 1
+
+The number of 'draws' defined by `-n` has been set to an arbitrarily high
+value. Only the first 10,000 entries in the output files are used in the
+subsequent analyses defined by the scripts that follow.
 """
 
 import numpy as np
@@ -45,12 +49,12 @@ data = {}
 for band in bands:
     filename = '{path}/{base}{band}.csv'.format(path=inpath,base=base,band=band)
     print filename
-    data[band] = pd.read_csv(filename)#,nrows=None if band is 'FUV' else 10000)
+    data[band] = pd.read_csv(filename,nrows=10000)
     print '{band} sources: {cnt}'.format(
                                 band=band,cnt=data[band]['objid'].shape[0])
 
 # The following plot will demonstrate that there is good sky sampling
-#for band in bands:
+# for band in bands:
 #    ra = coord.Angle(data[band]['ra']*u.degree)
 #    ra = ra.wrap_at(180*u.degree)
 #    dec = coord.Angle(data[band]['dec']*u.degree)
@@ -84,6 +88,7 @@ bincnt = 50
 magstep = 1.
 maglimits = [14,22.5]
 magrange = np.arange(maglimits[0],maglimits[1]+magstep,magstep)
+print 'dMag v. Mag'
 for band in bands:
     magmedian = np.zeros(len(magrange)-1)
     dmag = {#'NoBg':data[band]['aper4']-data[band]['mag'], # Awful photometry!
@@ -98,6 +103,8 @@ for band in bands:
         ix = ((np.bitwise_and(np.array(data[band]['flags'].values,
                 dtype='int16'),0b00111111)==0) & (data[band][apertxt]>0) &
                 (data[band][apertxt]<=maglimits[1]))
+        print 'Using {n} of {m} {b} sources.'.format(n=np.where(ix)[0].size,
+            m=np.array(data[band]['flags']).size,b=band)
         plt.xlabel('{b} AB Magnitude (MCAT {at})'.format(
                                 b=band,at=str.upper(apertxt)),fontsize=14)
         plt.ylabel('{d}Magnitude (MCAT {at} - gAperture)'.format(
@@ -154,6 +161,7 @@ for band in bands:
 bincnt = 50
 fig = plt.figure(figsize=(8*scl,4*scl))
 fig.subplots_adjust(left=0.12,right=0.95,wspace=0.1,bottom=0.15,top=0.9)
+print 'bg dMag v. Mag (surface)'
 for i,band in enumerate(bands):
     dmagrange = [-0.4,0.05]
     gphot_bg = data[band]['bg']/data[band]['exptime']
@@ -161,6 +169,8 @@ for i,band in enumerate(bands):
     delta = mcat_bg - gphot_bg
     ix = (np.bitwise_and(np.array(data[band]['flags'].values,
             dtype='int16'),0b00111111)==0)
+    print 'Using {n} of {m} {b} sources.'.format(n=np.where(ix)[0].size,
+            m=np.array(data[band]['flags']).size,b=band)
     plt.subplot(1,2,i+1,yticks=[])
     plt.hist(delta[ix],bins=bincnt,range=dmagrange,color='k',histtype='step',
         normed=1)
@@ -188,6 +198,7 @@ fig.savefig('{path}/Fig03.pdf'.format(path=outpath),
 bincnt = 101
 a = 3600
 dasrange = [-6,6]
+print 'Astrometry'
 for i,band in enumerate(bands):
     fig = plt.figure(figsize=(8,8))
     gs = gridspec.GridSpec(2, 2, width_ratios=[3, 1], height_ratios=[3,1])
@@ -200,6 +211,8 @@ for i,band in enumerate(bands):
                             (data[band][apertxt]<=maglimits[1]) &
                             np.isfinite(delta_ra) &
                             np.isfinite(delta_dec))
+    print 'Using {n} of {m} {b} sources.'.format(n=np.where(ix)[0].size,
+            m=np.array(data[band]['flags']).size,b=band)
     plt.subplot(gs[2],xlim=dasrange,yticks=[])
     plt.gca().invert_yaxis()
     plt.xlabel('{d} Right Ascension (arcseconds)'.format(
@@ -314,9 +327,15 @@ apertxt = 'aper{n}'.format(n=int(aper))
 
 # To make a cut on AIS leg, run the following and then add the leg
 # condition in ix below.
-legs = {}
-legs['FUV'] = np.array([gq.getArray(
+try:
+    _ = len(data['FUV']['legs'])
+except KeyError:
+    print 'Retrieving observation leg information from database.'
+    data['FUV']['legs'] = np.array([gq.getArray(
             gq.obstype(o))[0][5] for o in np.array(data['FUV']['objid'])])
+    data['FUV'].to_csv('{path}/{s}_dm_FUV_{a}.csv'.format(
+                                                s=source,path=inpath,a=aperas))
+legs = {'FUV':np.array(data['FUV']['legs'])}
 
 # Provide some baseline statistics for the sample
 ix = {}
@@ -327,8 +346,8 @@ for band in bands:
                         (data[band]['t0']<961986575.) &
         (np.bitwise_and(np.array(data[band]['flags'].values,dtype='int16'),
                                         0b00111111)==0))# & (legs[band]>3)
-    print '{b}: {m} / {n}'.format(b=band,n=len(data[band][apertxt]),
-        m=len(ix[band][0]))
+    print '{b}: {m} / {n} data points used'.format(b=band,
+        n=len(data[band][apertxt]),m=len(ix[band][0]))
     print 'mcat: {m} (ref: {r})'.format(
         m = np.median(np.array(data[band][apertxt])[ix[band]]) -
                                                     gt.apcorrect1(radius,band),
@@ -348,7 +367,7 @@ plt.axhline(-0.05, color='g', linestyle='solid', linewidth=1)
 dmag = data[band]['aper{a}'.format(a=aper)]-data[band]['mag_mcatbgsub']
 dmagrange = [-0.2,0.025]
 plt.ylim(dmagrange)
-plt.plot(np.array(legs[band])[ix[band]],
+plt.plot(legs[band][ix[band]],
                         np.array(dmag)[ix[band]],'.',alpha=0.3,color='k')
 plt.subplot(1,2,2,yticks=[])
 plt.hist(np.array(dmag)[ix[band]],bins=50,range=dmagrange,
@@ -671,9 +690,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import gPhoton.dbasetools as dt
 import gPhoton.gQuery as gq
-import pprint, pickle
+import pprint
 import triangle
 import emcee
+import pickle
 
 inpath = '.'
 outpath = '.'
@@ -684,10 +704,11 @@ outpath = '.'
 bands = ['FUV','NUV']
 querydata = pd.read_csv('{path}/stimquery.csv'.format(path=inpath))
 
-''' Uncomment this block in order to rerun the database queries.
 dtdata = {}
 for band in bands:
-    stimdata = pd.read_csv('{b}Stim.csv'.format(b=band))
+    stimdata = pd.read_csv('{b}Stim.csv'.format(b=band),index_col=0)
+    if len(stimdata.keys())==10:
+        continue # The additional data has already been added to the file
     n = len(stimdata)
     dtdata[band] = {'t0':np.zeros(n),'t1':np.zeros(n),
                     'stimcount':np.zeros(n),'globalcount':np.zeros(n),
@@ -708,31 +729,29 @@ for band in bands:
         dtdata[band]['exptime'][i] = exptime
         dtdata[band]['deadtime'][i] = deadtime
 
-# Note that this actually writes to 'inpath' because it's read in below
-output = open('{path}/stimdata.pkl'.format(path=inpath), 'wb')
-# Pickle dictionary using protocol 0.
-pickle.dump(dtdata, output)
-output.close()
-'''
+    for k in dtdata[band].keys():
+        stimdata[k] = dtdata[band][k]
+    stimdata.to_csv('{b}Stim.csv'.format(b=band))
 #------------------------------------
 # FUV linear mixture model
 
 scl = 1.4
 
-pkl_file = open('{path}/stimdata.pkl'.format(path=inpath), 'rb')
-dtdata = pickle.load(pkl_file)
-pkl_file.close()
 band = 'FUV'
+dtdata = {'FUV':pd.read_csv(
+    '{path}/FUVStim.csv'.format(path=inpath),index_col=0)}
 print dtdata[band].keys()
 
 ix = np.where(np.isfinite(dtdata[band]['globalcount']) &
     np.isfinite(dtdata[band]['stimcount']) & (dtdata[band]['exptime']>0) &
     (dtdata[band]['stimcount']/dtdata[band]['exptime']<140))
-rawexpt = dtdata[band]['t1'][ix]-dtdata[band]['t0'][ix]
-x = dtdata[band]['globalcount'][ix]/rawexpt
-y = dtdata[band]['stimcount'][ix]/rawexpt
-xerr = np.sqrt(dtdata[band]['globalcount'][ix])/dtdata[band]['exptime'][ix]
-yerr = np.sqrt(dtdata[band]['stimcount'][ix])/dtdata[band]['exptime'][ix]
+rawexpt = np.array(dtdata[band]['t1'])[ix]-np.array(dtdata[band]['t0'])[ix]
+x = np.array(dtdata[band]['globalcount'])[ix]/rawexpt
+y = np.array(dtdata[band]['stimcount'])[ix]/rawexpt
+xerr = (np.sqrt(np.array(dtdata[band]['globalcount'])[ix])/
+                                        np.array(dtdata[band]['exptime'])[ix])
+yerr = (np.sqrt(np.array(dtdata[band]['stimcount'])[ix])/
+                                        np.array(dtdata[band]['exptime'])[ix])
 print x.min(),x.max(),xerr.min(),xerr.max()
 print y.min(),y.max(),yerr.min(),yerr.max()
 
@@ -875,6 +894,7 @@ plt.ylabel("{b} Stim Countrate (ct/s)".format(b=band),fontsize=14)
 plt.tick_params(axis='both', which='major', labelsize=12)
 plt.ylim(68, 78)
 plt.xlim(0, 17000)
+plt.tight_layout()
 plt.savefig('{path}/Fig10a.pdf'.format(path=outpath,b=band),
     format='pdf',dpi=1000)
 
@@ -895,20 +915,22 @@ scl = 1.4
 inpath = '.'
 outpath = '.'
 
-pkl_file = open('{path}/stimdata.pkl'.format(path=inpath), 'rb')
-dtdata = pickle.load(pkl_file)
-pkl_file.close()
-print dtdata.keys()
+band = 'NUV'
+dtdata = {'NUV':pd.read_csv(
+    '{path}/NUVStim.csv'.format(path=inpath),index_col=0)}
+print dtdata[band].keys()
 
 band = 'NUV'
 ix = np.where(np.isfinite(dtdata[band]['globalcount']) &
               np.isfinite(dtdata[band]['stimcount']) &
               (dtdata[band]['exptime']>0))
-rawexpt = dtdata[band]['t1'][ix]-dtdata[band]['t0'][ix]
-x = dtdata[band]['globalcount'][ix]/rawexpt
-y = dtdata[band]['stimcount'][ix]/rawexpt
-xerr = np.sqrt(dtdata[band]['globalcount'][ix])/dtdata[band]['exptime'][ix]
-yerr = np.sqrt(dtdata[band]['stimcount'][ix])/dtdata[band]['exptime'][ix]
+rawexpt = np.array(dtdata[band]['t1'])[ix]-np.array(dtdata[band]['t0'])[ix]
+x = np.array(dtdata[band]['globalcount'])[ix]/rawexpt
+y = np.array(dtdata[band]['stimcount'])[ix]/rawexpt
+xerr = (np.sqrt(np.array(dtdata[band]['globalcount'])[ix])/
+                                        np.array(dtdata[band]['exptime'])[ix])
+yerr = (np.sqrt(np.array(dtdata[band]['stimcount'])[ix])/
+                                        np.array(dtdata[band]['exptime'])[ix])
 print x.min(),x.max(),xerr.min(),xerr.max()
 print y.min(),y.max(),yerr.min(),yerr.max()
 
@@ -1040,6 +1062,7 @@ plt.ylabel("{b} Stim Countrate (ct/s)".format(b=band),fontsize=14)
 plt.tick_params(axis='both', which='major', labelsize=12)
 plt.ylim(40, 75)
 plt.xlim(10000, 70000)
+plt.tight_layout()
 plt.savefig('{path}/Fig10b.pdf'.format(path=outpath,b=band),
     format='pdf',dpi=1000)
 

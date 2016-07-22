@@ -2,9 +2,8 @@
 
 """
 .. module:: gCalrun
-
    :synopsis: Performs a batch run of photometric extractions on semi-random
-   sets of known sources for calibration / regression purposes.
+       sets of known sources for calibration / regression purposes.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -13,7 +12,7 @@ import ast
 import argparse
 from regtestutils import datamaker
 import MCUtils as mc
-import gFind
+from gPhoton import gFind
 import numpy as np
 import os
 import galextools as gt
@@ -23,7 +22,7 @@ def find_random_positions(rarange=[0., 360.], decrange=[-90., 90.], nsamples=10,
                           seed=323):
     """
     Generate 'nsamples' random positions uniformly selected from the specified
-    RA and DEC ranges.
+        RA and DEC ranges.
 
     :param rarange: The minimum and maximum RA range to sample from.
 
@@ -42,7 +41,7 @@ def find_random_positions(rarange=[0., 360.], decrange=[-90., 90.], nsamples=10,
     :type seed: int
 
     :returns: tuple -- A two-element tuple containing 'nsamples' of RA and DEC
-    values.
+        values.
     """
 
     np.random.seed(seed=seed%2)
@@ -62,31 +61,51 @@ def calrun(outfile, band, nsamples=10, seed=323, rarange=[0., 360.],
            radius=gt.aper2deg(4), annulus=[0.0083, 0.025]):
     """
     Generate a bunch of magnitudes with comparisons against MCAT values for
-    random points on the sky within given legal ranges. Write it to a CSV.
+        random points on the sky within given legal ranges. Write it to a CSV.
 
     :param outfile: Name of the output file.
+
     :type outfile: str
+
     :param band: The band being used, either 'FUV' or 'NUV'.
+
     :type band: str
+
     :param nsamples: Number of random positions to sample.
+
     :type nsamples: int
+
     :param seed: The seed to use when generating the random sample.
+
     :type seed: int
+
     :param rarange: The minimum and maximum RA range to sample from.
+
     :type rarange: list
+
     :param decrange: The minimum and maximum DEC range to sample from.
+
     :type decrange: list
 
     :param exprange: The minimum and maximum exposure time to sample,
-    in seconds.
+        in seconds.
+
     :type exprange: list
+
     :param maglimit: The faintest source to consider.
+
     :type maglimit: float
+
     :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
     :type verbose: int
+
     :param radius: Photometric aperture radius, in degrees.
+
     :type radius: float
+
     :param annulus: Inner and outer extent of background annulus, in degrees.
+
     :type annulus: list
     """
 
@@ -102,7 +121,7 @@ def calrun(outfile, band, nsamples=10, seed=323, rarange=[0., 360.],
         print '{pos}'.format(pos=zip(ra, dec))
 
     for skypos in zip(ra, dec):
-        expt = gFind.gFind(skypos=skypos, band=band, quiet=True)[band]['expt']
+        expt = gFind(skypos=skypos, band=band, quiet=True)[band]['expt']
         if exprange[0] <= expt <= exprange[1]:
             print skypos, expt, True
             datamaker(band, skypos, outfile, maglimit=maglimit, verbose=verbose,
@@ -123,7 +142,7 @@ def check_annulus(args):
     :type args: argparse.ArgumentParser Namespace
 
     :returns: argparse.ArgumentParser Namespace -- The updated command-line
-    arguments.
+        arguments.
     """
 
     if not (args.annulus1 and args.annulus2) and not args.annulus:
@@ -197,14 +216,14 @@ def setup_parser():
 def check_args(args):
     """
     Ensures that the input RA is between 0. and 360., and the DEC is between
-    -90 and 90.
+        -90 and 90.
 
     :param args: The command-line arguments.
 
     :type args: argparse.ArgumentParser Namespace
 
     :returns: argparse.ArgumentParser Namespace -- The command-line arguments.
-    Included for function usage consistency.
+        Included for function usage consistency.
     """
 
     if (not(0. <= args.rarange[0] <= 360. and 0. <= args.rarange[1] <= 360. and

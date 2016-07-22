@@ -2,7 +2,6 @@
 
 """
 .. module:: gFind
-
    :synopsis: Find total amount of available data by position.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
@@ -13,12 +12,12 @@ import dbasetools as dbt
 import gphoton_args as gargs
 
 # ------------------------------------------------------------------------------
-def gFind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
+def gfind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
           minexp=1.0, quiet=False, retries=100, skypos=None, trange=None,
           verbose=0, skyrange=None):
     """
     Primary program in the module. Prints time ranges to the screen and
-    returns the total exposure time as a float.
+        returns the total exposure time as a float.
 
     :param band: The band being used, either 'BOTH', 'FUV', or 'NUV'.
 
@@ -33,17 +32,17 @@ def gFind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
     :type exponly: bool
 
     :param gaper: Return time ranges in a format that can be copy-pasted as
-    a valid gAperture call.
+        a valid gAperture call.
 
     :type gaper: bool
 
     :param maxgap: Maximum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type maxgap: float
 
     :param minexp: Minimum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type minexp: float
 
@@ -60,7 +59,7 @@ def gFind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
     :type skypos: list
 
     :param trange: Minimum and maximum time range to make a light curve,
-    in GALEX time.
+        in GALEX time.
 
     :type trange: list
 
@@ -69,7 +68,7 @@ def gFind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
     :type verbose: int
 
     :param skyrange: RA and Dec extents, in degrees, defining the lengths of
-    sides of a box on the sky that circumscribes the region of interest.
+        sides of a box on the sky that circumscribes the region of interest.
 
     :type skyrange: list
 
@@ -112,7 +111,8 @@ def gFind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
                             print ('    [ %.3f' % r[0] + ', %.3f' % r[1] +
                                    ' ], %.3f' % (r[1]-r[0]) + ' seconds')
             output[this_band] = {'expt':expt, 't0':ranges[:, 0],
-                                 't1':ranges[:, 1]}
+                                 't1':ranges[:, 1],
+                'nearest_source':dbt.find_nearest_mcat(this_band,skypos,0.05)}
 
     return output
 # ------------------------------------------------------------------------------
@@ -156,7 +156,7 @@ def setup_parser(iam='gfind', parser=None):
 def check_args(args, iam='gfind', allow_no_coords=False):
     """
     Checks validity of command line arguments and, in some cases,
-    modifies them a little bit.
+        modifies them a little bit.
 
     :param args: The command-line arguments.
 
@@ -171,7 +171,7 @@ def check_args(args, iam='gfind', allow_no_coords=False):
     :type allow_no_coords: bool
 
     :returns: argparse.ArgumentParser Namespace -- The updated command-line
-    arguments.
+        arguments.
     """
 
     args = gargs.check_common_args(args, iam, allow_no_coords=allow_no_coords)
@@ -188,7 +188,7 @@ def __main__():
     args = setup_parser().parse_args()
     args = check_args(args)
 
-    exp_times = gFind(band=args.band, detsize=args.detsize,
+    exp_times = gfind(band=args.band, detsize=args.detsize,
                       exponly=args.exponly, gaper=args.gaper,
                       maxgap=args.maxgap, minexp=args.minexp, quiet=args.quiet,
                       retries=args.retries, skypos=args.skypos,

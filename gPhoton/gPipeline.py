@@ -2,10 +2,9 @@
 
 """
 .. module:: gPipeline
-
    :synopsis: Runs the module that runs the standalone gPhoton calibration
-   pipelines to create aspect-corrected, time-tagged photon events from
-   low-level archived GALEX data products.
+       pipelines to create aspect-corrected, time-tagged photon events from
+       low-level archived GALEX data products.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -14,7 +13,7 @@ from PhotonPipe import photonpipe
 import argparse
 
 # ------------------------------------------------------------------------------
-def gPipeline(raw6file, scstfile, band, outbase, aspfile, ssdfile, nullout,
+def gpipeline(raw6file, scstfile, band, outbase, aspfile, ssdfile, nullout,
               retries=100):
     """
     Wrapper that calls the PhotonPipe method.
@@ -95,14 +94,14 @@ def setup_parser():
 def check_args(args):
     """
     Checks validity of command line arguments and, in some cases
-    modifies them a little bit.
+        modifies them a little bit.
 
     :param args: The command-line arguments.
 
     :type args: argparse.ArgumentParser Namespace
 
     :returns: argparse.ArgumentParser Namespace -- The updated command-line
-    arguments.
+        arguments.
     """
 
     if not args.raw6file:
@@ -154,7 +153,7 @@ def __main__():
 
     args = check_args(args)
 
-    gPipeline(args.raw6file, args.scstfile, args.band, args.outbase,
+    gpipeline(args.raw6file, args.scstfile, args.band, args.outbase,
               args.aspfile, args.ssdfile, args.nullout, retries=args.retries)
 # ------------------------------------------------------------------------------
 

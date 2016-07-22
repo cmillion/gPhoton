@@ -3,6 +3,8 @@ import gPhoton.gMap as gm
 import gPhoton.gFind as gf
 import gPhoton.gAperture as ga
 
+from gPhoton.gMap import setup_parser as gm_setup_parser
+
 """Regression tests for the command line utilities."""
 class TestRegression(unittest.TestCase):
     def setUp(self):
@@ -14,7 +16,7 @@ class TestRegression(unittest.TestCase):
         self.trange = self.tranges[0]
         self.radius = 0.01
         self.annulus = [0.02,0.03]
-        self.parser = ga.setup_parser()
+        self.parser = gm_setup_parser()
         self.args = self.parser.parse_args()
 
     def test_blah(self):

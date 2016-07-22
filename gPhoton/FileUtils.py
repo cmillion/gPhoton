@@ -1,6 +1,5 @@
 """
 .. module:: FileUtils
-
    :synopsis: Methods for reading data from files or web queries.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
@@ -23,7 +22,7 @@ def load_raw6(raw6file):
     :type raw6file: str
 
     :returns: tuple -- A two-element tuple containing the header of the
-    first extension, and the HDUList object returned from astropy.io.fits.
+        first extension, and the HDUList object returned from astropy.io.fits.
     """
 
     print "		", raw6file
@@ -43,10 +42,10 @@ def load_aspect(aspfile):
     :type aspfile: list
 
     :returns: tuple -- Returns a six-element tuple containing the RA, DEC,
-    twist (roll), time, header, and aspect flags. Each of these EXCEPT for
-    header, are returned as numpy.ndarrays. The header is returned as a dict
-    containing the RA, DEC, and roll from the headers of the aspec files in
-    numpy.ndarrays.
+        twist (roll), time, header, and aspect flags. Each of these EXCEPT for
+        header, are returned as numpy.ndarrays. The header is returned as a dict
+        containing the RA, DEC, and roll from the headers of the aspec files in
+        numpy.ndarrays.
     """
 
     ra, dec = np.array([]), np.array([])
@@ -94,10 +93,10 @@ def web_query_aspect(eclipse, retries=20):
     :type retries: int
 
     :returns: tuple -- Returns a six-element tuple containing the RA, DEC,
-    twist (roll), time, header, and aspect flags. Each of these EXCEPT for
-    header, are returned as numpy.ndarrays. The header is returned as a dict
-    containing the RA, DEC, and roll from the headers of the aspec files in
-    numpy.ndarrays.
+        twist (roll), time, header, and aspect flags. Each of these EXCEPT for
+        header, are returned as numpy.ndarrays. The header is returned as a dict
+        containing the RA, DEC, and roll from the headers of the aspec files in
+        numpy.ndarrays.
     """
 
     print "Attempting to query MAST database for aspect records."

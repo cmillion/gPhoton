@@ -30,7 +30,7 @@ setup(
     keywords=['astronomy', 'galex', 'photometry', 'ultraviolet'],
     scripts=['bin/gPipeline', 'bin/gAperture', 'bin/gFind', 'bin/gMap'],
     packages=['gPhoton', 'gPhoton.cal'],
-    install_requires=['numpy', 'scipy', 'requests', 'pandas', 'astropy',],
+    install_requires=['numpy>=2.4.0', 'scipy', 'requests', 'pandas', 'astropy',],
     package_data={'gPhoton.cal' : ['cal/*.fits', 'cal/*.tbl']},
     include_package_data=True,
     download_url='https://archive.stsci.edu/prepds/gphoton/cal/gPhoton-{v}.tar'

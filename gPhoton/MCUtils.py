@@ -1,8 +1,7 @@
 """
 .. module:: MCUtils
-
    :synopsis: A library of generic utilities programs that C. Million wants to
-   keep separate in order to re-use across other projects.
+       keep separate in order to re-use across other projects.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -84,7 +83,7 @@ def rms(data):
     Return the root-mean-square of the set of values.
 
     :param data: The set of values from which to calculate the
-    root-mean-squared.
+        root-mean-squared.
 
     :type data: list
 
@@ -128,22 +127,22 @@ def manage_requests2(query, maxcnt=100, wait=1, timeout=60., verbose=0):
     :type maxcnt: int
 
     :param wait: The length of time to wait before attempting the query again.
-    Currently a placeholder.
+        Currently a placeholder.
 
     :type wait: int
 
     :param timeout: The length of time to wait for the server to send data
-    before giving up, specified in seconds.
+        before giving up, specified in seconds.
 
     :type timeout: float
 
     :param verbose: If > 0, print additional messages to STDOUT. Higher value
-    represents more verbosity.
+        represents more verbosity.
 
     :type verbose: int
 
     :returns: requests.Response or None -- The response from the server. If the
-    query does not receive a response, returns None.
+        query does not receive a response, returns None.
     """
 
     # Keep track of the number of failures.
@@ -203,10 +202,10 @@ def manage_requests2(query, maxcnt=100, wait=1, timeout=60., verbose=0):
 def find_nearest_lower(array, value):
     """
     Finds the index of the value in the array that is closest without going
-    over. This method assumes that:
-        1. 'value' is within the range of 'array'.
-        2. 'array' is ordered.
-        3. 'array' has no gaps.
+        over. This method assumes that:
+            1. 'value' is within the range of 'array'.
+            2. 'array' is ordered.
+            3. 'array' has no gaps.
 
     :param array: Array of values to search.
 
@@ -217,7 +216,7 @@ def find_nearest_lower(array, value):
     :type value: float
 
     :returns: int -- The index of the array element closest to value without
-    going over.
+        going over.
     """
 
     idx = (np.abs(array-value)).argmin()
@@ -238,7 +237,7 @@ def get_fits_data(filename, dim=0, verbose=0):
     :type filename: str
 
     :param dim: The extension to retrieve the data from, 0=Primary, 1=First
-    Extension, etc.
+        Extension, etc.
 
     :type dim: int
 
@@ -315,9 +314,9 @@ def get_tbl_data(filename, comment='|'):
 def angularSeparation(ra1, dec1, ra2, dec2):
     """
     Compute angular separation in degrees of points on the sky.
-    It is important, especially for small angular separations, that the
-    values for ra[01] and dec[01] have precision of float64 or better.
-    Now uses the haversine formula which is stable for small angles.
+        It is important, especially for small angular separations, that the
+        values for ra[01] and dec[01] have precision of float64 or better.
+        Now uses the haversine formula which is stable for small angles.
 
     :param ra1: The right ascension of the first coordinate.
 

@@ -1,0 +1,27 @@
+\BOOKMARK [1][-]{section.1}{GALEX Overview}{}% 1
+\BOOKMARK [1][-]{section.2}{Motivation}{}% 2
+\BOOKMARK [1][-]{section.3}{The Database}{}% 3
+\BOOKMARK [2][-]{subsection.3.1}{Mission Data Products Used By gPhoton}{section.3}% 4
+\BOOKMARK [2][-]{subsection.3.2}{Reduction of the Photon Data}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.3}{Database Structure}{section.3}% 6
+\BOOKMARK [1][-]{section.4}{The Software Tools}{}% 7
+\BOOKMARK [2][-]{subsection.4.1}{gPipeline}{section.4}% 8
+\BOOKMARK [2][-]{subsection.4.2}{gFind}{section.4}% 9
+\BOOKMARK [2][-]{subsection.4.3}{gAperture}{section.4}% 10
+\BOOKMARK [2][-]{subsection.4.4}{gMap}{section.4}% 11
+\BOOKMARK [1][-]{section.5}{Calibration Tests}{}% 12
+\BOOKMARK [2][-]{subsection.5.1}{Relative Astrometry}{section.5}% 13
+\BOOKMARK [2][-]{subsection.5.2}{Background Correction}{section.5}% 14
+\BOOKMARK [2][-]{subsection.5.3}{Relative Flux Precision}{section.5}% 15
+\BOOKMARK [2][-]{subsection.5.4}{Absolute Flux Precision}{section.5}% 16
+\BOOKMARK [1][-]{section.6}{Implementation Notes}{}% 17
+\BOOKMARK [2][-]{subsection.6.1}{Effective Exposure Time}{section.6}% 18
+\BOOKMARK [2][-]{subsection.6.2}{Exposure Dead Time Correction}{section.6}% 19
+\BOOKMARK [2][-]{subsection.6.3}{Relative Response Correction}{section.6}% 20
+\BOOKMARK [2][-]{subsection.6.4}{Hotspot Masking}{section.6}% 21
+\BOOKMARK [2][-]{subsection.6.5}{Flux Uncertainties}{section.6}% 22
+\BOOKMARK [2][-]{subsection.6.6}{Optimal Time Bin Sizes}{section.6}% 23
+\BOOKMARK [2][-]{subsection.6.7}{Client vs. Server Optimizations}{section.6}% 24
+\BOOKMARK [1][-]{section.7}{Example Science Application - Stellar Flares From CR Draconis}{}% 25
+\BOOKMARK [1][-]{section.8}{Conclusion}{}% 26
+\BOOKMARK [1][-]{section.9}{Acknowledgments}{}% 27
