@@ -1,19 +1,20 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014/Fink) (preloaded format=pdflatex 2015.4.16)  20 JUL 2016 14:12
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.10.19)  21 JUL 2016 17:51
 entering extended mode
  restricted \write18 enabled.
+ file:line:error style messages enabled.
  %&-line parsing enabled.
 **gphoton.tex
 (./gphoton.tex
-LaTeX2e <2014/05/01>
-Babel <3.9k> and hyphenation patterns for 78 languages loaded.
+LaTeX2e <2015/10/01> patch level 1
+Babel <3.9m> and hyphenation patterns for 79 languages loaded.
 (./aastex.cls
 Document Class: aastex 2005/06/22 5.2/AAS markup document class
 Class aastex Info: Original \LaTeX2.09 style by Chris Biemesderfer (chris@seago
 at.com). Adapted to \LaTeXe by A. Ogawa (ogawa@teleport.com) on input line 83.
-(/sw/share/texmf-dist/tex/latex/base/article.cls
-Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
-(/sw/share/texmf-dist/tex/latex/base/size11.clo
-File: size11.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
+(/usr/local/texlive/2014/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
+(/usr/local/texlive/2014/texmf-dist/tex/latex/base/size11.clo
+File: size11.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count79
 \c@section=\count80
@@ -27,37 +28,37 @@ File: size11.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
 )
-(/sw/share/texmf-dist/tex/latex/base/latexsym.sty
+(/usr/local/texlive/2014/texmf-dist/tex/latex/base/latexsym.sty
 Package: latexsym 1998/08/17 v2.2e Standard LaTeX package (lasy symbols)
 \symlasy=\mathgroup4
 LaTeX Font Info:    Overwriting symbol font `lasy' in version `bold'
-(Font)                  U/lasy/m/n --> U/lasy/b/n on input line 47.
+(Font)                  U/lasy/m/n --> U/lasy/b/n on input line 52.
 )
-(/sw/share/texmf-dist/tex/latex/graphics/graphicx.sty
-Package: graphicx 2014/04/25 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
+(/usr/local/texlive/2014/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2014/10/28 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
 
-(/sw/share/texmf-dist/tex/latex/graphics/keyval.sty
-Package: keyval 2014/05/08 v1.15 key=value parser (DPC)
+(/usr/local/texlive/2014/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
 \KV@toks@=\toks14
 )
-(/sw/share/texmf-dist/tex/latex/graphics/graphics.sty
-Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+(/usr/local/texlive/2014/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2014/10/28 v1.0p Standard LaTeX Graphics (DPC,SPQR)
 
-(/sw/share/texmf-dist/tex/latex/graphics/trig.sty
+(/usr/local/texlive/2014/texmf-dist/tex/latex/graphics/trig.sty
 Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
 )
-(/sw/share/texmf-dist/tex/latex/latexconfig/graphics.cfg
+(/usr/local/texlive/2014/texmf-dist/tex/latex/latexconfig/graphics.cfg
 File: graphics.cfg 2010/04/23 v1.9 graphics configuration of TeX Live
 )
-Package graphics Info: Driver file: pdftex.def on input line 91.
+Package graphics Info: Driver file: pdftex.def on input line 94.
 
-(/sw/share/texmf-dist/tex/latex/pdftex-def/pdftex.def
+(/usr/local/texlive/2014/texmf-dist/tex/latex/pdftex-def/pdftex.def
 File: pdftex.def 2011/05/27 v0.06d Graphics/color for pdfTeX
 
-(/sw/share/texmf-dist/tex/generic/oberdiek/infwarerr.sty
+(/usr/local/texlive/2014/texmf-dist/tex/generic/oberdiek/infwarerr.sty
 Package: infwarerr 2010/04/08 v1.3 Providing info/warning/error messages (HO)
 )
-(/sw/share/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
+(/usr/local/texlive/2014/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
 Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
 )
 \Gread@gobject=\count87
@@ -65,10 +66,10 @@ Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
 \Gin@req@height=\dimen103
 \Gin@req@width=\dimen104
 )
-(/sw/share/texmf-dist/tex/latex/amsfonts/amssymb.sty
+(/usr/local/texlive/2014/texmf-dist/tex/latex/amsfonts/amssymb.sty
 Package: amssymb 2013/01/14 v3.01 AMS font symbols
 
-(/sw/share/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+(/usr/local/texlive/2014/texmf-dist/tex/latex/amsfonts/amsfonts.sty
 Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
 \@emptytoks=\toks15
 \symAMSa=\mathgroup5
@@ -76,15 +77,15 @@ Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
 LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
 (Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
 ))
-(/sw/share/texmf-dist/tex/latex/natbib/natbib.sty
+(/usr/local/texlive/2014/texmf-dist/tex/latex/natbib/natbib.sty
 Package: natbib 2010/09/13 8.31b (PWD, AO)
 \bibhang=\skip43
 \bibsep=\skip44
 LaTeX Info: Redefining \cite on input line 694.
 \c@NAT@ctr=\count88
 )
-(/sw/share/texmf-dist/tex/latex/tools/verbatim.sty
-Package: verbatim 2003/08/22 v1.5q LaTeX2e package for verbatim enhancements
+(/usr/local/texlive/2014/texmf-dist/tex/latex/tools/verbatim.sty
+Package: verbatim 2014/10/28 v1.5q LaTeX2e package for verbatim enhancements
 \every@verbatim=\toks16
 \verbatim@line=\toks17
 \verbatim@in@stream=\read1
@@ -115,7 +116,7 @@ Package: verbatim 2003/08/22 v1.5q LaTeX2e package for verbatim enhancements
 \c@plate=\count96
 \my@footins=\box31
 )
-(/sw/share/texmf-dist/tex/latex/lineno/lineno.sty
+(/usr/local/texlive/2014/texmf-dist/tex/latex/lineno/lineno.sty
 Package: lineno 2005/11/02 line numbers on paragraphs v4.41
 \linenopenalty=\count97
 \output=\toks18
@@ -133,14 +134,14 @@ Package: lineno 2005/11/02 line numbers on paragraphs v4.41
 \bframebox=\box32
 LaTeX Info: Redefining \\ on input line 3056.
 )
-(/sw/share/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/usr/local/texlive/2014/texmf-dist/tex/latex/hyperref/hyperref.sty
 Package: hyperref 2012/11/06 v6.83m Hypertext links for LaTeX
 
-(/sw/share/texmf-dist/tex/generic/oberdiek/hobsub-hyperref.sty
+(/usr/local/texlive/2014/texmf-dist/tex/generic/oberdiek/hobsub-hyperref.sty
 Package: hobsub-hyperref 2012/05/28 v1.13 Bundle oberdiek, subset hyperref (HO)
 
 
-(/sw/share/texmf-dist/tex/generic/oberdiek/hobsub-generic.sty
+(/usr/local/texlive/2014/texmf-dist/tex/generic/oberdiek/hobsub-generic.sty
 Package: hobsub-generic 2012/05/28 v1.13 Bundle oberdiek, subset generic (HO)
 Package: hobsub 2012/05/28 v1.13 Construct package bundles (HO)
 Package hobsub Info: Skipping package `infwarerr' (already loaded).
@@ -181,25 +182,25 @@ Package: atbegshi 2011/10/05 v1.16 At begin shipout hook (HO)
 Package: refcount 2011/10/16 v3.4 Data extraction from label references (HO)
 Package: hycolor 2011/01/30 v1.7 Color options for hyperref/bookmark (HO)
 )
-(/sw/share/texmf-dist/tex/generic/ifxetex/ifxetex.sty
+(/usr/local/texlive/2014/texmf-dist/tex/generic/ifxetex/ifxetex.sty
 Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 )
-(/sw/share/texmf-dist/tex/latex/oberdiek/auxhook.sty
+(/usr/local/texlive/2014/texmf-dist/tex/latex/oberdiek/auxhook.sty
 Package: auxhook 2011/03/04 v1.3 Hooks for auxiliary files (HO)
 )
-(/sw/share/texmf-dist/tex/latex/oberdiek/kvoptions.sty
+(/usr/local/texlive/2014/texmf-dist/tex/latex/oberdiek/kvoptions.sty
 Package: kvoptions 2011/06/30 v3.11 Key value format for package options (HO)
 )
 \@linkdim=\dimen120
 \Hy@linkcounter=\count104
 \Hy@pagecounter=\count105
 
-(/sw/share/texmf-dist/tex/latex/hyperref/pd1enc.def
+(/usr/local/texlive/2014/texmf-dist/tex/latex/hyperref/pd1enc.def
 File: pd1enc.def 2012/11/06 v6.83m Hyperref: PDFDocEncoding definition (HO)
 )
 \Hy@SavedSpaceFactor=\count106
 
-(/sw/share/texmf-dist/tex/latex/latexconfig/hyperref.cfg
+(/usr/local/texlive/2014/texmf-dist/tex/latex/latexconfig/hyperref.cfg
 File: hyperref.cfg 2002/06/06 v1.2 hyperref configuration of TeXLive
 )
 Package hyperref Info: Hyper figures OFF on input line 4443.
@@ -211,7 +212,7 @@ Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4688.
 \c@Hy@tempcnt=\count107
 
-(/sw/share/texmf-dist/tex/latex/url/url.sty
+(/usr/local/texlive/2014/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip10
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
@@ -236,23 +237,23 @@ LaTeX Info: Redefining \pageref on input line 6369.
 
 Package hyperref Message: Driver (autodetected): hpdftex.
 
-(/sw/share/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/usr/local/texlive/2014/texmf-dist/tex/latex/hyperref/hpdftex.def
 File: hpdftex.def 2012/11/06 v6.83m Hyperref driver for pdfTeX
 \Fld@listcount=\count112
 \c@bookmark@seq@number=\count113
 
-(/sw/share/texmf-dist/tex/latex/oberdiek/rerunfilecheck.sty
+(/usr/local/texlive/2014/texmf-dist/tex/latex/oberdiek/rerunfilecheck.sty
 Package: rerunfilecheck 2011/04/15 v1.7 Rerun checks for auxiliary files (HO)
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 82.
 )
 \Hy@SectionHShift=\skip46
 )
-(/sw/share/texmf-dist/tex/latex/tools/tabularx.sty
-Package: tabularx 2014/05/13 v2.10 `tabularx' package (DPC)
+(/usr/local/texlive/2014/texmf-dist/tex/latex/tools/tabularx.sty
+Package: tabularx 2014/10/28 v2.10 `tabularx' package (DPC)
 
-(/sw/share/texmf-dist/tex/latex/tools/array.sty
-Package: array 2008/09/09 v2.4c Tabular extension package (FMi)
+(/usr/local/texlive/2014/texmf-dist/tex/latex/tools/array.sty
+Package: array 2014/10/28 v2.4c Tabular extension package (FMi)
 \col@sep=\dimen124
 \extrarowheight=\dimen125
 \NC@list=\toks19
@@ -267,21 +268,21 @@ Package: array 2008/09/09 v2.4c Tabular extension package (FMi)
 \TX@cols=\count114
 \TX@ftn=\toks20
 )
-(/sw/share/texmf-dist/tex/latex/graphics/color.sty
-Package: color 2014/04/23 v1.1a Standard LaTeX Color (DPC)
+(/usr/local/texlive/2014/texmf-dist/tex/latex/graphics/color.sty
+Package: color 2014/10/28 v1.1a Standard LaTeX Color (DPC)
 
-(/sw/share/texmf-dist/tex/latex/latexconfig/color.cfg
+(/usr/local/texlive/2014/texmf-dist/tex/latex/latexconfig/color.cfg
 File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
 )
-Package color Info: Driver file: pdftex.def on input line 137.
+Package color Info: Driver file: pdftex.def on input line 142.
 )
-(/sw/share/texmf-dist/tex/latex/oberdiek/epstopdf.sty
+(/usr/local/texlive/2014/texmf-dist/tex/latex/oberdiek/epstopdf.sty
 Package: epstopdf 2010/02/09 v2.5 Conversion with epstopdf on the fly (HO)
 
-(/sw/share/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+(/usr/local/texlive/2014/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
 Package: epstopdf-base 2010/02/09 v2.5 Base part for package epstopdf
 
-(/sw/share/texmf-dist/tex/latex/oberdiek/grfext.sty
+(/usr/local/texlive/2014/texmf-dist/tex/latex/oberdiek/grfext.sty
 Package: grfext 2010/08/19 v1.1 Manage graphics extensions (HO)
 )
 Package grfext Info: Graphics extension search list:
@@ -289,10 +290,11 @@ Package grfext Info: Graphics extension search list:
 G,.JBIG2,.JB2,.eps]
 (grfext)             \AppendGraphicsExtensions on input line 452.
 
-(/sw/share/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+(/usr/local/texlive/2014/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
-))) (./gphoton.aux)
+)))
+(./gphoton.aux)
 \openout1 = `gphoton.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 19.
@@ -309,7 +311,8 @@ LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 19.
 LaTeX Font Info:    ... okay on input line 19.
 LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 19.
 LaTeX Font Info:    ... okay on input line 19.
-(/sw/share/texmf-dist/tex/context/base/supp-pdf.mkii
+
+(/usr/local/texlive/2014/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count115
 \scratchdimen=\dimen131
@@ -326,10 +329,10 @@ LaTeX Font Info:    ... okay on input line 19.
 AAS preprint substyle, v5.2 <12 Dec 2003>.
 \AtBeginShipoutBox=\box34
 Package hyperref Info: Link coloring OFF on input line 19.
-(/sw/share/texmf-dist/tex/latex/hyperref/nameref.sty
+(/usr/local/texlive/2014/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2012/10/27 v2.43 Cross-referencing by name of section
 
-(/sw/share/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
+(/usr/local/texlive/2014/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
 Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 )
 \c@section@level=\count121
@@ -337,216 +340,299 @@ Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 19.
 LaTeX Info: Redefining \pageref on input line 19.
 LaTeX Info: Redefining \nameref on input line 19.
- (./gphoton.out) (./gphoton.out)
+
+(./gphoton.out) (./gphoton.out)
 \@outlinefile=\write3
 \openout3 = `gphoton.out'.
 
 LaTeX Font Info:    Try loading font information for U+lasy on input line 51.
- (/sw/share/texmf-dist/tex/latex/base/ulasy.fd
+
+(/usr/local/texlive/2014/texmf-dist/tex/latex/base/ulasy.fd
 File: ulasy.fd 1998/08/17 v2.2e LaTeX symbol font definitions
 )
 LaTeX Font Info:    Try loading font information for U+msa on input line 51.
 
-(/sw/share/texmf-dist/tex/latex/amsfonts/umsa.fd
+(/usr/local/texlive/2014/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
 LaTeX Font Info:    Try loading font information for U+msb on input line 51.
 
-(/sw/share/texmf-dist/tex/latex/amsfonts/umsb.fd
+(/usr/local/texlive/2014/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [1
+)
 
-{/sw/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}]
+Package natbib Warning: Citation `mar2005' on page 1 undefined on input line 52
+.
+
+
+Package natbib Warning: Citation `mor2005' on page 1 undefined on input line 52
+.
+
+
+Package natbib Warning: Citation `mor2007' on page 1 undefined on input line 52
+.
+
+[1
+
+{/usr/local/texlive/2014/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 
 LaTeX Warning: Command \r invalid in math mode on input line 54.
 
 
 LaTeX Warning: Command \r invalid in math mode on input line 54.
 
-[2] [3]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 68.
- (/sw/share/texmf-dist/tex/latex/base/omscmr.fd
-File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
+[2]
+
+Package natbib Warning: Citation `rob2005' on page 3 undefined on input line 68
+.
+
+
+Package natbib Warning: Citation `wel2006' on page 3 undefined on input line 68
+.
+
+
+Package natbib Warning: Citation `wel2007' on page 3 undefined on input line 68
+.
+
+[3]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 70.
+ (/usr/local/texlive/2014/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <9> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 68.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 70.
 
-Underfull \hbox (badness 10000) in paragraph at lines 68--68
+Underfull \hbox (badness 10000) in paragraph at lines 70--70
 [][][][]$\OT1/cmtt/m/n/9 http : / / dx . doi . org / doi : 10 . 17909 / T9CC7G$
 [] \OMS/cmsy/m/n/9 j[]$\OT1/cmtt/m/n/9 http : / / ascl . net / 1603 . 004$[] \O
 MS/cmsy/m/n/9 j[]$\OT1/cmtt/m/n/9 https : / / github . com / cmillion /
  []
 
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 70.
-[4] [5] [6] <Fig01.pdf, id=196, 526.96875pt x 353.32pt>
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 72.
+[4]
+
+Package natbib Warning: Citation `mor2007' on page 5 undefined on input line 85
+.
+
+
+Package natbib Warning: Citation `mor2007' on page 5 undefined on input line 85
+.
+
+[5]
+
+Package natbib Warning: Citation `gra2006' on page 6 undefined on input line 95
+.
+
+<Fig01.pdf, id=168, 526.96875pt x 353.32pt>
 File: Fig01.pdf Graphic file (type pdf)
  <use Fig01.pdf>
-Package pdftex.def Info: Fig01.pdf used on input line 96.
+Package pdftex.def Info: Fig01.pdf used on input line 98.
 (pdftex.def)             Requested size: 474.26749pt x 317.98506pt.
 
-Overfull \hbox (4.5125pt too wide) in paragraph at lines 96--97
+Overfull \hbox (4.5125pt too wide) in paragraph at lines 98--99
 [][] 
  []
 
-[7 <./Fig01.pdf>]
-Overfull \hbox (2.18971pt too wide) in alignment at lines 125--125
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[6] [7 <./Fig01.pdf>]
+Overfull \hbox (2.18971pt too wide) in alignment at lines 127--127
 [][][][][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 140--140
+Underfull \hbox (badness 10000) in paragraph at lines 142--142
 []\OT1/cmtt/m/n/10.95 gAperture(band='NUV', skypos=[244.27247, 55.268069], step
 sz=10.,
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 141--141
+Underfull \hbox (badness 10000) in paragraph at lines 143--143
 []\OT1/cmtt/m/n/10.95 gMap(band='NUV', skypos=[244.27247, 55.268069],
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 141--141
+Underfull \hbox (badness 10000) in paragraph at lines 143--143
 \OT1/cmtt/m/n/10.95 stepsz=30., skyrange=[0.1,0.1], cntfile='imgcube.fits',
  []
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[8] [9] [10] [11] [12] <Fig02a.pdf, id=297, 578.16pt x 578.16pt>
-File: Fig02a.pdf Graphic file (type pdf)
+[8] [9] [10]
 
-<use Fig02a.pdf>
-Package pdftex.def Info: Fig02a.pdf used on input line 181.
+Package natbib Warning: Citation `pen2010' on page 11 undefined on input line 1
+66.
+
+
+Package natbib Warning: Citation `gre2002' on page 11 undefined on input line 1
+66.
+
+
+Package natbib Warning: Citation `cal2002' on page 11 undefined on input line 1
+66.
+
+[11]
+
+Package natbib Warning: Citation `mor2007' on page 12 undefined on input line 1
+72.
+
+[12] <Fig02a.pdf, id=262, 578.16pt x 578.16pt>
+File: Fig02a.pdf Graphic file (type pdf)
+ <use Fig02a.pdf>
+Package pdftex.def Info: Fig02a.pdf used on input line 183.
 (pdftex.def)             Requested size: 231.2599pt x 231.2599pt.
- <Fig02b.pdf, id=298, 578.16pt x 578.16pt>
+
+<Fig02b.pdf, id=263, 578.16pt x 578.16pt>
 File: Fig02b.pdf Graphic file (type pdf)
  <use Fig02b.pdf>
-Package pdftex.def Info: Fig02b.pdf used on input line 182.
+Package pdftex.def Info: Fig02b.pdf used on input line 184.
 (pdftex.def)             Requested size: 231.2599pt x 231.2599pt.
 
-Overfull \hbox (16.76482pt too wide) in paragraph at lines 180--185
+Overfull \hbox (16.76482pt too wide) in paragraph at lines 182--187
 [][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 190--190
+Underfull \hbox (badness 10000) in paragraph at lines 192--192
 [][][][]$\OT1/cmtt/m/n/9 http : / / www . galex . caltech . edu / DATA / gr1 _ 
 docs / Background _ determination _ and _ source _ extraction _ for _
  []
 
 [13 <./Fig02a.pdf> <./Fig02b.pdf
 
-pdfTeX warning: pdflatex (file ./Fig02b.pdf): PDF inclusion: multiple pdfs with
- page group included in a single page
->] <Fig03.pdf, id=417, 809.42403pt x 404.712pt>
+pdfTeX warning: /Library/TeX/Distributions/Programs/texbin/pdflatex (file ./Fig
+02b.pdf): PDF inclusion: multiple pdfs with page group included in a single pag
+e
+>] <Fig03.pdf, id=383, 809.42403pt x 404.712pt>
 File: Fig03.pdf Graphic file (type pdf)
  <use Fig03.pdf>
-Package pdftex.def Info: Fig03.pdf used on input line 197.
+Package pdftex.def Info: Fig03.pdf used on input line 199.
 (pdftex.def)             Requested size: 526.11938pt x 263.05968pt.
 
-Overfull \hbox (56.3644pt too wide) in paragraph at lines 197--199
+Overfull \hbox (56.3644pt too wide) in paragraph at lines 199--201
 [][] 
  []
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[14] [15 <./Fig03.pdf>] <Fig04a.pdf, id=487, 809.42403pt x 404.712pt>
+
+Package natbib Warning: Citation `mor2007' on page 14 undefined on input line 2
+04.
+
+[14] [15 <./Fig03.pdf>] <Fig04a.pdf, id=448, 809.42403pt x 404.712pt>
 File: Fig04a.pdf Graphic file (type pdf)
 
 <use Fig04a.pdf>
-Package pdftex.def Info: Fig04a.pdf used on input line 210.
+Package pdftex.def Info: Fig04a.pdf used on input line 212.
 (pdftex.def)             Requested size: 518.02962pt x 259.0148pt.
- <Fig04b.pdf, id=488, 809.42403pt x 404.712pt>
+ <Fig04b.pdf, id=449, 809.42403pt x 404.712pt>
 File: Fig04b.pdf Graphic file (type pdf)
 
 <use Fig04b.pdf>
-Package pdftex.def Info: Fig04b.pdf used on input line 211.
+Package pdftex.def Info: Fig04b.pdf used on input line 213.
 (pdftex.def)             Requested size: 518.02962pt x 259.0148pt.
 
-Overfull \hbox (48.27463pt too wide) in paragraph at lines 210--213
+Overfull \hbox (48.27463pt too wide) in paragraph at lines 212--215
 [][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 210--213
+Underfull \hbox (badness 10000) in paragraph at lines 212--215
 
  []
 
 
-Overfull \hbox (48.27463pt too wide) in paragraph at lines 210--213
+Overfull \hbox (48.27463pt too wide) in paragraph at lines 212--215
 [] 
  []
 
 
-LaTeX Warning: Float too large for page by 85.9521pt on input line 214.
+LaTeX Warning: Float too large for page by 115.87227pt on input line 216.
 
 [16 <./Fig04a.pdf> <./Fig04b.pdf
 
-pdfTeX warning: pdflatex (file ./Fig04b.pdf): PDF inclusion: multiple pdfs with
- page group included in a single page
->] <Fig05a.pdf, id=617, 809.42403pt x 404.712pt>
+pdfTeX warning: /Library/TeX/Distributions/Programs/texbin/pdflatex (file ./Fig
+04b.pdf): PDF inclusion: multiple pdfs with page group included in a single pag
+e
+>] <Fig05a.pdf, id=579, 809.42403pt x 404.712pt>
 File: Fig05a.pdf Graphic file (type pdf)
  <use Fig05a.pdf>
-Package pdftex.def Info: Fig05a.pdf used on input line 218.
+Package pdftex.def Info: Fig05a.pdf used on input line 220.
 (pdftex.def)             Requested size: 518.02962pt x 259.0148pt.
 
-<Fig05b.pdf, id=618, 809.42403pt x 404.712pt>
+<Fig05b.pdf, id=580, 809.42403pt x 404.712pt>
 File: Fig05b.pdf Graphic file (type pdf)
  <use Fig05b.pdf>
-Package pdftex.def Info: Fig05b.pdf used on input line 219.
+Package pdftex.def Info: Fig05b.pdf used on input line 221.
 (pdftex.def)             Requested size: 518.02962pt x 259.0148pt.
 
-Overfull \hbox (48.27463pt too wide) in paragraph at lines 218--221
+Overfull \hbox (48.27463pt too wide) in paragraph at lines 220--223
 [][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 218--221
+Underfull \hbox (badness 10000) in paragraph at lines 220--223
 
  []
 
 
-Overfull \hbox (48.27463pt too wide) in paragraph at lines 218--221
+Overfull \hbox (48.27463pt too wide) in paragraph at lines 220--223
 [] 
  []
 
 
-LaTeX Warning: Float too large for page by 41.07185pt on input line 222.
+LaTeX Warning: Float too large for page by 41.07185pt on input line 224.
 
 [17 <./Fig05a.pdf> <./Fig05b.pdf
 
-pdfTeX warning: pdflatex (file ./Fig05b.pdf): PDF inclusion: multiple pdfs with
- page group included in a single page
->] <Fig06a.pdf, id=758, 809.42403pt x 404.712pt>
+pdfTeX warning: /Library/TeX/Distributions/Programs/texbin/pdflatex (file ./Fig
+05b.pdf): PDF inclusion: multiple pdfs with page group included in a single pag
+e
+>]
+
+Package natbib Warning: Citation `mor2007' on page 18 undefined on input line 2
+28.
+
+
+Package natbib Warning: Citation `camarota2014white' on page 18 undefined on in
+put line 228.
+
+
+Package natbib Warning: Citation `bohlin2008absolute' on page 18 undefined on i
+nput line 228.
+
+<Fig06a.pdf, id=714, 809.42403pt x 404.712pt>
 File: Fig06a.pdf Graphic file (type pdf)
  <use Fig06a.pdf>
-Package pdftex.def Info: Fig06a.pdf used on input line 229.
+Package pdftex.def Info: Fig06a.pdf used on input line 231.
 (pdftex.def)             Requested size: 505.88878pt x 252.94438pt.
 
-<Fig06b.pdf, id=759, 809.42403pt x 404.712pt>
+<Fig06b.pdf, id=715, 809.42403pt x 404.712pt>
 File: Fig06b.pdf Graphic file (type pdf)
  <use Fig06b.pdf>
-Package pdftex.def Info: Fig06b.pdf used on input line 230.
+Package pdftex.def Info: Fig06b.pdf used on input line 232.
 (pdftex.def)             Requested size: 505.88878pt x 252.94438pt.
 
-Overfull \hbox (36.13379pt too wide) in paragraph at lines 229--232
+Overfull \hbox (36.13379pt too wide) in paragraph at lines 231--234
 [][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 229--232
+Underfull \hbox (badness 10000) in paragraph at lines 231--234
 
  []
 
 
-Overfull \hbox (36.13379pt too wide) in paragraph at lines 229--232
+Overfull \hbox (36.13379pt too wide) in paragraph at lines 231--234
 [] 
  []
 
 
-LaTeX Warning: Float too large for page by 14.57925pt on input line 233.
+LaTeX Warning: Float too large for page by 14.57925pt on input line 235.
 
 [18
 
@@ -554,64 +640,66 @@ LaTeX Warning: Float too large for page by 14.57925pt on input line 233.
 
 ] [19 <./Fig06a.pdf> <./Fig06b.pdf
 
-pdfTeX warning: pdflatex (file ./Fig06b.pdf): PDF inclusion: multiple pdfs with
- page group included in a single page
->] <Fig07a.pdf, id=894, 809.42403pt x 404.712pt>
+pdfTeX warning: /Library/TeX/Distributions/Programs/texbin/pdflatex (file ./Fig
+06b.pdf): PDF inclusion: multiple pdfs with page group included in a single pag
+e
+>] <Fig07a.pdf, id=847, 809.42403pt x 404.712pt>
 File: Fig07a.pdf Graphic file (type pdf)
  <use Fig07a.pdf>
-Package pdftex.def Info: Fig07a.pdf used on input line 237.
+Package pdftex.def Info: Fig07a.pdf used on input line 239.
 (pdftex.def)             Requested size: 505.88878pt x 252.94438pt.
 
-<Fig07b.pdf, id=895, 809.42403pt x 404.712pt>
+<Fig07b.pdf, id=848, 809.42403pt x 404.712pt>
 File: Fig07b.pdf Graphic file (type pdf)
  <use Fig07b.pdf>
-Package pdftex.def Info: Fig07b.pdf used on input line 238.
+Package pdftex.def Info: Fig07b.pdf used on input line 240.
 (pdftex.def)             Requested size: 505.88878pt x 252.94438pt.
 
-Overfull \hbox (36.13379pt too wide) in paragraph at lines 237--240
+Overfull \hbox (36.13379pt too wide) in paragraph at lines 239--242
 [][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 237--240
+Underfull \hbox (badness 10000) in paragraph at lines 239--242
 
  []
 
 
-Overfull \hbox (36.13379pt too wide) in paragraph at lines 237--240
+Overfull \hbox (36.13379pt too wide) in paragraph at lines 239--242
 [] 
  []
 
 
-LaTeX Warning: Float too large for page by 31.06018pt on input line 241.
+LaTeX Warning: Float too large for page by 31.06018pt on input line 243.
 
 [20 <./Fig07a.pdf> <./Fig07b.pdf
 
-pdfTeX warning: pdflatex (file ./Fig07b.pdf): PDF inclusion: multiple pdfs with
- page group included in a single page
->] <Fig08a.pdf, id=1024, 1011.78pt x 404.712pt>
+pdfTeX warning: /Library/TeX/Distributions/Programs/texbin/pdflatex (file ./Fig
+07b.pdf): PDF inclusion: multiple pdfs with page group included in a single pag
+e
+>] <Fig08a.pdf, id=978, 1011.78pt x 404.712pt>
 File: Fig08a.pdf Graphic file (type pdf)
  <use Fig08a.pdf>
-Package pdftex.def Info: Fig08a.pdf used on input line 245.
+Package pdftex.def Info: Fig08a.pdf used on input line 247.
 (pdftex.def)             Requested size: 556.48071pt x 222.59229pt.
 
-<Fig08b.pdf, id=1025, 1011.78pt x 404.712pt>
+<Fig08b.pdf, id=979, 1011.78pt x 404.712pt>
 File: Fig08b.pdf Graphic file (type pdf)
  <use Fig08b.pdf>
-Package pdftex.def Info: Fig08b.pdf used on input line 246.
+Package pdftex.def Info: Fig08b.pdf used on input line 248.
 (pdftex.def)             Requested size: 556.48071pt x 222.59229pt.
 
-Overfull \hbox (86.72572pt too wide) in paragraph at lines 245--248
+Overfull \hbox (86.72572pt too wide) in paragraph at lines 247--250
 [][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 245--248
+Underfull \hbox (badness 10000) in paragraph at lines 247--250
 
  []
 
 
-Overfull \hbox (86.72572pt too wide) in paragraph at lines 245--248
+Overfull \hbox (86.72572pt too wide) in paragraph at lines 247--250
 [] 
  []
 
@@ -620,41 +708,42 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 [21 <./Fig08a.pdf> <./Fig08b.pdf
 
-pdfTeX warning: pdflatex (file ./Fig08b.pdf): PDF inclusion: multiple pdfs with
- page group included in a single page
+pdfTeX warning: /Library/TeX/Distributions/Programs/texbin/pdflatex (file ./Fig
+08b.pdf): PDF inclusion: multiple pdfs with page group included in a single pag
+e
 >] [22
 
 
 
-] <Fig09a.pdf, id=1137, 1011.78pt x 404.712pt>
+] <Fig09a.pdf, id=1091, 1011.78pt x 404.712pt>
 File: Fig09a.pdf Graphic file (type pdf)
  <use Fig09a.pdf>
-Package pdftex.def Info: Fig09a.pdf used on input line 258.
+Package pdftex.def Info: Fig09a.pdf used on input line 260.
 (pdftex.def)             Requested size: 505.88876pt x 202.3555pt.
 
-<Fig09b.pdf, id=1138, 809.42403pt x 404.712pt>
+<Fig09b.pdf, id=1092, 809.42403pt x 404.712pt>
 File: Fig09b.pdf Graphic file (type pdf)
  <use Fig09b.pdf>
-Package pdftex.def Info: Fig09b.pdf used on input line 260.
+Package pdftex.def Info: Fig09b.pdf used on input line 262.
 (pdftex.def)             Requested size: 299.48221pt x 149.74109pt.
 
-<Fig09c.pdf, id=1139, 505.89pt x 404.712pt>
+<Fig09c.pdf, id=1093, 505.89pt x 404.712pt>
 File: Fig09c.pdf Graphic file (type pdf)
  <use Fig09c.pdf>
-Package pdftex.def Info: Fig09c.pdf used on input line 261.
+Package pdftex.def Info: Fig09c.pdf used on input line 263.
 (pdftex.def)             Requested size: 187.17636pt x 149.74109pt.
 
-Overfull \hbox (36.13377pt too wide) in paragraph at lines 258--264
+Overfull \hbox (36.13377pt too wide) in paragraph at lines 260--266
 [][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 258--264
+Underfull \hbox (badness 10000) in paragraph at lines 260--266
 
  []
 
 
-Overfull \hbox (40.90358pt too wide) in paragraph at lines 258--264
+Overfull \hbox (40.90358pt too wide) in paragraph at lines 260--266
 [] 
  []
 
@@ -663,28 +752,35 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 [23 <./Fig09a.pdf> <./Fig09b.pdf
 
-pdfTeX warning: pdflatex (file ./Fig09b.pdf): PDF inclusion: multiple pdfs with
- page group included in a single page
+pdfTeX warning: /Library/TeX/Distributions/Programs/texbin/pdflatex (file ./Fig
+09b.pdf): PDF inclusion: multiple pdfs with page group included in a single pag
+e
 > <./Fig09c.pdf
 
-pdfTeX warning: pdflatex (file ./Fig09c.pdf): PDF inclusion: multiple pdfs with
- page group included in a single page
+pdfTeX warning: /Library/TeX/Distributions/Programs/texbin/pdflatex (file ./Fig
+09c.pdf): PDF inclusion: multiple pdfs with page group included in a single pag
+e
 >] [24
 
 
-] [25] [26] <Fig10a.pdf, id=1336, 578.16pt x 289.08pt>
+]
+
+Package natbib Warning: Citation `for2013' on page 25 undefined on input line 2
+93.
+
+[25] [26] <Fig10a.pdf, id=1286, 578.16pt x 289.08pt>
 File: Fig10a.pdf Graphic file (type pdf)
  <use Fig10a.pdf>
-Package pdftex.def Info: Fig10a.pdf used on input line 295.
+Package pdftex.def Info: Fig10a.pdf used on input line 297.
 (pdftex.def)             Requested size: 433.61893pt x 216.80946pt.
 
-<Fig10b.pdf, id=1337, 578.16pt x 289.08pt>
+<Fig10b.pdf, id=1287, 578.16pt x 289.08pt>
 File: Fig10b.pdf Graphic file (type pdf)
  <use Fig10b.pdf>
-Package pdftex.def Info: Fig10b.pdf used on input line 296.
+Package pdftex.def Info: Fig10b.pdf used on input line 298.
 (pdftex.def)             Requested size: 433.61893pt x 216.80946pt.
 
-Underfull \hbox (badness 10000) in paragraph at lines 295--298
+Underfull \hbox (badness 10000) in paragraph at lines 297--300
 
  []
 
@@ -693,87 +789,139 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 [27 <./Fig10a.pdf> <./Fig10b.pdf
 
-pdfTeX warning: pdflatex (file ./Fig10b.pdf): PDF inclusion: multiple pdfs with
- page group included in a single page
->] [28
+pdfTeX warning: /Library/TeX/Distributions/Programs/texbin/pdflatex (file ./Fig
+10b.pdf): PDF inclusion: multiple pdfs with page group included in a single pag
+e
+>]
+
+Package natbib Warning: Citation `mor2007' on page 28 undefined on input line 3
+04.
+
+[28
 
 
-] [29] <Fig11.pdf, id=1496, 952.8536pt x 749.76045pt>
+] [29] <Fig11.pdf, id=1444, 952.8536pt x 749.76045pt>
 File: Fig11.pdf Graphic file (type pdf)
  <use Fig11.pdf>
-Package pdftex.def Info: Fig11.pdf used on input line 324.
+Package pdftex.def Info: Fig11.pdf used on input line 326.
 (pdftex.def)             Requested size: 466.90234pt x 367.38583pt.
 
 [30
 
- <./Fig11.pdf>] [31
+ <./Fig11.pdf>]
 
-] [32] <Fig13.pdf, id=1575, 769.87625pt x 1540.75626pt>
+Package natbib Warning: Citation `tam2008' on page 31 undefined on input line 3
+38.
+
+
+Package natbib Warning: Citation `cri1970' on page 31 undefined on input line 3
+38.
+
+
+Package natbib Warning: Citation `whe2008' on page 31 undefined on input line 3
+38.
+
+
+Package natbib Warning: Citation `wel2006' on page 31 undefined on input line 3
+38.
+
+[31
+
+] [32] <Fig13.pdf, id=1510, 769.87625pt x 1540.75626pt>
 File: Fig13.pdf Graphic file (type pdf)
-
-<use Fig13.pdf>
-Package pdftex.def Info: Fig13.pdf used on input line 366.
+ <use Fig13.pdf>
+Package pdftex.def Info: Fig13.pdf used on input line 368.
 (pdftex.def)             Requested size: 288.70288pt x 577.78218pt.
 
 
-LaTeX Warning: Float too large for page by 72.03343pt on input line 368.
+LaTeX Warning: Float too large for page by 72.03343pt on input line 370.
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[33 <./Fig13.pdf>] [34
+[33 <./Fig13.pdf>]
+
+Package natbib Warning: Citation `wel2006' on page 34 undefined on input line 3
+73.
 
 
-] <Fig12.pdf, id=1647, 396.48125pt x 692.5875pt>
+Package natbib Warning: Citation `ram2013' on page 34 undefined on input line 3
+73.
+
+
+Package natbib Warning: Citation `tam2008' on page 34 undefined on input line 3
+73.
+
+[34
+
+
+] <Fig12.pdf, id=1575, 396.48125pt x 692.5875pt>
 File: Fig12.pdf Graphic file (type pdf)
-
-<use Fig12.pdf>
-Package pdftex.def Info: Fig12.pdf used on input line 375.
+ <use Fig12.pdf>
+Package pdftex.def Info: Fig12.pdf used on input line 377.
 (pdftex.def)             Requested size: 148.6801pt x 259.71967pt.
  [35
 
- <./Fig12.pdf>] [36
+ <./Fig12.pdf>]
 
-] (./gphoton.bbl [37]pdfTeX warning (ext4): destination with the same identifie
-r (name{Hfootnote.6}) has been already used, duplicate ignored
-<to be read again> 
-                   \relax 
-l.104 \end{thebibliography}
-                           )
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 394.
- [38]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 394.
+Package natbib Warning: Citation `mor2007' on page 36 undefined on input line 3
+83.
+
+
+Package natbib Warning: Citation `mor2007' on page 36 undefined on input line 3
+83.
+
+[36
+
+]
+
+Package natbib Warning: Citation `astropy' on page 37 undefined on input line 3
+91.
+
+
+Package natbib Warning: Citation `simbad' on page 37 undefined on input line 39
+1.
+
+No file gphoton.bbl.
+
+Package natbib Warning: There were undefined citations.
+
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 396.
+[37]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 396.
  (./gphoton.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 394.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 394.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 396.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 396.
 Package rerunfilecheck Info: File `gphoton.out' has not changed.
 (rerunfilecheck)             Checksum: 8C425A4698675C3371AA2F048B1F60FF;1754.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 394.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 396.
  ) 
 Here is how much of TeX's memory you used:
- 6978 strings out of 493117
- 97664 string characters out of 6141650
- 197972 words of memory out of 5000000
- 10229 multiletter control sequences out of 15000+600000
+ 6915 strings out of 493054
+ 97969 string characters out of 6134759
+ 196436 words of memory out of 5000000
+ 10249 multiletter control sequences out of 15000+600000
  12602 words of font info for 52 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 34i,13n,28p,1686b,438s stack positions out of 5000i,500n,10000p,200000b,80000s
-</sw/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></sw/share/te
-xmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></sw/share/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmmi10.pfb></sw/share/texmf-dist/fonts/type1/public/am
-sfonts/cm/cmmi8.pfb></sw/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.
-pfb></sw/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></sw/share/te
-xmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></sw/share/texmf-dist/fonts/ty
-pe1/public/amsfonts/cm/cmr9.pfb></sw/share/texmf-dist/fonts/type1/public/amsfon
-ts/cm/cmsy10.pfb></sw/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb
-></sw/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></sw/share/texm
-f-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></sw/share/texmf-dist/fonts/ty
-pe1/public/amsfonts/cm/cmtt10.pfb></sw/share/texmf-dist/fonts/type1/public/amsf
-onts/cm/cmtt9.pfb>
-Output written on gphoton.pdf (38 pages, 1611204 bytes).
+ 34i,13n,28p,1797b,403s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
+></usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
+</usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><
+/usr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></u
+sr/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr
+/local/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/lo
+cal/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local
+/texlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/te
+xlive/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/tex
+live/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texli
+ve/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive
+/2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/
+2014/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2
+014/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
+Output written on gphoton.pdf (37 pages, 1607585 bytes).
 PDF statistics:
- 1759 PDF objects out of 2073 (max. 8388607)
- 688 compressed objects within 7 object streams
- 110 named destinations out of 1000 (max. 500000)
+ 1667 PDF objects out of 1728 (max. 8388607)
+ 599 compressed objects within 6 object streams
+ 89 named destinations out of 1000 (max. 500000)
  327 words of extra memory for PDF output out of 10000 (max. 10000000)
 

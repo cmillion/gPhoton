@@ -59,7 +59,7 @@ Here are the recommended commands for Ubuntu. If you are using Fedora, substitut
     sudo apt-get install python-setuptools
     sudo apt-get install python-numpy python-scipy
 
-You should use `pip` to get the latest versions of _requests_ and _astropy_. If _requests_ or _astropy_ is already installed, upgrade it by appending the `--upgrade` flag to the following calls.
+You should use `pip` to get the latest versions of _requests_ and _astropy_. If _requests_ or _astropy_ is already installed, upgrade it by appending the `--upgrade` flag to the following calls. (You can alternatively get astropy via apt-get.)
 
     sudo pip install requests
     sudo pip install astropy
@@ -434,7 +434,9 @@ These are the definitions of various values of the _flag_ column in the gPhoton 
 7. **NaN values in `_mcatbgsub` columns.** This indicates that there were no simultaneous (in time) detections of any source near (<0.1 degrees) your query position. Rather than try to make something up, we just pass NaN. You should confirm with gMap that there is, in fact, a source at this location and then use the annulus background method.
 8. **UNIX time does not handle leap seconds correctly. Does GALEX time?**
 No, it does not. If you require this level of precision, you'll need to apply a correction.
-9. **How do I check if my FUV data is possibly affected by the large multi-modality / offset that afflicts calibration mode (CAI) data with AIS legs 1-3?**
+9. **Does gPhoton correct for barycentric time?**
+Not at present. This is a planned feature with no firm date for implementation.
+10. **How do I check if my FUV data is possibly affected by the large multi-modality / offset that afflicts calibration mode (CAI) data with AIS legs 1-3?**
 Where _t_ is a GALEX timestamp, run the following function, which will return `True` if these conditions are met:
 
         from gPhoton import gQuery
