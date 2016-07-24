@@ -1,10 +1,4 @@
-Note on plots:
-I had to manually adjust the bounding boxes for almost all the plots.  I did this by first converting the .ps into .epsi (or sometimes just .eps) using ps2epsi or ps2eps, then opening the .epsi or .eps file in emacs and adjusting the BoundingBox until the white space at the top/bottom/left/right was a good amount.  If updating any of the plots, you should either try to change the plot output itself (if you open up the file in "gv" and don't see the whole plot, or there's way too much white space, it will need to be adjusted), or, follow the steps above to manually adjust the BoundingBox inside the plot.  This is best done by editing the new version of the plot somewhere else FIRST (so you can refer to the BoundingBox used in the version in the repository), then, after the new plot has had its BoundingBox redefined, you can overwrite the old plot in the repository.
+gPhoton Calibration / Software Paper
 
-To compile the latex:
-    latex gphoton.tex
-    latex gphoton.tex
-    bibtex gphoton.aux
-    latex gphoton.tex
-    dvips gphoton.dvi
-    (can convert from ps to pdf however you like, e.g., ps2pdf)
+Status: Submitted to IOP (6/2016)
+
