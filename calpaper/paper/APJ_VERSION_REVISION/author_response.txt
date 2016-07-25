@@ -1,11 +1,11 @@
-We thank the referee for the thorough review of both our paper and software.  In addition to addressing the referee's comments, we have made some additional code changes since the paper was initially submitted submitted (v1.27.1), and the most recent version which is available at the time that these revisions are being submitted (v1.27.2). Of particular note, these code changes produced NO CHANGES to the calibration results. We address each of the referee's points below.  A summary of substantive changes made to the software to version 1.27.2 is provided at the bottom of this report.
+We thank the referee for the thorough review of our paper and software. In addition to addressing the referee's comments, we have made some additional code changes since the paper was initially submitted submitted (v1.27.1), and the most recent version which is available at the time that these revisions are being submitted (v1.27.2). Of particular note, these code changes produced NO CHANGES to the calibration results presented in the paper at the precision used. We address each of the referee's points below. A summary of substantive changes made to the software to version 1.27.2 is provided at the bottom of this reply.
 
 --------------------------------------------------------------------------------
 RESPONSES TO EDITOR COMMENTS
 --------------------------------------------------------------------------------
 In addition to these comments, I just wanted to mention that while it's great that you have provided scripts to reproduce the plots in the paper, I would like to ask you to avoid including a Python pickle file, since these have no guarantee of working in the long term. Please use archival formats instead, whether plain text, JSON, FITS, HDF5, or other similar formats.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: We thank the editor for pointing this out. The information that was previously contained in the pickle file has been moved inside of CSV other CSV files that shared the same row definitions. The figures.py script has been updated to reflect this change.
+AUTHOR RESPONSE: The data that were previously contained in the pickle files have been added as columns of other CSV files that shared the same row definitions. The figures.py scripts have been updated to reflect this change.
 --------------------------------------------------------------------------------
 
 
@@ -74,7 +74,7 @@ Sect 5
 -------
 In Sect 5.2 the authors suggest that the difference in the background they see compared to the MCAT is due to sources in the background annulus and they suggest that software users manually identify contaminating sources in the images. They should try out this suggestion for a few cases and report the differene between the MCAT background and that measured from an annulus placed by hand to avoid contaminating sources, since this is what they recommend users to do.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: xxxxxxxxxxxxxxx Pending analysis.
+AUTHOR RESPONSE: xxxxxxxxxxxxxxx Pending analysis. (Scott)
 --------------------------------------------------------------------------------
 
 In Fig 6, there seems to be a systematic trend, such that all exposures > 150 s produce values above the expected magnitude. Is there a known reason?
@@ -117,7 +117,7 @@ Fig 13:
 I understand that this analysis is merely a usage example, but it should be correct and well readable.
 In this respect Fig 13 is lacking. What are the coordiantes on the x and y axis? What is the color scaling? Why is the background annulus (i) so close to CR Dra that is is visibly dominated by the wings of CR Dra's PSF? Why is it so small (since there are fewer counts in the background than in the source, I would expect that you chose a large background region. Otherwise the error on the CR Dra flux will be dominated by the counting statistics in the small background aperture)?
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: xxxxxxxxxx Pending Scott.
+AUTHOR RESPONSE: xxxxxxxxxx Pending. (Scott)
 --------------------------------------------------------------------------------
 
 Figures
@@ -129,7 +129,7 @@ AUTHOR RESPONSE: We have moved tables and figures to be placed near where they a
 
 Figures look a little blurred. I can referee them fine, but I encourange the authors to make use of a vector graphics format such as pdf for most of their plots.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: We were unable to reproduce this issue, but we now use PDF versions of the figures instead of EPS (which were created from the PDF originally).
+AUTHOR RESPONSE: We were unable to reproduce this issue, but we now use PDF versions of the figures instead of EPS.
 --------------------------------------------------------------------------------
 
 
@@ -138,8 +138,7 @@ Software on github
 
 Installation
 ------------
-Manually modifying the PYTHONPATH is not the best practice solution because it might interfere with e.g. virtualenv, conda environments etc.
-The de-facto standard is using setuptools, where the names of relevant command line scripts are defined as "entry points".
+Manually modifying the PYTHONPATH is not the best practice solution because it might interfere with e.g. virtualenv, conda environments etc. The de-facto standard is using setuptools, where the names of relevant command line scripts are defined as "entry points".
 --------------------------------------------------------------------------------
 AUTHOR RESPONSE:
 --------------------------------------------------------------------------------
@@ -149,10 +148,9 @@ Installations instructions Ubuntu: Note that you can get astropy through "apt-ge
 AUTHOR RESPONSE: Noted, and a comment was added to the User Guide.
 --------------------------------------------------------------------------------
 
-When trying out the software I followed the instruction in docs/UserGuide.md
-and that did not work. pip installing into Anaconda will not activate the command line scripts (see note about "entry points" above). I strongly encourage the authors to fix this - incomplete installation instructions are probably the fasted way to turn a user to look elsewhere.
+When trying out the software I followed the instruction in docs/UserGuide.md and that did not work. pip installing into Anaconda will not activate the command line scripts (see note about "entry points" above). I strongly encourage the authors to fix this - incomplete installation instructions are probably the fasted way to turn a user to look elsewhere.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE:
+AUTHOR RESPONSE: We were unfortunately not able to reproduce this issue with the information provided. In a normal bug report situation, we would ask for additional information, but the anonymous nature of the review makes that difficult.
 --------------------------------------------------------------------------------
 
 Calling from within the Python interpreter
