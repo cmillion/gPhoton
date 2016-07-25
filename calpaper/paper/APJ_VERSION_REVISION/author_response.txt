@@ -117,7 +117,7 @@ Fig 13:
 I understand that this analysis is merely a usage example, but it should be correct and well readable.
 In this respect Fig 13 is lacking. What are the coordiantes on the x and y axis? What is the color scaling? Why is the background annulus (i) so close to CR Dra that is is visibly dominated by the wings of CR Dra's PSF? Why is it so small (since there are fewer counts in the background than in the source, I would expect that you chose a large background region. Otherwise the error on the CR Dra flux will be dominated by the counting statistics in the small background aperture)?
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: xxxxxxxxxx Pending. (Scott)
+AUTHOR RESPONSE: We have re-made Fig. 13 in several ways.  First, we show not the coadd (which includes data across all observations, and is not actually relevant for aperture definition) but instead show a 10-second frame from the brightest flare event.  We have included coordinate grid (for spatial reference) and color bar (for intensity reference), and have further described in the figure caption the aperture sizes and choice of intensity scaling.  We have also remade the light curve plot itself using this refined aperture selection.
 --------------------------------------------------------------------------------
 
 Figures
@@ -150,7 +150,7 @@ AUTHOR RESPONSE: Noted, and a comment was added to the User Guide.
 
 When trying out the software I followed the instruction in docs/UserGuide.md and that did not work. pip installing into Anaconda will not activate the command line scripts (see note about "entry points" above). I strongly encourage the authors to fix this - incomplete installation instructions are probably the fasted way to turn a user to look elsewhere.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: We were unfortunately not able to reproduce this issue with the information provided. In a normal bug report situation, we would ask for additional information, but the anonymous nature of the review makes that difficult.
+AUTHOR RESPONSE: We were unfortunately not able to reproduce this issue with the information provided. In a normal bug report situation, we would ask for additional information, but the anonymous nature of the review makes that difficult.  If the referee would like to send a follow-up (anonymously) through the referee channels, with more specifics on their python environment and perhaps a command log (commands issued while trying to install and the errors returned) we'd be happy to investigate this further.  We have tested the latest branch using both pip and pip through Anaconda and could not get an error, so it's also possible the issue has been fixed in the latest branch as well, perhaps the referee could attempt this installation again.
 --------------------------------------------------------------------------------
 
 Calling from within the Python interpreter

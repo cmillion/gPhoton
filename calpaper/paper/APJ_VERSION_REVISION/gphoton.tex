@@ -365,8 +365,8 @@ This example is for the NUV band, a similar call can be used to make the FUV ban
 
 \clearpage
 \begin{figure}[h]
-\includegraphics[scale=0.375]{Fig13.pdf}
-\caption{Deep coadd image of CR Draconis using all available NUV photon events. The image is in counts, since we are only looking to define our photometric aperture and search for possible contamination sources. The aperture, inner annulus, and outer annulus for photometry are represented by the green, orange, and red circles, respectively.  There is a source to the lower left that is $\sim 0.5$\% the peak of CR Draconis itself. Although testing showed it did not significantly impact the photometry, we define our apertures such that it is not included within them.\label{crdracoadd}}
+\includegraphics[scale=0.75]{Fig12.pdf}
+\caption{Image (in counts) from a 10-second frame in the NUV using \texttt{gMap}.  This frame is selected from the image cube to define our aperture because it contains the peak of the largest flare on CR Draconis.  Apertures are represented by the colored circles, and correspond to 45, 55, and 80 arcseconds, respectively.  The color map is in a log scale, and is stretched to show the fainter wings of the source.  For reference, the maximum pixel contains 234 counts.\label{crdracoadd}}
 \end{figure}
 \clearpage
 
@@ -374,7 +374,7 @@ The largest observed flare in GALEX is the one reported in \citet{wel2006}, but 
 
 \clearpage
 \begin{figure}[h]
-\includegraphics[scale=0.375]{Fig12.pdf}
+\includegraphics[scale=0.375]{Fig13.pdf}
 \caption{Flares detected on CR Draconis using gPhoton, across the lifetime of the mission with a 10 second cadence. When available, FUV light curves are plotted (in blue) along with the NUV curves (in black). Fluxes have not been aperture corrected. Note that some of the larger flares reach sufficient brightness to exceed the non-linearity and saturation threshold of the detector; such points can be identified by checking whether bit 4 (''nonlinearity'') is set in the flag column returned by gAperture.
 \label{crdraflares}}
 \end{figure}
