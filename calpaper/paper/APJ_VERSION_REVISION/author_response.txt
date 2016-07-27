@@ -74,7 +74,7 @@ Sect 5
 -------
 In Sect 5.2 the authors suggest that the difference in the background they see compared to the MCAT is due to sources in the background annulus and they suggest that software users manually identify contaminating sources in the images. They should try out this suggestion for a few cases and report the differene between the MCAT background and that measured from an annulus placed by hand to avoid contaminating sources, since this is what they recommend users to do.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: xxxxxxxxxxxxxxx Pending analysis. (Scott)
+AUTHOR RESPONSE: For 549 'NUV' sources with a delta-magnitude of >0.2 and AB magnitude >22 when using the Annulus background method, we have confirmed by visual inspection (using gMap) that a large fraction of these have a relatively bright nearby star (i.e. within the outer annulus) that would contaminate the background estimate and could be avoided with a more judicious selection of annulus extent. Rather than manually define new apertures for all ~500 sources, we reran gAperture for these sources with a smaller aperture of extending [0.005,0.001] (degrees) from the source position. Without except, this resulted in background corrected magnitudes closer to zero, with a median offset of 0.156 from the previous value (with the larger annulus) towards zero.
 --------------------------------------------------------------------------------
 
 In Fig 6, there seems to be a systematic trend, such that all exposures > 150 s produce values above the expected magnitude. Is there a known reason?
