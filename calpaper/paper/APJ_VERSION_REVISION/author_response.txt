@@ -1,4 +1,4 @@
-We thank the referee for the thorough review of our paper and software. In addition to addressing the referee's comments, we have made some additional code changes since the paper was initially submitted submitted (v1.27.1), and the most recent version which is available at the time that these revisions are being submitted (v1.27.2). Of particular note, these code changes produced NO CHANGES to the calibration results presented in the paper at the precision used. We address each of the referee's points below. A summary of substantive changes made to the software to version 1.27.2 is provided at the bottom of this reply.
+We thank the referee for the thorough review of our paper and software. In addition to addressing the referee's comments, we have made some additional code changes since the paper was initially submitted (which was v1.27.1), and the most recent version (v1.27.2). Of particular note, these code changes produced NO CHANGES to the calibration results presented in the paper at the precision used. We address each of the referee's points below. A summary of substantive changes made to the software to version 1.27.2 is provided at the bottom of this reply, though most are also tracked in GitHub as Issues under the "1.27.2" Milestone.
 
 --------------------------------------------------------------------------------
 RESPONSES TO EDITOR COMMENTS
@@ -15,10 +15,9 @@ RESPONSES TO REFEREE COMMENTS
 
 Abstract
 --------
-
 "photon event" - This term may need a specific definition (are there other event types? Are there photons that are not events?). For the abstract I suggest to use the simple term "photon", leaving the exact definition for the text.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: We have simplified the abstract to refer to "photons" instead of "photon events," and in the Motivation section we describe more precisely what we mean by "events" generally as distinct from "photons" or "photon events."
+AUTHOR RESPONSE: We have simplified the abstract to refer to "photons" instead of "photon events," and in the Motivation section we describe more precisely what we mean by "events" in general, as distinct from "photons" or "photon events."
 --------------------------------------------------------------------------------
 
 Which version of the software does this describe? I understand that software evolves and articles do not, but the tests described here are done with one specific version e.g. when the authors say "summarize photometric and astrometric performance ...", those metrics might be version dependent.
@@ -56,7 +55,7 @@ AUTHOR RESPONSE: Like UNIX time on which it is based, GALEX time does not handle
 
 The gPhoton software is described in several places as a dabase of individual photons. However, after reading this manuscript, the User Guide, and installing and playing around with the software, it is still unclear to me which steps allow the user to retrieve a full calibrated photon list. (gAperture only retunred binned quantities. gPipeline is supposed to return a photon list, but unlike the other tools it requires a raw6 and scst file as input. Where would I get those? Why can they not be downloaded automatically with the skypos and time as in gAperture?)
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: The photon (events) are returned under the 'photons' key in the dictionary data structure that is returned by gAperture when run as a module.  (For example, if you set the return of gAperture to a variable: `x = gAperture(...)`, the events would be stored in `x['photons']`.) Prompted by this note, we have also added a gAperture option (in v1.27.2) to save the unbinned photon events as a CSV file (with, e.g., `photoncsvfile=<...>`) when called from _either_ the command line or as a module.
+AUTHOR RESPONSE: The photon (events) are returned under the 'photons' key in the dictionary data structure that is returned by gAperture when run as a module.  For example, if you set the return of gAperture to a variable: `x = gAperture(...)`, the events would be stored in `x['photons']`. Prompted by this note, we have also added a gAperture option (in v1.27.2) to save the unbinned photon events as a CSV file (with, e.g., `photoncsvfile=<...>`) when called from _either_ the command line or as a module.
 --------------------------------------------------------------------------------
 
 gPipeline: Do photon list files contain the values for the weighting factors for flat and dead time correction that are applied by gMap or gAperture tools? In other words, do the photon lists contain all the informnation needed for the analysis in some form or are the later tools required to download/calculate more information?
@@ -74,7 +73,7 @@ Sect 5
 -------
 In Sect 5.2 the authors suggest that the difference in the background they see compared to the MCAT is due to sources in the background annulus and they suggest that software users manually identify contaminating sources in the images. They should try out this suggestion for a few cases and report the differene between the MCAT background and that measured from an annulus placed by hand to avoid contaminating sources, since this is what they recommend users to do.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: For 549 'NUV' sources with a delta-magnitude of >0.2 and AB magnitude <22 when using the Annulus background method, we have confirmed by visual inspection (using gMap) that a large fraction of these have a relatively bright nearby star (i.e. within the outer annulus) that would contaminate the background estimate and could be avoided with a more judicious selection of annulus extent. Rather than manually define new apertures for all ~500 sources, we re-ran gAperture for these sources with a smaller aperture of extending [0.005,0.001] (degrees) from the source position. Without exception, this resulted in background corrected magnitudes closer to zero, with a median offset of 0.156 from the previous value (with the larger annulus) towards zero. Please see the plot (generated for the reviewer's convenience only and NOT TO BE PUBLISHED) of delta-mag vs. mag of these 549 sources the larger and smaller background annuli. We have updated the paper text to note that simply a smaller annuli may mitigate the issue.
+AUTHOR RESPONSE: For 549 'NUV' sources with a delta-magnitude of >0.2 and AB magnitude <22 when using the Annulus background method, we have confirmed by visual inspection (using gMap) that a large fraction of these have a relatively bright nearby star (i.e. within the outer annulus) that would contaminate the background estimate and could be avoided with a more judicious selection of annulus extent. Rather than manually define new apertures for all ~500 sources, we re-ran gAperture for these sources with a smaller aperture, extending [0.005, 0.001] (degrees) from the source position. Without exception, this resulted in background corrected magnitudes closer to zero, with a median offset of 0.156 from the previous value (with the larger annulus) towards zero. Please see the plot (generated for the reviewer's convenience only, not to be included in the publication) of delta-mag vs. mag of these 549 sources, comparing the larger and smaller background annuli. We have updated the paper text to note that simply a smaller annuli may mitigate the issue.
 --------------------------------------------------------------------------------
 
 In Fig 6, there seems to be a systematic trend, such that all exposures > 150 s produce values above the expected magnitude. Is there a known reason?
@@ -110,14 +109,14 @@ AUTHOR RESPONSE: We have added a brief paragraph showing how we made use of gFin
 Fig 12, caption:
 "such points can be identified by a flag" - I suggest giving the name of the flag here.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: We've added the specific bit to check in the flag bitmask to the figure caption (bit 4 is the one for nonlinearity warning). The bitmask look-up table is also in the UserGuide.
+AUTHOR RESPONSE: We've added the specific bit to check in the flag bitmask to the figure caption (bit 4 is the one for nonlinearity warning). The bitmask look-up table is also in the User Guide.
 --------------------------------------------------------------------------------
 
 Fig 13:
 I understand that this analysis is merely a usage example, but it should be correct and well readable.
 In this respect Fig 13 is lacking. What are the coordiantes on the x and y axis? What is the color scaling? Why is the background annulus (i) so close to CR Dra that is is visibly dominated by the wings of CR Dra's PSF? Why is it so small (since there are fewer counts in the background than in the source, I would expect that you chose a large background region. Otherwise the error on the CR Dra flux will be dominated by the counting statistics in the small background aperture)?
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: We have re-made Fig. 13 in several ways.  First, we show not the coadd (which includes data across all observations, and is not actually relevant for aperture definition) but instead show a 10-second frame from the brightest flare event.  We have included coordinate grid (for spatial reference) and color bar (for intensity reference), and have further described in the figure caption the aperture sizes and choice of intensity scaling.  We have also remade the light curve plot itself using this refined aperture selection.
+AUTHOR RESPONSE: We have re-made Fig. 13 in several ways.  First, we show not the coadd (which includes data across all observations, and is not actually relevant for aperture definition) but instead show a 10-second frame from the brightest flare event.  We have included a coordinate grid (for spatial reference) and color bar (for intensity reference), and have further described in the figure caption the aperture sizes and choice of intensity scaling.  We have also remade the light curve plot itself using this refined aperture selection, which resulted in essentially the same plot.
 --------------------------------------------------------------------------------
 
 Figures
@@ -140,7 +139,7 @@ Installation
 ------------
 Manually modifying the PYTHONPATH is not the best practice solution because it might interfere with e.g. virtualenv, conda environments etc. The de-facto standard is using setuptools, where the names of relevant command line scripts are defined as "entry points".
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE:
+AUTHOR RESPONSE: This was necessary early on when installing from GitHub and *not* running setup.py.  Since this is not how most users will ever want to install this, we have removed mentions of modifying PYTHONPATH and instruct users to either use pip or clone from GitHub and execute the setup.py file directly.
 --------------------------------------------------------------------------------
 
 Installations instructions Ubuntu: Note that you can get astropy through "apt-get" as well.
@@ -187,7 +186,7 @@ Python version
 --------------
 The code is obviously written for python 2 and will fail on Python 3. It's probably not too hard to convert using 2to3 or six, but it should state somewhere which Python versions are supported and which versions of numpy, scipy, astropy, ... are tested and known to work.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: We plan to make gPhoton compatible with Python 3.x in addition to Python 2.7.x in the near future. For now, the software has only been tested on Python 2.7.x. We have added a note about this in the UserGuide.
+AUTHOR RESPONSE: We plan to make gPhoton compatible with Python 3.x in addition to Python 2.7.x in the near future. For now, the software has only been tested on Python 2.7.x. We have added a note about this in the User Guide.
 --------------------------------------------------------------------------------
 
 
@@ -243,8 +242,8 @@ SUMMARY OF CHANGES BETWEEN SOFTWARE BRANCH v1.27.1 (on submission) and v1.27.2 (
 
 We have rerun our full suite of regression tests (including regenerating all graphics), which include the astrometry, relative photometry, and absolute photometry presented in the paper, and have found minimal difference between the two branches in terms of the results presented in the paper. Software changes that might potentially have resulted in substantive calibration changes (but did not!) include the following.
 
-1.) We have slightly modified the method of computing the "MCAT" background for a target. It still does exactly what is described in the paper, but it should do a better job of selecting the closest MCAT visit (in time and space) from which to draw a background estimate. The text (and User Guide) has been modified to describe the new feature that in rare cases that no appropriate visit is found, the MCAT estimated background is set to NaN. Note that the calibration results have not changed at the level of precision that they are reported in the paper. This is not unexpected because the change should really only effect cases where there is no nearby MCAT source; the calibration tests uses only locations of known MCAT sources and so avoid this case by construction.
+1.) We have slightly modified the method of computing the "MCAT" background for a target. It still does exactly what is described in the paper, but it should do a better job of selecting the closest MCAT visit (in time and space) from which to draw a background estimate. The text (and User Guide) has been modified to describe the new feature, which happens in rare cases where no appropriate visit is found.  In those cases, the MCAT estimated background is set to NaN. Note that the calibration results have not changed at the level of precision that they are reported in the paper. This is not unexpected because the change should really only effect cases where there is no nearby MCAT source; the calibration tests uses only locations of known MCAT sources and so avoid this case by construction.
 
-2.) We took the opportunity of rerunning the calibration to make the baseline sample 10,000 in both bands to better permit direct comparison (which is less in NUV and more in FUV than was used before). We have modified the description of the manuscript (and figures) accordingly. Note that, despite the change in sample size, the calibration results have not changed at the level of precision that they are reported in the paper.
+2.) We took the opportunity of rerunning the calibration to make the baseline samples 10,000 targets in *both* bands to better permit direct comparison (10,000 targets is less than used in the original draft in NUV, and more in FUV). We have modified the description in the manuscript (and figures) accordingly. Note that, despite the change in sample size, the calibration results have not changed at the level of precision that they are reported in the paper.
 
 For a complete history of changes since the initial paper submission, please see the list of Github issues under the v1.27.2 milestone and commit log starting from 6/2/2016 through the merge of branch v1.27.2 into Master.
