@@ -1,9 +1,6 @@
 **gPhoton** is a project to calibrate, archive, and make available every photon event observed by the GALEX mission in an effort to dramatically improve the flexibility and utility of the data with specific emphasis on enabling short time domain photometric studies.
 
-<!-- Uncomment this and remove the v1272 line below once merge with the master branch is done.
 To get started, please read the [User Guide](https://github.com/cmillion/gPhoton/blob/master/docs/UserGuide.md).  You can also refer to the [Full API](http://gphoton.readthedocs.io/en/master/) available on ReadTheDocs.
--->
-To get started, please read the [User Guide](https://github.com/cmillion/gPhoton/blob/master/docs/UserGuide.md).  You can also refer to the [Full API](http://gphoton.readthedocs.io/en/v1272/) available on ReadTheDocs.
 
 #####Database Status
 **Every photon observed through GR6/7 is now available in the database!** This includes every observation up to the start of the post-NASA or "CAUSE" phase of the mission.
@@ -13,7 +10,4 @@ If you use gPhoton software in your research, please cite:
 Million, C., Fleming, S. W., Shiao, B. (2014) gPhoton. Software available at https://github.com/cmillion/gPhoton
 
 ![Logo](https://travis-ci.org/cmillion/gPhoton.svg?branch=master)
-<!-- Uncomment this and remove the v1272 link once master is merged with v1272 and the RTD documentation is built.
 [![Documentation Status](https://readthedocs.org/projects/gphoton/badge/?version=master)](http://gphoton.readthedocs.io/en/master/?badge=master)
--->
-[![Documentation Status](https://readthedocs.org/projects/gphoton/badge/?version=v1272)](http://gphoton.readthedocs.io/en/v1272/?badge=v1272)
