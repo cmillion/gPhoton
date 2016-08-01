@@ -1,26 +1,40 @@
 """
 .. module:: galextools
-
    :synopsis: This module contains helper and reference functions that are
-   specific to GALEX and used by other modules, but do not directly access the
-   database or generate end products of any kind.
+       specific to GALEX and used by other modules, but do not directly access
+       the database or generate end products of any kind.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 import numpy as np
 from astropy import wcs as pywcs
+import datetime
+import time
 
 # ------------------------------------------------------------------------------
 GPSSECS = 315532800+432000
 # ------------------------------------------------------------------------------
 
+def recovery_tranges():
+    """
+    Defines and returns an array of time ranges during which the spacecraft
+        was in some sort of recovery mode (e.g. FUV cycling or CSP) and
+        therefore any data from these periods should be viewed skeptically
+        (because of things like observing while not at HVNOM).
+    """
+    return [# CSP (05-04-2010 to 06-23-2010)
+            [time.mktime(datetime.date(2010,5,4).timetuple())-GPSSECS,
+             time.mktime(datetime.date(2010,6,23).timetuple())-GPSSECS],
+        ]
+
 # ------------------------------------------------------------------------------
 def isPostCSP(t, switch=961986575.):
     """
     Given a GALEX time stamp, return TRUE if it corresponds to a "post-CSP"
-    eclipse. The actual CSP was on eclipse 37423, but the clock change (which
-    matters more for calibration purposes) occured on 38268 (t~=961986575.)
+        eclipse. The actual CSP was on eclipse 37423, but the clock change
+        (which matters more for calibration purposes) occured on 38268
+        (t~=961986575.)
 
     :param t: The time stamp to test.
 
@@ -80,7 +94,7 @@ def aper2deg(apercode):
 def apcorrect1(radius, band):
     """
     Compute an apeture correction. First way. Uses the table data in Figure 4
-    from Morissey, et al., 2007
+        from Morissey, et al., 2007
 
     :param radius: The photometric radius, in degrees.
 
@@ -126,8 +140,8 @@ def apcorrect1(radius, band):
 def apcorrect2(radius, band):
     """
     Compute an aperture correction in mag based upon an aperture radius in
-    degrees. Second way. Uses the data in Table 1 from
-    http://www.galex.caltech.edu/researcher/techdoc-ch5.html
+        degrees. Second way. Uses the data in Table 1 from
+        http://www.galex.caltech.edu/researcher/techdoc-ch5.html
 
     :param radius: The photometric radius, in degrees.
 
@@ -177,7 +191,7 @@ def apcorrect2(radius, band):
 def photometric_repeatability(cps, expt, band):
     """
     Estimate the photometric repeatability vs. magnitude .
-    See: http://asd.gsfc.nasa.gov/archive/galex/FAQ/counts_background.html
+        See: http://asd.gsfc.nasa.gov/archive/galex/FAQ/counts_background.html
 
     :param cps: Source flux in counts per second.
 
@@ -204,7 +218,7 @@ def photometric_repeatability(cps, expt, band):
 def detbg(area, band):
     """
     Nominal background in counts per second per 1.5" pixel.
-    See: http://asd.gsfc.nasa.gov/archive/galex/FAQ/counts_background.html
+        See: http://asd.gsfc.nasa.gov/archive/galex/FAQ/counts_background.html
 
     :param area: The area to calculate the background in square degrees.
 
@@ -215,7 +229,7 @@ def detbg(area, band):
     :type band: str
 
     :returns: float -- The nominal background for the given band, in counts per
-    second.
+        second.
     """
 
     rate = 1e-4 if band == 'FUV' else 1e-3
@@ -227,7 +241,7 @@ def detbg(area, band):
 def counts2mag(cps, band):
     """
     Converts GALEX counts per second to AB magnitudes.
-    See: http://asd.gsfc.nasa.gov/archive/galex/FAQ/counts_background.html
+        See: http://asd.gsfc.nasa.gov/archive/galex/FAQ/counts_background.html
 
     :param cps: The flux in counts per second.
 
@@ -252,7 +266,7 @@ def counts2mag(cps, band):
 def mag2counts(mag, band):
     """
     Converts AB magnitudes to GALEX counts per second.
-    See: http://asd.gsfc.nasa.gov/archive/galex/FAQ/counts_background.html
+        See: http://asd.gsfc.nasa.gov/archive/galex/FAQ/counts_background.html
 
     :param mag: The AB magnitude to convert.
 
@@ -274,7 +288,7 @@ def mag2counts(mag, band):
 def counts2flux(cps, band):
     """
     Converts GALEX counts per second to flux (erg sec^-1 cm^-2 A^-1).
-    See: http://asd.gsfc.nasa.gov/archive/galex/FAQ/counts_background.html
+        See: http://asd.gsfc.nasa.gov/archive/galex/FAQ/counts_background.html
 
     :param cps: The flux in counts per second.
 
@@ -296,26 +310,30 @@ def counts2flux(cps, band):
 # END methods that use conversion factors from Goddard.
 #
 
-def local_nl_correction(mr,band):
-    """Measured counts per second to predicted counts per sectond.
-    Attempts to correct a measured count rate for nonlinearity per the formula
-    given in Fig. 8 of Morrissey 2007.
+def local_nl_correction(mr, band):
     """
+    Measured counts per second to predicted counts per sectond.
+        Attempts to correct a measured count rate for nonlinearity per the
+        formula given in Fig. 8 of Morrissey 2007.
+    """
+
     coeffs = {'NUV':[-0.314,1.365,-0.103],
               'FUV':[-0.531,1.696,-0.225]}
     C0,C1,C2=coeffs[band]
-    return 10**np.roots([C2,C1,C0-np.log10(MR)])[1]
 
-def deg2pix(skypos,skyrange,pixsz=0.000416666666666667):
-    """Converts degrees to GALEX pixels rounded up to the nearest pixel
-    so that the number of degrees specified will fully fit into the frame.
+    return 10**np.roots([C2, C1, C0-np.log10(MR)])[1]
+
+def deg2pix(skypos, skyrange, pixsz=0.000416666666666667):
+    """
+    Converts degrees to GALEX pixels rounded up to the nearest pixel
+        so that the number of degrees specified will fully fit into the frame.
 
     :param skypos: The right ascension and declination, in degrees.
 
     :type skypos: list
 
     :param skyrange: Values in degrees RA and Dec of a box around skypos that
-    defines the extent of the region of interest.
+        defines the extent of the region of interest.
 
     :type skyrange: list
 
@@ -363,7 +381,7 @@ def flat_scale_parameters(band):
     :type band: str
 
     :returns: tuple -- A three-element tuple containing the flat scaling
-    parameters.
+        parameters.
     """
 
     if band == 'NUV':
@@ -391,10 +409,10 @@ def flat_scale_parameters(band):
 def compute_flat_scale(t, band, verbose=0):
     """
     Return the flat scale factor for a given time.
-    These are empirically determined linear scales to the flat field
-    as a function of time due to diminished detector response. They
-    were determined by Tom Barlow and are in the original GALEX pipeline
-    but there is no published source of which I am aware.
+        These are empirically determined linear scales to the flat field
+        as a function of time due to diminished detector response. They
+        were determined by Tom Barlow and are in the original GALEX pipeline
+        but there is no published source of which I am aware.
 
     :param t: Time stamp(s) to retrieve the scale factor for.
 

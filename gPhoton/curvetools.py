@@ -1,6 +1,5 @@
 """
 .. module:: curvetools
-
    :synopsis: Functions for creation of lightcurves and components thereof.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
@@ -36,7 +35,8 @@ def gphot_params(band, skypos, radius, annulus=None, verbose=0, detsize=1.25,
     :type radius: float
 
     :param annulus: A two-element list containing the inner and outer radius
-    to use for background subtraction during aperture photometry, in degrees.
+        to use for background subtraction during aperture photometry, in
+        degrees.
 
     :type annulus: list
 
@@ -72,11 +72,11 @@ def xieta2colrow(xi, eta, band, detsize=1.25):
     """
     Convert detector xi and eta into col and row.
 
-    :param xi: Sky-projected event "x" positions _in detetor coordinates_.
+    :param xi: Sky-projected event "x" positions *in detetor coordinates*.
 
     :type xi: numpy.ndarray
 
-    :param eta: Sky-projected event "y" positions _in detetor coordinates_.
+    :param eta: Sky-projected event "y" positions *in detetor coordinates*.
 
     :type eta: numpy.ndarray
 
@@ -124,7 +124,7 @@ def hashresponse(band, events, verbose=0):
     :type verbose: int
 
     :returns: dict -- The photon event properties, updated with the response at
-    each position.
+        each position.
     """
 
     # Hash out the response correction.
@@ -150,7 +150,7 @@ def read_photons(photonfile, ra0, dec0, tranges, radius, verbose=0,
                            'dec', 'flags']):
     """
     Read a photon list file and return a python dict() with the expected
-    format.
+        format.
 
     :param photonfile: Name of the photon event file to use.
 
@@ -165,12 +165,12 @@ def read_photons(photonfile, ra0, dec0, tranges, radius, verbose=0,
     :type dec0: float
 
     :param tranges: Set of time ranges from which to retrieve photon events,
-    in GALEX time units
+        in GALEX time units
 
     :type tranges: list
 
     :param radius: The radius, in degrees, defining a cone on the sky that
-    is centered on ra0 and dec0, from which to extract photons.
+        is centered on ra0 and dec0, from which to extract photons.
 
     :type radius: float
 
@@ -188,7 +188,7 @@ def read_photons(photonfile, ra0, dec0, tranges, radius, verbose=0,
     # [Future]: Consider moving this method to 'dbasetools'.
 
     if verbose:
-        print 'Reading photon list file: {f}'.format(f=photonfile)
+        mc.print_inline('Reading photon list file: {f}'.format(f=photonfile))
 
     data = pd.io.parsers.read_csv(photonfile, names=colnames)
     ra, dec = np.array(data['ra']), np.array(data['dec'])
@@ -196,8 +196,6 @@ def read_photons(photonfile, ra0, dec0, tranges, radius, verbose=0,
 
     ix = np.array([])
     for trange in tranges:
-        if verbose:
-            print trange
         cut = np.where((angsep <= radius) & (np.isfinite(angsep)))[0]
         ix = np.concatenate((ix, cut), axis=0)
     events = {'t':np.array(data['t'][ix])/tscale,
@@ -230,12 +228,12 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
     :type dec0: float
 
     :param tranges: Set of time ranges from which to retrieve photon events,
-    in GALEX time units
+        in GALEX time units
 
     :type tranges: list
 
     :param radius: The radius, in degrees, defining a cone on the sky that
-    is centered on ra0 and dec0, from which to extract photons.
+        is centered on ra0 and dec0, from which to extract photons.
 
     :type radius: float
 
@@ -244,9 +242,9 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
     :type verbose: int
 
     :param flag: Photon list flag value upon which to select. Default of 0
-    corresponds to nominally corrected data with no issues. NOTE: 'Flag' is
-    not a reliable way to parse data at this time. You should compare
-    timestamps against the aspect file.
+        corresponds to nominally corrected data with no issues. NOTE: 'Flag' is
+        not a reliable way to parse data at this time. You should compare
+        timestamps against the aspect file.
 
     :type flag: int
 
@@ -256,8 +254,9 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
     # [Future]: This should probably be moved to 'dbasetools'.
     stream = []
     if verbose:
-        print "Retrieving photons within {rad} degrees of [{r}, {d}]".format(
-            rad=radius, r=ra0, d=dec0)
+        mc.print_inline(
+            "Retrieving photons within {rad} degrees of [{r}, {d}]".format(
+                rad=radius, r=ra0, d=dec0))
     for trange in tranges:
         if verbose:
             mc.print_inline(" and between {t0} and {t1}.".format(t0=trange[0],
@@ -278,14 +277,14 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
     stream = np.array(stream, 'f8').T
     colnames = ['t', 'ra', 'dec', 'xi', 'eta', 'x', 'y', 'flag']
     dtypes = ['f8', 'f8', 'f8', 'f4', 'f4', 'f4', 'f4', 'i4']
-    cols = map(np.asarray, stream, dtypes)
-
-    events = dict(zip(colnames, cols))
-
-    # Adjust the timestamp by tscale.
-    events['t'] /= tscale
-
-    return events
+    try:
+        cols = map(np.asarray, stream, dtypes)
+        events = dict(zip(colnames, cols))
+        # Adjust the timestamp by tscale.
+        events['t'] /= tscale
+        return events
+    except TypeError:
+        return None
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -307,12 +306,12 @@ def pullphotons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
     :type dec0: float
 
     :param tranges: Set of time ranges from which to retrieve photon events,
-    in GALEX time units
+        in GALEX time units
 
     :type tranges: list
 
     :param radius: The radius, in degrees, defining a cone on the sky that
-    is centered on ra0 and dec0, from which to extract photons.
+        is centered on ra0 and dec0, from which to extract photons.
 
     :type radius: float
 
@@ -325,9 +324,9 @@ def pullphotons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
     :type photonfile: str
 
     :param flag: Photon list flag value upon which to select. Default of 0
-    corresponds to nominally corrected data with no issues. NOTE: 'Flag' is
-    not a reliable way to parse data at this time. You should compare
-    timestamps against the aspect file.
+        corresponds to nominally corrected data with no issues. NOTE: 'Flag' is
+        not a reliable way to parse data at this time. You should compare
+        timestamps against the aspect file.
 
     :type flag: int
 
@@ -341,17 +340,19 @@ def pullphotons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
         events = query_photons(band, ra0, dec0, tranges, radius,
                                verbose=verbose, flag=flag, detsize=detsize)
 
-    events = hashresponse(band, events, verbose=verbose)
-
-    return events
+    try:
+        events = hashresponse(band, events, verbose=verbose)
+        return events
+    except TypeError:
+        return None
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
 def aperture_error(counts, expt, bgcounts=0):
     """
     The estimated error in the countrate within the aperture, by adding
-    together the counting error within the aperture and background (if
-    provided) in quadrature.
+        together the counting error within the aperture and background (if
+        provided) in quadrature.
 
     :param counts: Total counts within the aperture.
 
@@ -375,15 +376,15 @@ def aperture_error(counts, expt, bgcounts=0):
 def reduce_lcurve(bin_ix, region_ix, data, function, dtype='float64'):
     """
     Produces light curve columns by iteratively applying 'function' to 'data'
-    within 'region_ix' over 'bin_ix'.
+        within 'region_ix' over 'bin_ix'.
 
     :param bin_ix: Array indices designating which events are in the time bin
-    of interest.
+        of interest.
 
     :type bin_ix: numpy.ndarray
 
     :param region_ix: Array indices designating which events are in the spatial
-    region of interest (e.g. the photometric aperture).
+        region of interest (e.g. the photometric aperture).
 
     :type region_ix: numpy.ndarray
 
@@ -420,6 +421,74 @@ def reduce_lcurve(bin_ix, region_ix, data, function, dtype='float64'):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+def recoverywarning(band,bin_ix,events,verbose=0):
+    """
+    Test whether the bin contains data that was collected during a spacecraft
+        recovery period (e.g. FUV cycling) as defined by the lookup table in
+        galextools.recovery_tranges().
+
+    :param band: The band being used, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param bin_ix: Array indices designating which events are in the time bin
+        of interest.
+
+    :type bin_ix: numpy.ndarray
+
+    :param events: Set of photon events to check if they are near a masked
+        detector region.
+
+    :type events: dict
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+    """
+    tranges = gxt.recovery_tranges()
+    for trange in tranges:
+        t = np.array(events['photons']['t'])[bin_ix]
+        if ((trange[0]<=t) & (trange[1]>=t)).any():
+            return True
+    return False
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def caiwarning(band,bin_ix,events,verbose=0):
+    """
+    Test whether a bin contains data from the first 3 legs of an FUV
+        observation as part of the calibration (CAI) survey.
+
+    :param band: The band being used, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param bin_ix: Array indices designating which events are in the time bin
+        of interest.
+
+    :type bin_ix: numpy.ndarray
+
+    :param events: Set of photon events to check if they are near a masked
+        detector region.
+
+    :type events: dict
+
+    :param verbose: Verbosity level, a value of 0 is minimum verbosity.
+
+    :type verbose: int
+    """
+    if band=='FUV':
+        for trange in dbt.distinct_tranges(np.array(events['photons']['t'])[bin_ix]):
+            t = np.median(trange)
+            obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
+            if not obsdata:
+                continue
+            if ((str(obsdata[0][0]) is 'CAI') and (obsdata[0][5]<=3)):
+                return True
+    return False
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 def maskwarning(band, bin_ix, events, verbose=0, mapkey='H', mode=None):
     """
     Test if any given events are near a masked detector region.
@@ -429,12 +498,12 @@ def maskwarning(band, bin_ix, events, verbose=0, mapkey='H', mode=None):
     :type band: str
 
     :param bin_ix: Array indices designating which events are in the time bin
-    of interest.
+        of interest.
 
     :type bin_ix: numpy.ndarray
 
     :param events: Set of photon events to check if they are near a masked
-    detector region.
+        detector region.
 
     :type events: dict
 
@@ -443,12 +512,12 @@ def maskwarning(band, bin_ix, events, verbose=0, mapkey='H', mode=None):
     :type verbose: int
 
     :param mapkey: Text code indicating whether to use the hotspot mask ("H")
-    or the flat (edge) mask ("E").
+        or the flat (edge) mask ("E").
 
     :type mapkey: str
 
     :returns: bool -- Returns True/False whether a given set of events are near
-    a masked detector region.
+        a masked detector region.
     """
 
     maps = {'H':cal.mask, 'E':cal.flat}
@@ -499,10 +568,10 @@ def maskwarning(band, bin_ix, events, verbose=0, mapkey='H', mode=None):
 def lowresponsewarning(bin_ix, events, verbose=0, ratio=0.7):
     """
     Checks for anomalously low response values in the data of interest, which
-    could indicate data on poorly characterized or behaved detector regions.
+        could indicate data on poorly characterized or behaved detector regions.
 
     :param bin_ix: Array indices designating which events are in the time bin
-    of interest.
+        of interest.
 
     :type bin_ix: numpy.ndarray
 
@@ -515,13 +584,13 @@ def lowresponsewarning(bin_ix, events, verbose=0, ratio=0.7):
     :type verbose: int
 
     :param ratio: The value that defines a low response, between 0 and 1.
-    (Where a response value of 1 indicates a "perfect" response value w/ no
-    correction.)
+        (Where a response value of 1 indicates a "perfect" response value w/ no
+        correction.)
 
     :type ratio: float
 
     :returns: bool -- Returns True/False whether a given set of events contain
-    any on a low response region of the detector.
+        any on a low response region of the detector.
     """
 
     ix = np.where(events['photons']['response'][bin_ix] < 0.7)
@@ -533,17 +602,17 @@ def lowresponsewarning(bin_ix, events, verbose=0, ratio=0.7):
 def exptimewarning(bin_ix, events, verbose=0, ratio=0.5):
     """
     Passes a warning if the effective exposure time within a bin is
-    significantly less than the raw exposure time, which might produce
-    anomalous values due to counting statistics or be a symptom of a problem
-    in the exposure time correction for this bin.
+        significantly less than the raw exposure time, which might produce
+        anomalous values due to counting statistics or be a symptom of a problem
+        in the exposure time correction for this bin.
 
     :param bin_ix: Array indices designating which events are in the time bin
-    of interest.
+        of interest.
 
     :type bin_ix: numpy.ndarray
 
     :param events: Set of photon events to check if there is an effective
-    exposure time warning.
+        exposure time warning.
 
     :type events: dict
 
@@ -552,7 +621,7 @@ def exptimewarning(bin_ix, events, verbose=0, ratio=0.5):
     :type verbose: int
 
     :param ratio: The ratio of effective to raw exposure time in a bin below
-    which the bin will be flagged.
+        which the bin will be flagged.
 
     :type ratio: float
 
@@ -567,19 +636,19 @@ def exptimewarning(bin_ix, events, verbose=0, ratio=0.5):
 def nonlinearitywarning(band, bin_ix, events, verbose=0):
     """
     Flag count rates above the 10% local nonlinearty dropoff, per the
-    calibration paper.
+        calibration paper.
 
     :param band: The band that is being used, either 'FUV' or 'NUV'.
 
     :type band: str
 
     :param bin_ix: Array indices designating which events are in the time bin
-    of interest.
+        of interest.
 
     :type bin_ix: numpy.ndarray
 
     :param events: Set of photon events to check if they are in the
-    non-linearity regime.
+        non-linearity regime.
 
     :type events: dict
 
@@ -588,7 +657,7 @@ def nonlinearitywarning(band, bin_ix, events, verbose=0):
     :type verbose: int
 
     :returns: bool -- Returns True/False whether a given set of events are at
-    the non-linearity regime.
+        the non-linearity regime.
     """
 
     cps_10p_rolloff = {'NUV':311, 'FUV':109}
@@ -602,15 +671,15 @@ def nonlinearitywarning(band, bin_ix, events, verbose=0):
 def detedgewarning(bin_ix, events, verbose=0, valid_detrad=0.5):
     """
     Assigns warning flags if any of the events of interest are adjacent
-    to the detector edge as defined by a radius of valid_detrad in degrees.
+        to the detector edge as defined by a radius of valid_detrad in degrees.
 
     :param bin_ix: Array indices designating which events are in the time bin
-    of interest.
+        of interest.
 
     :type bin_ix: numpy.ndarray
 
     :param events: Set of photon events to check if they are near the detector
-    edge.
+        edge.
 
     :type events: dict
 
@@ -619,12 +688,12 @@ def detedgewarning(bin_ix, events, verbose=0, valid_detrad=0.5):
     :type verbose: int
 
     :param valid_detrad: The radius, in degrees, beyond which an edge warning is
-    raised.
+        raised.
 
     :type valid_detrad: float
 
     :returns: bool -- Returns True/False whether a given set of events are too
-    close to the edge of the detector.
+        close to the edge of the detector.
     """
 
     ix = np.where(mc.distance(events['photons']['col'][bin_ix],
@@ -638,22 +707,24 @@ def detedgewarning(bin_ix, events, verbose=0, valid_detrad=0.5):
 def getflags(band, bin_ix, events, verbose=0):
     """
     Pass flags if data meets conditions that are likely to create
-    misleading photometry. The flags are binary, with bins set as follows:
-    1 - 'hotspot' - aperture events in pixels contiguous to a masked hotspot
-    2 - 'mask edge' - aperture events in pixels contiguous to the detector edge
-    4 - 'exptime' - bin contains < 50% exposure time coverage
-    8 - 'respose' - events weighted with response < 0.7
-    16 - 'nonlinearity' - local countrate exceeds 10% response dropoff
-    32 - 'detector edge' - events outside of 0.5 degrees of detector center
-    64 - 'bg hotspot' - annulus events in pixels contiguous to a masked hotspot
-    128 - 'bg mask' - annulus events in pixels contiguous to detector edge
+        misleading photometry. The flags are binary, with bins set as follows:
+        1 - 'hotspot' - aperture events in pixels contiguous to a masked hotspot
+        2 - 'mask edge' - aperture events in pixels contiguous to the detector
+        edge
+        4 - 'exptime' - bin contains < 50% exposure time coverage
+        8 - 'respose' - events weighted with response < 0.7
+        16 - 'nonlinearity' - local countrate exceeds 10% response dropoff
+        32 - 'detector edge' - events outside of 0.5 degrees of detector center
+        64 - 'bg hotspot' - annulus events in pixels contiguous to a masked
+        hotspot
+        128 - 'bg mask' - annulus events in pixels contiguous to detector edge
 
     :param band: The band being used, either 'FUV' or 'NUV'.
 
     :type band: str
 
     :param bin_ix: Array indices designating which events are in the time bin
-    of interest.
+        of interest.
 
     :type bin_ix: numpy.ndarray
 
@@ -696,7 +767,10 @@ def getflags(band, bin_ix, events, verbose=0):
                 if maskwarning(band, ix, events, mapkey='E',
                                             mode='bg', verbose=verbose):
                     flags[i] += 128
-
+                #if caiwarning(band, ix, events, verbose=verbose):
+                #    flags[i] += 256
+                if recoverywarning(band, ix, events, verbose=verbose):
+                    flags[i] += 512
             except:
                 raise
         else:
@@ -710,7 +784,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
              verbose=0, detsize=1.25, coadd=False):
     """
     Primary wrapper function for generating and synthesizing all of the
-    parameters and calculations necessary to create light curves.
+        parameters and calculations necessary to create light curves.
 
     :param band: The band being used, either 'FUV' or 'NUV'.
 
@@ -733,7 +807,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
     :type radius: float
 
     :param annulus: Radii of the inner and outer extents of the background
-    annulus, in degrees.
+        annulus, in degrees.
 
     :type annulus: list
 
@@ -748,7 +822,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
     :param detsize: Effective diameter, in degrees, of the field-of-view.
 
     :param coadd: Set to True if calculating a total flux instead of flux
-    from each time bin.
+        from each time bin.
 
     :type coadd: bool
 
@@ -760,6 +834,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
     searchradius = radius if annulus is None else annulus[1]
     data = pullphotons(band, ra0, dec0, tranges, searchradius, verbose=verbose,
                        detsize=detsize)
+    if not data:
+        return None
 
     if verbose:
         mc.print_inline("Binning data according to requested depth.")
@@ -795,7 +871,9 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
                                                             skypos=[ra0, dec0]))
     except IndexError:
         if np.isnan(data['t']):
-            print "No valid data available in {t}".format(t=tranges)
+            if verbose:
+                mc.print_inline(
+                    "No valid data available in {t}".format(t=tranges))
         lcurve['t0'] = np.array([np.nan])
         lcurve['t1'] = np.array([np.nan])
         lcurve['exptime'] = np.array([0])
@@ -817,8 +895,10 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
     lcurve['racent'] = reduce_lcurve(bin_ix, aper_ix, data['ra'], np.mean)
     lcurve['deccent'] = reduce_lcurve(bin_ix, aper_ix, data['dec'], np.mean)
 
+    skybgmcatdata = dbt.get_mcat_data([ra0,dec0],radius)
     lcurve['mcat_bg'] = lcurve['exptime']*np.array(
-        [dbt.mcat_skybg(band, [ra0, dec0], radius, trange=tr, verbose=verbose)
+        [dbt.mcat_skybg(band, [ra0, dec0], radius, trange=tr,
+                                        mcat=skybgmcatdata, verbose=verbose)
          for tr in zip(lcurve['t0'], lcurve['t1'])])
 
     if annulus is not None:
@@ -891,7 +971,7 @@ def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
              maxgap=1., detsize=1.1):
     """
     Wraps quickmag() to make it ensure some proper parameter formatting and
-    therefore make it slightly more user friendly.
+        therefore make it slightly more user friendly.
 
     :param band: The band being used, either 'FUV' or 'NUV'.
 
@@ -902,6 +982,7 @@ def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
     :type ra0: float
 
     :param dec0: Declination, in degrees, of the target position.
+
     :type dec0: float
 
     :param radius: The radius of the photometric aperture, in degrees.
@@ -909,7 +990,7 @@ def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
     :type radius: float
 
     :param annulus: Radii of the inner and outer extents of the background
-    annulus, in degrees.
+        annulus, in degrees.
 
     :type annulus: list
 
@@ -918,7 +999,7 @@ def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
     :type stepsz: float
 
     :param trange: Minimum and maximum time range to make a light curve,
-    in GALEX time seconds.
+        in GALEX time seconds.
 
     :type trange: list
 
@@ -931,17 +1012,17 @@ def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
     :type verbose: int
 
     :param coadd: Set to True if calculating a total flux instead of flux
-    from each time bin.
+        from each time bin.
 
     :type coadd: bool
 
     :param minexp: Minimum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type minexp: float
 
     :param maxgap: Maximum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type maxgap: float
 
@@ -961,11 +1042,15 @@ def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
                                      maxgap=maxgap, minexp=minexp,
                                      verbose=verbose, detsize=detsize)
     if not np.array(tranges).shape[1]:
-        print "No exposure time at this location: [{ra},{dec}]".format(
-            ra=ra0, dec=dec0)
+        if verbose:
+            mc.print_inline(
+                "No exposure time at this location: [{ra},{dec}]".format(
+                    ra=ra0, dec=dec0))
         return None
     lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
                       stepsz=stepsz, verbose=verbose, coadd=coadd)
+    if not lcurve:
+        return None
 
     if verbose:
         mc.print_inline("Done.")
@@ -978,7 +1063,7 @@ def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                 stepsz=None, trange=None, tranges=None, verbose=0, coadd=False,
                 iocode='wb', detsize=1.1, overwrite=False, minexp=1., maxgap=1.,
-                minimal_output=False):
+                minimal_output=False, photoncsvfile=None):
     """
     Generates a lightcurve and optionally writes the data to a CSV file.
 
@@ -998,12 +1083,12 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
 
     :type radius: float
 
-    :param csvfile: Name of the photon event CSV file to use.
+    :param csvfile: Name of the photon event CSV file to use for the lightcurve.
 
     :type csvfile: str
 
     :param annulus: Radii of the inner and outer extents of the background
-    annulus, in degrees.
+        annulus, in degrees.
 
     :type annulus: list
 
@@ -1012,7 +1097,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
     :type stepsz: float
 
     :param trange: Minimum and maximum timew within which to make a lightcurve,
-    in GALEX time seconds.
+        in GALEX time seconds.
 
     :type trange: list
 
@@ -1025,7 +1110,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
     :type verbose: int
 
     :param coadd: Set to True if calculating a total flux instead of flux
-    from each time bin.
+        from each time bin.
 
     :type coadd: bool
 
@@ -1042,19 +1127,24 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
     :type overwrite: bool
 
     :param minexp: Minimum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type minexp: float
 
     :param maxgap: Maximum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type maxgap: float
 
     :param minimal_output: If True, produce an output file with a minimum
-    number of columns.
+        number of columns.
 
     :type minimal_output: bool
+
+    :param photoncsvfile: Name of the photon event CSV file to write the
+        photon list data to.
+
+    :type photoncsvfile: str
 
     :returns: dict -- The light curve, including input parameters.
     """
@@ -1064,13 +1154,60 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                     coadd=coadd, minexp=minexp, maxgap=maxgap,
                     detsize=detsize)
     if not data:
+        if verbose:
+            print 'No events available at the requested location and time(s).'
         return None
 
     exclude_keys = ['photons', 'params']
-    minimal_columns = ['t0', 't1', 'exptime', 'flux', 'flux_err', 'flags']
 
-    if annulus:
-        minimal_columns += ['flux_bgsub', 'flux_bgsub_err']
+    if minimal_output:
+        # Initialize a list that will define the columns included in the
+        # minimal output option.
+        output_columns = ['t_mean']
+
+        # Only include the annulus-corrected fluxes if an annulus was specified.
+        if annulus:
+            output_columns += ['flux_bgsub', 'flux_bgsub_err']
+
+            # Then include these columns in all cases.
+            output_columns += ['flux_mcatbgsub', 'flux_mcatbgsub_err',
+                                'flags', 'counts', 'exptime', 'detrad']
+    else:
+        # Otherwise, define the order of the output columns to match the
+        # User Guide sorting.
+        time_related_cols = ['t0', 't1', 't_mean', 't0_data', 't1_data']
+        annulus_bkg_corrected_cols = ['cps_bgsub', 'cps_bgsub_err',
+                                      'flux_bgsub', 'flux_bgsub_err',
+                                      'mag_bgsub', 'mag_bgsub_err_1',
+                                      'mag_bgsub_err_2']
+        mcat_bkg_corrected_cols = ['cps_mcatbgsub', 'cps_mcatbgsub_err',
+                                      'flux_mcatbgsub', 'flux_mcatbgsub_err',
+                                      'mag_mcatbgsub', 'mag_mcatbgsub_err_1',
+                                      'mag_mcatbgsub_err_2']
+        bkg_uncorrected_cols = ['cps', 'cps_err',
+                                      'flux', 'flux_err',
+                                      'mag', 'mag_err_1', 'mag_err_2']
+        total_counts_cols = ['counts', 'flat_counts', 'bg_counts',
+                             'bg_flat_counts']
+        calibration_cols = ['exptime', 'bg', 'mcat_bg', 'responses', 'detxs',
+                            'detys', 'detrad', 'racent', 'deccent', 'flags']
+        output_columns = (time_related_cols + annulus_bkg_corrected_cols +
+                          mcat_bkg_corrected_cols + bkg_uncorrected_cols +
+                          total_counts_cols + calibration_cols)
+
+    # The output columns defined here must match all of those in the return
+    # data dict, if not, raise an error so it can be fixed by developers.
+    if minimal_output:
+        # Make sure each of these are included in data.keys()
+        if not set(output_columns) <= set(
+                [x for x in data.keys() if x not in exclude_keys]):
+            raise ValueError("Some output columns are not present in the"
+                             " data structure.  A developer needs to fix this.")
+    else:
+        if set(output_columns) != set(
+                [x for x in data.keys() if x not in exclude_keys]):
+            raise ValueError("Output columns do not match those returned in"
+                             " data structure.  A developer needs to fix this.")
 
     if csvfile:
         if verbose:
@@ -1078,7 +1215,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
 
         frame, columns = {}, []
 
-        for k in minimal_columns if minimal_output else data.keys():
+        for k in output_columns:
             if k in exclude_keys:
                 continue
             frame[k] = data[k]
@@ -1102,6 +1239,9 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
         if verbose or (not verbose and not csvfile):
             print "AB Magnitudes:               "
             print data['mag']
+
+    if photoncsvfile:
+        pd.DataFrame(data['photons']).to_csv(photoncsvfile,index=False)
 
     return data
 # ------------------------------------------------------------------------------

@@ -1,7 +1,8 @@
 import os as _os
 import numpy as np
-from .. import cal_dir
-from ..MCUtils import get_fits_data, get_fits_header, get_tbl_data
+#from .. import cal_dir
+from gPhoton import cal_dir
+from gPhoton.MCUtils import get_fits_data, get_fits_header, get_tbl_data
 
 def check_band(band):
     if not band in ['NUV','FUV']:

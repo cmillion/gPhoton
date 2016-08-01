@@ -29,7 +29,7 @@ The primary mission calibration paper (henceforth "the calibration paper") is al
 Morrissey, Patrick, et al. "The calibration and data products of GALEX." The Astrophysical Journal Supplement Series 173.2 (2007): 682.
 
 ###Installation Instructions
-The standalone tools are written exclusively in Python, a flexible and powerful interpreted programming and data exploration language that has been increasingly adopted in many fields of research and especially astronomy. The "installation" in this case refers to installing the required version of Python and the non-standard Python modules ("dependencies") called by the gPhoton software. For naive Python users, we suggest simply [downloading the Anaconda distribution](https://store.continuum.io/cshop/anaconda/) of Python which contains all of the required dependencies. For advanced users and developers, we suggest that you manage the dependencies yourself; the complete dependency list and suggested installation instructions are given under **Manual Package Management** below.
+The standalone tools are written exclusively in Python, a flexible and powerful interpreted programming and data exploration language that has been increasingly adopted in many fields of research and especially astronomy.  **Please note that gPhoton has so-far only been tested running Python 2.7x.  Support for Python 3.x is not guaranteed, but will be included in a future build of gPhoton.**  The "installation" in this case refers to installing the required version of Python and the non-standard Python modules ("dependencies") called by the gPhoton software. For naive Python users, we suggest simply [downloading the Anaconda distribution](https://store.continuum.io/cshop/anaconda/) of Python which contains all of the required dependencies. For advanced users and developers, we suggest that you manage the dependencies yourself; the complete dependency list and suggested installation instructions are given under **Manual Package Management** below.
 
 Because the standalone tools are written in Python, they are theoretically cross platform. Development of the current version was on OSX. At last attempt (circa 2013), we were not able to run the tools on Debian Linux because some of the required libraries were not yet supported.
 
@@ -59,14 +59,14 @@ Here are the recommended commands for Ubuntu. If you are using Fedora, substitut
     sudo apt-get install python-setuptools
     sudo apt-get install python-numpy python-scipy
 
-You should use `pip` to get the latest versions of _requests_ and _astropy_. If _requests_ or _astropy_ is already installed, upgrade it by appending the `--upgrade` flag to the following calls.
+You should use `pip` to get the latest versions of _requests_ and _astropy_. If _requests_ or _astropy_ is already installed, upgrade it by appending the `--upgrade` flag to the following calls. (You can alternatively get astropy via apt-get.)
 
     sudo pip install requests
     sudo pip install astropy
     sudo pip install pandas
 
 ######Mac (OSX)
-**Draft.** For installing and managing your custom python build in Mac OSX, we suggest using the [MacPorts package](https://www.macports.org/). There is also a tutorial for installing Python on Mac with MacPorts [here](https://astrofrog.github.io/macports-python/).
+**Draft.** For installing and managing your custom Python build in Mac OSX, we suggest using the [MacPorts package](https://www.macports.org/). There is also a tutorial for installing Python on Mac with MacPorts [here](https://astrofrog.github.io/macports-python/).
 
     sudo port install py27-numpy
     sudo port install py27-scipy
@@ -183,9 +183,9 @@ For any command, you can always request more information be printed to the termi
 | ------------ | --------------------------------- | ------------------------------ | --------------------------- | -------------------- | ------------------- |
 | t0	       | cps_bgsub 		 	   | cps_mcatbgsub		    | cps	     	  	  | counts	     	 | exptime	       |
 | t1	       | cps_bgsub_err 		 	   | cps_mcatbgsub_err		    | cps_err	     	  	  | flat_counts	      	 | bg		       |
-| t0_data      | flux_bgsub	      	 	   | flux_mcatbgsub		    | flux	     	  	  | bg_counts		 | mcat_bg	       |
-| t1_data      | flux_bgsub_err      	 	   | flux_mcatbgsub_err	     	    | flux_err	     	  	  | bg_flat_counts     	 | responses	       |
-| t_mean       | mag_bgsub      	 	   | mag_mcatbgsub		    | mag	     	  	  |		      	 | detxs	       |
+| t_mean       | flux_bgsub	      	 	   | flux_mcatbgsub		    | flux	     	  	  | bg_counts		 | mcat_bg	       |
+| t0_data      | flux_bgsub_err      	 	   | flux_mcatbgsub_err	     	    | flux_err	     	  	  | bg_flat_counts     	 | responses	       |
+| t1_data      | mag_bgsub      	 	   | mag_mcatbgsub		    | mag	     	  	  |		      	 | detxs	       |
 | 	       | mag_bgsub_err_1    	 	   | mag_mcatbgsub_err_1     	    | mag_err_1	     	  	  |		      	 | detys	       |
 |	       | mag_bgsub_err_2    	 	   | mag_mcatbgsub_err_2     	    | mag_err_2	     	  	  |		      	 | detrad	       |
 |	       | 				   | 				    | 				  |			 | racent	       |
@@ -197,11 +197,11 @@ For any command, you can always request more information be printed to the termi
 
 &nbsp;&nbsp;**t1** - Upper time delimiting the bin.
 
+&nbsp;&nbsp;**t_mean** - Mean timestamp of events within the aperture.
+
 &nbsp;&nbsp;**t0_data** - Earliest timestamp of events within the aperture.
 
 &nbsp;&nbsp;**t1_data** - Final timestamp of events within the aperture.
-
-&nbsp;&nbsp;**t_mean** - Mean timestamp of events within the aperture.
 
 ###### Annulus-Background-Corrected-Flux
 &nbsp;&nbsp;**cps_bgsub** - Countrate within the aperture, corrected by the background estimated from the annulus.
@@ -297,10 +297,27 @@ These flags are automatically set in software based upon conditions that we know
 
 128 - 'bg mask' - annulus events in pixels contiguous to detector edge
 
+256 - 'FUV multimodality' - Includes data from the first three legs of a CAI observation in the FUV, which is strongly correlated to extreme (~15%) outliers in delta-mag vs. mag comparisons against the MCAT. See the gPhoton paper for more information. -- CURRENTLY DEPRECATED DUE TO RUNTIME OVERHEAD
+
+512 - 'Spacecraft Recovery' - Includes data collected during a spacecraft recovery period. This often involved unusual operating modes (like observing at low voltage) and should be regarded skeptically. -- NOT YET FULLY POPULATED
+
 ####Calling from within the Python Interpreter
 You can also import and work with _gAperture_ and its modules from within the Python interpeter.
 
     import gPhoton.gAperture
+
+####Retrieving the Photon Events
+The individual photon events used in the creation of a light curve can be optionally written to a separate CSV file using the `--photoncsvfile` flag to gAperture. These data are also included under the _photons_ key of the dictionary data structure that is returned when gAperture is run as a Python module. These data may have scientific utility in "unbinned" analyses, and they are often extremely useful for troubleshooting. The available columns include everything described in Photon File Column Definitions below in addition to:
+
+&nbsp;&nbsp;**col** - The flat (and mask) image pixel row in which the event falls.
+
+&nbsp;&nbsp;**row** - The flat (and mask) image pixel row in which the event falls.
+
+&nbsp;&nbsp;**flat** - The detector flat value at the location of the event.
+
+&nbsp;&nbsp;**scale** - A time dependent scale factor applied to the flat.
+
+&nbsp;&nbsp;**response** - Equal to _flat_*_scale_.
 
 ###gMap.py
 
@@ -412,3 +429,18 @@ These are the definitions of various values of the _flag_ column in the gPhoton 
 2. **Why are there negative counts per second or NaN magnitudes?** This happens when the measured background (in counts per second per area) is larger than the measured source (in counts per second per area) such that `cps<sub>source</sub>-cps<sub>background</sub><0`. In most cases, this is for the obvious reason that the signal is near or has dropped below the background. It is not uncommon for shorter integrations of particularly dim sources (especially in FUV) to have _zero_ counts detected within the aperture.
 3. **How do I convert GALEX time stamps to something meaningful?** The GALEX time stamps are in "GALEX Time" which is is defined UNIX Time less 315964800 seconds. (t<sub>GALEX</sub> = t<sub>UNIX</sub> - 315964800) UNIX Time is a standard defined as the number of seconds that have elapsed since January 1, 1970. A number of utilities exist online for converting UNIX time to something with broader meaning (like Julian Date).
 4. **Why isn't the exposure time (exptime) column equal to the integration time (t1-t0)?** The effective exposure time is corrected for detector dead time, shutter effects, and whether the spacecraft was actually observing the targeted region of sky. For order-of-magnitude estimates, you can assume that the effective exposure time will be 80% of the total integration time, on average, although the full range of values (0-100%) is possible. Please see the GALEX calibration and gPhoton software papers for more information.
+5. **Use the MCAT source positions when possible.** Particularly if you are doing analysis based on a cross-matched catalog, you may want to use the source positions from the GALEX merged catalog (MCAT) because they might be slightly different, which could throw off your aperture photometry. For that matter, the source positions might be slightly different in the two GALEX bands, so you should use the appropriate source position for each analysis. Using a sufficiently large aperture will mitigate this somewhat, although at the expense of increasing contamination from nearby sources; judgement calls should be made in consultation with gMap-produced images of the targeted region of sky.
+6. **NaN and Inf values for `mag` and `t_mean`.** This indicates that there are zero counts within the aperture during a time bin. The value for the _counts_ column should be zero, as well as _flux_ and _cps_. `np.log(0) = -inf` however, so the magnitude will be _inf_. And many other common methods for, e.g., `np.min()`, `np.max()`, and `np.mean()` return nan when given an empty array, so this gets propagated to the light curve file. Depending on the type of analysis that you are doing, if there is _not_ a flag set for this bin, especially the edge warning flag, then you might want to consider it to be a "significant" non-detection.
+7. **NaN values in `_mcatbgsub` columns.** This indicates that there were no simultaneous (in time) detections of any source near (<0.1 degrees) your query position. Rather than try to make something up, we just pass NaN. You should confirm with gMap that there is, in fact, a source at this location and then use the annulus background method.
+8. **UNIX time does not handle leap seconds correctly. Does GALEX time?**
+No, it does not. If you require this level of precision, you'll need to apply a correction.
+9. **Does gPhoton correct for barycentric time?**
+Not at present. This is a planned feature with no firm date for implementation.
+10. **How do I check if my FUV data is possibly affected by the large multi-modality / offset that afflicts calibration mode (CAI) data with AIS legs 1-3?**
+Where _t_ is a GALEX timestamp, run the following function, which will return `True` if these conditions are met:
+
+        from gPhoton import gQuery
+        def caiwarning(t,band='FUV'):
+            obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
+            return False if (not obsdata or not ((str(obsdata[0][0]) is 'CAI')
+                and (obsdata[0][5]<=3))) else True

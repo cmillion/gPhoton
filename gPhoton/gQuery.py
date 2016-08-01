@@ -1,8 +1,7 @@
 """
 .. module:: gQuery
-
    :synopsis: Defines and constructs common queries that are passed to the
-   GALEX databases (esp: photon, aspect, and MCAT) at MAST.
+       GALEX databases (esp: photon, aspect, and MCAT) at MAST.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -33,7 +32,7 @@ formatURL = ' -- '+str(time_id)+'&format=extjs'
 def hasNaN(query):
     """
     Check if there is NaN in a query (or any string) and, if so, raise an
-    exception because that probably indicates that something has gone wrong.
+        exception because that probably indicates that something has gone wrong.
 
     :param query: The query string to check.
 
@@ -64,7 +63,7 @@ def getValue(query, verbose=0, retries=100):
     :type retries: int
 
     :returns: requests.Response or None -- The response from the server. If the
-    query does not receive a response, returns None.
+        query does not receive a response, returns None.
     """
 
     hasNaN(query)
@@ -108,7 +107,7 @@ def getArray(query, verbose=0, retries=100):
     :type retries: int
 
     :returns: requests.Response or None -- The response from the server. If the
-    query does not receive a response, returns None.
+        query does not receive a response, returns None.
     """
 
     hasNaN(query)
@@ -132,13 +131,12 @@ def getArray(query, verbose=0, retries=100):
 def mcat_sources(band, ra0, dec0, radius, maglimit=20.):
     """
     Return the MCAT coadd sources given sky position and search radius
-    (and optional lower magnitude limit).
-
-    Columns are:
-    [0,RA],[1,Dec],[2,NUV_mag],[3,FUV_mag],[4,FoV_radius],[5,NUV_skybg],
-    [6,FUV_skybg],[7,NUV_FWHM_world],[8,FUV_FWHM_world],
-    [9:15,FUV_mag_aper_1:7],[16:22,NUV_mag_aper_1:7]
-    [23:29,FUV_magerr_aper_1:7],[30:36,NUV_magerr_aper1:7]
+        (and optional lower magnitude limit).
+        Columns are:
+        [0,RA],[1,Dec],[2,NUV_mag],[3,FUV_mag],[4,FoV_radius],[5,NUV_skybg],
+        [6,FUV_skybg],[7,NUV_FWHM_world],[8,FUV_FWHM_world],
+        [9:15,FUV_mag_aper_1:7],[16:22,NUV_mag_aper_1:7]
+        [23:29,FUV_magerr_aper_1:7],[30:36,NUV_magerr_aper1:7]
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -153,7 +151,7 @@ def mcat_sources(band, ra0, dec0, radius, maglimit=20.):
     :type dec0: float
 
     :param radius: The radius within which to search for MCAT sources, in
-    degrees.
+        degrees.
 
     :type radius: float
 
@@ -212,20 +210,24 @@ def obstype(objid):
             baseURL=baseURL, MCATDB=MCATDB, objid=objid, formatURL=formatURL))
 # ------------------------------------------------------------------------------
 
-# ------------------------------------------------------------------------------
+def obstype_from_t(t):
+    return "{baseURL}SELECT * from {baseDB}.fGetLegObsType({t}){formatURL}".format(
+            baseURL=baseURL,baseDB=baseDB,t=str(long(t*tscale)),
+            formatURL=formatURL)
+
+# -_----------------------------------------------------------------------------
 def mcat_visit_sources(ra0, dec0, radius):
     """
     Return the MCAT per-visit sources given sky position and search radius.
-
-    The columns are as follows:
-    [0,objid],[1,ra],[2,dec],[3,NUV_mag],[4,FUV_mag],[5,FoV_radius],
-    [6,NUV_skybg],[7,FUV_skybg],[8,NUV_FWHM],[9,FUV_FWHM],[10,FUV_expt],
-    [11,NUV_expt],[12:18,FUV_mag_aper_1:7],[19:25,NUV_mag_aper_1:7],
-    [26:32,FUV_magerr_aper_1:7],[33:39,NUV_magerr_aper_1:7],[40,Nobssecs],
-    [41,Fobssecs],[42,NUV_artifact],[43,FUV_artifact],[44,FUV_obstart],
-    [45,FUV_obsend],[46,NUV_obstart],[47,NUV_obsend],
-    [48,FUV_ALPHA_J2000],[49,FUV_DELTA_J2000],
-    [50,NUV_ALPHA_J2000],[51,NUV_DELTA_J2000]
+        The columns are as follows:
+        [0,objid],[1,ra],[2,dec],[3,NUV_mag],[4,FUV_mag],[5,FoV_radius],
+        [6,NUV_skybg],[7,FUV_skybg],[8,NUV_FWHM],[9,FUV_FWHM],[10,FUV_expt],
+        [11,NUV_expt],[12:18,FUV_mag_aper_1:7],[19:25,NUV_mag_aper_1:7],
+        [26:32,FUV_magerr_aper_1:7],[33:39,NUV_magerr_aper_1:7],[40,Nobssecs],
+        [41,Fobssecs],[42,NUV_artifact],[43,FUV_artifact],[44,FUV_obstart],
+        [45,FUV_obsend],[46,NUV_obstart],[47,NUV_obsend],
+        [48,FUV_ALPHA_J2000],[49,FUV_DELTA_J2000],
+        [50,NUV_ALPHA_J2000],[51,NUV_DELTA_J2000]
 
     :param ra0: The right ascension, in degrees, around which to search.
 
@@ -236,7 +238,7 @@ def mcat_visit_sources(ra0, dec0, radius):
     :type dec0: float
 
     :param radius: The radius within which to search for MCAT sources, in
-    degrees.
+        degrees.
 
     :type radius: float
 
@@ -272,7 +274,7 @@ def mcat_visit_sources(ra0, dec0, radius):
 def mcat_objid_search(objid):
     """
     Return a bunch of observation data for a visit level objid (ggoid).
-    Doing the same for coadd level data is not yet supported.
+        Doing the same for coadd level data is not yet supported.
 
     :param objid: The MCAT Object ID to return the observation data from.
 
@@ -296,7 +298,7 @@ def exposure_ranges(band, ra0, dec0, t0=1, t1=10000000000000, detsize=1.25,
                     epsilon=0.001):
     """
     Returns a list of times (in one second increments) where data exists
-    with an aspect solution within detsize of [ra0,dec0].
+        with an aspect solution within detsize of [ra0,dec0].
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -404,7 +406,7 @@ def aperture(band, ra0, dec0, t0, t1, radius):
     :type t1: long
 
     :param radius: The radius within which to integrate counts, in
-    degrees.
+        degrees.
 
     :type radius: float
 
@@ -482,7 +484,7 @@ def deadtime2(band, t0, t1):
 def deadtime(band, t0, t1, feeclkratio=0.966, tec2fdead=5.52e-6):
     """
     Return the emperically determined deadtime correction based upon the
-    global count rate.
+        global count rate.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -501,7 +503,7 @@ def deadtime(band, t0, t1, feeclkratio=0.966, tec2fdead=5.52e-6):
     :type feeclkratio: float
 
     :param tec2fdead: The nominal amount of time following an event that the
-    detector is unable to detect another event.
+        detector is unable to detect another event.
 
     :type tec2fdead: float
 
@@ -631,7 +633,7 @@ def uniquetimes(band, t0, t1, flag=False, null=False):
 def boxcount(band, t0, t1, xr, yr):
     """
     Find the number of events inside of a box defined by [xy] range in
-    detector space coordinates. This is useful for pulling out stim events.
+        detector space coordinates. This is useful for pulling out stim events.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -666,7 +668,7 @@ def boxcount(band, t0, t1, xr, yr):
 def detbox(band, t0, t1, xr, yr):
     """
     Return all events inside a box defined in detector space by [xy]
-    range. Created as a sanity check for stim events.
+        range. Created as a sanity check for stim events.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -719,7 +721,7 @@ def stimcount(band, t0, t1, margin=[90.01, 90.01], aspum=68.754932/1000.,
     :type t1: long
 
     :param margin: X and Y lengths, in arcseconds, of a box within which
-    to search for stim events.
+        to search for stim events.
 
     :type margin: list
 
@@ -796,7 +798,7 @@ def stimtimes(band, t0, t1, margin=[90.01, 90.01], aspum=68.754932/1000.,
     :type t1: long
 
     :param margin: X and Y lengths, in arcseconds, of a box in which to
-    search for stim values.
+        search for stim values.
 
     :type margin: list
 
@@ -949,8 +951,8 @@ def allphotons(band, ra0, dec0, t0, t1, radius, flag=0):
     :type radius: float
 
     :param flag: Only return times with this flag value. Zero is nominal.
-    NOTE: 'Flag' is not a reliable way to parse data at this time. You
-    should compare event timestamps against the aspect file.
+        NOTE: 'Flag' is not a reliable way to parse data at this time. You
+        should compare event timestamps against the aspect file.
 
     :type flag: int
 
@@ -1062,7 +1064,7 @@ def aspect_skypos(ra, dec, detsize=1.25):
 def box(band, ra0, dec0, t0, t1, radius, flag=0):
     """
     Return data within a box centered on ra0, dec0 with sides of length
-    2*radius.
+        2*radius.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -1132,12 +1134,12 @@ def skyrect(band, ra0, dec0, t0, t1, ra, dec, flag=0):
     :type t1: long
 
     :param ra: The length in degrees along RA describing the region of
-    interest.
+        interest.
 
     :type ra: float
 
     :param dec: The length in degrees along Dec describing the region of
-    interest.
+        interest.
 
     :type dec: float
 

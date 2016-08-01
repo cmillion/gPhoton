@@ -1,29 +1,29 @@
 """
 .. module:: CalUtils
-
    :synopsis: Numerous methods for calibrating the raw photon event data.
-   Many of these instantiate or make use of specific detector hardware
-   parameters / constants related to the "static" or detector-space event
-   calibration, including walk, wiggle, linearity, post-CSP, and stim
-   scaling corrections.
+       Many of these instantiate or make use of specific detector hardware
+       parameters / constants related to the "static" or detector-space event
+       calibration, including walk, wiggle, linearity, post-CSP, and stim
+       scaling corrections.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
-from MCUtils import rms, print_inline, get_fits_header, get_tbl_data
-import pandas as pd
-from galextools import isPostCSP
-from astropy.io import fits as pyfits
+import csv
 import numpy as np
+import pandas as pd
+from astropy.io import fits as pyfits
+from MCUtils import rms, print_inline, get_fits_header, get_tbl_data
+from galextools import isPostCSP
 import cal
 
 # ------------------------------------------------------------------------------
 def clk_cen_scl_slp(band, eclipse):
     """
     Return the detector clock, center, scale, and slope constants. These are
-    empirically determined detector-space calibration parameters that help
-    define the relationship between raw event data and its physical position
-    on the detector.
+        empirically determined detector-space calibration parameters that help
+        define the relationship between raw event data and its physical position
+        on the detector.
 
     :param band: The band to return the constants for, either 'FUV' or 'NUV'.
 
@@ -34,7 +34,7 @@ def clk_cen_scl_slp(band, eclipse):
     :type eclipse: int
 
     :returns: tuple -- a tuple containing the x-clock, y-clock, x-center,
-    y-center, x-scale, y-scale, x-slope, and y-slope constants.
+        y-center, x-scale, y-scale, x-slope, and y-slope constants.
     """
 
     band = band.upper()
@@ -101,7 +101,7 @@ def avg_stimpos(band, eclipse):
     Define the mean detector stim positions.
 
     :param band: The band to return the average stim positions for,
-    either 'FUV' or 'NUV'.
+        either 'FUV' or 'NUV'.
 
     :type band: str
 
@@ -110,7 +110,7 @@ def avg_stimpos(band, eclipse):
     :type eclipse: int
 
     :returns: dict -- A dict containing the average x and y positions of the
-    four stims (for the requested band).
+        four stims (for the requested band).
     """
 
     if band == 'FUV':
@@ -141,12 +141,12 @@ def avg_stimpos(band, eclipse):
 def find_stims_index(x, y, band, eclipse, margin=90.001):
     """
     Given a list of detector x,y positions of events, returns four
-    arrays that contain the indices of likely stim events for that stim, i.e.,
-    the first array contains positions for stim1, the second array has positions
-    of stim2, etc.
+        arrays that contain the indices of likely stim events for that stim,
+        i.e., the first array contains positions for stim1, the second array has
+        positions of stim2, etc.
 
-    Example of how the return indexes are used: x[index1], y[index1] would give
-    all of the event positions for stim1.
+        Example of how the return indexes are used: x[index1], y[index1] would
+        give all of the event positions for stim1.
 
     :param x: Detector 'x' positions to identify likely stim events from.
 
@@ -169,7 +169,7 @@ def find_stims_index(x, y, band, eclipse, margin=90.001):
     :type margin: float
 
     :returns: tuple -- A four-element tuple containing arrays of indexes that
-    correpond to the event positions for stim1, stim2, stim3, and stim4.
+        correpond to the event positions for stim1, stim2, stim3, and stim4.
     """
 
     # [Future] This method could be programmed better. Consider using numpy
@@ -211,11 +211,11 @@ def find_stims_index(x, y, band, eclipse, margin=90.001):
 def stimcount(data, band, t0, t1, margin=90.001):
     """
     Given a dict() that contains a list of 't' event times and 'x' and 'y'
-    detector positions, returns the total number of stim events within a time
-    range.
+        detector positions, returns the total number of stim events within a
+        time range.
 
     :param data: The event times and detector positions from which to count the
-    total number of stim events.
+        total number of stim events.
 
     :type data: dict
 
@@ -280,10 +280,10 @@ def stimcount(data, band, t0, t1, margin=90.001):
 def totalcount(data, t0, t1):
     """
     Given a dict() containg 't', a list of global even times, return
-    the total number of events within the time range.
+        the total number of events within the time range.
 
     :param data: The event times and detector positions from which to count the
-    total number of photon events.
+        total number of photon events.
 
     :type data: dict
 
@@ -306,8 +306,8 @@ def totalcount(data, t0, t1):
 def deadtime_method0(data, t0, t1, band, feeclkratio=0.966, tec2fdead=5.52e-6):
     """
     Given a dict() containing 't', a list of global event times, computes
-    the deadtime using an empirical formula based on global count rate over
-    the whole time range.
+        the deadtime using an empirical formula based on global count rate over
+        the whole time range.
 
     :param data: The event times from which to calculate the deadtime.
 
@@ -322,8 +322,8 @@ def deadtime_method0(data, t0, t1, band, feeclkratio=0.966, tec2fdead=5.52e-6):
     :type t1: float
 
     :param band: The band to return the constants for, either 'FUV' or 'NUV'.
-    Not actually used in this function, but retained to make this function
-    definition consistent with deadtime_method[12].
+        Not actually used in this function, but retained to make this function
+        definition consistent with deadtime_method[12].
 
     :type band: str
 
@@ -332,7 +332,7 @@ def deadtime_method0(data, t0, t1, band, feeclkratio=0.966, tec2fdead=5.52e-6):
     :type feeclkratio: float
 
     :param tec2fdead: The nominal amount of time following an event that the
-    detector is unable to detect another event.
+        detector is unable to detect another event.
 
     :type tec2fdead: float
 
@@ -350,11 +350,11 @@ def deadtime_method1(data, t0, t1, band, feeclkratio=0.966, tec2fdead=5.52e-6,
                      tstep=1.):
     """
     Given a dict() containing 't', a list of global event times, computes
-    the deadtime using an empirical formula based on global count rates, put
-    into bins of depth equal to `tstep` seconds and averaged.
+        the deadtime using an empirical formula based on global count rates, put
+        into bins of depth equal to `tstep` seconds and averaged.
 
     :param data: The event times and detector positions from which to calculate
-    the deadtime.
+        the deadtime.
 
     :type data: dict
 
@@ -367,8 +367,8 @@ def deadtime_method1(data, t0, t1, band, feeclkratio=0.966, tec2fdead=5.52e-6,
     :type t1: float
 
     :param band: The band to return the constants for, either 'FUV' or 'NUV'.
-    Not actually used in this function, but retained to make this function
-    definition consistent with deadtime_method[02].
+        Not actually used in this function, but retained to make this function
+        definition consistent with deadtime_method[02].
 
     :type band: str
 
@@ -377,7 +377,7 @@ def deadtime_method1(data, t0, t1, band, feeclkratio=0.966, tec2fdead=5.52e-6,
     :type feeclkratio: float
 
     :param tec2fdead: The nominal amount of time following an event that the
-    detector is unable to detect another event.
+        detector is unable to detect another event.
 
     :type tec2fdead: float
 
@@ -388,7 +388,7 @@ def deadtime_method1(data, t0, t1, band, feeclkratio=0.966, tec2fdead=5.52e-6,
     :type tstep: float
 
     :returns: numpy.ndarray -- The deadtimes within the specified time range,
-    split into the requested bin size.
+        split into the requested bin size.
     """
 
     exptime = t1-t0
@@ -405,15 +405,15 @@ def deadtime_method1(data, t0, t1, band, feeclkratio=0.966, tec2fdead=5.52e-6,
 
 # ------------------------------------------------------------------------------
 def deadtime_method2(data, t0, t1, band, refrate=79., feeclkratio=0.966,
-    tstep=1., refrange=[.4, 2.]):
+                     tstep=1., refrange=[.4, 2.]):
     """
     Given a list of global event times, computes the deadtime through
-    direct comparison of the stim rate to the reference rate in bins of
-    depth `tstep` seconds, and trimmed of outliers. This is close to the
-    deadtime method used by the mission pipeline.
+        direct comparison of the stim rate to the reference rate in bins of
+        depth `tstep` seconds, and trimmed of outliers. This is close to the
+        deadtime method used by the mission pipeline.
 
     :param data: The event times and 'x' and 'y' detector positions from
-    which to calculate the deadtime.
+        which to calculate the deadtime.
 
     :type data: dict
 
@@ -442,12 +442,12 @@ def deadtime_method2(data, t0, t1, band, refrate=79., feeclkratio=0.966,
     :type tstep: float
 
     :param refrange: minimum and maximum multiplicative of the reference stim
-    rate that will be considered a legitimate / valid measurement
+        rate that will be considered a legitimate / valid measurement
 
     :type refrange: list
 
     :returns: numpy.ndarray -- The deadtimes within the specified time range,
-    split into the requested bin size.
+        split into the requested bin size.
     """
 
     eclipse = 100. if isPostCSP(t0) else 40000. # HACK: for backwards comp.
@@ -474,7 +474,7 @@ def deadtime_fromlist(photonfile, t0, t1, band, method=0,
                                 'ra', 'dec', 'flags']):
     """
     Given a photon event list, calculate the deadtime using the specified
-    method.
+        method.
 
     :param photonfile: Name of the file containing photon events.
 
@@ -501,8 +501,8 @@ def deadtime_fromlist(photonfile, t0, t1, band, method=0,
     :type colnames: list
 
     :returns: float or numpy.ndarray -- The deadtime within the requested time
-    range. If using Method 0, return value is a float, otherwise, return value
-    is an array containing the deadtimes per bin.
+        range. If using Method 0, return value is a float, otherwise, return
+        value is an array containing the deadtimes per bin.
     """
 
     # Read photon event file.
@@ -524,12 +524,12 @@ def find_stims(t, x, y, band, eclipse):
     :type t: numpy.ndarray
 
     :param x: Photon event detector x positions within which to search for stim
-    events.
+        events.
 
     :type x: numpy.ndarray
 
     :param y: Photon event detector y positions within which to search for stim
-    events.
+        events.
 
     :type y: numpy.ndarray
 
@@ -542,8 +542,8 @@ def find_stims(t, x, y, band, eclipse):
     :type eclipse: int
 
     :returns: tuple -- A four-element tuple containing arrays of the times,
-    detector x, detector y, and stim ID (1, 2, 3 or 4) of the likely stim
-    events.
+        detector x, detector y, and stim ID (1, 2, 3 or 4) of the likely stim
+        events.
     """
 
     # [Future] This method could be programmed better. Consider using numpy
@@ -612,15 +612,15 @@ def find_stims(t, x, y, band, eclipse):
 def get_stim_coefs(ssdfile):
     """
     Computes the stim scaling coefficients based on a ssdfile (which contains
-    information on the on-detector spatial separation of stims as a function
-    of time).
+        information on the on-detector spatial separation of stims as a function
+        of time).
 
     :param ssdfile: The name of the Stim Separatation Data (SSD) file.
 
     :type ssdfile: str
 
     :returns: tuple -- A two-element tuple containing the stim scaling
-    coefficients.
+        coefficients.
     """
     tbl = get_tbl_data(ssdfile)
 
@@ -688,7 +688,7 @@ def post_csp_caldata():
     Loads the calibration data for after the CSP event.
 
     :returns: tuple -- A six-element tuple containing the wiggle, walk, and
-    clock corrections. See the calibration paper for details.
+        clock corrections. See the calibration paper for details.
     """
 
     print "Loading post-CSP wiggle file..."
@@ -905,7 +905,7 @@ def raw6_to_stims(raw6file, band, eclipse, margin=90.001):
     :type margin: float
 
     :returns: tuple -- A four-element tuple containing data from each stim. The
-    data from each stim are stored in dicts.
+        data from each stim are stored in dicts.
     """
 
     print "Extracting stim data from ", raw6file, " ..."
@@ -1066,8 +1066,8 @@ def compute_stimstats(raw6file, band, eclipse):
     :type eclipse: int
 
     :returns: tuple -- Six-element tuple containing information on the trend
-    in relative positions of the stims over time used for the Post-CSP
-    stim correction.
+        in relative positions of the stims over time used for the Post-CSP
+        stim correction.
     """
 
     print "Computing stim statistics and post-CSP corrections..."
@@ -1310,7 +1310,7 @@ def create_ssd(raw6file, band, eclipse, ssdfile=None):
     :type ssdfile: str
 
     :returns: tuple -- 2xN tuple containing slope and intercept of
-    stim positions over time.
+        stim positions over time.
     """
     if ssdfile:
         print "Preparing SSD output file "+ssdfile

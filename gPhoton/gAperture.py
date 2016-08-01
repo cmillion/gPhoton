@@ -2,9 +2,8 @@
 
 """
 .. module:: gAperture
-
    :synopsis: Module for the creation of GALEX  light curves with user-defined
-   time bins and photometric apertures.
+       time bins and photometric apertures.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -22,13 +21,13 @@ from galextools import aper2deg
 from gPhoton import __version__
 
 # ------------------------------------------------------------------------------
-def gAperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
+def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
               stepsz=False, verbose=0, overwrite=False, trange=None,
               tranges=None, minexp=1., maxgap=1500., iocode='wb',
-              detsize=1.1, minimal_output=False):
+              detsize=1.1, minimal_output=False, photoncsvfile=None):
     """
     Creates a light curve and returns the data in a python dict() and as
-    a CSV file, if outfile is specified. Can be called from the interpreter.
+        a CSV file, if outfile is specified. Can be called from the interpreter.
 
     :param band: The band being used, either 'FUV' or 'NUV'.
 
@@ -42,17 +41,17 @@ def gAperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
 
     :type radius: float
 
-    :param csvfile: Name of the photon event CSV file to use.
+    :param csvfile: Name of the photon event CSV file to use for lightcurve.
 
     :type csvfile: str
 
     :param annulus: Radii of the inner and outer of an annulus, in degrees,
-    within which to measure the background.
+        within which to measure the background.
 
     :type annulus: list
 
     :param coadd: Set to True if calculating a total flux instead of flux
-    from each time bin.
+        from each time bin.
 
     :type coadd: bool
 
@@ -69,7 +68,7 @@ def gAperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
     :type overwrite: bool
 
     :param trange: Minimum and maximum time range to make a light curve,
-    in GALEX time seconds.
+        in GALEX time seconds.
 
     :type trange: list
 
@@ -78,12 +77,12 @@ def gAperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
     :type tranges: list
 
     :param minexp: Minimum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type minexp: float
 
     :param maxgap: Maximum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type maxgap: float
 
@@ -96,9 +95,13 @@ def gAperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
     :type detsize: float
 
     :param minimal_output: If True, produce an output file with a minimum
-    number of columns.
+        number of columns.
 
     :type minimal_output: bool
+
+    :param photoncsvfile: Name of the photon event CSV file to use for photons.
+
+    :type photoncsvfile: str
 
     :returns: dict -- The light curve, including input parameters.
     """
@@ -120,7 +123,8 @@ def gAperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
                           verbose=verbose, overwrite=overwrite, trange=trange,
                           tranges=tranges, coadd=coadd, minexp=minexp,
                           maxgap=maxgap, iocode=iocode, detsize=detsize,
-                          minimal_output=minimal_output)
+                          minimal_output=minimal_output,
+                          photoncsvfile=photoncsvfile)
 
     return data
 # ------------------------------------------------------------------------------
@@ -135,7 +139,7 @@ def check_radius(args):
     :type args: argparse.ArgumentParser Namespace
 
     :returns: argparse.ArgumentParser Namespace -- The updated command-line
-    arguments.
+        arguments.
     """
 
     if not (args.radius or args.suggest or args.aperradius):
@@ -162,7 +166,7 @@ def check_annulus(args):
     :type args: argparse.ArgumentParser Namespace
 
     :returns: argparse.ArgumentParser Namespace -- The updated command-line
-    arguments.
+        arguments.
     """
 
     if not (args.annulus1 and args.annulus2) and not args.annulus:
@@ -208,6 +212,9 @@ def setup_parser(iam='gaperture'):
     parser.add_argument("-f", "--file", "--outfile", "--csvfile",
                         action="store", type=str, dest="csvfile",
                         help="CSV output file")
+    parser.add_argument("--photoncsvfile",
+                        action="store", type=str, dest="photoncsvfile",
+                        help="CSV output file for photon list")
     parser.add_argument("--stamp", action="store", type=str, dest="stamp",
                         help="Filename for a JPEG preview stamp of the"
                         " targeted region.")
@@ -225,10 +232,8 @@ def setup_parser(iam='gaperture'):
                         " sigmas (assuming Gaussians)", type=float, default=1.5)
     parser.add_argument("--minimal_output", "--minout", action="store_true",
                         dest="minimal_output", help=("If csvfile is also set,"
-                                                     " writes only a small"
-                                                     " number of human-"
-                                                     "readable columns to the"
-                                                     " lightcurve file."))
+                        " writes only a small number of human-readable columns"
+                        "to the lightcurve file."))
 
     return parser
 # ------------------------------------------------------------------------------
@@ -237,7 +242,7 @@ def setup_parser(iam='gaperture'):
 def check_args(args, iam='gaperture'):
     """
     Checks validity of command line arguments and, in some cases
-    modifies them a little bit.
+        modifies them a little bit.
 
     :param args: The command-line arguments.
 
@@ -248,7 +253,7 @@ def check_args(args, iam='gaperture'):
     :type iam: str
 
     :returns: argparse.ArgumentParser Namespace -- The updated command-line
-    arguments.
+        arguments.
     """
 
     args = gargs.check_common_args(args, iam)
@@ -286,14 +291,14 @@ def reconstruct_command(args):
 def setup_file(args):
     """
     If requested, create a header for the CSV that includes the column
-    names and a reconstruction of the command line call.
+        names and a reconstruction of the command line call.
 
     :param args: The command-line arguments.
 
     :type args: argparse.ArgumentParser Namespace
 
     :returns: argparse.ArgumentParser Namespace -- The updated command-line
-    arguments.
+        arguments.
     """
 
     if not args.csvfile:
@@ -360,13 +365,14 @@ def __main__():
     stamp(args)
 
     # [Future]: add support for trange(s).
-    data = gAperture(args.band, args.skypos, args.radius, csvfile=args.csvfile,
+    data = gaperture(args.band, args.skypos, args.radius, csvfile=args.csvfile,
                      annulus=args.annulus, stepsz=args.stepsz,
                      verbose=args.verbose, overwrite=args.overwrite,
                      trange=[args.tmin, args.tmax], tranges=args.trange,
                      coadd=args.coadd, minexp=args.minexp, maxgap=args.maxgap,
                      iocode=args.iocode, detsize=args.detsize,
-                     minimal_output=args.minimal_output)
+                     minimal_output=args.minimal_output,
+                     photoncsvfile=args.photoncsvfile)
 # ------------------------------------------------------------------------------
 
 if __name__ == "__main__":

@@ -1,10 +1,9 @@
 """
 .. module:: CalibrationTools
-
    :synopsis: Contains functions for generating calibration products applicable
-   at the image level, mostly when operating directly on the photon lists (not
-   the db), including exposure time and relative response. Not really used
-   elsewhere at present but possibly useful as "documentation."
+       at the image level, mostly when operating directly on the photon lists
+       (not the db), including exposure time and relative response. Not really
+       used elsewhere at present but possibly useful as "documentation."
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -33,7 +32,7 @@ def load_txy(csvfile):
     :type csvfile: str
 
     :returns: tuple -- A four-element tuple containing arrays with the
-    times, x position, y position, and flags from the photon event CSV file.
+        times, x position, y position, and flags from the photon event CSV file.
     """
 
     reader = csv.reader(open(csvfile, 'rb'), delimiter=',', quotechar='|')
@@ -55,9 +54,9 @@ def load_txy(csvfile):
 def compute_deadtime(t, x, y, band, eclipse, trange=[[], []]):
     """
     Uses multiple methods to estimate the detector deadtime correction.
-    The deadtime is an estimate of the fraction of time that the detector
-    was unable to register new events because it was in the middle of
-    readout. Deadtime should, therefore, not count as true exposure time.
+        The deadtime is an estimate of the fraction of time that the detector
+        was unable to register new events because it was in the middle of
+        readout. Deadtime should, therefore, not count as true exposure time.
 
     :param t: Set of photon event times.
 
@@ -80,13 +79,13 @@ def compute_deadtime(t, x, y, band, eclipse, trange=[[], []]):
     :type eclipse: int
 
     :param trange: A 2xN list of minimum and maximum times that define the
-    ranges in which to calculate the dead time. If not supplied, the range is
-    defined as the minimum and maximum times of the photon events.
+        ranges in which to calculate the dead time. If not supplied, the range
+        is defined as the minimum and maximum times of the photon events.
 
     :type trange: list
 
     :returns: numpy.ndarray -- The dead time (dt), as a percentage (0<dt<1),
-    during the entire observation or per time bin (if trange is defined).
+        during the entire observation or per time bin (if trange is defined).
     """
 
     print "Computing deadtime correction..."
@@ -149,23 +148,23 @@ def compute_deadtime(t, x, y, band, eclipse, trange=[[], []]):
 def compute_shutter(t, trange=[[], []]):
     """
     Computes the detector shutter correction.
-    The shutter correction accounts for short periods of time when no events
-    were registered by the detector for any number of reasons. Any gap of
-    longer than 0.05 seconds does not count as true exposure time.
+        The shutter correction accounts for short periods of time when no events
+        were registered by the detector for any number of reasons. Any gap of
+        longer than 0.05 seconds does not count as true exposure time.
 
     :param t: Set of photon event times.
 
     :type t: numpy.ndarray
 
     :param trange: A 2xN list of minimum and maximum times that define the
-    ranges in which to calculate the dead time. If not supplied, the range is
-    defined as the minimum and maximum times of the photon events.
+        ranges in which to calculate the dead time. If not supplied, the range
+        is defined as the minimum and maximum times of the photon events.
 
     :type trange: list
 
     :returns: float -- The total time lost due to shutter, i.e., the sum of
-    all time periods >=0.05 seconds during which no events are registered by
-    the detector.
+        all time periods >=0.05 seconds during which no events are registered by
+        the detector.
     """
 
     if not trange[0]:
@@ -216,13 +215,13 @@ def compute_exposure(t, x, y, flags, band, eclipse, trange=[[], []]):
     :type eclipse: int
 
     :param trange: A 2xN list of minimum and maximum times that define the
-    ranges in which to calculate the dead time. If not supplied, the range is
-    defined as the minimum and maximum times of the photon events.
+        ranges in which to calculate the dead time. If not supplied, the range
+        is defined as the minimum and maximum times of the photon events.
 
     :type trange: list
 
     :returns: numpy.ndarray -- The effective exposure time, in seconds,
-    during the specified time range(s).
+        during the specified time range(s).
     """
 
     # Use only unflagged data.
@@ -259,7 +258,7 @@ def create_rr(csvfile, band, eclipse, aspfile=None, expstart=None, expend=None,
               retries=20, detsize=1.25, pltscl=68.754932):
     """
     DEPRECATED: Creates a relative response map for an eclipse, given a
-    photon list.
+        photon list.
 
     :param csvfile: Name of CSV file containing photon events.
 
@@ -298,8 +297,8 @@ def create_rr(csvfile, band, eclipse, aspfile=None, expstart=None, expend=None,
     :type pltscl: float
 
     :returns: tuple -- A two-element tuple containing the relative response
-    and the effective exposure time. The relative response is a 2D array of
-    values.
+        and the effective exposure time. The relative response is a 2D array of
+        values.
     """
 
     aspum = pltscl/1000.0
@@ -373,7 +372,7 @@ def write_rr(csvfile, band, eclipse, rrfile, outfile, aspfile=None,
     expstart=None, expend=None, retries=20):
     """
     Creates a relative response map for an eclipse, given a photon list
-    file, and writes it to a FITS file.
+        file, and writes it to a FITS file.
 
     :param csvfile: Name of CSV file containing photon events.
 
@@ -388,7 +387,7 @@ def write_rr(csvfile, band, eclipse, rrfile, outfile, aspfile=None,
     :type eclipse: int
 
     :param rrfile: The name of an existing rrhr FITS frile from which to steal
-    header information about exposure time. (For comparing outputs.)
+        header information about exposure time. (For comparing outputs.)
 
     :type rrfile: str
 
@@ -451,14 +450,14 @@ def write_rr(csvfile, band, eclipse, rrfile, outfile, aspfile=None,
 def write_rrhr(rrfile, rrhrfile, outfile):
     """
     Turns a relative response (rr) into a high resolution relative response
-    (rrhr) file with interpolation.
+        (rrhr) file with interpolation.
 
     :param rrfile: Relative Response FITS file to get header information from.
 
     :type rrfile: str
 
     :param rrhrfile: High Resolution Relative Response FITS file to get header
-    information from.
+        information from.
 
     :type rrhrfile: str
 
@@ -492,7 +491,7 @@ def write_rrhr(rrfile, rrhrfile, outfile):
 def write_int(cntfile, rrhrfile, oldint, outfile):
     """
     Writes out an intensity (int) map given a count (cnt) and a high
-    resolution relative response (rrhr).
+        resolution relative response (rrhr).
 
     :param cntfile: Name of count map (-cnt) FITS file.
 
@@ -503,7 +502,7 @@ def write_int(cntfile, rrhrfile, oldint, outfile):
     :type rrhrfile: str
 
     :param oldint: Name of Intensity file (nominally from the mission pipeline)
-    from which to pull header information. (for comparisons)
+        from which to pull header information. (for comparisons)
 
     :type oldint: str
 

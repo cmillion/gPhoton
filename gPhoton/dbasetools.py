@@ -1,8 +1,7 @@
 """
 .. module:: dbasetools
-
    :synopsis: Contains tools for working with data from the database that are
-   used by a number of different modules.
+       used by a number of different modules.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -10,7 +9,7 @@
 import numpy as np
 import gQuery
 from MCUtils import print_inline, area, distance, angularSeparation
-from galextools import GPSSECS, zpmag
+from galextools import GPSSECS, zpmag, aper2deg
 from gQuery import tscale
 
 # ------------------------------------------------------------------------------
@@ -69,14 +68,15 @@ def get_aspect(band, skypos, trange=[6e8, 11e8], verbose=0, detsize=1.25):
 def distinct_tranges(times, maxgap=1.):
     """
     Produces a list of pairs of start / stop times delimiting distinct
-    unique time ranges, given that gaps of >maxgap initiate a new time period.
+        unique time ranges, given that gaps of >maxgap initiate a new time
+        period.
 
     :param times: A set of time stamps to extract unique time ranges from.
 
     :type times: list
 
     :param maxgap:  Maximum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type maxgap: float
 
@@ -95,7 +95,7 @@ def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
                     skyrange=None):
     """
     Given a sky position and (optional) extent, return all of the times
-    periods containing spatially intersecting observations.
+        periods containing spatially intersecting observations.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -118,7 +118,7 @@ def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
     :type verbose: int
 
     :param skyrange: Values in degrees RA and Dec of a box around skypos that
-    defines the extent of the region of interest.
+        defines the extent of the region of interest.
 
     :type skyrange: list
 
@@ -136,13 +136,22 @@ def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
     # entire region of sky for data, but it's not hugely dumb and does work...
     skypos_list = [skypos]
     if skyrange:
-        for r in np.linspace(skypos[0]-skyrange[0]/2.,
-                             skypos[0]+skyrange[0]/2.,
-                             np.ceil(skyrange[0]/(detsize/2.)), endpoint=True):
-            for d in np.linspace(skypos[1]-skyrange[1]/2.,
-                                 skypos[1]+skyrange[1]/2.,
-                                 np.ceil(skyrange[1]/(detsize/2.)),
-                                 endpoint=True):
+        """ This massive construction with the hstack and separate calls to
+        linspace is to ensure that skypos (i.e. the target position) is
+        always uniquely searched.
+        In a perfect world, you would probably divice detsize by 2. The
+        detsize is divided by 3 to make sure to oversample the search just a
+        little bit."""
+        for r in np.unique(np.hstack([np.linspace(skypos[0],
+                skypos[0]+skyrange[0]/2.,
+                np.ceil(skyrange[0]/(detsize/3.)), endpoint=True),
+                np.linspace(skypos[0],skypos[0]-skyrange[0]/2.,
+                np.ceil(skyrange[0]/(detsize/3.)), endpoint=True)])):
+            for d in np.unique(np.hstack([np.linspace(skypos[1],
+                    skypos[1]+skyrange[1]/2.,
+                    np.ceil(skyrange[1]/(detsize/3.)), endpoint=True),
+                    np.linspace(skypos[1],skypos[1]-skyrange[1]/2.,
+                    np.ceil(skyrange[1]/(detsize/3.)), endpoint=True)])):
                 skypos_list += [[r, d]]
 
     times = []
@@ -216,27 +225,27 @@ def fGetTimeRanges(band, skypos, trange=None, detsize=1.1, verbose=0,
     :type verbose: int
 
     :param maxgap:  Maximum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type maxgap: float
 
     :param minexp: Minimum gap size, in seconds, for data to be considered
-    contiguous.
+        contiguous.
 
     :type minexp: float
 
     :param skyrange: Values in degrees RA and Dec of a box around skypos that
-    defines the extent of the region of interest.
+        defines the extent of the region of interest.
 
     :type skyrange: list
 
     :param maxgap_override: Enables an experimental feature where maxgap
-    can be less than one second.
+        can be less than one second.
 
     :type maxgap_override: bool
 
     :returns: numpy.ndarray -- A valid set of time ranges, accounting for
-    minimum exposure lengths and maximum gaps.
+        minimum exposure lengths and maximum gaps.
 	"""
 
     times = get_valid_times(band, skypos, trange=trange, detsize=detsize,
@@ -264,7 +273,7 @@ def fGetTimeRanges(band, skypos, trange=None, detsize=1.1, verbose=0,
 def stimcount_shuttered(band, trange, verbose=0, timestamplist=False):
     """
     Returns the stim count over a time range, excluding periods that the
-    detector is considered shuttered (because of no non-NULL data).
+        detector is considered shuttered (because of no non-NULL data).
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -315,7 +324,7 @@ def stimcount_shuttered(band, trange, verbose=0, timestamplist=False):
 def globalcount_shuttered(band, trange, verbose=0, timestamplist=False):
     """
     Global event counts over the time range, exluding shuttered periods (due to
-    no non-NULL data).
+        no non-NULL data).
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -379,7 +388,7 @@ def compute_shutter(band, trange, verbose=0, shutgap=0.05,
     :type verbose: int
 
     :param shutgap: Amount of time, in seconds, that defines the minimum gap in
-    observation that corresponds to a 'shutter' (not a true exposure time).
+        observation that corresponds to a 'shutter' (not a true exposure time).
 
     :type shutgap: float
 
@@ -388,7 +397,7 @@ def compute_shutter(band, trange, verbose=0, shutgap=0.05,
     :type timestamplist: list
 
     :returns: numpy.ndarray -- The total shutter time, in seconds, during the
-    specified time range.
+        specified time range.
     """
 
     try:
@@ -411,8 +420,8 @@ def empirical_deadtime(band, trange, verbose=0, feeclkratio=0.966,
                        timestamplist=False):
     """
     Calculate empirical deadtime (per global count rate) using revised
-    formulas. Restricts integration of global counts to non-shuttered time
-    periods.
+        formulas. Restricts integration of global counts to non-shuttered time
+        periods.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -456,8 +465,9 @@ def empirical_deadtime(band, trange, verbose=0, feeclkratio=0.966,
 def exposure(band, trange, verbose=0):
     """
     Calculate the effective exposure time in a period, in seconds, accounting
-    for shutter and deadtime. Does not account for actual sky coverage of
-    the telescope during the time period queried (see: compute_exptime() below).
+        for shutter and deadtime. Does not account for actual sky coverage of
+        the telescope during the time period queried (see: compute_exptime()
+        below).
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -501,7 +511,7 @@ def compute_exptime(band, tr, verbose=0, skypos=None, detsize=1.25,
                     coadd=False):
     """
     Compute the total effective exposure time, in seconds, accounting for
-    shutter and deadtime _and_ detector size (i.e. effective coverage).
+        shutter and deadtime _and_ detector size (i.e. effective coverage).
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -524,7 +534,7 @@ def compute_exptime(band, tr, verbose=0, skypos=None, detsize=1.25,
     :type detsize: float
 
     :param coadd: Should the effective exposure time be calculated across all
-    time ranges, e.g., a coadded effective exposure time.
+        time ranges, e.g., a coadded effective exposure time.
 
     :type coadd: bool
 
@@ -560,16 +570,16 @@ def compute_exptime(band, tr, verbose=0, skypos=None, detsize=1.25,
 # ------------------------------------------------------------------------------
 def get_mcat_data(skypos, rad):
     """
-    Return MCAT sources and their catalog values within a give radius of the
-    specified sky position.
+    Return visit-level MCAT sources and their catalog values within a give
+        radius of the specified sky position.
 
     :param skypos: The right ascension and declination, in degrees, around
-    which to search for MCAT sources.
+        which to search for MCAT sources.
 
     :type skypos: list
 
     :param rad: The radius within which to search for MCAT sources,
-    in degrees.
+        in degrees.
 
     :type rad: float
 
@@ -664,14 +674,14 @@ def get_mcat_data(skypos, rad):
 def exp_from_objid(objid):
     """
     Return the effective exposure time, start time, and end time from the MCAT
-    for a given GALEX object ID.
+        for a given GALEX object ID.
 
     :param objid: GALEX object ID.
 
     :type objid: int
 
     :returns: dict -- The FUV and NUV effective exposure time and start/stop
-    times.
+        times.
     """
 
     out = np.array(gQuery.getArray(gQuery.mcat_objid_search(objid)))
@@ -686,6 +696,26 @@ def exp_from_objid(objid):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+def obstype(t,obsdata=None):
+    if not obsdata:
+        obsdata=gQuery.getArray(gQuery.obstype_from_t(t))
+    try:
+        return str(obsdata[0][0])
+    except IndexError:
+        return "Unknown"
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def legnum(t,obsdata=None):
+    if not obsdata:
+        obsdata=gQuery.getArray(gQuery.obstype_from_t(t))
+    try:
+        return obsdata[0][5]
+    except IndexError:
+        return "Unknown"
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 def obstype_from_objid(objid):
     """
     Return the number of legs and petal value for a given GALEX object ID.
@@ -695,7 +725,8 @@ def obstype_from_objid(objid):
     :type objid: int
 
     :returns: tuple -- A two-element tuple containing the number of legs and
-    the petal value, which can be used to infer the observation type/strategy.
+        the petal value, which can be used to infer the observation
+        type/strategy.
     """
 
     out = gQuery.getArray(gQuery.obstype(objid))
@@ -707,7 +738,8 @@ def obstype_from_objid(objid):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def mcat_skybg(band, skypos, radius, verbose=0, trange=None):
+def mcat_skybg(band, skypos, radius, verbose=0, trange=None, mcat=None,
+    searchradius=0.1):
     """
     Estimate the sky background using the MCAT 'skybg' for nearby sources.
 
@@ -732,39 +764,49 @@ def mcat_skybg(band, skypos, radius, verbose=0, trange=None):
     :type trange: list
 
     :returns: float -- The estimated sky background in the photometric
-    aperture, in counts per second.
+        aperture, in counts per second.
     """
+    # Search the visit-level MCAT for nearby detections.
+    # Unless the MCAT data has already been handed off for detection purposes.
+    if not mcat:
+        mcat = get_mcat_data(skypos,searchradius)
+    try:
+        # Find the distance to each source.
+        dist = np.array([angularSeparation(skypos[0],skypos[1],a[0],a[1])
+                            for a in zip(mcat[band]['ra'],mcat[band]['dec'])])
+    except TypeError:
+        print_inline(
+            'No {b} MCAT sources within {r} degrees of {p}'.format(
+                                            b=band,r=searchradius,p=skypos))
+        return np.nan
 
-    # Setting maglimit to 30 so that it gets _everything_...
-    if verbose:
-        print_inline('Estimating background using {m} method...'.format(
-            m='per-visit' if trange else 'median'))
+    # Find visits that overlap in time.
+    if not trange:
+        tix = (np.array(range(len(mcat[band]['mag'])),dtype='int32'),)
+    else:
+        tix = np.where(
+            ((trange[0]>=mcat[band]['t0']) & (trange[0]<=mcat[band]['t1'])) |
+            ((trange[1]>=mcat[band]['t0']) & (trange[1]<=mcat[band]['t1'])) |
+            ((trange[0]<=mcat[band]['t0']) & (trange[1]>=mcat[band]['t1'])))
 
-    mcat = get_mcat_data(skypos, radius)
-    skybg = None
+    if not len(tix[0]):
+        print_inline('No concurrent {b} MCAT source nearby.'.format(b=band))
+        return np.nan # Might not be the preferred behavior here.
 
-    # [Future]: This is really slow for deep fields because it makes one
-    # https request for every single objid until it gets a match. The time
-    # ranges need to be folded into the return from gQuery.mcat_visit_sources()
-    if trange:
-        for i, objid in enumerate(mcat['objid']):
-            if skybg:
-                continue
-            for i, (t0, t1) in enumerate(zip(mcat[band]['t0'],
-                                             mcat[band]['t1'])):
-                if (trange[0] <= t0 <= trange[1] or
-                        trange[0] <= t1 <= trange[1] or
-                        t0 <= trange[0] <= t1 or t0 <= trange[1] <= t1):
-                    skybg = mcat[band]['skybg'][i]
+    ix = np.where(dist[tix]==min(dist[tix]))
 
-    if not skybg:
-        if trange and verbose:
-            print 'No bg data for this visit... Using median over all visits.'
-        ix = np.where(mcat[band]['skybg'] >= 0)
-        skybg = np.median(mcat[band]['skybg'][ix])
+    skybg = mcat[band]['skybg'][tix][ix]
 
-    # Scale bg to area of aperture. Radius is in degrees.
-    return skybg*area(radius*60.*60.)
+    # This should rarely happen, but sometimes there's a duplicate entry in
+    # the visit-level MCAT.
+    if len(skybg) > 1:
+        # If the skybg array is all the same value, it's a duplicate.
+        if np.all(skybg == skybg[0]):
+            skybg = np.asarray([skybg[0]])
+        else:
+            skybg = np.asarray([np.median(skybg)])
+
+    return skybg[0]*area(radius*60.*60.)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -772,12 +814,12 @@ def get_mags(band, ra0, dec0, radius, maglimit, mode='coadd',
              zpmag={'NUV':20.08, 'FUV':18.82}, verbose=0):
     """
     Given RA, Dec and search radius, searches the coadd MCAT for sources.
-    Returns a dict() which contains magnitudes for all of the APER settings.
-    Note: Visit mode returns a lot more sources, more slowly than coadd mode
-    given the same search parameters. You should probably use smaller search
-    radii in visit mode. If you're just trying to find unique sources in a
-    large region, use coadd mode and then pass the result through the
-    parse_unique_sources() function contained in this module.
+        Returns a dict() which contains magnitudes for all of the APER settings.
+        Note: Visit mode returns a lot more sources, more slowly than coadd mode
+        given the same search parameters. You should probably use smaller search
+        radii in visit mode. If you're just trying to find unique sources in a
+        large region, use coadd mode and then pass the result through the
+        parse_unique_sources() function contained in this module.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -800,7 +842,7 @@ def get_mags(band, ra0, dec0, radius, maglimit, mode='coadd',
     :type maglimit: float
 
     :param mode: Specify whether to return MCAT sources from the 'visit' or
-    'coadd' catalog.
+        'coadd' catalog.
 
     :type mode: str
 
@@ -813,7 +855,7 @@ def get_mags(band, ra0, dec0, radius, maglimit, mode='coadd',
     :type verbose: int
 
     :returns: dict -- The set of magnitudes from different apertures for sources
-    in the MCAT, centered around the specified coordinate.
+        in the MCAT, centered around the specified coordinate.
     """
 
     zpf, zpn = zpmag['FUV'], zpmag['NUV']
@@ -825,7 +867,7 @@ def get_mags(band, ra0, dec0, radius, maglimit, mode='coadd',
                                        verbose=verbose))
         if not len(out):
             print "Warning: No sources found!"
-            return 0
+            return None
         return {'ra':out[:, 0], 'dec':out[:, 1],
                 'FUV':{'mag':out[:, 3], 1:out[:, 9]+zpf, 2:out[:, 10]+zpf,
                        3:out[:, 11]+zpf, 4:out[:, 12]+zpf, 5:out[:, 13]+zpf,
@@ -834,36 +876,55 @@ def get_mags(band, ra0, dec0, radius, maglimit, mode='coadd',
                        3:out[:, 18]+zpn, 4:out[:, 19]+zpn, 5:out[:, 20]+zpn,
                        6:out[:, 21]+zpn, 7:out[:, 22]+zpn}}
     elif mode == 'visit':
-        out = np.array(gQuery.getArray(gQuery.mcat_visit_sources(ra0, dec0,
-                                                                 radius),
-                                       verbose=verbose))
-        # NOTE: For runtime considerations, mcat_visit_sources() does not
-        # make any slices on time or maglimit, so we need to do it here.
-        ix = np.where((out[:, 2 if band == 'NUV' else 3] < maglimit) &
-                      (out[:, 2 if band == 'NUV' else 3] > 0))
-        return {'ra':out[:, 0][ix], 'dec':out[:, 1][ix],
-                'NUV':{'mag':out[:, 2][ix], 'expt':out[:, 8][ix],
-                       1:out[:, 18][ix]+zpn, 2:out[:, 19][ix]+zpn,
-                       3:out[:, 20][ix]+zpn, 4:out[:, 21][ix]+zpn,
-                       5:out[:, 22][ix]+zpn, 6:out[:, 23][ix]+zpn,
-                       7:out[:, 24][ix]+zpn},
-                'FUV':{'mag':out[:, 3][ix], 'expt':out[:, 9][ix],
-                       1:out[:, 11][ix]+zpf, 2:out[:, 12][ix]+zpf,
-                       3:out[:, 13][ix]+zpf, 4:out[:, 14][ix]+zpf,
-                       5:out[:, 15][ix]+zpf, 6:out[:, 16][ix]+zpf,
-                       7:out[:, 17][ix]+zpf}}
+        return get_mcat_data([ra0,dec0],radius)
     else:
         print "mode must be in [coadd,visit]"
         return None
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
+def find_nearest_mcat(band, skypos, radius, maglimit=30.):
+    """
+    Given a sky position and a search radius, find the nearest MCAT source
+        and return its position and magnitude in specified band.
+
+    :param band: The band to use, either 'FUV' or 'NUV'.
+
+    :type band: str
+
+    :param skypos: Two element array of RA and Dec in decimal degrees.
+
+    :type skypos: array
+
+    :param radius: Search radius in decimal degrees.
+
+    :type radius: float
+
+    :param maglimit: The NUV faint limit to return MCAT sources for.
+
+    :type maglimit: float
+    """
+
+    data = get_mags(band,skypos[0],skypos[1],radius,30)
+    if not data:
+        return None
+
+    separation = [angularSeparation(skypos[0],skypos[1],a[0],a[1])
+                                        for a in zip(data['ra'],data['dec'])]
+    minsep = np.where(separation==min(separation))
+
+    return {'mag':data[band]['mag'][minsep][0],
+            'skypos':np.array(zip(data['ra'],data['dec']))[minsep][0].tolist(),
+            'distance':min(separation)}
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
 def parse_unique_sources(ras, decs, margin=0.001):
     """
     Iteratively returns unique sources based upon a margin within
-    which two sources should be considered the same sources. Is a little
-    bit sensitive to the first entry and could probably be written to be
-    more robust, but works well enough.
+        which two sources should be considered the same sources. Is a little
+        bit sensitive to the first entry and could probably be written to be
+        more robust, but works well enough.
 
     :param ras: Set of right ascensions, in degrees.
 
@@ -901,7 +962,7 @@ def find_unique_sources(band, ra0, dec0, searchradius, maglimit=20.0,
                         margin=0.001, verbose=0):
     """
     Locates nominally unique (via crossmatch) GALEX sources in the MCAT
-    near a sky position of interest.
+        near a sky position of interest.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -916,7 +977,7 @@ def find_unique_sources(band, ra0, dec0, searchradius, maglimit=20.0,
     :type dec0: float
 
     :param searchradius: The size of the radius to search for unique sources,
-    in degrees.
+        in degrees.
 
     :type searchradius: float
 
@@ -960,7 +1021,7 @@ def avg_sources(band, skypos, radius=0.001, maglimit=20.0, verbose=0,
     :type skypos: list
 
     :param radius: The radius within which to search for MCAT sources,
-    in degrees?
+        in degrees?
 
     :type radius: float
 
@@ -977,7 +1038,7 @@ def avg_sources(band, skypos, radius=0.001, maglimit=20.0, verbose=0,
     :type catalog: str
 
     :returns: tuple -- A three-element tuple containing the mean RA, mean DEC,
-    and mean FWHM of sources within the search radius.
+        and mean FWHM of sources within the search radius.
     """
 
     out = np.array(gQuery.getArray(gQuery.mcat_sources(band, skypos[0],
@@ -1007,7 +1068,7 @@ def nearest_source(band, skypos, radius=0.01, maglimit=20.0, verbose=0,
     :type skypos: list
 
     :param radius: The radius within which to search for the nearest MCAT
-    source, in degrees.
+        source, in degrees.
 
     :type radius: float
 
@@ -1024,7 +1085,7 @@ def nearest_source(band, skypos, radius=0.01, maglimit=20.0, verbose=0,
     :type catalog: str
 
     :returns: tuple -- A three-element tuple containing the mean RA, mean DEC,
-    and mean FWHM of the nearest sources within the search radius.
+        and mean FWHM of the nearest sources within the search radius.
     """
 
     out = np.array(gQuery.getArray(gQuery.mcat_sources(band, skypos[0],
@@ -1072,7 +1133,7 @@ def nearest_distinct_source(band, skypos, radius=0.1, maglimit=20.0, verbose=0,
     :type skypos: list
 
     :param radius: The radius within which to search for the nearest MCAT
-    source, in degrees.
+        source, in degrees.
 
     :type radius: float
 
@@ -1089,7 +1150,7 @@ def nearest_distinct_source(band, skypos, radius=0.1, maglimit=20.0, verbose=0,
     :type catalog: str
 
     :returns: numpy.ndarray -- Catalog values for the nearest non-targeted
-    source.
+        source.
     """
 
     out = np.array(gQuery.getArray(gQuery.mcat_sources(band, skypos[0],
@@ -1109,7 +1170,7 @@ def suggest_bg_radius(band, skypos, radius=0.1, maglimit=20.0, verbose=0,
                       catalog='MCAT'):
     """
     Returns a recommended background radius based upon the positions and FWHM of
-    nearby sources in the MCAT.
+        nearby sources in the MCAT.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -1120,7 +1181,7 @@ def suggest_bg_radius(band, skypos, radius=0.1, maglimit=20.0, verbose=0,
     :type skypos: list
 
     :param radius: The radius within which to search for MCAT  sources,
-    in degrees?
+        in degrees?
 
     :type radius: float
 
@@ -1177,7 +1238,7 @@ def optimize_annulus(optrad, outann, verbose=0):
 def suggest_parameters(band, skypos, verbose=0):
     """
     Provide suggested coordinates and photometric apertures for a source
-    given the location of known MCAT sources nearby.
+        given the location of known MCAT sources nearby.
 
     :param band: The band to use, either 'FUV' or 'NUV'.
 
@@ -1192,8 +1253,8 @@ def suggest_parameters(band, skypos, verbose=0):
     :type verbose: int
 
     :returns: tuple -- A five-element tuple containing the suggested right
-    ascension, declination, photometric aperture, inner annulus, and outer
-    annulus, all in degrees.
+        ascension, declination, photometric aperture, inner annulus, and outer
+        annulus, all in degrees.
     """
 
     mcat = get_mcat_data(skypos, 0.01)

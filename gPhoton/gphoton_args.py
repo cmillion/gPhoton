@@ -1,8 +1,7 @@
 """
 .. module:: gphoton_args
-
    :synopsis: This module contains functions for checking duplicate arguments
-   across gFind, gAperture, gMap, and other gPhoton functions.
+       across gFind, gAperture, gMap, and other gPhoton functions.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -30,9 +29,9 @@ def common_args(parser, function_name,
                 valid_functions=['gaperture', 'gmap', 'gfind']):
     """
     Defines the arguments and options for the parser object when
-    called from the command line.  Accepts a string used to determine which
-    arguments to add to the Parser object. Valid function names are "gfind",
-    "gaperture", or "gmap" (all case insensitive).
+        called from the command line.  Accepts a string used to determine which
+        arguments to add to the Parser object. Valid function names are "gfind",
+        "gaperture", or "gmap" (all case insensitive).
 
     :param parser: Command-line options to check and modify.
 
@@ -47,7 +46,7 @@ def common_args(parser, function_name,
     :type valid_functions: list
 
     :returns: argparse.ArgumentParser Namespace -- The updated command-line
-    arguments.
+        arguments.
     """
 
     try:
@@ -148,8 +147,8 @@ def check_common_args(args, function_name,
                       allow_no_coords=False):
     """
     Checks validity of some command line arguments used in gFind,
-    gAperture, gMap, etc.  Returns the appropriate arguments as variables back
-    to the calling procedure.
+        gAperture, gMap, etc.  Returns the appropriate arguments as variables
+        back to the calling procedure.
 
     :param args: Command-line options to check and modify.
 
@@ -168,7 +167,7 @@ def check_common_args(args, function_name,
     :type allow_no_coords: bool
 
     :returns: argparse.ArgumentParser Namespace -- The updated command-line
-    arguments.
+        arguments.
     """
 
     try:

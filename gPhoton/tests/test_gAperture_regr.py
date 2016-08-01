@@ -3,6 +3,8 @@ import gPhoton.gMap as gm
 import gPhoton.gFind as gf
 import gPhoton.gAperture as ga
 
+from gPhoton.gAperture import setup_parser as ga_setup_parser
+
 """Regression tests for gAperture."""
 class TestRegression(unittest.TestCase):
     def setUp(self):
@@ -14,7 +16,7 @@ class TestRegression(unittest.TestCase):
         self.trange = self.tranges[0]
         self.radius = 0.01
         self.annulus = [0.02,0.03]
-        self.parser = ga.setup_parser()
+        self.parser = ga_setup_parser()
         self.args = self.parser.parse_args()
         self.stepsz = 100.
 
@@ -23,16 +25,16 @@ class TestRegression(unittest.TestCase):
     #    """Tests for a bug where the _not_ bg subtracted magnitude is
     #    different whether --annulus is specified or not."""
     #    for band in self.bands:
-    #        out = ga.gAperture(band=band,skypos=self.skypos,
+    #        out = ga(band=band,skypos=self.skypos,
     #                                            radius=self.radius,coadd=True)
-    #        out_ann = ga.gAperture(band=band,skypos=self.skypos,
+    #        out_ann = ga(band=band,skypos=self.skypos,
     #                        radius=self.radius,annulus=self.annulus,coadd=True)
     #        self.assertAlmostEqual(out['mag'][0],out_ann['mag'][0])
 
 
     def test_basic_query_NUV(self):
         """Regtest the simplest valid query. (NUV)"""
-        out = ga.gAperture(band='NUV',skypos=self.skypos,radius=self.radius)
+        out = ga(band='NUV',skypos=self.skypos,radius=self.radius)
         self.assertEqual(len(out['exptime']),6)
         # Regtest the exposure times
         for i, expt in enumerate([ 102.20581307, 636.30367737, 358.59845156,
@@ -45,7 +47,7 @@ class TestRegression(unittest.TestCase):
 
     def test_basic_query_FUV(self):
         """Regtest the simplest valid query. (FUV)"""
-        out = ga.gAperture(band='FUV',skypos=self.skypos,radius=self.radius)
+        out = ga(band='FUV',skypos=self.skypos,radius=self.radius)
         self.assertEqual(len(out['exptime']),3)
         # Regtest the exposure times
         for i, expt in enumerate([ 1229.34564077, 108.04223136, 914.1187588 ]):
@@ -56,7 +58,7 @@ class TestRegression(unittest.TestCase):
 
     def test_lcurve_query_NUV(self):
         """Regtest lightcurve over a specific time range. (NUV)"""
-        out = ga.gAperture(band='NUV',skypos=self.skypos,radius=self.radius,
+        out = ga(band='NUV',skypos=self.skypos,radius=self.radius,
                            trange=self.tranges[1],stepsz=self.stepsz,
                            annulus=self.annulus)
         self.assertEqual(len(out['mag']),13)
@@ -113,7 +115,7 @@ class TestRegression(unittest.TestCase):
 
     def test_lcurve_query_FUV(self):
         """Regtest lightcurve over a specific time range. (FUV)"""
-        out = ga.gAperture(band='FUV',skypos=self.skypos,radius=self.radius,
+        out = ga(band='FUV',skypos=self.skypos,radius=self.radius,
                            trange=self.tranges[1],stepsz=self.stepsz,
                            annulus=self.annulus)
         self.assertEqual(len(out['mag']),13)
@@ -161,11 +163,11 @@ class TestRegression(unittest.TestCase):
 
     def test_coadd_query_NUV(self):
         """Regtest a coadded magnitude. (NUV)"""
-        out = ga.gAperture(band='NUV',skypos=self.skypos,radius=self.radius,
+        out = ga(band='NUV',skypos=self.skypos,radius=self.radius,
                            tranges=self.tranges,coadd=True)
         # This query does *not* coadd, so we can compare the components that
         # went into the coadd values.
-        out2 = ga.gAperture(band='NUV',skypos=self.skypos,radius=self.radius,
+        out2 = ga(band='NUV',skypos=self.skypos,radius=self.radius,
                            tranges=self.tranges,coadd=False)
         self.assertEqual(len(out['mag']), 1)
         self.assertEqual(len(out2['mag']), 3)
@@ -182,11 +184,11 @@ class TestRegression(unittest.TestCase):
 
     def test_coadd_query_FUV(self):
         """Regtest a coadded magnitude. (FUV)"""
-        out = ga.gAperture(band='FUV',skypos=self.skypos,radius=self.radius,
+        out = ga(band='FUV',skypos=self.skypos,radius=self.radius,
                            tranges=self.tranges,coadd=True)
         # This query does *not* coadd, so we can compare the components that
         # went into the coadd values.
-        out2 = ga.gAperture(band='FUV',skypos=self.skypos,radius=self.radius,
+        out2 = ga(band='FUV',skypos=self.skypos,radius=self.radius,
                            tranges=self.tranges,coadd=False)
         self.assertEqual(len(out['mag']), 1)
         self.assertEqual(len(out2['mag']), 2)

@@ -1,8 +1,7 @@
 """
 .. module:: gnomonic
-
    :synopsis: This module contains gnomonic projection methods for translating
-   between detector and sky coordinates.
+       between detector and sky coordinates.
 
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
@@ -47,7 +46,7 @@ def gnomrev_simple(xi, eta, ra0, dec0, crota, cdelt, cenpix):
     :type cenpix: float
 
     :returns: tuple -- A two-element tuple containing the right ascension and
-    declination, in degrees.
+        declination, in degrees.
     """
 
     x = (xi - cenpix)*cdelt/R2D
