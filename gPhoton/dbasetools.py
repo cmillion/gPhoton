@@ -771,16 +771,14 @@ def mcat_skybg(band, skypos, radius, verbose=0, trange=None, mcat=None,
     if not mcat:
         mcat = get_mcat_data(skypos,searchradius)
     try:
-        test = mcat[band]
-    except:
+        # Find the distance to each source.
+        dist = np.array([angularSeparation(skypos[0],skypos[1],a[0],a[1])
+                            for a in zip(mcat[band]['ra'],mcat[band]['dec'])])
+    except TypeError:
         print_inline(
             'No {b} MCAT sources within {r} degrees of {p}'.format(
                                             b=band,r=searchradius,p=skypos))
         return np.nan
-
-    # Find the distance to each source.
-    dist = np.array([angularSeparation(skypos[0],skypos[1],a[0],a[1])
-                            for a in zip(mcat[band]['ra'],mcat[band]['dec'])])
 
     # Find visits that overlap in time.
     if not trange:
