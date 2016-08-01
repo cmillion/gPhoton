@@ -33,7 +33,6 @@ setup(
     install_requires=['numpy', 'scipy', 'requests>=2.4.0', 'pandas', 'astropy',],
     package_data={'gPhoton.cal' : ['cal/*.fits', 'cal/*.tbl']},
     include_package_data=True,
-    #download_url='https://archive.stsci.edu/prepds/gphoton/cal/gPhoton-{v}.tar'
-    #'.gz'.format(v=__version__),
-    download_url='https://dl.dropboxusercontent.com/u/57393828/gPhoton-1.27.2.tar.gz',
+    download_url='https://archive.stsci.edu/prepds/gphoton/cal/gPhoton-{v}.tar'
+    '.gz'.format(v=__version__),
 )
