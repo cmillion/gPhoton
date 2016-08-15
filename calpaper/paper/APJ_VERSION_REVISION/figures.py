@@ -1,3 +1,61 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib import gridspec
+
+from gPhoton.regtestutils import datamaker
+import gPhoton.galextools as gt
+import gPhoton.MCUtils as mc
+import gPhoton.gphoton_utils as gu
+import gPhoton.gFind
+import gPhoton.dbasetools as db
+import gPhoton.gQuery as gq
+from gPhoton.gphoton_utils import read_lc
+import gPhoton.dbasetools as dt
+
+import astropy.coordinates as coord
+import astropy.units as u
+
+from sklearn.neighbors import KernelDensity
+from sklearn.grid_search import GridSearchCV
+
+"""A couple of repeatedly used utility functions."""
+def make_kde(data,datarange,bwrange=[0.01,1]):
+    # A function for producing Kernel Density Estimates
+    # Based on code from:
+    #   https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
+    grid = GridSearchCV(KernelDensity(),
+        {'bandwidth': np.linspace(bwrange[0],bwrange[1],100)},cv=20,n_jobs=4)
+    grid.fit(data[:, None])
+    bandwidth = grid.best_params_['bandwidth']
+    x = np.linspace(datarange[0],datarange[1],10000)
+    kde_skl = KernelDensity(bandwidth=bandwidth)
+    kde_skl.fit(data[:, np.newaxis])
+    # score_samples() returns the log-likelihood of the samples
+    log_pdf = kde_skl.score_samples(x[:, np.newaxis])
+    y = np.exp(log_pdf)
+    peak = x[np.where(y==y.max())][0]
+    return x,y,peak,bandwidth
+
+def data_errors(catmag, band, t, sigma=3., mode='mag', aper=None, bg=None):
+    if mode != 'cps' and mode != 'mag':
+        print 'mode must be set to "cps" or "mag"'
+        exit(0)
+    cps_bg = gt.mag2counts(bg,band) if bg else 0.
+    if not aper in [None,1,2,3,4,5,6,7]:
+        raise '{a} is not a valid APER value.'.format(a=aper)
+    # Don't include counts outside the aperture as "signal" for error purposes
+    apcorr = 0 if not aper else gt.apcorrect1(gt.aper2deg(aper),band)
+    cps = gt.mag2counts(catmag+apcorr, band)
+    dcps = np.sqrt((np.sqrt(cps*t)**2.)+(np.sqrt(cps_bg*t)**2.))/t
+    ymin = cps-sigma*dcps
+    ymax = cps+sigma*dcps
+    if mode == 'mag':
+        ymin = gt.counts2mag(ymin, band)-apcorr
+        ymax = gt.counts2mag(ymax, band)-apcorr
+    return ymin, ymax
+
+
 """Generate plots of difference between MCAT and gAperture photometry of
 sources (delta-magnitude) as a function of source brightness (magnitude).
 
@@ -13,25 +71,6 @@ The number of 'draws' defined by `-n` has been set to an arbitrarily high
 value. Only the first 10,000 entries in the output files are used in the
 subsequent analyses defined by the scripts that follow.
 """
-
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plot
-from matplotlib import gridspec
-
-from gPhoton.regtestutils import datamaker
-import gPhoton.galextools as gt
-import gPhoton.MCUtils as mc
-import gPhoton.gphoton_utils as gu
-import gPhoton.gFind
-import matplotlib.pyplot as plt
-
-import astropy.coordinates as coord
-import astropy.units as u
-
-from sklearn.neighbors import KernelDensity
-from sklearn.grid_search import GridSearchCV
-
 # Define I/O directories
 outpath = '.'
 print 'Writing to: {o}'.format(o=outpath)
@@ -42,7 +81,8 @@ print 'Reading from: {i}'.format(i=inpath)
 scl = 1.4
 bands = ['NUV','FUV']
 base = 'DPFCore_calrun_'
-apertxt='aper4'
+aper = 4
+apertxt='aper{a}'.format(a=aper)
 
 # Read in the data
 data = {}
@@ -53,34 +93,19 @@ for band in bands:
     print '{band} sources: {cnt}'.format(
                                 band=band,cnt=data[band]['objid'].shape[0])
 
-# The following plot will demonstrate that there is good sky sampling
-# for band in bands:
-#    ra = coord.Angle(data[band]['ra']*u.degree)
-#    ra = ra.wrap_at(180*u.degree)
-#    dec = coord.Angle(data[band]['dec']*u.degree)
-#    plt.title(band)
-#    fig = plt.figure(figsize=(8,6))
-#    plt.title(band)
-#    ax = fig.add_subplot(111, projection="mollweide")
-#    ax.scatter(ra.radian, dec.radian)
-
-def make_kde(data,datarange,bwrange=[0.01,1]):
-    # A function for producing Kernel Density Estimates
-    # Based on code from:
-    #   https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
-    print 'Building KDE.'
-    grid = GridSearchCV(KernelDensity(),
-        {'bandwidth': np.linspace(bwrange[0],bwrange[1],100)},cv=20,n_jobs=4)
-    grid.fit(data[:, None])
-    bandwidth = grid.best_params_['bandwidth']
-    x = np.linspace(datarange[0],datarange[1],10000)
-    kde_skl = KernelDensity(bandwidth=bandwidth)
-    kde_skl.fit(data[:, np.newaxis])
-    # score_samples() returns the log-likelihood of the samples
-    log_pdf = kde_skl.score_samples(x[:, np.newaxis])
-    y = np.exp(log_pdf)
-    peak = x[np.where(y==y.max())][0]
-    return x,y,peak,bandwidth
+# The following plots, which do not appear in the paper, demonstrate that
+# there is good sky sampling
+"""
+for band in bands:
+   ra = coord.Angle(data[band]['ra']*u.degree)
+   ra = ra.wrap_at(180*u.degree)
+   dec = coord.Angle(data[band]['dec']*u.degree)
+   plt.title(band)
+   fig = plt.figure(figsize=(8,6))
+   plt.title(band)
+   ax = fig.add_subplot(111, projection="mollweide")
+   ax.scatter(ra.radian, dec.radian)
+"""
 
 # Generate dmag v. mag plots in both bands using both the Annulus and MCAT
 # background estimation methods.
@@ -90,6 +115,9 @@ maglimits = [14,22.5]
 magrange = np.arange(maglimits[0],maglimits[1]+magstep,magstep)
 print 'dMag v. Mag'
 for band in bands:
+    dm_err = magrange - gt.counts2mag(
+        gt.mag2counts(magrange,band)+1*np.sqrt(
+            gt.mag2counts(magrange,band)*100)/100,band)
     magmedian = np.zeros(len(magrange)-1)
     dmag = {#'NoBg':data[band]['aper4']-data[band]['mag'], # Awful photometry!
             'Annulus':data[band][apertxt]-data[band]['mag_bgsub'],
@@ -101,7 +129,7 @@ for band in bands:
             left=0.12,right=0.95,wspace=0.05,bottom=0.15,top=0.9)
         plt.subplot(1,2,1)
         ix = ((np.bitwise_and(np.array(data[band]['flags'].values,
-                dtype='int16'),0b00111111)==0) & (data[band][apertxt]>0) &
+                dtype='int16'),0b11111111)==0) & (data[band][apertxt]>0) &
                 (data[band][apertxt]<=maglimits[1]))
         print 'Using {n} of {m} {b} sources.'.format(n=np.where(ix)[0].size,
             m=np.array(data[band]['flags']).size,b=band)
@@ -115,11 +143,19 @@ for band in bands:
         # Compute moving median value in 1-mag bins
         for i,m in enumerate(magrange[:-1]):
             mix = ((np.bitwise_and(np.array(data[band]['flags'].values,
-                dtype='int16'),0b00111111)==0) & (data[band][apertxt]>=m) &
+                dtype='int16'),0b11111111)==0) & (data[band][apertxt]>=m) &
                 (data[band][apertxt]<m+magstep) & np.isfinite(dmag[bgmode]))
             magmedian[i]=dmag[bgmode][mix].median()
+        plt.errorbar(data[band][apertxt][ix],np.array(dmag[bgmode][ix]),
+            yerr=np.array(data[band]['{apertxt}_err'.format(
+                apertxt=apertxt)][ix]),fmt="none",ecolor='b',alpha=0.025)
+
         plt.plot(data[band][apertxt][ix],dmag[bgmode][ix],'.',color='k',
-            alpha=0.1 if band is 'FUV' else 0.05)
+            alpha=0.2)
+
+        plt.plot(magrange,-(data_errors(magrange,band,100,sigma=1,aper=aper,bg=22 if band=='NUV' else 23.5)[1]-magrange),'r--',color='g')
+        plt.plot(magrange,(data_errors(magrange,band,100,sigma=1,aper=aper,bg=22 if band=='NUV' else 23.5)[1]-magrange),'r--',color='g')
+
         plt.plot(magrange[:-1]+magstep/2.,magmedian,color='r',
                                             linestyle='dashed',linewidth=4)
         plt.text(15,0.3,
@@ -163,12 +199,13 @@ fig = plt.figure(figsize=(8*scl,4*scl))
 fig.subplots_adjust(left=0.12,right=0.95,wspace=0.1,bottom=0.15,top=0.9)
 print 'bg dMag v. Mag (surface)'
 for i,band in enumerate(bands):
-    dmagrange = [-0.4,0.05]
-    gphot_bg = data[band]['bg']/data[band]['exptime']
-    mcat_bg = data[band]['mcat_bg.1']
+    dmagrange = [-1,1]# if band is 'NUV' else [-0.05,0.05]
+    gphot_bg = gt.counts2mag(data[band]['bg']/data[band]['exptime'],band)
+    # MCAT bg must be scaled to area of the aperture
+    mcat_bg = gt.counts2mag(data[band]['mcat_bg.1']*mc.area(gt.aper2deg(4)*60*60),band)
     delta = mcat_bg - gphot_bg
     ix = (np.bitwise_and(np.array(data[band]['flags'].values,
-            dtype='int16'),0b00111111)==0)
+            dtype='int16'),0b11111111)==0)
     print 'Using {n} of {m} {b} sources.'.format(n=np.where(ix)[0].size,
             m=np.array(data[band]['flags']).size,b=band)
     plt.subplot(1,2,i+1,yticks=[])
@@ -182,15 +219,72 @@ for i,band in enumerate(bands):
         linewidth=4,
         label='Median: {m}'.format(m=round(np.median(delta[ix]),2)))
     plt.xlim(dmagrange)
-    plt.xlabel('{b} {d}Magnitude/arcsec{exp} (MCAT - gAperture)'.format(
+    plt.xlabel('{b} {d}Magnitude (MCAT - gAperture)'.format(
         b=band,d=r'$\Delta$',exp=r'$^{2}$'),fontsize=14)
     plt.tick_params(axis='both', which='major', labelsize=12)
-    plt.legend(loc=2,fontsize=12)
-    plt.text(-0.35,5 if band is 'NUV' else 23,
-        'n={n}'.format(n=len(delta[ix])),fontsize=16)
+    plt.legend(loc=1 if band is 'NUV' else 2,fontsize=12)
+    plt.text(0.5 if band is 'NUV' else -0.9,1,'n={n}'.format(
+                                            n=len(delta[ix])),fontsize=16)
 fig.savefig('{path}/Fig03.pdf'.format(path=outpath),
     format='pdf',dpi=1000)
 
+"""
+#The following figures, which do not appear in the paper, support claims made
+#about the absolute distribution of background estimates and errors.
+print "Distribution of BG Estimates:"
+plt.figure()
+for i,band in enumerate(['NUV','FUV']):
+    ix = (np.bitwise_and(np.array(data[band]['flags'].values,
+        dtype='int16'),0b11111111)==0)
+    plt.subplot(1,2,i+1,yticks=[])
+    if band is 'NUV':
+        plt.title('Background Magnitude Distributions')
+    if band is 'FUV':
+        plt.xlabel('AB Magnitude')
+    plt.ylabel(band)
+    gphot_bg = gt.counts2mag(np.array(data[band]['bg']/data[band]['exptime'])[ix],band)
+    x,y,peak,bandwidth = make_kde(gphot_bg,[18,25],bwrange=[0.01,0.1])
+    print band, 'gphot', peak
+    plt.hist(gphot_bg,bins=50,label='gphot',histtype='step',normed=1)
+    plt.plot(x,y)
+
+    mcat_bg = gt.counts2mag(data[band]['mcat_bg.1']*mc.area(gt.aper2deg(4)*60*60),band)
+    x,y,peak,bandwidth = make_kde(np.array(mcat_bg)[ix],[18,25],bwrange=[0.01,0.1])
+    print band, 'mcat', peak
+    plt.hist(np.array(mcat_bg)[ix],bins=50,label='mcat',histtype='step',normed=1)
+    plt.plot(x,y)
+
+    plt.xlim([18,25])
+    plt.legend()
+
+print 'Distribution of Errors:'
+plt.figure()
+for i,band in enumerate(['NUV','FUV']):
+    ix = (np.bitwise_and(np.array(data[band]['flags'].values,
+        dtype='int16'),0b11111111)==0)
+    plt.subplot(1,2,i+1,yticks=[])
+    if band is 'NUV':
+        plt.title('Background Magnitude Distributions')
+    if band is 'FUV':
+        plt.xlabel('AB Magnitude')
+    plt.ylabel(band)
+    gphot_err = np.array(data['NUV']['mag_bgsub_err_1'])[ix]
+    x,y,peak,bandwidth = make_kde(gphot_err[np.where(np.isfinite(gphot_err))],[0,3.5],bwrange=[0.01,0.1])
+    # Report the KDE peak
+    print band, 'gphot', peak
+    plt.hist(gphot_err[np.where(np.isfinite(gphot_err))],bins=50,label='gphot',histtype='step',normed=1)
+    plt.plot(x,y)
+
+    mcat_err = np.array(data['NUV']['aper4_err'])[ix]
+    x,y,peak,bandwidth = make_kde(mcat_err[np.where(np.isfinite(mcat_err))],[0,3.5],bwrange=[0.01,0.1])
+    # Report the KDE peak
+    print band, 'mcat', peak
+    plt.hist(mcat_err[np.where(np.isfinite(mcat_err))],bins=50,label='mcat',histtype='step',normed=1)
+    plt.plot(x,y)
+
+    #plt.xlim([18,25])
+    plt.legend()
+"""
 
 # Generate plots of relative astrometry between MCAT and gAperture using
 # the center of brightness (CoB) from gAperture and reported source positions
@@ -207,7 +301,7 @@ for i,band in enumerate(bands):
         data[band]['ra']-data[band]['racent'])*np.cos(np.array(data[band]['dec']))*a
     delta_dec = np.array(data[band]['dec']-data[band]['deccent'])*a
     ix = np.where((np.bitwise_and(np.array(data[band]['flags'].values,
-            dtype='int16'),0b00111111)==0) & (data[band][apertxt]>0) &
+            dtype='int16'),0b11111111)==0) & (data[band][apertxt]>0) &
                             (data[band][apertxt]<=maglimits[1]) &
                             np.isfinite(delta_ra) &
                             np.isfinite(delta_dec))
@@ -283,18 +377,6 @@ LDS749B w/ 34.5 arcsecond aperture & large annulus
 The following commands will generate the plots. In addition to gPhoton and its
 dependencies, you will need matplotlib and scikit-learn.
 """
-import numpy as np
-import matplotlib.pyplot as plt
-
-import gPhoton.galextools as gt
-import gPhoton.dbasetools as db
-import gPhoton.gQuery as gq
-import gPhoton.MCUtils as mc
-from gPhoton.gphoton_utils import read_lc, dmag_errors, data_errors
-
-from sklearn.neighbors import KernelDensity
-from sklearn.grid_search import GridSearchCV
-
 # Define I/O directories
 outpath = '.'
 print 'Writing to: {o}'.format(o=outpath)
@@ -318,8 +400,7 @@ data = {'FUV':read_lc('{path}/{s}_dm_FUV_{a}.csv'.format(
                                             s=source,path=inpath,a=aperas))}
 
 def magrange(band):
-    return refmag[band]-0.2,refmag[band]+0.6
-
+    return [refmag[band]-0.1,refmag[band]+0.1] if band=='NUV' else [refmag[band]-0.2,refmag[band]+0.6]
 
 aper = 7
 radius = gt.aper2deg(aper)
@@ -345,7 +426,7 @@ for band in bands:
                         (data[band]['detrad']<200) &
                         (data[band]['t0']<961986575.) &
         (np.bitwise_and(np.array(data[band]['flags'].values,dtype='int16'),
-                                        0b00111111)==0))# & (legs[band]>3)
+                                        0b11111111)==0))# & (legs[band]>3)
     print '{b}: {m} / {n} data points used'.format(b=band,
         n=len(data[band][apertxt]),m=len(ix[band][0]))
     print 'mcat: {m} (ref: {r})'.format(
@@ -377,29 +458,11 @@ plt.axhline(-0.05, color='g', linestyle='solid', linewidth=1)
 plt.savefig('{path}/Fig09a.pdf'.format(path=outpath),
     format='pdf',dpi=1000)
 
-def make_kde(data,datarange,bwrange=[0.01,1]):
-    # A function for producing Kernel Density Estimates
-    # Based on code from:
-    #   https://jakevdp.github.io/blog/2013/12/01/kernel-density-estimation/
-    grid = GridSearchCV(KernelDensity(),
-        {'bandwidth': np.linspace(bwrange[0],bwrange[1],100)},cv=20,n_jobs=4)
-    grid.fit(data[:, None])
-    bandwidth = grid.best_params_['bandwidth']
-    x = np.linspace(datarange[0],datarange[1],10000)
-    kde_skl = KernelDensity(bandwidth=bandwidth)
-    kde_skl.fit(data[:, np.newaxis])
-    # score_samples() returns the log-likelihood of the samples
-    log_pdf = kde_skl.score_samples(x[:, np.newaxis])
-    y = np.exp(log_pdf)
-    peak = x[np.where(y==y.max())][0]
-    return x,y,peak,bandwidth
-
 # Overplot gAperture photometry of LDS749B on the reference magnitude and
 # modeled 3-sigma error bounds as a function of exposure time.
 nsigma = 3
 for band in data.keys():
     tmin,tmax = 0,300
-    magrange = [refmag[band]-0.2,refmag[band]+0.6]
     plt.figure(figsize=(8*scl,4*scl))
     plt.subplots_adjust(left=0.12,right=0.95,wspace=0.1,bottom=0.15,top=0.9)
     # Overplot data in AIS legs 1-3.
@@ -417,17 +480,17 @@ for band in data.keys():
               np.array(data[band]['mag_mcatbgsub_err_2'])[ix[band]]])
     t = np.arange(tmin+1,tmax+1)
     plt.plot(t,refmag[band]*(t/t),'k')
-    plt.plot(t,data_errors(refmag[band],band,t,sigma=nsigma)[0],'r--')
-    plt.plot(t,data_errors(refmag[band],band,t,sigma=nsigma)[1],'r--')
+    plt.plot(t,data_errors(refmag[band],band,t,sigma=nsigma,aper=aper)[0],'r--')
+    plt.plot(t,data_errors(refmag[band],band,t,sigma=nsigma,aper=aper)[1],'r--')
     plt.xlim(tmin,tmax)
-    plt.ylim(magrange[0],magrange[1])
+    plt.ylim(magrange(band)[0],magrange(band)[1])
     plt.gca().invert_yaxis()
     plt.xlabel('Effective Exposure Depth (s)',fontsize=16)
     plt.ylabel('{b} gAperture Magnitude ({target})'.format(
         target=target.split('_')[0],b=band),fontsize=16)
     plt.tick_params(axis='both', which='major', labelsize=14)
     a,b = data_errors(refmag[band],band,
-        np.array(data[band]['exptime'])[ix[band]],sigma=nsigma)
+        np.array(data[band]['exptime'])[ix[band]],sigma=nsigma,aper=aper)
     cnt = len(np.where(
         (np.array(data[band]['mag_mcatbgsub'])[ix[band]]-
          gt.apcorrect1(radius,band)>=b) &
@@ -444,7 +507,7 @@ for band in data.keys():
                  gt.apcorrect1(radius,band)<=a[lix]))[0])
         print 'w/o legs 1-3... {b}: {n} of {m} ({p}%) within {s} sigma'.format(
             b=band,n=cntlix,m=len(ix[band][0][lix]),p=100*cntlix/len(ix[band][0][lix]),s=nsigma)
-    plt.text(150, 15.9 if band=='FUV' else 15.1,
+    plt.text(150, 15.9 if band=='FUV' else 14.83,
         '{p}% within {s}{sym} (n={n})'.format(
         p=100*cnt/len(ix[band][0]),s=nsigma,sym=r'$\sigma$',
         n=len(ix[band][0])), fontsize=18)
@@ -457,37 +520,38 @@ bincnt=50
 fig = plt.figure(figsize=(10*scl,4*scl))
 fig.subplots_adjust(left=0.12,right=0.95,wspace=0.1,bottom=0.15,top=0.9)
 for i,band in enumerate(['NUV','FUV']):
-    magrange = [refmag[band]-0.2,refmag[band]+0.6]
     tmin,tmax = 0,350
-    plt.subplot(1,2,i+1,xticks=np.arange(round(magrange[0],1),
-        round(magrange[1]+0.01,1),0.2),yticks=[])
+    plt.subplot(1,2,i+1,xticks=np.arange(round(magrange(band)[0],1),
+        round(magrange(band)[1]+0.01,1),0.2),yticks=[])
     mags = np.array(data[band]['mag_mcatbgsub'])-gt.apcorrect1(radius,band)
     plt.hist(mags[ix[band]],bins=bincnt,color='k',histtype='step',
-        range=magrange,normed=1)
+        range=magrange(band),normed=1)
     plt.axvline(refmag[band], color='g', linestyle='solid', linewidth=4,
         label='Ref: {r} AB Mag'.format(r=round(refmag[band],2)))
-    x,y,peak,bandwidth = make_kde(mags[ix[band]],magrange)
+    x,y,peak,bandwidth = make_kde(mags[ix[band]],magrange(band))
     plt.plot(x,y)
     print '{b}: peak={p} ({bw})'.format(b=band,p=peak,bw=bandwidth)
     if band is 'FUV':
         lix = np.where((legs[band][ix[band]]>3) | (legs[band][ix[band]]<0))
-        _,_,newpeak,_ = make_kde(mags[ix[band][0][lix]],magrange)
+        _,_,newpeak,_ = make_kde(mags[ix[band][0][lix]],magrange(band))
         print 'w/o legs 1-3, FUV peak at {p}'.format(p=newpeak)
     plt.axvline(peak, color='k', linestyle='dotted', linewidth=2,
         label='KDE Peak: {p}'.format(p=round(peak,2)))
     plt.axvline(np.median(mags[ix[band]]), color='r', linestyle='dashed',
         linewidth=4,
         label='Median: {m}'.format(m=round(np.median(mags[ix[band]]),2)))
-    plt.xlim(magrange)
+    plt.xlim(magrange(band))
     plt.gca().invert_xaxis()
     plt.legend(loc=2,fontsize=14)
     plt.xlabel('{b} gAperture AB Magnitude ({target})'.format(
         target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=14)
     plt.tick_params(axis='both', which='major', labelsize=12)
-    plt.text(magrange[1]-0.1,3 if band is 'NUV' else 1,
+    plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.05),
+             3 if band is 'NUV' else .75,
                             '(a)' if band is 'NUV' else '(b)',fontsize=30)
-    plt.text(magrange[1]-0.05,17 if band is 'NUV' else 5,'n={n}'.format(
-        n=len(mags[ix[band]])),fontsize=16)
+    plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.06),
+            19 if band is 'NUV' else 4.7,'n={n}'.format(
+                            n=len(mags[ix[band]])),fontsize=16)
     plt.savefig('{path}/Fig08a.pdf'.format(path=outpath),
         format='pdf',dpi=1000)
 
@@ -495,7 +559,6 @@ for i,band in enumerate(['NUV','FUV']):
 # modeled 3-sigma error bounds as a function of exposure time.
 for band in data.keys():
     tmin,tmax = 0,300
-    magrange = [refmag[band]-0.2,refmag[band]+0.6]
     plt.figure(figsize=(8*scl,4*scl))
     plt.subplots_adjust(left=0.12,right=0.95,wspace=0.1,bottom=0.15,top=0.9)
     plt.errorbar(np.array(data[band]['exptime'])[ix[band]],
@@ -505,10 +568,10 @@ for band in data.keys():
                   np.array(data[band]['mag_bgsub_err_2'])[ix[band]]])
     t = np.arange(tmin+1,tmax+1)
     plt.plot(t,refmag[band]*(t/t),'k')
-    plt.plot(t,data_errors(refmag[band],band,t,sigma=3)[0],'r--')
-    plt.plot(t,data_errors(refmag[band],band,t,sigma=3)[1],'r--')
+    plt.plot(t,data_errors(refmag[band],band,t,sigma=3,aper=aper)[0],'r--')
+    plt.plot(t,data_errors(refmag[band],band,t,sigma=3,aper=aper)[1],'r--')
     plt.xlim(tmin,tmax)
-    plt.ylim(magrange[0],magrange[1])
+    plt.ylim(magrange(band)[0],magrange(band)[1])
     plt.gca().invert_yaxis()
     plt.xlabel('Effective Exposure Depth (s, n={n})'.format(
         n=len(ix[band][0])),fontsize=16)
@@ -516,14 +579,14 @@ for band in data.keys():
         target=target.split('_')[0],b=band),fontsize=16)
     plt.tick_params(axis='both', which='major', labelsize=14)
     a,b = data_errors(refmag[band],
-        band,np.array(data[band]['exptime'])[ix[band]],sigma=nsigma)
+        band,np.array(data[band]['exptime'])[ix[band]],sigma=nsigma,aper=aper)
     cnt = len(np.where((np.array(data[band][apertxt])[ix[band]]-
                                     gt.apcorrect1(gt.aper2deg(aper),band)>=b) &
                        (np.array(data[band][apertxt])[ix[band]]-
                                 gt.apcorrect1(gt.aper2deg(aper),band)<=a))[0])
     print '{b}: {n} of {m} ({p}%) within {s} sigma'.format(
         b=band,n=cnt,m=len(ix[band][0]),p=100*cnt/len(ix[band][0]),s=nsigma)
-    plt.text(150, 15.9 if band=='FUV' else 15.1,
+    plt.text(150, 15.9 if band=='FUV' else 14.83,
         '{p}% within {s}{sym} (n={n})'.format(
         p=100*cnt/len(ix[band][0]),s=nsigma,sym=r'$\sigma$',n=len(ix[band][0])),
         fontsize=18)
@@ -536,16 +599,15 @@ bincnt = 50
 fig = plt.figure(figsize=(10*scl,4*scl))
 fig.subplots_adjust(left=0.12,right=0.95,wspace=0.1,bottom=0.15,top=0.9)
 for i,band in enumerate(['NUV','FUV']):
-    magrange = [refmag[band]-0.2,refmag[band]+0.6]
     tmin,tmax = 0,350
-    plt.subplot(1,2,i+1,xticks=np.arange(round(magrange[0],1),
-        round(magrange[1]+0.01,1),0.2),yticks=[])
+    plt.subplot(1,2,i+1,xticks=np.arange(round(magrange(band)[0],1),
+        round(magrange(band)[1]+0.01,1),0.2),yticks=[])
     mags = np.array(data[band][apertxt])-gt.apcorrect1(gt.aper2deg(aper),band)
     plt.hist(mags[ix[band]],bins=bincnt,color='k',histtype='step',
-        range=magrange, normed=1)
+        range=magrange(band), normed=1)
     plt.axvline(refmag[band], color='g', linestyle='solid', linewidth=4,
         label='Ref: {r} AB Mag'.format(r=round(refmag[band],2)))
-    x,y,peak,bandwidth = make_kde(mags[ix[band]],magrange)
+    x,y,peak,bandwidth = make_kde(mags[ix[band]],magrange(band))
     print '{b}: peak={p} ({bw})'.format(b=band,p=peak,bw=bandwidth)
     plt.plot(x,y)
     plt.axvline(peak, color='k', linestyle='dotted', linewidth=2,
@@ -553,15 +615,17 @@ for i,band in enumerate(['NUV','FUV']):
     plt.axvline(np.median(mags[ix[band]]), color='r', linestyle='dashed',
         linewidth=4,
         label='Median: {m}'.format(m=round(np.median(mags[ix[band]]),2)))
-    plt.xlim(magrange)
+    plt.xlim(magrange(band))
     plt.gca().invert_xaxis()
     plt.xlabel('{b} MCAT AB Magnitude ({target})'.format(
         target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=14)
     plt.tick_params(axis='both', which='major', labelsize=12)
     plt.legend(loc=2,fontsize=14)
-    plt.text(magrange[1]-0.1,3 if band is 'NUV' else 2,
+    plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.05),
+        3 if band is 'NUV' else 1.5,
                             '(c)' if band is 'NUV' else '(d)',fontsize=30)
-    plt.text(magrange[1]-0.05,15 if band is 'NUV' else 8,'n={n}'.format(
+    plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.05),
+        17.5 if band is 'NUV' else 6.5,'n={n}'.format(
             n=len(mags[ix[band]])),fontsize=16)
     plt.savefig('{path}/Fig08b.pdf'.format(path=outpath),
         format='pdf',dpi=1000)
@@ -574,7 +638,6 @@ for i,band in enumerate(['NUV','FUV']):
 nsigma = 3
 for band in ['FUV']:
     tmin,tmax = 0,300
-    magrange = [refmag[band]-0.2,refmag[band]+0.6]
     plt.figure(figsize=(8*scl,4*scl))
     plt.subplots_adjust(left=0.12,right=0.95,wspace=0.1,bottom=0.15,top=0.9)
     # Exclude data in AIS legs 1-3.
@@ -586,10 +649,10 @@ for band in ['FUV']:
                 np.array(data[band]['mag_mcatbgsub_err_2'])[ix[band][0][lix]]])
     t = np.arange(tmin+1,tmax+1)
     plt.plot(t,refmag[band]*(t/t),'k')
-    plt.plot(t,data_errors(refmag[band],band,t,sigma=nsigma)[0],'r--')
-    plt.plot(t,data_errors(refmag[band],band,t,sigma=nsigma)[1],'r--')
+    plt.plot(t,data_errors(refmag[band],band,t,sigma=nsigma,aper=aper)[0],'r--')
+    plt.plot(t,data_errors(refmag[band],band,t,sigma=nsigma,aper=aper)[1],'r--')
     plt.xlim(tmin,tmax)
-    plt.ylim(magrange[0],magrange[1])
+    plt.ylim(magrange(band)[0],magrange(band)[1])
     plt.gca().invert_yaxis()
     plt.xlabel('Effective Exposure Depth (s, n={n})'.format(
         n=len(ix[band][0])),fontsize=16)
@@ -597,7 +660,7 @@ for band in ['FUV']:
         target=target.split('_')[0],b=band),fontsize=16)
     plt.tick_params(axis='both', which='major', labelsize=14)
     a,b = data_errors(refmag[band],band,
-        np.array(data[band]['exptime'])[ix[band]],sigma=nsigma)
+        np.array(data[band]['exptime'])[ix[band]],sigma=nsigma,aper=aper)
     lix = np.where((legs[band][ix[band]]>3) | (legs[band][ix[band]]<0))
     cnt = len(np.where(
         (np.array(data[band]['mag_mcatbgsub'])[ix[band][0][lix]]-
@@ -620,36 +683,35 @@ bincnt=50
 fig = plt.figure(figsize=(5*scl,4*scl))
 fig.subplots_adjust(left=0.12,right=0.95,wspace=0.1,bottom=0.15,top=0.9)
 for i,band in enumerate(['FUV']):
-    magrange = [refmag[band]-0.2,refmag[band]+0.6]
     tmin,tmax = 0,350
     lix = np.where(legs[band][ix[band]]>3)
-    plt.subplot(1,1,i+1,xticks=np.arange(round(magrange[0],1),
-        round(magrange[1]+0.01,1),0.2),yticks=[])
+    plt.subplot(1,1,i+1,xticks=np.arange(round(magrange(band)[0],1),
+        round(magrange(band)[1]+0.01,1),0.2),yticks=[])
     mags = np.array(data[band]['mag_mcatbgsub'])-gt.apcorrect1(radius,band)
     plt.hist(mags[ix[band]][lix],bins=bincnt,color='k',histtype='step',
-        range=magrange,normed=1)
+        range=magrange(band),normed=1)
     plt.axvline(refmag[band], color='g', linestyle='solid', linewidth=4,
         label='Ref: {r} AB Mag'.format(r=round(refmag[band],2)))
-    x,y,peak,bandwidth = make_kde(mags[ix[band]][lix],magrange)
+    x,y,peak,bandwidth = make_kde(mags[ix[band]][lix],magrange(band))
     plt.plot(x,y)
     print '{b}: peak={p} ({bw})'.format(b=band,p=peak,bw=bandwidth)
     if band is 'FUV':
         lix = np.where((legs[band][ix[band]]>3) | (legs[band][ix[band]]<0))
-        _,_,newpeak,_ = make_kde(mags[ix[band][0][lix]],magrange)
+        _,_,newpeak,_ = make_kde(mags[ix[band][0][lix]],magrange(band))
         print 'w/o legs 1-3, FUV peak at {p}'.format(p=newpeak)
     plt.axvline(peak, color='k', linestyle='dotted', linewidth=2,
         label='KDE Peak: {p}'.format(p=round(peak,2)))
     plt.axvline(np.median(mags[ix[band]][lix]), color='r', linestyle='dashed',
         linewidth=4,
         label='Median: {m}'.format(m=round(np.median(mags[ix[band]][lix]),2)))
-    plt.xlim(magrange)
+    plt.xlim(magrange(band))
     plt.gca().invert_xaxis()
     plt.legend(loc=2,fontsize=14)
-    plt.text(magrange[1]-0.05,3,'Excludes legs 1-3.',fontsize=16)
+    plt.text(magrange(band)[1]-0.05,3,'Excludes legs 1-3.',fontsize=16)
     plt.xlabel('{b} gAperture Magnitude ({target}, n={n})'.format(
         target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=14)
     plt.tick_params(axis='both', which='major', labelsize=12)
-    plt.text(magrange[1]-0.05,7,'n={n}'.format(n=len(mags[ix[band]][lix])),fontsize=16)
+    plt.text(magrange(band)[1]-0.05,7,'n={n}'.format(n=len(mags[ix[band]][lix])),fontsize=16)
     plt.savefig('{path}/Fig09c.pdf'.format(path=outpath),
         format='pdf',dpi=1000)
 
@@ -685,11 +747,6 @@ The `stimquery.csv` file is read in and reformated as python pickle files
 (.pkl). This extra and seemingly unnecessary step is a holdover from early
 development. There is a lot of redundant code between the FUV and NUV mixture models, which is also just a holdover from early development.
 """
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
-import gPhoton.dbasetools as dt
-import gPhoton.gQuery as gq
 import pprint
 import triangle
 import emcee
