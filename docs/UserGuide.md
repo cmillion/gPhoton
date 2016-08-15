@@ -41,12 +41,12 @@ You must then install the most recent version of gPhoton from the Python Package
 You will be able to run `gFind`, `gAperture`, `gMap`, and `gPipeline` as scripts directly from your terminal as well as `import gPhoton` from within a Python interactive session. The examples in this guide assume that gPhoton was installed using _pip_.
 
 ####Manual Package Management (advanced users)
-Advanced users and developers will want more control over their installation and direct access to the source code and git repository. Importantly, this method will not give you access to the command line scripts unless you add them manually to your /usr/bin (or equivalent) directory.
+Advanced users and developers will want more control over their installation and direct access to the source code and git repository. Importantly, this method will not give you access to the command line scripts unless you add them manually to your /usr/bin (or equivalent) directory, or install via the `setup.py` file in the repo, via `python setup.py install`, or if you don't have root access to the default install directory, via `python setup.py install --user`.
 
 #####Obtaining the Source Code
 **For developers:** Obtain the source code by cloning the master branch of the [gPhoton repository on Github](https://github.com/cmillion/gPhoton). Instructions for getting started using Github can be found [here](https://help.github.com/categories/54/articles), and instructions specifically for cloning repositories can be found [here](https://help.github.com/articles/which-remote-url-should-i-use#cloning-with-ssh). Once you've cloned the repository, it will be straightforward for your to update your local version when we make updates to the master version.
 
-Note: If you want to run the command line scripts (`gMap`, `gAperture`, `gFind`, and `gPipeline`) from your github checkout, you'll need to move them into the correct directory relative to the main module. They currently reside in the _bin_ directory directly under the repo (from which the PyPI installation puts them into _/usr/bin/_). You should copy them to the top level directory (which contains _gPhoton_, _docs_, etc.) and run them as scripts from there. (Running the scripts straight from _bin_ will result in an error like "ValueError: Attempted relative import beyond toplevel package")
+Note: If you want to run the command line scripts (`gMap`, `gAperture`, `gFind`, and `gPipeline`) from your github checkout, and did not run the setup.py installation script, you'll need to move them into the correct directory relative to the main module. They currently reside in the _bin_ directory directly under the repo (from which the PyPI installation puts them into _/usr/bin/_). You should copy them to the top level directory (which contains _gPhoton_, _docs_, etc.) and run them as scripts from there. (Running the scripts straight from _bin_ will result in an error like "ValueError: Attempted relative import beyond toplevel package").  In general, we strongly recommend installing via the setup.py file included in the repo to ensure command-line access is available.
 
 #####Managing dependencies
 You will need to install _python2.7_, _numpy_, _scipy_, _astropy_, _requests_ (>=v2.4.0) and _pandas_. The recommended commands for doing this appear below under the appropriate operating system.
@@ -136,8 +136,8 @@ Note that the heavy lifting within gFind is performed by a function _itself_ cal
 
 within the interpreter would be the following.
 
-    import gPhoton.gFind
-    gPhoton.gFind.gFind(band='NUV',skypos=[176.919525856024,0.255696872807351],maxgap=100.,minexp=100.)
+    import gPhoton
+    gPhoton.gFind(band='NUV',skypos=[176.919525856024,0.255696872807351],maxgap=100.,minexp=100.)
 
 ###gAperture.py
 _gAperture_ is the photometry tool which computes source fluxes or light curves for specified targets and time ranges with customizable apertures and background annuli. If an output filename is provided, the light curve data will be written to a .csv file.
