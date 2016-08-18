@@ -1,3 +1,8 @@
+"""
+This script reproduces the figures in Million, et al. (2016) 'gPhoton: The
+GALEX Photon Data Archive.'
+"""
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -455,6 +460,7 @@ plt.hist(np.array(dmag)[ix[band]],bins=50,range=dmagrange,
                  orientation='horizontal',color='k',histtype='step',normed=1)
 plt.axhline(-0.015, color='g', linestyle='solid', linewidth=1)
 plt.axhline(-0.05, color='g', linestyle='solid', linewidth=1)
+plt.tight_layout()
 plt.savefig('{path}/Fig09a.pdf'.format(path=outpath),
     format='pdf',dpi=1000)
 
@@ -511,6 +517,7 @@ for band in data.keys():
         '{p}% within {s}{sym} (n={n})'.format(
         p=100*cnt/len(ix[band][0]),s=nsigma,sym=r'$\sigma$',
         n=len(ix[band][0])), fontsize=18)
+    plt.tight_layout()
     plt.savefig('{path}/Fig0{n}a.pdf'.format(path=outpath,
                 n='6' if band is 'NUV' else '7'),
                 format='pdf',dpi=1000)
@@ -552,6 +559,7 @@ for i,band in enumerate(['NUV','FUV']):
     plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.06),
             19 if band is 'NUV' else 4.7,'n={n}'.format(
                             n=len(mags[ix[band]])),fontsize=16)
+    plt.tight_layout()
     plt.savefig('{path}/Fig08a.pdf'.format(path=outpath),
         format='pdf',dpi=1000)
 
@@ -590,6 +598,7 @@ for band in data.keys():
         '{p}% within {s}{sym} (n={n})'.format(
         p=100*cnt/len(ix[band][0]),s=nsigma,sym=r'$\sigma$',n=len(ix[band][0])),
         fontsize=18)
+    plt.tight_layout()
     plt.savefig('{path}/Fig0{n}b.pdf'.format(path=outpath,
                 n='6' if band is 'NUV' else '7'),
                 format='pdf',dpi=1000)
@@ -627,6 +636,7 @@ for i,band in enumerate(['NUV','FUV']):
     plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.05),
         17.5 if band is 'NUV' else 6.5,'n={n}'.format(
             n=len(mags[ix[band]])),fontsize=16)
+    plt.tight_layout()
     plt.savefig('{path}/Fig08b.pdf'.format(path=outpath),
         format='pdf',dpi=1000)
 
@@ -674,6 +684,7 @@ for band in ['FUV']:
     plt.text(75, 15.9, '{p}% within {s}{sym} (excluding legs 1-3, n={n})'.format(
         p=100*cntlix/len(ix[band][0][lix]),s=nsigma,sym=r'$\sigma$',
         n=len(np.array(data[band]['mag_mcatbgsub'])[ix[band][0][lix]])), fontsize=18)
+    plt.tight_layout()
     plt.savefig('{path}/Fig09b.pdf'.format(path=outpath),
         format='pdf',dpi=1000)
 
@@ -712,6 +723,7 @@ for i,band in enumerate(['FUV']):
         target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=14)
     plt.tick_params(axis='both', which='major', labelsize=12)
     plt.text(magrange(band)[1]-0.05,7,'n={n}'.format(n=len(mags[ix[band]][lix])),fontsize=16)
+    plt.tight_layout()
     plt.savefig('{path}/Fig09c.pdf'.format(path=outpath),
         format='pdf',dpi=1000)
 
@@ -1171,6 +1183,7 @@ for sigma in [3]:
         for l in [30]:
             plt.axvline(l, color='k', linestyle='dotted', linewidth=2, label='{n} Seconds'.format(n=l))
         plt.legend(fontsize=14)
+    plt.tight_layout()
     plt.savefig('{p}/Fig11.pdf'.format(p=outpath,n=sigma),
         format='pdf',dpi=1000,bbox_inches='tight')
 

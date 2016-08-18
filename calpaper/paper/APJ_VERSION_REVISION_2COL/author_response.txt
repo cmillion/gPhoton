@@ -133,7 +133,7 @@ Figures
 -------
 There is no need to group figures and tables at the end of the manuscript any longer. ApJ/AJ used to have such a policy, but ended it many years ago and at least this referee finds it preferrable to place them in the text close to the position where they are discussed.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: We have moved tables and figures to be placed near where they are first referenced in the manuscript.  We will produce a 2-column version using the "emulateapj" package before posting to the arXiv preprint server, upon paper acceptance.
+AUTHOR RESPONSE: We have created a 2-column version using the "emulateapj" package, and are re-submitting this version for improved readability.
 --------------------------------------------------------------------------------
 
 Figures look a little blurred. I can referee them fine, but I encourange the authors to make use of a vector graphics format such as pdf for most of their plots.
