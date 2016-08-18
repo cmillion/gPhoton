@@ -192,6 +192,7 @@ for band in bands:
                 n=len(np.where(np.isfinite(dmag[bgmode][ix]))[0])),
             fontsize=15)
         plt.legend(fontsize=14)
+        fig.tight_layout()
         fig.savefig('{path}/Fig0{n}{l}.pdf'.format(path=outpath,
             n='4' if bgmode is 'Annulus' else '5',
             l='a' if band is 'NUV' else 'b',
@@ -230,6 +231,7 @@ for i,band in enumerate(bands):
     plt.legend(loc=1 if band is 'NUV' else 2,fontsize=12)
     plt.text(0.5 if band is 'NUV' else -0.9,1,'n={n}'.format(
                                             n=len(delta[ix])),fontsize=16)
+fig.tight_layout()
 fig.savefig('{path}/Fig03.pdf'.format(path=outpath),
     format='pdf',dpi=1000)
 
@@ -352,6 +354,7 @@ for i,band in enumerate(bands):
         bbox=dict(boxstyle='square',facecolor='w',edgecolor='k'))
     plt.text(-5.5,-5.5,'n={n}'.format(n=len(delta_ra[ix])),fontsize=16)
     plt.ylabel('{d} Declination (arcseconds)'.format(d=r'$\Delta$'),fontsize=16)
+    #fig.tight_layout()
     fig.savefig('{path}/Fig02{l}.pdf'.format(
         path=outpath,l='a' if band is 'NUV' else 'b'),
         format='pdf',dpi=1000)
@@ -1300,4 +1303,5 @@ for i in xrange(len(all_flares)):
     these_subplots[row].set_xlim(xlims[i])
 
 pyp.subplots_adjust(hspace=0.30)
+plt.tight_layout()
 pyp.savefig(file_name)
