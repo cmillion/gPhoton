@@ -264,6 +264,7 @@ We have rerun our full suite of regression tests (including regenerating all gra
 4.) The modeled errors in the analysis of LDS749B have been modified slightly to take into account the effect of counting statistics of the aperture correction. This necessarily resulted in a change in the reported % of data falling within 3-sigma.
 
 Additional changes:
-Section 3.2 (describing mission pipeline data products) has been slightly expanded for clarity. We've made minor grammar and clarity edits throughout.
++ Section 3.2 (describing mission pipeline data products) has been slightly expanded for clarity. We've made minor grammar and clarity edits throughout.
++ We have tightened up the figures in a few places without altering the content in ways not already mentioned above.
 
 For a complete history of changes since the initial paper submission, please see the list of Github issues under the v1.27.2 milestone and commit log starting from 6/2/2016 through the merge of branch v1.27.2 into Master.
