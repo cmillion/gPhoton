@@ -194,7 +194,7 @@ for band in bands:
         plt.legend(fontsize=14)
         fig.tight_layout()
         fig.savefig('{path}/Fig0{n}{l}.pdf'.format(path=outpath,
-            n='4' if bgmode is 'Annulus' else '5',
+            n='5' if bgmode is 'Annulus' else '4',
             l='a' if band is 'NUV' else 'b',
             band=band,bg=bgmode.lower()),format='pdf',dpi=1000)
 
