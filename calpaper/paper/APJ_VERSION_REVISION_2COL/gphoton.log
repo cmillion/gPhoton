@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014/Fink) (preloaded format=pdflatex 2015.4.16)  18 AUG 2016 15:08
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2014/Fink) (preloaded format=pdflatex 2015.4.16)  24 AUG 2016 12:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -859,7 +859,7 @@ Here is how much of TeX's memory you used:
  11659 multiletter control sequences out of 15000+600000
  13512 words of font info for 56 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 35i,18n,29p,1789b,484s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 35i,18n,29p,1789b,483s stack positions out of 5000i,500n,10000p,200000b,80000s
 </sw/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></sw/share/tex
 mf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></sw/share/texmf-dist/fonts/
 type1/public/amsfonts/cm/cmmi10.pfb></sw/share/texmf-dist/fonts/type1/public/am
@@ -876,7 +876,7 @@ sw/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></sw/share/texmf-
 dist/fonts/type1/public/amsfonts/cm/cmti8.pfb></sw/share/texmf-dist/fonts/type1
 /public/amsfonts/cm/cmtt10.pfb></sw/share/texmf-dist/fonts/type1/public/amsfont
 s/cm/cmtt8.pfb>
-Output written on gphoton.pdf (15 pages, 2256420 bytes).
+Output written on gphoton.pdf (15 pages, 2256472 bytes).
 PDF statistics:
  1678 PDF objects out of 1728 (max. 8388607)
  645 compressed objects within 7 object streams
