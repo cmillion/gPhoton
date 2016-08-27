@@ -133,15 +133,16 @@ for band in bands:
         fig.subplots_adjust(
             left=0.12,right=0.95,wspace=0.05,bottom=0.15,top=0.9)
         plt.subplot(1,2,1)
+        plt.tick_params(labelsize=14)
         ix = ((np.bitwise_and(np.array(data[band]['flags'].values,
                 dtype='int16'),0b11111111)==0) & (data[band][apertxt]>0) &
                 (data[band][apertxt]<=maglimits[1]))
         print 'Using {n} of {m} {b} sources.'.format(n=np.where(ix)[0].size,
             m=np.array(data[band]['flags']).size,b=band)
         plt.xlabel('{b} AB Magnitude (MCAT {at})'.format(
-                                b=band,at=str.upper(apertxt)),fontsize=14)
+                                b=band,at=str.upper(apertxt)),fontsize=18)
         plt.ylabel('{d}Magnitude (MCAT {at} - gAperture)'.format(
-            d=r'$\Delta$',at=str.upper(apertxt)),fontsize=14)
+            d=r'$\Delta$',at=str.upper(apertxt)),fontsize=16)
         plt.tick_params(axis='both', which='major', labelsize=12)
         plt.xlim([14,22.5])
         plt.ylim(dmagrange)
@@ -163,11 +164,12 @@ for band in bands:
 
         plt.plot(magrange[:-1]+magstep/2.,magmedian,color='r',
                                             linestyle='dashed',linewidth=4)
-        plt.text(15,0.3,
+        plt.text(14.5,0.3,
             {'NoBg':'No Background Correction',
              'Annulus':'Annulus Background Correction',
-             'MCAT':'MCAT Background Correction'}[bgmode],fontsize=15)
+             'MCAT':'MCAT Background Correction'}[bgmode],fontsize=18)
         plt.subplot(1,2,2,ylim=dmagrange,yticks=[],xticks=[])
+        plt.tick_params(labelsize=14)
         plt.hist(np.array(dmag[bgmode][ix]),bins=bincnt,range=dmagrange,
                  orientation='horizontal',color='k',histtype='step',normed=1)
         x,y,peak,bandwidth = make_kde(
@@ -185,13 +187,13 @@ for band in bands:
             color='r', linestyle='dashed',linewidth=4,
             label='Median: {m}'.format(m=round(
                 dmag[bgmode][ix].median(),2)))
-        plt.text(0.5, -0.43, '50% of data within {pm}{p90} (n={n})'.format(
+        plt.text(2, 0.2, '(n={n})'.format(
+                n=len(np.where(np.isfinite(dmag[bgmode][ix]))[0])),fontsize=18)
+        plt.text(1, -0.35, '50% of data within {pm}{p90}'.format(
             pm=r'$\pm$',p90=round(np.percentile(np.abs(np.array(
                 dmag[bgmode][ix]))[np.where(
-                        np.isfinite(dmag[bgmode][ix]))],50),2),
-                n=len(np.where(np.isfinite(dmag[bgmode][ix]))[0])),
-            fontsize=15)
-        plt.legend(fontsize=14)
+                        np.isfinite(dmag[bgmode][ix]))],50),2)),fontsize=18)
+        plt.legend(fontsize=20)
         fig.tight_layout()
         fig.savefig('{path}/Fig0{n}{l}.pdf'.format(path=outpath,
             n='5' if bgmode is 'Annulus' else '4',
@@ -215,6 +217,7 @@ for i,band in enumerate(bands):
     print 'Using {n} of {m} {b} sources.'.format(n=np.where(ix)[0].size,
             m=np.array(data[band]['flags']).size,b=band)
     plt.subplot(1,2,i+1,yticks=[])
+    plt.tick_params(labelsize=14)
     plt.hist(delta[ix],bins=bincnt,range=dmagrange,color='k',histtype='step',
         normed=1)
     x,y,peak,bandwidth = make_kde(delta[ix],dmagrange)
@@ -226,11 +229,11 @@ for i,band in enumerate(bands):
         label='Median: {m}'.format(m=round(np.median(delta[ix]),2)))
     plt.xlim(dmagrange)
     plt.xlabel('{b} {d}Magnitude (MCAT - gAperture)'.format(
-        b=band,d=r'$\Delta$',exp=r'$^{2}$'),fontsize=14)
+        b=band,d=r'$\Delta$',exp=r'$^{2}$'),fontsize=18)
     plt.tick_params(axis='both', which='major', labelsize=12)
-    plt.legend(loc=1 if band is 'NUV' else 2,fontsize=12)
+    plt.legend(loc=1,fontsize=16)
     plt.text(0.5 if band is 'NUV' else -0.9,1,'n={n}'.format(
-                                            n=len(delta[ix])),fontsize=16)
+                                            n=len(delta[ix])),fontsize=18)
 fig.tight_layout()
 fig.savefig('{path}/Fig03.pdf'.format(path=outpath),
     format='pdf',dpi=1000)
@@ -317,7 +320,7 @@ for i,band in enumerate(bands):
     plt.subplot(gs[2],xlim=dasrange,yticks=[])
     plt.gca().invert_yaxis()
     plt.xlabel('{d} Right Ascension (arcseconds)'.format(
-        d=r'$\Delta$'),fontsize=14)
+        d=r'$\Delta$'),fontsize=18)
     plt.hist(delta_ra[ix],bins=bincnt,histtype='step',range=dasrange,
         normed=1,color='k')
     x,y,peak,bandwidth = make_kde(delta_ra[ix],dasrange)
@@ -330,6 +333,7 @@ for i,band in enumerate(bands):
     ra_kdepeak, ra_median = peak, np.median(delta_ra[ix])
     plt.tick_params(axis='both', which='major', labelsize=12)
     plt.subplot(gs[1],ylim=dasrange,xticks=[],yticks=[])
+    plt.tick_params(labelsize=14)
     plt.hist(delta_dec[ix],bins=bincnt,histtype='step',
         orientation='horizontal',range=dasrange,normed=1,color='k')
     x,y,peak,bandwidth = make_kde(delta_dec[ix],dasrange)
@@ -341,19 +345,20 @@ for i,band in enumerate(bands):
         label='Median: {m} as'.format(m=round(np.median(delta_dec[ix]),2)))
     dec_kdepeak, dec_median = peak, np.median(delta_dec[ix])
     plt.subplot(gs[0],xticks=[])
+    plt.tick_params(labelsize=14)
     plt.title('{b}: Relative Astrometry (MCAT - gAperture)'.format(
         b=band),fontsize=16)
     plt.plot(delta_ra[ix],delta_dec[ix],'.',color='k',alpha=0.1)
     plt.xlim(dasrange[0],dasrange[1])
     plt.ylim(dasrange[0],dasrange[1])
-    plt.text(-5,4,'RA KDE Peak: {ra_kdepeak}\nRA Median: {ra_median}\nDec KDE Peak: {dec_kdepeak}\nDec Median: {dec_median}'.format(
+    plt.text(-5,2.8,'RA KDE Peak: {ra_kdepeak}\nRA Median: {ra_median}\nDec KDE Peak: {dec_kdepeak}\nDec Median: {dec_median}'.format(
             ra_kdepeak='{0:.2f}'.format(round(ra_kdepeak,3)),
             ra_median='{0:.2f}'.format(round(ra_median,3)),
             dec_kdepeak='{0:.2f}'.format(round(dec_kdepeak,3)),
             dec_median='{0:.2f}'.format(round(dec_median,))),
-        bbox=dict(boxstyle='square',facecolor='w',edgecolor='k'))
-    plt.text(-5.5,-5.5,'n={n}'.format(n=len(delta_ra[ix])),fontsize=16)
-    plt.ylabel('{d} Declination (arcseconds)'.format(d=r'$\Delta$'),fontsize=16)
+        bbox=dict(boxstyle='square',facecolor='w',edgecolor='k'),fontsize=20)
+    plt.text(-5.5,-5.5,'n={n}'.format(n=len(delta_ra[ix])),fontsize=20)
+    plt.ylabel('{d} Declination (arcseconds)'.format(d=r'$\Delta$'),fontsize=18)
     #fig.tight_layout()
     fig.savefig('{path}/Fig02{l}.pdf'.format(
         path=outpath,l='a' if band is 'NUV' else 'b'),
@@ -448,9 +453,11 @@ fig = plt.figure(figsize=(10*scl,4*scl))
 fig.subplots_adjust(left=0.12,right=0.95,wspace=0.05,bottom=0.15,top=0.9)
 band = 'FUV'
 plt.subplot(1,2,1)
-plt.ylabel('{d} AB Magnitude (MCAT - gAperture)'.format(d=r'$\Delta$'))
+plt.tick_params(labelsize=14)
+plt.ylabel('{d} AB Magnitude (MCAT - gAperture)'.format(d=r'$\Delta$'),
+                                                                fontsize=18)
 plt.xlabel('CAI Observation Leg, {target} ({b})'.format(
-                                    target=target.split('_')[0],b=band))
+                            target=target.split('_')[0],b=band),fontsize=18)
 plt.axhline(-0.015, color='g', linestyle='solid', linewidth=1)
 plt.axhline(-0.05, color='g', linestyle='solid', linewidth=1)
 dmag = data[band]['aper{a}'.format(a=aper)]-data[band]['mag_mcatbgsub']
@@ -459,6 +466,7 @@ plt.ylim(dmagrange)
 plt.plot(legs[band][ix[band]],
                         np.array(dmag)[ix[band]],'.',alpha=0.3,color='k')
 plt.subplot(1,2,2,yticks=[])
+plt.tick_params(labelsize=14)
 plt.hist(np.array(dmag)[ix[band]],bins=50,range=dmagrange,
                  orientation='horizontal',color='k',histtype='step',normed=1)
 plt.axhline(-0.015, color='g', linestyle='solid', linewidth=1)
@@ -494,10 +502,10 @@ for band in data.keys():
     plt.xlim(tmin,tmax)
     plt.ylim(magrange(band)[0],magrange(band)[1])
     plt.gca().invert_yaxis()
-    plt.xlabel('Effective Exposure Depth (s)',fontsize=16)
+    plt.xlabel('Effective Exposure Depth (s)',fontsize=20)
     plt.ylabel('{b} gAperture Magnitude ({target})'.format(
-        target=target.split('_')[0],b=band),fontsize=16)
-    plt.tick_params(axis='both', which='major', labelsize=14)
+        target=target.split('_')[0],b=band),fontsize=18)
+    plt.tick_params(axis='both', which='major', labelsize=16)
     a,b = data_errors(refmag[band],band,
         np.array(data[band]['exptime'])[ix[band]],sigma=nsigma,aper=aper)
     cnt = len(np.where(
@@ -519,7 +527,7 @@ for band in data.keys():
     plt.text(150, 15.9 if band=='FUV' else 14.83,
         '{p}% within {s}{sym} (n={n})'.format(
         p=100*cnt/len(ix[band][0]),s=nsigma,sym=r'$\sigma$',
-        n=len(ix[band][0])), fontsize=18)
+        n=len(ix[band][0])), fontsize=22)
     plt.tight_layout()
     plt.savefig('{path}/Fig0{n}a.pdf'.format(path=outpath,
                 n='6' if band is 'NUV' else '7'),
@@ -552,19 +560,18 @@ for i,band in enumerate(['NUV','FUV']):
         label='Median: {m}'.format(m=round(np.median(mags[ix[band]]),2)))
     plt.xlim(magrange(band))
     plt.gca().invert_xaxis()
-    plt.legend(loc=2,fontsize=14)
+    plt.legend(loc=2,fontsize=16)
     plt.xlabel('{b} gAperture AB Magnitude ({target})'.format(
-        target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=14)
-    plt.tick_params(axis='both', which='major', labelsize=12)
+        target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=20)
+    plt.tick_params(axis='both', which='major', labelsize=18)
     plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.05),
-             3 if band is 'NUV' else .75,
+             3 if band is 'NUV' else .6,
                             '(a)' if band is 'NUV' else '(b)',fontsize=30)
     plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.06),
-            19 if band is 'NUV' else 4.7,'n={n}'.format(
-                            n=len(mags[ix[band]])),fontsize=16)
+            18 if band is 'NUV' else 4.7,'n={n}'.format(
+                            n=len(mags[ix[band]])),fontsize=22)
     plt.tight_layout()
-    plt.savefig('{path}/Fig08a.pdf'.format(path=outpath),
-        format='pdf',dpi=1000)
+plt.savefig('{path}/Fig08a.pdf'.format(path=outpath),format='pdf',dpi=1000)
 
 # Overplot MCAT photometry of LDS749B on the reference magnitude and
 # modeled 3-sigma error bounds as a function of exposure time.
@@ -584,11 +591,11 @@ for band in data.keys():
     plt.xlim(tmin,tmax)
     plt.ylim(magrange(band)[0],magrange(band)[1])
     plt.gca().invert_yaxis()
-    plt.xlabel('Effective Exposure Depth (s, n={n})'.format(
-        n=len(ix[band][0])),fontsize=16)
+    plt.xlabel('Effective Exposure Depth (s)'.format(
+        n=len(ix[band][0])),fontsize=20)
     plt.ylabel('{b} MCAT Magnitude ({target})'.format(
-        target=target.split('_')[0],b=band),fontsize=16)
-    plt.tick_params(axis='both', which='major', labelsize=14)
+        target=target.split('_')[0],b=band),fontsize=18)
+    plt.tick_params(axis='both', which='major', labelsize=16)
     a,b = data_errors(refmag[band],
         band,np.array(data[band]['exptime'])[ix[band]],sigma=nsigma,aper=aper)
     cnt = len(np.where((np.array(data[band][apertxt])[ix[band]]-
@@ -600,7 +607,7 @@ for band in data.keys():
     plt.text(150, 15.9 if band=='FUV' else 14.83,
         '{p}% within {s}{sym} (n={n})'.format(
         p=100*cnt/len(ix[band][0]),s=nsigma,sym=r'$\sigma$',n=len(ix[band][0])),
-        fontsize=18)
+        fontsize=22)
     plt.tight_layout()
     plt.savefig('{path}/Fig0{n}b.pdf'.format(path=outpath,
                 n='6' if band is 'NUV' else '7'),
@@ -630,18 +637,17 @@ for i,band in enumerate(['NUV','FUV']):
     plt.xlim(magrange(band))
     plt.gca().invert_xaxis()
     plt.xlabel('{b} MCAT AB Magnitude ({target})'.format(
-        target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=14)
-    plt.tick_params(axis='both', which='major', labelsize=12)
-    plt.legend(loc=2,fontsize=14)
+        target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=20)
+    plt.tick_params(axis='both', which='major', labelsize=16)
+    plt.legend(loc=2,fontsize=16)
     plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.05),
         3 if band is 'NUV' else 1.5,
                             '(c)' if band is 'NUV' else '(d)',fontsize=30)
     plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.05),
         17.5 if band is 'NUV' else 6.5,'n={n}'.format(
-            n=len(mags[ix[band]])),fontsize=16)
+            n=len(mags[ix[band]])),fontsize=22)
     plt.tight_layout()
-    plt.savefig('{path}/Fig08b.pdf'.format(path=outpath),
-        format='pdf',dpi=1000)
+plt.savefig('{path}/Fig08b.pdf'.format(path=outpath),format='pdf',dpi=1000)
 
 ####
 
@@ -667,11 +673,11 @@ for band in ['FUV']:
     plt.xlim(tmin,tmax)
     plt.ylim(magrange(band)[0],magrange(band)[1])
     plt.gca().invert_yaxis()
-    plt.xlabel('Effective Exposure Depth (s, n={n})'.format(
-        n=len(ix[band][0])),fontsize=16)
+    plt.xlabel('Effective Exposure Depth (s)'.format(
+        n=len(ix[band][0])),fontsize=20)
     plt.ylabel('{b} gAperture Magnitude ({target})'.format(
-        target=target.split('_')[0],b=band),fontsize=16)
-    plt.tick_params(axis='both', which='major', labelsize=14)
+        target=target.split('_')[0],b=band),fontsize=18)
+    plt.tick_params(axis='both', which='major', labelsize=16)
     a,b = data_errors(refmag[band],band,
         np.array(data[band]['exptime'])[ix[band]],sigma=nsigma,aper=aper)
     lix = np.where((legs[band][ix[band]]>3) | (legs[band][ix[band]]<0))
@@ -686,7 +692,7 @@ for band in ['FUV']:
             b=band,n=cntlix,m=len(ix[band][0][lix]),p=100*cntlix/len(ix[band][0][lix]),s=nsigma)
     plt.text(75, 15.9, '{p}% within {s}{sym} (excluding legs 1-3, n={n})'.format(
         p=100*cntlix/len(ix[band][0][lix]),s=nsigma,sym=r'$\sigma$',
-        n=len(np.array(data[band]['mag_mcatbgsub'])[ix[band][0][lix]])), fontsize=18)
+        n=len(np.array(data[band]['mag_mcatbgsub'])[ix[band][0][lix]])), fontsize=22)
     plt.tight_layout()
     plt.savefig('{path}/Fig09b.pdf'.format(path=outpath),
         format='pdf',dpi=1000)
@@ -720,12 +726,12 @@ for i,band in enumerate(['FUV']):
         label='Median: {m}'.format(m=round(np.median(mags[ix[band]][lix]),2)))
     plt.xlim(magrange(band))
     plt.gca().invert_xaxis()
-    plt.legend(loc=2,fontsize=14)
-    plt.text(magrange(band)[1]-0.05,3,'Excludes legs 1-3.',fontsize=16)
-    plt.xlabel('{b} gAperture Magnitude ({target}, n={n})'.format(
-        target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=14)
-    plt.tick_params(axis='both', which='major', labelsize=12)
-    plt.text(magrange(band)[1]-0.05,7,'n={n}'.format(n=len(mags[ix[band]][lix])),fontsize=16)
+    plt.legend(loc=2,fontsize=16)
+    plt.text(magrange(band)[1]-0.05,3,'Excludes legs 1-3.',fontsize=22)
+    plt.xlabel('{b} gAperture Magnitude ({target})'.format(
+        target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=20)
+    plt.tick_params(axis='both', which='major', labelsize=18)
+    plt.text(magrange(band)[1]-0.05,7,'n={n}'.format(n=len(mags[ix[band]][lix])),fontsize=22)
     plt.tight_layout()
     plt.savefig('{path}/Fig09c.pdf'.format(path=outpath),
         format='pdf',dpi=1000)
@@ -958,12 +964,12 @@ plt.text(5000, 76,
         mp='+{v}'.format(v=round(m_mcmc[1],6)),
         mm='-{v}'.format(v=round(m_mcmc[2],6)),
         bp='+{v}'.format(v=round(b_mcmc[1],2)),
-        bm='-{v}'.format(v=round(b_mcmc[2],2))), fontsize=18)
+        bm='-{v}'.format(v=round(b_mcmc[2],2))), fontsize=24)
 
 plt.xlabel("{b} Global Countrate (ct/s, n={n})".format(
-    b=band,n=bg_ct+fg_ct),fontsize=14)
-plt.ylabel("{b} Stim Countrate (ct/s)".format(b=band),fontsize=14)
-plt.tick_params(axis='both', which='major', labelsize=12)
+    b=band,n=bg_ct+fg_ct),fontsize=20)
+plt.ylabel("{b} Stim Countrate (ct/s)".format(b=band),fontsize=20)
+plt.tick_params(axis='both', which='major', labelsize=16)
 plt.ylim(68, 78)
 plt.xlim(0, 17000)
 plt.tight_layout()
@@ -1126,12 +1132,12 @@ plt.text(15000, 45,
         mp='+{v}'.format(v=round(m_mcmc[1],6)),
         mm='-{v}'.format(v=round(m_mcmc[2],6)),
         bp='+{v}'.format(v=round(b_mcmc[1],2)),
-        bm='-{v}'.format(v=round(b_mcmc[2],2))), fontsize=18)
+        bm='-{v}'.format(v=round(b_mcmc[2],2))), fontsize=24)
 
 plt.xlabel("{b} Global Countrate (ct/s, n={n})".format(
-    b=band,n=fg_ct+bg_ct),fontsize=14)
-plt.ylabel("{b} Stim Countrate (ct/s)".format(b=band),fontsize=14)
-plt.tick_params(axis='both', which='major', labelsize=12)
+    b=band,n=fg_ct+bg_ct),fontsize=20)
+plt.ylabel("{b} Stim Countrate (ct/s)".format(b=band),fontsize=20)
+plt.tick_params(axis='both', which='major', labelsize=16)
 plt.ylim(40, 75)
 plt.xlim(10000, 70000)
 plt.tight_layout()
@@ -1175,9 +1181,9 @@ for sigma in [3]:
         plt.semilogx()
         plt.xlim(1,1600)
         #plt.title('{b} Bin Depths vs. Error'.format(b=band),fontsize=16)
-        plt.xlabel('Exposure Bin Depth (s)',fontsize=14)
-        plt.ylabel('{b} {n}{s} Error (AB Mag)'.format(b=band,n=sigma,s=r'$\sigma$'),fontsize=14)
-        plt.tick_params(axis='both', which='major', labelsize=12)
+        plt.xlabel('Exposure Bin Depth (s)',fontsize=20)
+        plt.ylabel('{b} {n}{s} Error (AB Mag)'.format(b=band,n=sigma,s=r'$\sigma$'),fontsize=20)
+        plt.tick_params(axis='both', which='major', labelsize=18)
         for mag in magrange:
             cps = gt.mag2counts(mag,band)
             cps_err = sigma*np.sqrt(cps*t_eff)/t_eff
@@ -1185,7 +1191,7 @@ for sigma in [3]:
             plt.plot(t_raw,mag_err,label='{m}{u}'.format(m=mag,u=' AB Mag' if mag==max(magrange) else ''))
         for l in [30]:
             plt.axvline(l, color='k', linestyle='dotted', linewidth=2, label='{n} Seconds'.format(n=l))
-        plt.legend(fontsize=14)
+        plt.legend(fontsize=16)
     plt.tight_layout()
     plt.savefig('{p}/Fig11.pdf'.format(p=outpath,n=sigma),
         format='pdf',dpi=1000,bbox_inches='tight')
