@@ -1256,7 +1256,7 @@ for i in xrange(len(all_flares)):
 
     # Label the y-axis if this is zero'th subplot.
     if i == 0:
-        this_figure.text(0.06, 0.5, 'Flux (ergs/cm$^{2}\!$/sec/$\AA$)',
+        this_figure.text(0.02, 0.5, 'Flux (ergs/cm$^{2}\!$/sec/$\AA$)',
                              ha='center', va='center', rotation='vertical',
                              size="xx-large")
 
@@ -1308,5 +1308,5 @@ for i in xrange(len(all_flares)):
     # Make sure x-axis plot limits are enforced.
     these_subplots[row].set_xlim(xlims[i])
 
-pyp.subplots_adjust(hspace=0.30,top=0.98,bottom=0.06,right=0.95)
+pyp.subplots_adjust(hspace=0.30,top=0.98,bottom=0.03,right=0.98,left=0.08)
 pyp.savefig(file_name)
