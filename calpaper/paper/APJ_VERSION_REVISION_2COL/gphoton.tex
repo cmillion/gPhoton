@@ -1,6 +1,7 @@
 %\documentclass[iop]{emulateapj}
 \documentclass[preprint2]{aastex}
-\usepackage{lineno,hyperref}
+\usepackage{hyperref}
+\usepackage{lineno}
 \usepackage{tabularx}
 \modulolinenumbers[5]
 \bibliographystyle{apj}
@@ -12,6 +13,9 @@
 \usepackage{epstopdf}
 \usepackage{array}
 \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\usepackage{footnote}
+\makesavenoteenv{tabular}
+\makesavenoteenv{table}
 
 \shorttitle{gPhoton - Tools for GALEX Photon Events}
 \shortauthors{Chase Million et al.}
@@ -133,15 +137,15 @@ DB & min $\delta$ & max $\delta$ & N\_FUV & N\_NUV\\
 \label{softwaretools}
 There are four primary modules included in gPhoton and described in Table \ref{moduledesc}. These utilities are all written in Python and released under a permissive license. With the exception of gPipeline, the tools can be called either from the command line or imported as Python modules. When imported as modules, output is also returned as Python objects that include the complete lists of photon events used. The command line utilities draw upon a large number of supporting functions which will not be described in this paper, but are possibly of interest to users who want to perform advanced or specialized analyses with the gPhoton data, or even modify the functionality to fit their individual needs. For more information, users are encouraged to consult the documentation available in the software repository or the MAST page for the project.\footnote{\url{https://archive.stsci.edu/prepds/gphoton/}}.
 
-\begin{table}[h!]
+\begin{table}[htbp!]
 %\begin{tabular}{|L{1.5cm}|L{6.5cm}|}
 \begin{tabular}{|L{0.095\textwidth}|L{0.340\textwidth}|}
 \hline
 	{\bf Module} & {\bf Function}\\\hline
-	gPipeline & Generates aspect-corrected photon lists from a small set of user supplied input files. The input files are archived products from the original mission pipeline. Output from gPipeline was used to populate the photon event database that the other modules query and, therefore, the majority of researchers will not need this module. Please see the User Guide\footnote{\url{https://github.com/cmillion/gPhoton/blob/master/docs/UserGuide.md}} for syntax.\\\hline
-	gFind & Provides information on the available raw exposure depths and time ranges for any location on the sky. Example to find the total available exposure depth, in each band, for the star CR Draconis: \parbox[t]{0.34\textwidth}{\texttt{gFind(band='both', exponly=True, skypos=[244.27247, 55.268069])}}\\\hline
-	gAperture & Generates a light curve (returned as a table of times, calibrated fluxes, and additional parameters) for a given coordinate, time sampling, and aperture size. Example to create a light curve with 10-second bins in the NUV, with specified aperture radius and background annuli (always in degrees): \parbox[t]{0.34\textwidth}{\texttt{gAperture(band='NUV', skypos=[244.27247, 55.268069], stepsz=10., csvfile='nuv.csv', radius=0.0045, annulus=[0.0050,0.0060])}}\\\hline
-	gMap & Creates an image (in units of counts and/or calibrated fluxes) and/or image cubes (also in units of counts and/or calibrated fluxes), for a given area of the sky and (optionally) time sampling. Example to create an NUV coadd image (in counts) using all available data, as well as an image cube using 30-second slices, of a 6x6 arcmin area on the sky centered on CR Draconis: \parbox[t]{0.34\textwidth}{\texttt{gMap(band='NUV', skypos=[244.27247, 55.268069], stepsz=30., skyrange=[0.1,0.1], cntfile='imgcube.fits', cntcoaddfile='coadd.fits')}}\\\hline
+	gPipeline & Generates aspect-corrected photon lists from a small set of user supplied input files. Output from gPipeline was used to populate the photon event database that the other modules query and, therefore, the majority of researchers will not need this module. Please see the User Guide\footnote{\url{https://github.com/cmillion/gPhoton/blob/master/docs/UserGuide.md}} for syntax.\\\hline
+	gFind & Provides information on the available raw exposure depths and time ranges for any location on the sky. Example to find the total available exposure depth, in each band, for the star CR Draconis: \parbox[t]{0.34\textwidth}{\footnotesize{\texttt{gFind(band='both', exponly=True, skypos=[244.27247, 55.268069])}}}\\\hline
+	gAperture & Generates a light curve (returned as a table of times, calibrated fluxes, and additional parameters) for a given coordinate, time sampling, and aperture size. Example to create a light curve with 10-second bins in the NUV, with specified aperture radius and background annuli (always in degrees): \parbox[t]{0.34\textwidth}{\footnotesize{\texttt{gAperture(band='NUV', skypos=[244.27247, 55.268069], stepsz=10., csvfile='nuv.csv', radius=0.0045, annulus=[0.0050,0.0060])}}}\\\hline
+	gMap & Creates an image and/or image cubes (in units of counts and/or calibrated fluxes) for a given area of the sky and (optionally) time sampling. Example to create an NUV coadd image (in counts) using all available data, as well as an image cube using 30-second slices, of a 6x6 arcmin area on the sky centered on CR Draconis: \parbox[t]{0.34\textwidth}{\footnotesize{\texttt{gMap(band='NUV', skypos=[244.27247, 55.268069], stepsz=30., skyrange=[0.1,0.1], cntfile='imgcube.fits', cntcoaddfile='coadd.fits')}}}\\\hline
 \end{tabular}
 \caption{Summary of Primary gPhoton Modules with example Python syntax.}
 \label{moduledesc}
