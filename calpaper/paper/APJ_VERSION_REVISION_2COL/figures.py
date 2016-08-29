@@ -1308,6 +1308,5 @@ for i in xrange(len(all_flares)):
     # Make sure x-axis plot limits are enforced.
     these_subplots[row].set_xlim(xlims[i])
 
-pyp.subplots_adjust(hspace=0.30)
-plt.tight_layout()
+pyp.subplots_adjust(hspace=0.30,top=0.98,bottom=0.06,right=0.95)
 pyp.savefig(file_name)
