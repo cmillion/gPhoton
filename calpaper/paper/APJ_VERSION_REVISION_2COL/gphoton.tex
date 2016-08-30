@@ -1,5 +1,4 @@
-%\documentclass[iop]{emulateapj}
-\documentclass[preprint2]{aastex}
+\documentclass[trackchanges,preprint2]{aastex}
 \usepackage{hyperref}
 \usepackage{lineno}
 \usepackage{tabularx}
@@ -14,7 +13,7 @@
 \usepackage{array}
 \newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 \usepackage{footnote}
-\makesavenoteenv{tabular}
+\makesavenoteenv{tabularx}
 \makesavenoteenv{table}
 
 \shorttitle{gPhoton - Tools for GALEX Photon Events}
@@ -26,25 +25,25 @@
 
 % Authors section.
 \author{
-  Chase Million\altaffilmark{a},
-  Scott W. Fleming\altaffilmark{b,c},
-  Bernie Shiao\altaffilmark{b},
-  Mark Seibert\altaffilmark{d},
-  Parke Loyd\altaffilmark{e},
-  Michael Tucker\altaffilmark{f},
-  Myron Smith\altaffilmark{b,g},
-  Randy Thompson\altaffilmark{b,c},
-  Richard L. White\altaffilmark{b}
+  Chase Million\altaffilmark{1},
+  Scott W. Fleming\altaffilmark{2,3},
+  Bernie Shiao\altaffilmark{2},
+  Mark Seibert\altaffilmark{4},
+  Parke Loyd\altaffilmark{5},
+  Michael Tucker\altaffilmark{6},
+  Myron Smith\altaffilmark{2,7},
+  Randy Thompson\altaffilmark{2,3},
+  Richard L. White\altaffilmark{2}
 }
 
 % Addresses section.
-\altaffiltext{a}{Million Concepts LLC, PO Box 119, 141 Mary St, Lemont, PA 16851, USA}
-\altaffiltext{b}{Space Telescope Science Institute, 3700 San Martin Dr, Baltimore, MD 21218, USA}
-\altaffiltext{c}{CSRA, Inc., 3700 San Martin Dr, Baltimore, MD 21218, USA}
-\altaffiltext{d}{The Observatories of the Carnegie Institution of Washington, 813 Santa Barbara Street, Pasadena, CA 91101, USA}
-\altaffiltext{e}{Laboratory for Atmospheric and Space Physics, Boulder, Colorado,  80309}
-\altaffiltext{f}{Dept. of Physics and Astronomy, Appalachian State University, Boone, NC 28608, USA}
-\altaffiltext{g}{Current Address: National Optical Astronomy Observatory, 950 N. Cherry Ave., Tucson, AZ 85719}
+\altaffiltext{1}{Million Concepts LLC, PO Box 119, 141 Mary St, Lemont, PA 16851, USA}
+\altaffiltext{2}{Space Telescope Science Institute, 3700 San Martin Dr, Baltimore, MD 21218, USA}
+\altaffiltext{3}{CSRA, Inc., 3700 San Martin Dr, Baltimore, MD 21218, USA}
+\altaffiltext{4}{The Observatories of the Carnegie Institution of Washington, 813 Santa Barbara Street, Pasadena, CA 91101, USA}
+\altaffiltext{5}{Laboratory for Atmospheric and Space Physics, Boulder, Colorado,  80309}
+\altaffiltext{6}{Dept. of Physics and Astronomy, Appalachian State University, Boone, NC 28608, USA}
+\altaffiltext{7}{Current Address: National Optical Astronomy Observatory, 950 N. Cherry Ave., Tucson, AZ 85719}
 
 % Since \fnref{} in the author page already defines a footnote with a '1' mark, increment the footnote counter now.
 %\addtocounter{footnote}{1}
@@ -54,6 +53,7 @@ gPhoton is a new database product and software package that enables analysis of 
 \end{abstract}
 
 \section{GALEX Overview}
+\added{This is some new text.}
 The Galaxy Evolution Explorer \citep{mar2005} was a NASA Small Explorer (SMEX) telescope that surveyed the sky in the ultraviolet over ten years between launch on 28 April 2003 and spacecraft termination on 28 June 2013. The spacecraft, instruments, data, and calibration are well described in previous publications \citep{mor2005,mor2007} and the mission`s online technical documentation.\footnote{\url{http://www.galex.caltech.edu/wiki/Public:Documentation}} We will restrict discussion to topics that are necessary for completeness, have not appeared elsewhere in the literature, or are of particular importance to the gPhoton project.
 
 GALEX carried two micro-channel plate detectors (MCP) with 1.25 degree fields-of-view (FoV), simultaneously exposed via a dichroic. The detectors record signals from electrical cascades, referred to as ``events,'' which are produced by photons hitting the MCPs. Detector positions and time stamps of these events recorded by the spacecraft are then corrected for instrumental effects and re-projected into celestial coordinates by a calibration pipeline on the ground. The detectors observed in two broad ultraviolet (UV) bands centered around $1528\,\rm{\AA}$ (Far Ultraviolet or ``FUV'') and $2271\,\rm{\AA}$ (Near Ultraviolet or ``NUV''). The FUV detector failed in May of 2009, but the NUV detector continued to operate until the end of the mission. The spacecraft could observe in either direct imaging or slitless spectroscopic (grism) modes. Observations were conducted while the spacecraft was on the night side of each orbit (an ``eclipse''), which lasted 1500-1800 seconds. To avoid detector burn-in or local gain sag effects caused by depletion of electrons in the multiplier plate, the telescope did not stare at a fixed location on the sky during an observation but continuously moved the boresight relative to the target position. Several boresight patterns, or ``modes,'' were used over the course of the mission, which impacted the nature of the corresponding observational data.
@@ -113,6 +113,7 @@ The distribution of the ten databases on the sky is shown in Figure \ref{dbdist}
 \end{enumerate}
 
 \begin{table}[h!]
+\caption{Distribution of non-null photon events per database.}
 \begin{tabularx}{0.45\textwidth}{lllll}
 \hline
 DB & min $\delta$ & max $\delta$ & N\_FUV & N\_NUV\\
@@ -130,24 +131,23 @@ DB & min $\delta$ & max $\delta$ & N\_FUV & N\_NUV\\
 10 &  52.50 &  90.00 &   6.540819967 & 100.482179843\\
 \hline
 \end{tabularx}
-\caption{Distribution of non-null photon events per database.\label{dbcounts}}
+\label{dbcounts}
 \end{table}
 
 \section{The Software Tools}
 \label{softwaretools}
-There are four primary modules included in gPhoton and described in Table \ref{moduledesc}. These utilities are all written in Python and released under a permissive license. With the exception of gPipeline, the tools can be called either from the command line or imported as Python modules. When imported as modules, output is also returned as Python objects that include the complete lists of photon events used. The command line utilities draw upon a large number of supporting functions which will not be described in this paper, but are possibly of interest to users who want to perform advanced or specialized analyses with the gPhoton data, or even modify the functionality to fit their individual needs. For more information, users are encouraged to consult the documentation available in the software repository or the MAST page for the project.\footnote{\url{https://archive.stsci.edu/prepds/gphoton/}}.
+There are four primary modules included in gPhoton and described in Table \ref{moduledesc}. These utilities are all written in Python and released under a permissive license. With the exception of gPipeline, the tools can be called either from the command line or imported as Python modules. When imported as modules, output is also returned as Python objects that include the complete lists of photon events used. The command line utilities draw upon a large number of supporting functions which will not be described in this paper, but are possibly of interest to users who want to perform advanced or specialized analyses with the gPhoton data, or even modify the functionality to fit their individual needs. For more information, users are encouraged to consult the documentation available in the software repository, the User Guide\footnote{\url{https://github.com/cmillion/gPhoton/blob/master/docs/UserGuide.md}}, or the MAST page for the project.\footnote{\url{https://archive.stsci.edu/prepds/gphoton/}}.
 
 \begin{table}[htbp!]
-%\begin{tabular}{|L{1.5cm}|L{6.5cm}|}
-\begin{tabular}{|L{0.095\textwidth}|L{0.340\textwidth}|}
+\caption{Summary of Primary gPhoton Modules with example Python syntax.}
+\begin{tabularx}{0.45\textwidth}{|L{0.095\textwidth}|L{0.315\textwidth}|}
 \hline
 	{\bf Module} & {\bf Function}\\\hline
-	gPipeline & Generates aspect-corrected photon lists from a small set of user supplied input files. Output from gPipeline was used to populate the photon event database that the other modules query and, therefore, the majority of researchers will not need this module. Please see the User Guide\footnote{\url{https://github.com/cmillion/gPhoton/blob/master/docs/UserGuide.md}} for syntax.\\\hline
-	gFind & Provides information on the available raw exposure depths and time ranges for any location on the sky. Example to find the total available exposure depth, in each band, for the star CR Draconis: \parbox[t]{0.34\textwidth}{\footnotesize{\texttt{gFind(band='both', exponly=True, skypos=[244.27247, 55.268069])}}}\\\hline
-	gAperture & Generates a light curve (returned as a table of times, calibrated fluxes, and additional parameters) for a given coordinate, time sampling, and aperture size. Example to create a light curve with 10-second bins in the NUV, with specified aperture radius and background annuli (always in degrees): \parbox[t]{0.34\textwidth}{\footnotesize{\texttt{gAperture(band='NUV', skypos=[244.27247, 55.268069], stepsz=10., csvfile='nuv.csv', radius=0.0045, annulus=[0.0050,0.0060])}}}\\\hline
-	gMap & Creates an image and/or image cubes (in units of counts and/or calibrated fluxes) for a given area of the sky and (optionally) time sampling. Example to create an NUV coadd image (in counts) using all available data, as well as an image cube using 30-second slices, of a 6x6 arcmin area on the sky centered on CR Draconis: \parbox[t]{0.34\textwidth}{\footnotesize{\texttt{gMap(band='NUV', skypos=[244.27247, 55.268069], stepsz=30., skyrange=[0.1,0.1], cntfile='imgcube.fits', cntcoaddfile='coadd.fits')}}}\\\hline
-\end{tabular}
-\caption{Summary of Primary gPhoton Modules with example Python syntax.}
+	gPipeline & Generates aspect-corrected photon lists from a small set of user supplied input files. Output from gPipeline was used to populate the photon event database that the other modules query and, therefore, the majority of researchers will not need this module. Please see the User Guide for syntax.\\\hline
+	gFind & Provides information on the available raw exposure depths and time ranges for any location on the sky. Example to find the total available exposure depth, in each band, for the star CR Draconis: \parbox[t]{0.315\textwidth}{\footnotesize{\texttt{gFind(band='both', exponly=True, skypos=[244.27247, 55.268069])}}}\\\hline
+	gAperture & Generates a light curve (returned as a table of times, calibrated fluxes, and additional parameters) for a given coordinate, time sampling, and aperture size. Example to create a light curve with 10-second bins in the NUV, with specified aperture radius and background annuli (always in degrees): \parbox[t]{0.315\textwidth}{\footnotesize{\texttt{gAperture(band='NUV', skypos=[244.27247, 55.268069], stepsz=10., csvfile='nuv.csv', radius=0.0045, annulus=[0.0050,0.0060])}}}\\\hline
+	gMap & Creates an image and/or image cubes (in units of counts and/or calibrated fluxes) for a given area of the sky and (optionally) time sampling. Example to create an NUV coadd image (in counts) using all available data, as well as an image cube using 30-second slices, of a 6x6 arcmin area on the sky centered on CR Draconis: \parbox[t]{0.315\textwidth}{\footnotesize{\texttt{gMap(band='NUV', skypos=[244.27247, 55.268069], stepsz=30., skyrange=[0.1,0.1], cntfile='imgcube.fits', cntcoaddfile='coadd.fits')}}}\\\hline
+\end{tabularx}
 \label{moduledesc}
 \end{table}
 
