@@ -413,7 +413,7 @@ data = {'FUV':read_lc('{path}/{s}_dm_FUV_{a}.csv'.format(
                                             s=source,path=inpath,a=aperas))}
 
 def magrange(band):
-    return [refmag[band]-0.1,refmag[band]+0.1] if band=='NUV' else [refmag[band]-0.2,refmag[band]+0.6]
+    return [refmag[band]-0.06,refmag[band]+0.1] if band=='NUV' else [refmag[band]-0.2,refmag[band]+0.6]
 
 aper = 7
 radius = gt.aper2deg(aper)
@@ -551,7 +551,7 @@ for i,band in enumerate(['NUV','FUV']):
     if band is 'FUV':
         lix = np.where((legs[band][ix[band]]>3) | (legs[band][ix[band]]<0))
         _,_,newpeak,_ = make_kde(mags[ix[band][0][lix]],magrange(band))
-        print 'w/o legs 1-3, FUV peak at {p}'.format(p=newpeak)
+        #print 'w/o legs 1-3, FUV peak at {p}'.format(p=newpeak)
     plt.axvline(peak, color='k', linestyle='dotted', linewidth=2,
         label='KDE Peak: {p}'.format(p=round(peak,2)))
     plt.axvline(np.median(mags[ix[band]]), color='r', linestyle='dashed',
@@ -559,7 +559,7 @@ for i,band in enumerate(['NUV','FUV']):
         label='Median: {m}'.format(m=round(np.median(mags[ix[band]]),2)))
     plt.xlim(magrange(band))
     plt.gca().invert_xaxis()
-    plt.legend(loc=2,fontsize=18)
+    plt.legend(loc=2,fontsize=22)
     plt.xlabel('{b} gAperture AB Magnitude ({target})'.format(
         target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=20)
     plt.tick_params(axis='both', which='major', labelsize=18)
@@ -567,8 +567,8 @@ for i,band in enumerate(['NUV','FUV']):
              3 if band is 'NUV' else .6,
                             '(a)' if band is 'NUV' else '(b)',fontsize=30)
     plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.06),
-            18 if band is 'NUV' else 4.45,'n={n}'.format(
-                            n=len(mags[ix[band]])),fontsize=22)
+            16 if band is 'NUV' else 3.8,'n={n}'.format(
+                            n=len(mags[ix[band]])),fontsize=24)
     plt.tight_layout()
 plt.savefig('{path}/Fig08a.pdf'.format(path=outpath),format='pdf',dpi=1000)
 
@@ -638,13 +638,13 @@ for i,band in enumerate(['NUV','FUV']):
     plt.xlabel('{b} MCAT AB Magnitude ({target})'.format(
         target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=20)
     plt.tick_params(axis='both', which='major', labelsize=16)
-    plt.legend(loc=2,fontsize=18)
+    plt.legend(loc=2,fontsize=22)
     plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.05),
         3 if band is 'NUV' else 1.5,
                             '(c)' if band is 'NUV' else '(d)',fontsize=30)
     plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.05),
-        17 if band is 'NUV' else 6.5,'n={n}'.format(
-            n=len(mags[ix[band]])),fontsize=22)
+        15 if band is 'NUV' else 5.5,'n={n}'.format(
+            n=len(mags[ix[band]])),fontsize=24)
     plt.tight_layout()
 plt.savefig('{path}/Fig08b.pdf'.format(path=outpath),format='pdf',dpi=1000)
 
@@ -673,10 +673,10 @@ for band in ['FUV']:
     plt.ylim(magrange(band)[0],magrange(band)[1])
     plt.gca().invert_yaxis()
     plt.xlabel('Effective Exposure Depth (s)'.format(
-        n=len(ix[band][0])),fontsize=24)
-    plt.ylabel('{b} gAperture Magnitude'.format(
-        target=target.split('_')[0],b=band),fontsize=24)
-    plt.tick_params(axis='both', which='major', labelsize=20)
+        n=len(ix[band][0])),fontsize=28)
+    plt.ylabel('{b} gAperture Mag'.format(
+        target=target.split('_')[0],b=band),fontsize=28)
+    plt.tick_params(axis='both', which='major', labelsize=22)
     a,b = data_errors(refmag[band],band,
         np.array(data[band]['exptime'])[ix[band]],sigma=nsigma,aper=aper)
     lix = np.where((legs[band][ix[band]]>3) | (legs[band][ix[band]]<0))
@@ -689,7 +689,7 @@ for band in ['FUV']:
         b=band,n=cnt,m=len(ix[band][0]),p=100*cnt/len(ix[band][0]),s=nsigma)
     print 'w/o legs 1-3... {b}: {n} of {m} ({p}%) within {s} sigma'.format(
             b=band,n=cntlix,m=len(ix[band][0][lix]),p=100*cntlix/len(ix[band][0][lix]),s=nsigma)
-    plt.text(50, 15.9, '{p}% within {s}{sym} (excluding legs 1-3, n={n})'.format(
+    plt.text(30, 15.9, '{p}% within {s}{sym} (excluding legs 1-3, n={n})'.format(
         p=100*cntlix/len(ix[band][0][lix]),s=nsigma,sym=r'$\sigma$',
         n=len(np.array(data[band]['mag_mcatbgsub'])[ix[band][0][lix]])), fontsize=26)
     plt.tight_layout()
@@ -728,8 +728,8 @@ for i,band in enumerate(['FUV']):
     plt.legend(loc=2,fontsize=22)
     plt.text(magrange(band)[1]-0.1,3,'Excludes legs 1-3.',fontsize=26)
     plt.xlabel('{b} gAperture Magnitude'.format(
-        target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=24)
-    plt.tick_params(axis='both', which='major', labelsize=20)
+        target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=28)
+    plt.tick_params(axis='both', which='major', labelsize=22)
     plt.text(magrange(band)[1]-0.05,6,'n={n}'.format(n=len(mags[ix[band]][lix])),fontsize=26)
     plt.tight_layout()
     plt.savefig('{path}/Fig09c.pdf'.format(path=outpath),
@@ -1187,10 +1187,10 @@ for sigma in [3]:
             cps = gt.mag2counts(mag,band)
             cps_err = sigma*np.sqrt(cps*t_eff)/t_eff
             mag_err = mag-gt.counts2mag(cps+cps_err,band)
-            plt.plot(t_raw,mag_err,label='{m}{u}'.format(m=mag,u=' AB Mag' if mag==max(magrange) else ''))
+            plt.plot(t_raw,mag_err,label='{m}{u}'.format(m=mag,u=' Mag' if ((mag==23) | (mag==17)) else ''))
         for l in [30]:
             plt.axvline(l, color='k', linestyle='dotted', linewidth=2, label='{n} Seconds'.format(n=l))
-        plt.legend(fontsize=16)
+        plt.legend(fontsize=22,ncol=2)
     plt.tight_layout()
     plt.savefig('{p}/Fig11.pdf'.format(p=outpath,n=sigma),
         format='pdf',dpi=1000,bbox_inches='tight')
