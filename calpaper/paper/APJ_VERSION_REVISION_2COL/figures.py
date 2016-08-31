@@ -1298,14 +1298,18 @@ for i in xrange(len(all_flares)):
 
     # Get the approximate calendar date of the event.
     mean_date = calculate_caldat(numpy.mean(these_times))
-    these_subplots[row].set_title(mean_date, fontsize=12)
+    these_subplots[row].set_title(mean_date, fontsize=18)
+    these_subplots[row].tick_params(labelsize=16)
+    offset_text = these_subplots[row].yaxis.get_offset_text()
+    offset_text.set_size(16)
 
     # Label the x-axis, if this is the last subplot.
     if row == len(all_flares)-1:
-        these_subplots[row].set_xlabel('Time Elapsed (Minutes)')
+        these_subplots[row].set_xlabel('Time Elapsed (Minutes)',fontsize="xx-large")
 
     # Make sure x-axis plot limits are enforced.
     these_subplots[row].set_xlim(xlims[i])
 
 pyp.subplots_adjust(hspace=0.30,top=0.98,bottom=0.03,right=0.98,left=0.08)
 pyp.savefig(file_name)
+
