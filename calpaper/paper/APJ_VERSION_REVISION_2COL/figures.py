@@ -1180,9 +1180,9 @@ for sigma in [3]:
         plt.semilogx()
         plt.xlim(1,1600)
         #plt.title('{b} Bin Depths vs. Error'.format(b=band),fontsize=16)
-        plt.xlabel('Exposure Bin Depth (s)',fontsize=20)
-        plt.ylabel('{b} {n}{s} Error (AB Mag)'.format(b=band,n=sigma,s=r'$\sigma$'),fontsize=20)
-        plt.tick_params(axis='both', which='major', labelsize=18)
+        plt.xlabel('Exposure Bin Depth (s)',fontsize=24)
+        plt.ylabel('{b} {n}{s} Error (AB Mag)'.format(b=band,n=sigma,s=r'$\sigma$'),fontsize=24)
+        plt.tick_params(axis='both', which='major', labelsize=20)
         for mag in magrange:
             cps = gt.mag2counts(mag,band)
             cps_err = sigma*np.sqrt(cps*t_eff)/t_eff
