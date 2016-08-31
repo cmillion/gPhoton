@@ -447,17 +447,15 @@ for band in bands:
                                                     gt.apcorrect1(radius,band),
         r = refmag[band])
 
-# The following plots will demonstrate the FUV multi-modality
-#for band in bands:
+# The following plots demonstrate the FUV multi-modality
 fig = plt.figure(figsize=(10*scl,4*scl))
 fig.subplots_adjust(left=0.12,right=0.95,wspace=0.05,bottom=0.15,top=0.9)
 band = 'FUV'
 plt.subplot(1,2,1)
-plt.tick_params(labelsize=14)
-plt.ylabel('{d} AB Magnitude (MCAT - gAperture)'.format(d=r'$\Delta$'),
-                                                                fontsize=18)
-plt.xlabel('CAI Observation Leg, {target} ({b})'.format(
-                            target=target.split('_')[0],b=band),fontsize=18)
+plt.tick_params(labelsize=20)
+plt.ylabel('{d} AB Mag (MCAT - gAperture)'.format(d=r'$\Delta$'),fontsize=22)
+plt.xlabel('CAI Observation Leg ({target}, {b})'.format(
+                            target=target.split('_')[0],b=band),fontsize=24)
 plt.axhline(-0.015, color='g', linestyle='solid', linewidth=1)
 plt.axhline(-0.05, color='g', linestyle='solid', linewidth=1)
 dmag = data[band]['aper{a}'.format(a=aper)]-data[band]['mag_mcatbgsub']
@@ -466,7 +464,7 @@ plt.ylim(dmagrange)
 plt.plot(legs[band][ix[band]],
                         np.array(dmag)[ix[band]],'.',alpha=0.3,color='k')
 plt.subplot(1,2,2,yticks=[])
-plt.tick_params(labelsize=14)
+plt.tick_params(labelsize=20)
 plt.hist(np.array(dmag)[ix[band]],bins=50,range=dmagrange,
                  orientation='horizontal',color='k',histtype='step',normed=1)
 plt.axhline(-0.015, color='g', linestyle='solid', linewidth=1)
@@ -522,8 +520,9 @@ for band in data.keys():
                  gt.apcorrect1(radius,band)>=b[lix]) &
             (np.array(data[band]['mag_mcatbgsub'])[ix[band][0][lix]]-
                  gt.apcorrect1(radius,band)<=a[lix]))[0])
-        print 'w/o legs 1-3... {b}: {n} of {m} ({p}%) within {s} sigma'.format(
-            b=band,n=cntlix,m=len(ix[band][0][lix]),p=100*cntlix/len(ix[band][0][lix]),s=nsigma)
+        #print 'w/o legs 1-3... {b}: {n} of {m} ({p}%) within {s} sigma'.format(
+        #    b=band,n=cntlix,m=len(ix[band][0][lix]),
+        #    p=100*cntlix/len(ix[band][0][lix]),s=nsigma)
     plt.text(150, 15.9 if band=='FUV' else 14.83,
         '{p}% within {s}{sym} (n={n})'.format(
         p=100*cnt/len(ix[band][0]),s=nsigma,sym=r'$\sigma$',
@@ -545,7 +544,7 @@ for i,band in enumerate(['NUV','FUV']):
     plt.hist(mags[ix[band]],bins=bincnt,color='k',histtype='step',
         range=magrange(band),normed=1)
     plt.axvline(refmag[band], color='g', linestyle='solid', linewidth=4,
-        label='Ref: {r} AB Mag'.format(r=round(refmag[band],2)))
+        label='Ref: {r} Mag'.format(r=round(refmag[band],2)))
     x,y,peak,bandwidth = make_kde(mags[ix[band]],magrange(band))
     plt.plot(x,y)
     print '{b}: peak={p} ({bw})'.format(b=band,p=peak,bw=bandwidth)
@@ -560,7 +559,7 @@ for i,band in enumerate(['NUV','FUV']):
         label='Median: {m}'.format(m=round(np.median(mags[ix[band]]),2)))
     plt.xlim(magrange(band))
     plt.gca().invert_xaxis()
-    plt.legend(loc=2,fontsize=16)
+    plt.legend(loc=2,fontsize=18)
     plt.xlabel('{b} gAperture AB Magnitude ({target})'.format(
         target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=20)
     plt.tick_params(axis='both', which='major', labelsize=18)
@@ -568,7 +567,7 @@ for i,band in enumerate(['NUV','FUV']):
              3 if band is 'NUV' else .6,
                             '(a)' if band is 'NUV' else '(b)',fontsize=30)
     plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.06),
-            18 if band is 'NUV' else 4.7,'n={n}'.format(
+            18 if band is 'NUV' else 4.45,'n={n}'.format(
                             n=len(mags[ix[band]])),fontsize=22)
     plt.tight_layout()
 plt.savefig('{path}/Fig08a.pdf'.format(path=outpath),format='pdf',dpi=1000)
@@ -625,7 +624,7 @@ for i,band in enumerate(['NUV','FUV']):
     plt.hist(mags[ix[band]],bins=bincnt,color='k',histtype='step',
         range=magrange(band), normed=1)
     plt.axvline(refmag[band], color='g', linestyle='solid', linewidth=4,
-        label='Ref: {r} AB Mag'.format(r=round(refmag[band],2)))
+        label='Ref: {r} Mag'.format(r=round(refmag[band],2)))
     x,y,peak,bandwidth = make_kde(mags[ix[band]],magrange(band))
     print '{b}: peak={p} ({bw})'.format(b=band,p=peak,bw=bandwidth)
     plt.plot(x,y)
@@ -639,12 +638,12 @@ for i,band in enumerate(['NUV','FUV']):
     plt.xlabel('{b} MCAT AB Magnitude ({target})'.format(
         target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=20)
     plt.tick_params(axis='both', which='major', labelsize=16)
-    plt.legend(loc=2,fontsize=16)
+    plt.legend(loc=2,fontsize=18)
     plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.05),
         3 if band is 'NUV' else 1.5,
                             '(c)' if band is 'NUV' else '(d)',fontsize=30)
     plt.text(magrange(band)[1]-(0.01 if band is 'NUV' else 0.05),
-        17.5 if band is 'NUV' else 6.5,'n={n}'.format(
+        17 if band is 'NUV' else 6.5,'n={n}'.format(
             n=len(mags[ix[band]])),fontsize=22)
     plt.tight_layout()
 plt.savefig('{path}/Fig08b.pdf'.format(path=outpath),format='pdf',dpi=1000)
@@ -674,10 +673,10 @@ for band in ['FUV']:
     plt.ylim(magrange(band)[0],magrange(band)[1])
     plt.gca().invert_yaxis()
     plt.xlabel('Effective Exposure Depth (s)'.format(
-        n=len(ix[band][0])),fontsize=20)
-    plt.ylabel('{b} gAperture Magnitude ({target})'.format(
-        target=target.split('_')[0],b=band),fontsize=18)
-    plt.tick_params(axis='both', which='major', labelsize=16)
+        n=len(ix[band][0])),fontsize=24)
+    plt.ylabel('{b} gAperture Magnitude'.format(
+        target=target.split('_')[0],b=band),fontsize=24)
+    plt.tick_params(axis='both', which='major', labelsize=20)
     a,b = data_errors(refmag[band],band,
         np.array(data[band]['exptime'])[ix[band]],sigma=nsigma,aper=aper)
     lix = np.where((legs[band][ix[band]]>3) | (legs[band][ix[band]]<0))
@@ -690,9 +689,9 @@ for band in ['FUV']:
         b=band,n=cnt,m=len(ix[band][0]),p=100*cnt/len(ix[band][0]),s=nsigma)
     print 'w/o legs 1-3... {b}: {n} of {m} ({p}%) within {s} sigma'.format(
             b=band,n=cntlix,m=len(ix[band][0][lix]),p=100*cntlix/len(ix[band][0][lix]),s=nsigma)
-    plt.text(75, 15.9, '{p}% within {s}{sym} (excluding legs 1-3, n={n})'.format(
+    plt.text(50, 15.9, '{p}% within {s}{sym} (excluding legs 1-3, n={n})'.format(
         p=100*cntlix/len(ix[band][0][lix]),s=nsigma,sym=r'$\sigma$',
-        n=len(np.array(data[band]['mag_mcatbgsub'])[ix[band][0][lix]])), fontsize=22)
+        n=len(np.array(data[band]['mag_mcatbgsub'])[ix[band][0][lix]])), fontsize=26)
     plt.tight_layout()
     plt.savefig('{path}/Fig09b.pdf'.format(path=outpath),
         format='pdf',dpi=1000)
@@ -711,7 +710,7 @@ for i,band in enumerate(['FUV']):
     plt.hist(mags[ix[band]][lix],bins=bincnt,color='k',histtype='step',
         range=magrange(band),normed=1)
     plt.axvline(refmag[band], color='g', linestyle='solid', linewidth=4,
-        label='Ref: {r} AB Mag'.format(r=round(refmag[band],2)))
+        label='Ref: {r} Mag'.format(r=round(refmag[band],2)))
     x,y,peak,bandwidth = make_kde(mags[ix[band]][lix],magrange(band))
     plt.plot(x,y)
     print '{b}: peak={p} ({bw})'.format(b=band,p=peak,bw=bandwidth)
@@ -726,12 +725,12 @@ for i,band in enumerate(['FUV']):
         label='Median: {m}'.format(m=round(np.median(mags[ix[band]][lix]),2)))
     plt.xlim(magrange(band))
     plt.gca().invert_xaxis()
-    plt.legend(loc=2,fontsize=16)
-    plt.text(magrange(band)[1]-0.05,3,'Excludes legs 1-3.',fontsize=22)
-    plt.xlabel('{b} gAperture Magnitude ({target})'.format(
-        target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=20)
-    plt.tick_params(axis='both', which='major', labelsize=18)
-    plt.text(magrange(band)[1]-0.05,7,'n={n}'.format(n=len(mags[ix[band]][lix])),fontsize=22)
+    plt.legend(loc=2,fontsize=22)
+    plt.text(magrange(band)[1]-0.1,3,'Excludes legs 1-3.',fontsize=26)
+    plt.xlabel('{b} gAperture Magnitude'.format(
+        target=target.split('_')[0],b=band,n=len(ix[band][0])),fontsize=24)
+    plt.tick_params(axis='both', which='major', labelsize=20)
+    plt.text(magrange(band)[1]-0.05,6,'n={n}'.format(n=len(mags[ix[band]][lix])),fontsize=26)
     plt.tight_layout()
     plt.savefig('{path}/Fig09c.pdf'.format(path=outpath),
         format='pdf',dpi=1000)
