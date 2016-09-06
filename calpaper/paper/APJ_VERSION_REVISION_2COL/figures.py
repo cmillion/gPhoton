@@ -1312,4 +1312,3 @@ for i in xrange(len(all_flares)):
 
 pyp.subplots_adjust(hspace=0.30,top=0.98,bottom=0.03,right=0.98,left=0.08)
 pyp.savefig(file_name)
-
