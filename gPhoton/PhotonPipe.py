@@ -8,6 +8,7 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
+from __future__ import absolute_import, division, print_function
 import os
 import csv
 import time
@@ -87,10 +88,10 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
     hdr = hdulist[0].header
     hdulist.close()
     eclipse = hdr['eclipse']
-    print "Eclipse is "+str(eclipse)+"."
+    print("Eclipse is "+str(eclipse)+".")
 
     # Returns detector constants.
-    print "Band is "+band+"."
+    print("Band is "+band+".")
     (xclk, yclk, xcen, ycen, xscl, yscl, xslp,
      yslp) = clk_cen_scl_slp(band, eclipse)
 
@@ -102,22 +103,22 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
                                                               eclipse)
         wig2, wig2data, wlk2, wlk2data, clk2, clk2data = post_csp_caldata()
 
-    print "Loading wiggle files..."
+    print("Loading wiggle files...")
     wiggle_x, _ = cal.wiggle(band, 'x')
     wiggle_y, _ = cal.wiggle(band, 'y')
 
-    print "Loading walk files..."
+    print("Loading walk files...")
     walk_x, _ = cal.walk(band, 'x')
     walk_y, _ = cal.walk(band, 'y')
 
-    print "Loading linearity files..."
+    print("Loading linearity files...")
     linearity_x, _ = cal.linearity(band, 'x')
     linearity_y, _ = cal.linearity(band, 'y')
 
     # This is for the post-CSP stim distortion corrections.
-    print "Loading distortion files..."
+    print("Loading distortion files...")
     if eclipse > 37460:
-        print " Using stim separation of :"+str(stimsep)
+        print(" Using stim separation of :"+str(stimsep))
     distortion_x, disthead = cal.distortion(band, 'x', eclipse, stimsep)
     distortion_y, _ = cal.distortion(band, 'y', eclipse, stimsep)
     (cube_x0, cube_dx, cube_y0, cube_dy, cube_d0, cube_dd, cube_nd, cube_nc,
@@ -133,24 +134,24 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         xoffset, yoffset = 0., 0.
 
     if os.path.isfile(str(ssdfile)):
-        print "SSD file provided: "+str(ssdfile)
+        print("SSD file provided: "+str(ssdfile))
         stim_coef0, stim_coef1 = get_stim_coefs(ssdfile)
     elif ssdfile:
-        print "SSD file requested: "+str(ssdfile)
+        print("SSD file requested: "+str(ssdfile))
         stim_coef0, stim_coef1 = create_ssd(raw6file, band, eclipse, ssdfile)
     else:
-        print "No SSD file provided or requested."
+        print("No SSD file provided or requested.")
         stim_coef0, stim_coef1 = create_ssd(raw6file, band, eclipse)
-    print "		stim_coef0, stim_coef1 = "+str(stim_coef0)+", "+str(stim_coef1)
+    print("		stim_coef0, stim_coef1 = "+str(stim_coef0)+", "+str(stim_coef1))
 
-    print "Loading mask file..."
+    print("Loading mask file...")
     mask, maskinfo = cal.mask(band)
     npixx = mask.shape[0]
     npixy = mask.shape[1]
     pixsz = maskinfo['CDELT2']
     maskfill = detsize/(npixx*pixsz)
 
-    print "Loading aspect data..."
+    print("Loading aspect data...")
     if aspfile:
         (aspra, aspdec, asptwist, asptime, aspheader,
          aspflags) = load_aspect(aspfile)
@@ -160,36 +161,36 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
 
     minasp, maxasp = min(asptime), max(asptime)
     trange = [minasp, maxasp]
-    print "			trange= ( {t0} , {t1} )".format(t0=trange[0], t1=trange[1])
+    print("			trange= ( {t0} , {t1} )".format(t0=trange[0], t1=trange[1]))
     ra0, dec0, roll0 = aspheader['RA'], aspheader['DEC'], aspheader['ROLL']
-    print "			[avgRA, avgDEC, avgROLL] = [{RA}, {DEC}, {ROLL}]".format(
-        RA=aspra.mean(), DEC=aspdec.mean(), ROLL=asptwist.mean())
+    print("			[avgRA, avgDEC, avgROLL] = [{RA}, {DEC}, {ROLL}]".format(
+        RA=aspra.mean(), DEC=aspdec.mean(), ROLL=asptwist.mean()))
 
     # This projects the aspect solutions onto the MPS field centers.
-    print "Computing aspect vectors..."
+    print("Computing aspect vectors...")
     (xi_vec, eta_vec) = gnomfwd_simple(aspra, aspdec, ra0, dec0, -asptwist,
                                        1.0/36000.0, 0.)
 
-    print "Loading raw6 file..."
+    print("Loading raw6 file...")
     raw6hdulist = pyfits.open(raw6file, memmap=1)
     raw6htab = raw6hdulist[1].header
     nphots = raw6htab['NAXIS2']
-    print "		"+str(nphots)+" events"
+    print("		"+str(nphots)+" events")
     cnt = 0
 
     outfile = outbase+'.csv'
-    print "Preparing output file "+outfile
+    print("Preparing output file "+outfile)
     spreadsheet = csv.writer(open(outfile, 'wb'), delimiter=',',
                              quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
     # If specified, dump lines with NULLS into a separate csv file.
     if nullfile:
         nullfile = outbase+'_NULL.csv'
-        print "Preparing output file "+nullfile
+        print("Preparing output file "+nullfile)
         NULLspreadsheet = csv.writer(open(nullfile, 'wb'), delimiter=',',
                                      quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
-    print ""
+    print("")
 
     for i in xrange(int(nphots/chunksz)+1):
         a = time.time()
@@ -553,15 +554,15 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
     stopt = time.time()
 
     print_inline("")
-    print ""
-    print "Runtime statistics:"
-    print " runtime		=	{seconds} sec. = ({minutes} min.)".format(
-        seconds=stopt-startt, minutes=(stopt-startt)/60.)
-    print "	processed	=	"+str(cnt)+" of "+str(nphots)+" events."
+    print("")
+    print("Runtime statistics:")
+    print(" runtime		=	{seconds} sec. = ({minutes} min.)".format(
+        seconds=stopt-startt, minutes=(stopt-startt)/60.))
+    print("	processed	=	"+str(cnt)+" of "+str(nphots)+" events.")
     if cnt < nphots:
-        print "		WARNING: MISSING EVENTS!"
-    print "	rate		=	"+str(nphots/(stopt-startt))+" photons/sec."
-    print ""
+        print("		WARNING: MISSING EVENTS!")
+    print("	rate		=	"+str(nphots/(stopt-startt))+" photons/sec.")
+    print("")
 
     return
 # ------------------------------------------------------------------------------

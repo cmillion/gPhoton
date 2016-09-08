@@ -6,10 +6,11 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
+from __future__ import absolute_import
+from os import path
 # Always prefer setuptools over distutils
 from setuptools import setup
 # To use a consistent encoding
-from os import path
 from gPhoton import __version__
 
 HERE = path.abspath(path.dirname(__file__))

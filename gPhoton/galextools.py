@@ -7,6 +7,7 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
+from __future__ import absolute_import, division, print_function
 import numpy as np
 from astropy import wcs as pywcs
 import datetime

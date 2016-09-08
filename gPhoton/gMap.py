@@ -7,6 +7,7 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
+from __future__ import absolute_import, division, print_function
 import os
 import argparse
 from imagetools import write_images

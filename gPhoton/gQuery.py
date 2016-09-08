@@ -6,6 +6,7 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
+from __future__ import absolute_import, division, print_function
 from MCUtils import manage_requests2
 import CalUtils
 from galextools import isPostCSP

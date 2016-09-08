@@ -8,8 +8,8 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
+from __future__ import absolute_import, division, print_function
 import csv
-import time
 from astropy.io import fits as pyfits
 import numpy as np
 from FileUtils import load_aspect, web_query_aspect
@@ -88,7 +88,7 @@ def compute_deadtime(t, x, y, band, eclipse, trange=[[], []]):
         during the entire observation or per time bin (if trange is defined).
     """
 
-    print "Computing deadtime correction..."
+    print("Computing deadtime correction...")
     refrate = 79.0 # counts per second
     minrate = refrate*.4
     maxrate = refrate+2.
@@ -105,12 +105,12 @@ def compute_deadtime(t, x, y, band, eclipse, trange=[[], []]):
     exptime = trange[1]-trange[0]
 
     stimt, stimx_as, stimy_as, stimix = find_stims(t, x, y, band, eclipse)
-    print "Located "+str(len(stimt))+" stim events."
+    print("Located "+str(len(stimt))+" stim events.")
 
     dead = 0.
     # Compute using an emperical formula -- Method 1
     dead0 = tec2fdead*(len(t)/exptime)/feeclkratio
-    print "	Simple correction w/ Method 1: "+str(dead0)
+    print("	Simple correction w/ Method 1: "+str(dead0))
 
     # Toss more error checking into here esp. wrt minrate and maxrate
     if exptime <= tstep:
@@ -125,21 +125,21 @@ def compute_deadtime(t, x, y, band, eclipse, trange=[[], []]):
 
     h, xh = np.histogram(t-trange[0], bins=bins)
     dead1 = (tec2fdead*(h/tstep)/feeclkratio).mean()
-    print "	Correction w/ Method 1:        "+str(dead1)
-    print "	Correction w/ Method 2:        "+str(dead2)
+    print("	Correction w/ Method 1:        "+str(dead1))
+    print("	Correction w/ Method 2:        "+str(dead2))
 
     # For short time slices, the "best" deadtime estimation method
     #  doesn't work very well.
     if exptime <= 5.:
-        print "Short exposure. Using Method 1."
+        print("Short exposure. Using Method 1.")
         dead = dead1
         if abs(dead1-dead0) > maxdiff:
-            print "Warning: Deadtime corrections are suspect."
+            print("Warning: Deadtime corrections are suspect.")
     else:
-        print "Using Method 2."
+        print("Using Method 2.")
         dead = dead2
         if abs(dead2-dead1) > maxdiff:
-            print "Warning: Deadtime corrections are suspect."
+            print("Warning: Deadtime corrections are suspect.")
 
     return dead
 # ------------------------------------------------------------------------------
@@ -228,7 +228,7 @@ def compute_exposure(t, x, y, flags, band, eclipse, trange=[[], []]):
     ix = ((flags != 7) & (flags != 12)).nonzero()[0]
 
     if not len(ix):
-        print "No unflagged data."
+        print("No unflagged data.")
         return 0.
     if not trange[0]:
         trange[0] = min(t[ix])
@@ -236,19 +236,19 @@ def compute_exposure(t, x, y, flags, band, eclipse, trange=[[], []]):
         trange[1] = max(t[ix])
 
     exptime = trange[1]-trange[0]
-    print "Gross exposure time is "+str(exptime)+" seconds."
+    print("Gross exposure time is "+str(exptime)+" seconds.")
 
     deadtime = exptime*compute_deadtime(t, x, y, band, eclipse,
                                         trange=trange)
-    print "Removing "+str(deadtime)+" seconds of exposure from deadtime."
+    print("Removing "+str(deadtime)+" seconds of exposure from deadtime.")
 
     ix = (flags == 0).nonzero()[0]
     shutter = compute_shutter(t[ix], trange=trange)
 
     if shutter:
-        print ("Removing "+str(shutter)+" seconds of exposure from"
-               " shutter.")
-    print "Corrected exposure is "+str(exptime-deadtime-shutter)+" seconds."
+        print("Removing "+str(shutter)+" seconds of exposure from"
+              " shutter.")
+    print("Corrected exposure is "+str(exptime-deadtime-shutter)+" seconds.")
 
     return exptime-deadtime-shutter
 # ------------------------------------------------------------------------------
@@ -303,14 +303,14 @@ def create_rr(csvfile, band, eclipse, aspfile=None, expstart=None, expend=None,
 
     aspum = pltscl/1000.0
 
-    print "Loading flat file..."
+    print("Loading flat file...")
     flat, flatinfo = cal.flat(band)
     npixx = flat.shape[0]
     npixy = flat.shape[1]
     pixsz = flatinfo['CDELT2']
     flatfill = detsize/(npixx*pixsz)
 
-    print "Retrieving aspect data..."
+    print("Retrieving aspect data...")
     if aspfile:
         (aspra, aspdec, asptwist, asptime, aspheader,
          aspflags) = load_aspect([aspfile])
@@ -319,13 +319,13 @@ def create_rr(csvfile, band, eclipse, aspfile=None, expstart=None, expend=None,
          aspflags) = web_query_aspect(eclipse, retries=retries)
     minasp = min(asptime)
     maxasp = max(asptime)
-    print "			trange= ( "+str(minasp)+" , "+str(maxasp)+" )"
+    print("			trange= ( "+str(minasp)+" , "+str(maxasp)+" )")
     ra0, dec0, roll0 = aspheader['RA'], aspheader['DEC'], aspheader['ROLL']
-    print ("			[RA, DEC, ROLL] = ["+str(ra0)+", "+str(dec0)+
-           ", "+str(roll0)+"]")
+    print("			[RA, DEC, ROLL] = ["+str(ra0)+", "+str(dec0)+
+          ", "+str(roll0)+"]")
 
-    print "Computing aspect vectors..."
-    print "Calculating aspect solution vectors..."
+    print("Computing aspect vectors...")
+    print("Calculating aspect solution vectors...")
     xi_vec, eta_vec = np.array([]), np.array([])
     xi_vec, eta_vec = gnomfwd_simple(ra0, dec0, aspra, aspdec, -asptwist,
                                      1.0/36000.0, 0.)
@@ -345,10 +345,10 @@ def create_rr(csvfile, band, eclipse, aspfile=None, expstart=None, expend=None,
     row = (((eta_vec/36000.)/(detsize/2.)*flatfill + 1.)/2. * npixy)-400.
     for i in xrange(len(asptime)-1):
         if (asptime[i]+GPSSECS) < expstart or (asptime[i]+GPSSECS) > expend:
-            print "		", asptime[i]+GPSSECS, " out of range."
+            print("		", asptime[i]+GPSSECS, " out of range.")
             continue
         elif (aspflags[i]%2 != 0) or (aspflags[i+1]%2 != 0):
-            print "		", asptime[i]+GPSSECS, " flagged."
+            print("		", asptime[i]+GPSSECS, " flagged.")
             continue
         else:
             rr += scipy.ndimage.interpolation.shift(
@@ -369,7 +369,7 @@ def create_rr(csvfile, band, eclipse, aspfile=None, expstart=None, expend=None,
 
 # ------------------------------------------------------------------------------
 def write_rr(csvfile, band, eclipse, rrfile, outfile, aspfile=None,
-    expstart=None, expend=None, retries=20):
+             expstart=None, expend=None, retries=20):
     """
     Creates a relative response map for an eclipse, given a photon list
         file, and writes it to a FITS file.
@@ -468,11 +468,11 @@ def write_rrhr(rrfile, rrhrfile, outfile):
 
     hdulist1 = pyfits.open(rrfile)
     hdr1 = hdulist1[0].header
-    hdulist1.close
+    hdulist1.close()
 
     hdulist0 = pyfits.open(rrhrfile)
     hdr0 = hdulist0[0].header
-    hdulist0.close
+    hdulist0.close()
 
     hdr0.update(key='expstart', value=hdr1['expstart'])
     hdr0.update(key='expend', value=hdr1['expend'])
@@ -516,11 +516,11 @@ def write_int(cntfile, rrhrfile, oldint, outfile):
 
     hdulist1 = pyfits.open(cntfile)
     hdr1 = hdulist1[0].header
-    hdulist1.close
+    hdulist1.close()
 
     hdulist0 = pyfits.open(oldint)
     hdr0 = hdulist0[0].header
-    hdulist0.close
+    hdulist0.close()
 
     hdr0.update(key='expstart', value=hdr1['expstart'])
     hdr0.update(key='expend', value=hdr1['expend'])

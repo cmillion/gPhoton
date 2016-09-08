@@ -9,6 +9,7 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
+from __future__ import absolute_import, division, print_function
 import csv
 import numpy as np
 import pandas as pd
@@ -54,7 +55,7 @@ def clk_cen_scl_slp(band, eclipse):
         xslp, yslp = 0.53, 0.
     else:
         # Might need to raise a ValueError or some other proper error?
-        print 'Band must be either fuv or nuv ... Exiting.'
+        print('Band must be either fuv or nuv ... Exiting.')
         return
 
     return xclk, yclk, xcen, ycen, xscl, yscl, xslp, yslp
@@ -132,7 +133,7 @@ def avg_stimpos(band, eclipse):
 
     else:
         # Might need to raise a ValueError or other proper error here.
-        print "Error: No valid band specified."
+        print("Error: No valid band specified.")
 
     return avgstim
 # ------------------------------------------------------------------------------
@@ -652,17 +653,17 @@ def find_fuv_offset(scstfile):
 
     scsthead = get_fits_header(scstfile)
 
-    print "Reading header values from scst file: ", scstfile
+    print("Reading header values from scst file: ", scstfile)
 
     try:
         eclipse = int(scsthead['eclipse'])
         fdttdc = float(scsthead['fdttdc'])
     except KeyError:
-        print "ERROR: FUV header values missing from SCST."
+        print("ERROR: FUV header values missing from SCST.")
         return 0., 0.
 
-    print "Offsetting FUV image for eclipse {e} at {t} degrees.".format(
-        e=eclipse, t=fdttdc)
+    print("Offsetting FUV image for eclipse {e} at {t} degrees.".format(
+        e=eclipse, t=fdttdc))
 
     fodx_coef_0 = cal.offset('x')[eclipse-1, 1]
     fody_coef_0 = cal.offset('y')[eclipse-1, 1]
@@ -671,13 +672,13 @@ def find_fuv_offset(scstfile):
     fody_coef_1 = 0.3597
 
     if (fdttdc <= 20.) or (fdttdc >= 40.):
-        print "ERROR: FDTTDC is out of range at {t}".format(t=fdttdc)
+        print("ERROR: FDTTDC is out of range at {t}".format(t=fdttdc))
         return 0., 0.
     else:
         xoffset = fodx_coef_0 - (fodx_coef_1 * (fdttdc - 29.))
         yoffset = fody_coef_0 - (fody_coef_1 * (fdttdc - 29.))
-        print "Setting FUV offsets to x={x}, y={y}".format(x=xoffset,
-                                                           y=yoffset)
+        print("Setting FUV offsets to x={x}, y={y}".format(x=xoffset,
+                                                           y=yoffset))
 
     return xoffset, yoffset
 # ------------------------------------------------------------------------------
@@ -691,7 +692,7 @@ def post_csp_caldata():
         clock corrections. See the calibration paper for details.
     """
 
-    print "Loading post-CSP wiggle file..."
+    print("Loading post-CSP wiggle file...")
 
     wig2fits, wig2head = cal.wiggle2()
     wig2 = np.zeros([128, 8, 32, 8])
@@ -706,7 +707,7 @@ def post_csp_caldata():
 
     wig2data = {'start':wig2head['Y_AS_0'], 'inc':wig2head['Y_AS_INC']}
 
-    print "Loading post-CSP walk file..."
+    print("Loading post-CSP walk file...")
 
     wlk2fits, wlk2head = cal.walk2()
     wlk2 = np.zeros([100, 8, 32])
@@ -720,7 +721,7 @@ def post_csp_caldata():
 
     wlk2data = {'start':wlk2head['Y_AS_0'], 'inc':wlk2head['Y_AS_INC']}
 
-    print "Loading post-CSP clock file..."
+    print("Loading post-CSP clock file...")
 
     clk2fits, clk2head = cal.clock2()
     clk2 = np.zeros([100, 8])
@@ -908,15 +909,15 @@ def raw6_to_stims(raw6file, band, eclipse, margin=90.001):
         data from each stim are stored in dicts.
     """
 
-    print "Extracting stim data from ", raw6file, " ..."
-    print "         Using a search box with sides of ", margin, " arcseconds."
+    print("Extracting stim data from ", raw6file, " ...")
+    print("         Using a search box with sides of ", margin, " arcseconds.")
 
     # This is unscoped for some reason... so I'm just coding it.
     (xclk, yclk, xcen, ycen, xscl, yscl, xslp, yslp) = clk_cen_scl_slp(band,
                                                                        eclipse)
 
     chunksz = 1000000
-    print "Loading raw6 file..."
+    print("Loading raw6 file...")
     raw6hdulist = pyfits.open(raw6file, memmap=1)
     raw6htab = raw6hdulist[1].header
     nphots = raw6htab['NAXIS2']
@@ -946,7 +947,7 @@ def raw6_to_stims(raw6file, band, eclipse, margin=90.001):
          'yb':np.array([]), 'yap':np.array([])}
         )
 
-    print ""
+    print("")
 
     for i in xrange(int(nphots/chunksz)+1):
         csvrows = []
@@ -1070,7 +1071,7 @@ def compute_stimstats(raw6file, band, eclipse):
         stim correction.
     """
 
-    print "Computing stim statistics and post-CSP corrections..."
+    print("Computing stim statistics and post-CSP corrections...")
 
     # Plate scale (in arcsec/mm).
     pltscl = 68.754932
@@ -1087,15 +1088,15 @@ def compute_stimstats(raw6file, band, eclipse):
     stim3avg = [stim3['x'].mean()*aspum, stim3['y'].mean()*aspum]
     stim4avg = [stim4['x'].mean()*aspum, stim4['y'].mean()*aspum]
 
-    print ("Init: Number of stim photons:", len(stim1['t']),
-           len(stim2['t']), len(stim3['t']), len(stim4['t']))
-    print ("Init: Mean x values at stim positions (arcsec):", stim1avg[0],
-           stim2avg[0], stim3avg[0], stim4avg[0])
-    print ("Init: Mean x values at stim positions (arcsec):", stim1avg[1],
-           stim2avg[1], stim3avg[1], stim4avg[1])
-    print ("Init: Mean y values at stim positions (micron):",
-           stim1avg[1]/aspum, stim2avg[1]/aspum, stim3avg[1]/aspum,
-           stim4avg[1]/aspum)
+    print("Init: Number of stim photons:", len(stim1['t']),
+          len(stim2['t']), len(stim3['t']), len(stim4['t']))
+    print("Init: Mean x values at stim positions (arcsec):", stim1avg[0],
+          stim2avg[0], stim3avg[0], stim4avg[0])
+    print("Init: Mean x values at stim positions (arcsec):", stim1avg[1],
+          stim2avg[1], stim3avg[1], stim4avg[1])
+    print("Init: Mean y values at stim positions (micron):",
+          stim1avg[1]/aspum, stim2avg[1]/aspum, stim3avg[1]/aspum,
+          stim4avg[1]/aspum)
 
     # Compute the RMS around the mean (in arcseconds).
     stim1rms = [rms(stim1['x']*aspum), rms(stim1['y']*aspum)]
@@ -1106,15 +1107,15 @@ def compute_stimstats(raw6file, band, eclipse):
     # Compute the stim separation.
     stimsep = (((stim2avg[0]-stim1avg[0])+(stim4avg[0]-stim3avg[0])+
                 (stim1avg[1]-stim3avg[1])+(stim2avg[1]-stim4avg[1]))/4.)
-    print ("Init: RMS  x values at stim positions (arcsec):", stim1rms[0],
-           stim2rms[0], stim3rms[0], stim4rms[0])
-    print ("Init: RMS  y values at stim positions (arcsec):", stim1rms[1],
-           stim2rms[1], stim3rms[1], stim4rms[1])
-    print ("Init: (arcsec): Stim sep =", stimsep, "    Average: X RMS =",
-           (stim1rms[0]+stim2rms[0]+stim3rms[0]+stim4rms[0])/4.,
-           "        Y RMS =",
-           (stim1rms[1]+stim2rms[1]+stim3rms[1]+stim4rms[1])/4.)
-    print "Raw stim separation is", stimsep
+    print("Init: RMS  x values at stim positions (arcsec):", stim1rms[0],
+          stim2rms[0], stim3rms[0], stim4rms[0])
+    print("Init: RMS  y values at stim positions (arcsec):", stim1rms[1],
+          stim2rms[1], stim3rms[1], stim4rms[1])
+    print("Init: (arcsec): Stim sep =", stimsep, "    Average: X RMS =",
+          (stim1rms[0]+stim2rms[0]+stim3rms[0]+stim4rms[0])/4.,
+          "        Y RMS =",
+          (stim1rms[1]+stim2rms[1]+stim3rms[1]+stim4rms[1])/4.)
+    print("Raw stim separation is", stimsep)
 
     # Compute means and RMS values for each stim for each YA value stim1.
     for ya in xrange(32):
@@ -1132,7 +1133,7 @@ def compute_stimstats(raw6file, band, eclipse):
               (avgstim['y3']+avgstim['y4'])/2.)
     My = (Y1-Y2)/(y1-y2)
     By = (Y1-My*y1)/aspum
-    print "Init: FODC: Y scale and shift (microns): My=", My, "By=", By
+    print("Init: FODC: Y scale and shift (microns): My=", My, "By=", By)
 
     # Compute Y scale and shift factors: yprime_as = (m * y_as) + B.
     x1, x2 = (stim1avg[0]+stim3avg[0])/2., (stim2avg[0]+stim4avg[0])/2.
@@ -1140,7 +1141,7 @@ def compute_stimstats(raw6file, band, eclipse):
               (avgstim['x2']+avgstim['x4'])/2.)
     Mx = (X1-X2)/(x1-x2)
     Bx = (X1-Mx*x1)/aspum
-    print "Init: FODC: X scale and shift (microns): Mx=", Mx, "Bx=", Bx
+    print("Init: FODC: X scale and shift (microns): Mx=", Mx, "Bx=", Bx)
 
     stim1['xs'] = stim1['x']*Mx+Bx
     stim1['ys'] = stim1['y']*My+By
@@ -1157,15 +1158,15 @@ def compute_stimstats(raw6file, band, eclipse):
     stim3avgs = [stim3['xs'].mean()*aspum, stim3['ys'].mean()*aspum]
     stim4avgs = [stim4['xs'].mean()*aspum, stim4['ys'].mean()*aspum]
 
-    print ("Scal: Number of stim photons:", len(stim1['xs']),
-           len(stim2['xs']), len(stim3['xs']), len(stim4['xs']))
-    print ("Scal: Mean x values at stim positions (arcsec):",
-           stim1avgs[0], stim2avgs[0], stim3avgs[0], stim4avgs[0])
-    print ("Scal: Mean y values at stim positions (arcsec):",
-           stim1avgs[1], stim2avgs[1], stim3avgs[1], stim4avgs[1])
-    print ("Scal: Mean y values at stim positions (microns):",
-           stim1avgs[1]/aspum, stim2avgs[1]/aspum, stim3avgs[1]/aspum,
-           stim4avgs[1]/aspum)
+    print("Scal: Number of stim photons:", len(stim1['xs']),
+          len(stim2['xs']), len(stim3['xs']), len(stim4['xs']))
+    print("Scal: Mean x values at stim positions (arcsec):",
+          stim1avgs[0], stim2avgs[0], stim3avgs[0], stim4avgs[0])
+    print("Scal: Mean y values at stim positions (arcsec):",
+          stim1avgs[1], stim2avgs[1], stim3avgs[1], stim4avgs[1])
+    print("Scal: Mean y values at stim positions (microns):",
+          stim1avgs[1]/aspum, stim2avgs[1]/aspum, stim3avgs[1]/aspum,
+          stim4avgs[1]/aspum)
 
     # Compute the new RMS around the mean (in arcseconds).
     stim1rmss = [rms(stim1['xs']*aspum), rms(stim1['ys']*aspum)]
@@ -1177,14 +1178,14 @@ def compute_stimstats(raw6file, band, eclipse):
     stimseps = (((stim2avgs[0]-stim1avgs[0])+(stim4avgs[0]-stim3avgs[0])+
                  (stim1avgs[1]-stim3avgs[1])+
                  (stim2avgs[1]-stim4avgs[1]))/4.)
-    print ("Scal: RMS  x values at stim positions (arcsec):",
-           stim1rmss[0], stim2rmss[0], stim3rmss[0], stim4rmss[0])
-    print ("Init: RMS  y values at stim positions (arcsec):",
-           stim1rmss[1], stim2rmss[1], stim3rmss[1], stim4rmss[1])
-    print ("Init: (arcsec): Stim sep =", stimseps, "   Average: X RMS =",
-           (stim1rmss[0]+stim2rmss[0]+stim3rmss[0]+stim4rmss[0])/4.,
-           "    Y RMS =",
-           (stim1rmss[1]+stim2rmss[1]+stim3rmss[1]+stim4rmss[1])/4.)
+    print("Scal: RMS  x values at stim positions (arcsec):",
+          stim1rmss[0], stim2rmss[0], stim3rmss[0], stim4rmss[0])
+    print("Init: RMS  y values at stim positions (arcsec):",
+          stim1rmss[1], stim2rmss[1], stim3rmss[1], stim4rmss[1])
+    print("Init: (arcsec): Stim sep =", stimseps, "   Average: X RMS =",
+          (stim1rmss[0]+stim2rmss[0]+stim3rmss[0]+stim4rmss[0])/4.,
+          "    Y RMS =",
+          (stim1rmss[1]+stim2rmss[1]+stim3rmss[1]+stim4rmss[1])/4.)
 
     # Fit straight line to YA>2 and YB==2 points.
     # This could be written more efficiently, but it's an attempt at a faithful
@@ -1203,11 +1204,11 @@ def compute_stimstats(raw6file, band, eclipse):
          stim2['ys'][ix2]-stim2avgs[1]/aspum,
          stim3['ys'][ix3]-stim3avgs[1]/aspum,
          stim4['ys'][ix4]-stim4avgs[1]/aspum), axis=0)
-    print "NOTE: Found,", len(w8), "points for YA correction fit."
+    print("NOTE: Found,", len(w8), "points for YA correction fit.")
 
     yac_coef1, yac_coef0 = np.polyfit(x8, y8, 1)
 
-    print "Scal: YA correction coef for YB=2:", yac_coef0, yac_coef1
+    print("Scal: YA correction coef for YB=2:", yac_coef0, yac_coef1)
 
     # Compute yb shift factors == zero for all.
     yac_ybs = np.zeros(8)
@@ -1217,25 +1218,25 @@ def compute_stimstats(raw6file, band, eclipse):
     # Set user slope adjustment. Use best slope adjustments from September 2010.
     # YB == 2...
     slope_scale = 1.04
-    print "NOTE: Using slope scale of,", slope_scale, "for YB==2."
+    print("NOTE: Using slope scale of,", slope_scale, "for YB==2.")
     rr1 = yac_coef1*slope_scale
     rr0 = (yac_coef0 + (16.*yac_coef1))-(16.*rr1)
     coef0_yb[2] = rr0
     coef1_yb[2] = rr1
-    print "New: YA correction coef (YB==2):", coef0_yb[2], coef1_yb[2]
+    print("New: YA correction coef (YB==2):", coef0_yb[2], coef1_yb[2])
 
     # YB == 3,4...
     slope_scale = 1.06
-    print "NOTE: Using slope scale of,", slope_scale, "for YB==3."
+    print("NOTE: Using slope scale of,", slope_scale, "for YB==3.")
     rr1 = yac_coef1*slope_scale
     rr0 = (yac_coef0 + (16.*yac_coef1))-(16.*rr1)
     coef0_yb[3] = rr0
     coef1_yb[3] = rr1
     coef0_yb[4] = rr0
     coef1_yb[4] = rr1
-    print "New: YA correction coef (YB==3):", coef0_yb[3], coef1_yb[3]
-    print "NOTE: Using slope scale of,", slope_scale, "for YB==4."
-    print "New: YA correction coef (YB==4):", coef0_yb[4], coef1_yb[4]
+    print("New: YA correction coef (YB==3):", coef0_yb[3], coef1_yb[3])
+    print("NOTE: Using slope scale of,", slope_scale, "for YB==4.")
+    print("New: YA correction coef (YB==4):", coef0_yb[4], coef1_yb[4])
 
     # Fill in look up array.
     yac = np.zeros([40, 8])
@@ -1261,29 +1262,29 @@ def compute_stimstats(raw6file, band, eclipse):
         s1m = ((stim1['ys']-stim1['yac'])[ix]*aspum).mean()
         s1r = rms((stim1['ys']-stim1['yac'])[ix]*aspum)
         if len(ix) > 0:
-            print ("Corrected stim 1: YB=", yb, " Num=", len(ix),
-                   " Mean=", s1m, " RMS=", s1r)
+            print("Corrected stim 1: YB=", yb, " Num=", len(ix),
+                  " Mean=", s1m, " RMS=", s1r)
     for yb in xrange(8):
         ix = ((stim2['yb'] == yb)&(stim2['ya'] > 4)).nonzero()[0]
         s2m = ((stim2['ys']-stim2['yac'])[ix]*aspum).mean()
         s2r = rms((stim2['ys']-stim2['yac'])[ix]*aspum)
         if len(ix) > 0:
-            print ("Corrected stim 2: YB=", yb, " Num=", len(ix),
-                   " Mean=", s2m, " RMS=", s2r)
+            print("Corrected stim 2: YB=", yb, " Num=", len(ix),
+                  " Mean=", s2m, " RMS=", s2r)
     for yb in xrange(8):
         ix = ((stim3['yb'] == yb)&(stim3['ya'] > 4)).nonzero()[0]
         s3m = ((stim3['ys']-stim3['yac'])[ix]*aspum).mean()
         s3r = rms((stim3['ys']-stim3['yac'])[ix]*aspum)
         if len(ix) > 0:
-            print ("Corrected stim 3: YB=", yb, " Num=", len(ix),
-                   " Mean=", s3m, " RMS=", s3r)
+            print("Corrected stim 3: YB=", yb, " Num=", len(ix),
+                  " Mean=", s3m, " RMS=", s3r)
     for yb in xrange(8):
         ix = ((stim4['yb'] == yb)&(stim4['ya'] > 4)).nonzero()[0]
         s4m = ((stim4['ys']-stim4['yac'])[ix]*aspum).mean()
         s4r = rms((stim4['ys']-stim4['yac'])[ix]*aspum)
         if len(ix) > 0:
-            print ("Corrected stim 4: YB=", yb, " Num=", len(ix),
-                   " Mean=", s4m, " RMS=", s4r)
+            print("Corrected stim 4: YB=", yb, " Num=", len(ix),
+                  " Mean=", s4m, " RMS=", s4r)
 
     return Mx, Bx, My, By, stimsep, yac
 # ------------------------------------------------------------------------------
@@ -1313,7 +1314,7 @@ def create_ssd(raw6file, band, eclipse, ssdfile=None):
         stim positions over time.
     """
     if ssdfile:
-        print "Preparing SSD output file "+ssdfile
+        print("Preparing SSD output file "+ssdfile)
         tbl = csv.writer(open(ssdfile, 'wb'), delimiter=' ',
                          quotechar='|', quoting=csv.QUOTE_MINIMAL)
         tbl.writerow(['|sct', '|stim_sep', '|stim_num', '|sep_fit'])

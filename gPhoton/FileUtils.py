@@ -5,11 +5,9 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
-import csv
+from __future__ import absolute_import, division, print_function
 from astropy.io import fits as pyfits
 import numpy as np
-from sys import stdout
-import requests
 import gQuery
 
 # ------------------------------------------------------------------------------
@@ -25,7 +23,7 @@ def load_raw6(raw6file):
         first extension, and the HDUList object returned from astropy.io.fits.
     """
 
-    print "		", raw6file
+    print("		", raw6file)
     hdulist = pyfits.open(raw6file, memmap=1)
     htab = hdulist[1].header
     hdulist.close()
@@ -53,7 +51,7 @@ def load_aspect(aspfile):
 
     header = {'RA':[], 'DEC':[], 'ROLL':[]}
     for i in xrange(len(aspfile)):
-        print "         ", aspfile[i]
+        print("         ", aspfile[i])
         hdulist = pyfits.open(aspfile[i], memmap=1)
         ra = np.append(ra, np.array(hdulist[1].data.field('ra')))
         dec = np.append(dec, np.array(hdulist[1].data.field('dec')))
@@ -99,12 +97,12 @@ def web_query_aspect(eclipse, retries=20):
         numpy.ndarrays.
     """
 
-    print "Attempting to query MAST database for aspect records."
+    print("Attempting to query MAST database for aspect records.")
     entries = gQuery.getArray(gQuery.aspect_ecl(eclipse), retries=retries)
     n = len(entries)
-    print '		Located '+str(n)+' aspect entries.'
+    print('		Located '+str(n)+' aspect entries.')
     if not n:
-        print "No aspect entries for eclipse "+str(eclipse)
+        print("No aspect entries for eclipse "+str(eclipse))
         return
     ra, dec, twist, time, flags = [], [], [], [], []
     header = {'RA':[], 'DEC':[], 'ROLL':[]}

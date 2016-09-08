@@ -9,6 +9,7 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
+from __future__ import absolute_import, division, print_function
 from PhotonPipe import photonpipe
 import argparse
 
