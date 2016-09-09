@@ -22,6 +22,7 @@ setup(
     url='https://github.com/cmillion/gPhoton',
     author='Chase Million, et al.',
     author_email='chase.million@gmail.com',
+    zip_safe=False,
     license='AURA',
     classifiers=[
         'Development Status :: 3 - Alpha',
