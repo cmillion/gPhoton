@@ -7,9 +7,10 @@
 """
 
 from __future__ import absolute_import, division, print_function
-from MCUtils import manage_requests2
-import CalUtils
-from galextools import isPostCSP
+# gPhoton imports.
+import gPhoton.CalUtils
+from gPhoton.MCUtils import manage_requests2
+from gPhoton.galextools import isPostCSP
 from gPhoton import time_id
 
 # ------------------------------------------------------------------------------

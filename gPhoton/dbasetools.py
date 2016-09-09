@@ -7,11 +7,13 @@
 """
 
 from __future__ import absolute_import, division, print_function
+# Core and Third Party imports.
 import numpy as np
-import gQuery
-from MCUtils import print_inline, area, angularSeparation
-from galextools import GPSSECS, zpmag, aper2deg
-from gQuery import tscale
+# gPhoton imports.
+from gPhoton.galextools import GPSSECS, zpmag, aper2deg
+import gPhoton.gQuery
+from gPhoton.gQuery import tscale
+from gPhoton.MCUtils import print_inline, area, angularSeparation
 
 # ------------------------------------------------------------------------------
 def get_aspect(band, skypos, trange=[6e8, 11e8], verbose=0, detsize=1.25):

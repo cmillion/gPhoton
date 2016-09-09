@@ -10,8 +10,10 @@
 """
 
 from __future__ import absolute_import, division, print_function
-from PhotonPipe import photonpipe
+# Core and Third Party imports.
 import argparse
+# gPhoton imports.
+from gPhoton.PhotonPipe import photonpipe
 
 # ------------------------------------------------------------------------------
 def gpipeline(raw6file, scstfile, band, outbase, aspfile, ssdfile, nullout,

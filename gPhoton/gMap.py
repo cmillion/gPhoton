@@ -8,12 +8,14 @@
 """
 
 from __future__ import absolute_import, division, print_function
-import os
+# Core and Third Party imports.
 import argparse
-from imagetools import write_images
-import dbasetools as dbt
-import gphoton_args as gargs
+import os
 import numpy as np
+# gPhoton imports.
+import gPhoton.dbasetools as dbt
+import gPhoton.gphoton_args as gargs
+from gPhoton.imagetools import write_images
 
 # ------------------------------------------------------------------------------
 def gmap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,

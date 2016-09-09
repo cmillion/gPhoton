@@ -9,12 +9,14 @@
 """
 
 from __future__ import absolute_import, division, print_function
-import ast
+# Core and Third Party imports.
 import argparse
-from regtestutils import datamaker
+import ast
 import numpy as np
+# gPhoton imports.
+import gPhoton.galextools as gt
 from gPhoton import gFind
-import galextools as gt
+from gPhoton.regtestutils import datamaker
 
 # ------------------------------------------------------------------------------
 def find_random_positions(rarange=[0., 360.], decrange=[-90., 90.], nsamples=10,

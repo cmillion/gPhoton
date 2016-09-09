@@ -9,16 +9,18 @@
 """
 
 from __future__ import absolute_import, division, print_function
-import csv
+# Core and Third Party imports.
 from astropy.io import fits as pyfits
+import csv
 import numpy as np
-from FileUtils import load_aspect, web_query_aspect
 import scipy.ndimage
-from MCUtils import get_fits_data
-from CalUtils import find_stims
-from gnomonic import gnomfwd_simple
-import cal
-from galextools import compute_flat_scale
+# gPhoton imports.
+import gPhoton.cal
+from gPhoton.CalUtils import find_stims
+from gPhoton.FileUtils import load_aspect, web_query_aspect
+from gPhoton.galextools import compute_flat_scale
+from gPhoton.gnomonic import gnomfwd_simple
+from gPhoton.MCUtils import get_fits_data
 
 GPSSECS = 315532800+432000
 

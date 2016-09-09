@@ -7,11 +7,13 @@
 """
 
 from __future__ import absolute_import, division, print_function
+# Core and Third Party imports.
 from astropy.time import Time
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import galextools as gt
+# gPhoton imports.
+import gPhoton.galextools as gt
 
 # ------------------------------------------------------------------------------
 def read_lc(csvfile, comment='|'):

@@ -7,10 +7,11 @@
 """
 
 from __future__ import absolute_import, division, print_function
-from sys import stdout
+# Core and Third Party imports.
+from astropy.io import fits as pyfits
 import numpy as np
 import requests
-from astropy.io import fits as pyfits
+from sys import stdout
 
 # ------------------------------------------------------------------------------
 def area(radius):

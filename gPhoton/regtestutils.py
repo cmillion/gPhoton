@@ -7,12 +7,14 @@
 """
 
 from __future__ import absolute_import, division, print_function
+# Core and Third Party imports.
 import csv
 import os
 import numpy as np
 import pandas as pd
-import galextools as gt
-import dbasetools as dt
+# gPhoton imports.
+import gPhoton.dbasetools as dt
+import gPhoton.galextools as gt
 from gPhoton import gAperture
 
 # ------------------------------------------------------------------------------

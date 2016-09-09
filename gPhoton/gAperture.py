@@ -9,15 +9,17 @@
 """
 
 from __future__ import absolute_import, division, print_function
-import os
-import ast
-import sys
+# Core and Third Party imports.
 import argparse
-import curvetools as ct
-import gphoton_args as gargs
-from imagetools import write_jpeg # For JPEG preview image creation
-from galextools import aper2deg
+import ast
+import os
+import sys
+# gPhoton imports.
+import gPhoton.curvetools as ct
+from gPhoton.galextools import aper2deg
 from gPhoton import __version__
+import gPhoton.gphoton_args as gargs
+from gPhoton.imagetools import write_jpeg # For JPEG preview image creation
 
 # ------------------------------------------------------------------------------
 def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,

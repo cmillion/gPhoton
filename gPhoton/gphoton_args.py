@@ -7,10 +7,12 @@
 """
 
 from __future__ import absolute_import, division, print_function
-import os
+# Core and Third Party imports.
 import ast
-import dbasetools as dbt
+import os
 import numpy as np
+# gPhoton imports.
+import gPhoton.dbasetools as dbt
 
 # ------------------------------------------------------------------------------
 class gPhotonArgsError(Exception):

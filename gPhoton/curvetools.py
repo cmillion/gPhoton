@@ -6,15 +6,16 @@
 """
 
 from __future__ import absolute_import, division, print_function
+# Core and Third Party imports.
 import numpy as np
 import pandas as pd
-# gPhoton specific
-import gQuery
-from gQuery import tscale
-import MCUtils as mc
-import dbasetools as dbt
-import galextools as gxt
-import cal
+# gPhoton imports.
+import gPhoton.cal
+import gPhoton.dbasetools as dbt
+import gPhoton.galextools as gxt
+import gPhoton.gQuery
+from gPhoton.gQuery import tscale
+import gPhoton.MCUtils as mc
 
 # ------------------------------------------------------------------------------
 def gphot_params(band, skypos, radius, annulus=None, verbose=0, detsize=1.25,

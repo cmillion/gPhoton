@@ -6,19 +6,21 @@
 """
 
 from __future__ import absolute_import, division, print_function
-import gQuery
-import numpy as np
-import MCUtils as mc
+# Core and Third Party imports.
 from astropy import wcs as pywcs
 from astropy.io import fits as pyfits
+import numpy as np
 import scipy.misc
-import scipy.special # erfc
 import scipy.ndimage
-import dbasetools as dbt
-import galextools as gxt
-import curvetools as ct
-from gQuery import tscale
+import scipy.special # erfc
+# gPhoton imports.
+import gPhoton.curvetools as ct
+import gPhoton.dbasetools as dbt
+import gPhoton.galextools as gxt
 from gPhoton import __version__
+import gPhoton.MCUtils as mc
+import gPhoton.gQuery
+from gPhoton.gQuery import tscale
 
 # ------------------------------------------------------------------------------
 def define_wcs(skypos, skyrange, verbose=0, pixsz=0.000416666666666667):

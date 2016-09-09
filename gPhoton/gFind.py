@@ -8,9 +8,11 @@
 """
 
 from __future__ import absolute_import, division, print_function
+# Core and Third Party imports.
 import argparse
-import dbasetools as dbt
-import gphoton_args as gargs
+# gPhoton imports.
+import gPhoton.dbasetools as dbt
+import gPhoton.gphoton_args as gargs
 
 # ------------------------------------------------------------------------------
 def gfind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,

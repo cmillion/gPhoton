@@ -8,9 +8,10 @@
 """
 
 from __future__ import absolute_import, division, print_function
+# Core and Third Party imports.
+from astropy import wcs as pywcs
 import datetime
 import time
-from astropy import wcs as pywcs
 import numpy as np
 
 # ------------------------------------------------------------------------------

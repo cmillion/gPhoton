@@ -6,9 +6,11 @@
 """
 
 from __future__ import absolute_import, division, print_function
+# Core and Third Party imports.
 from astropy.io import fits as pyfits
 import numpy as np
-import gQuery
+# gPhoton imports.
+import gPhoton.gQuery
 
 # ------------------------------------------------------------------------------
 def load_raw6(raw6file):

@@ -9,16 +9,20 @@
 """
 
 from __future__ import absolute_import, division, print_function
-import os
-import csv
-import time
+# Core and Third Party imports.
 from astropy.io import fits as pyfits
+import csv
 import numpy as np
-from CalUtils import clk_cen_scl_slp, get_stim_coefs, find_fuv_offset, post_csp_caldata, rtaph_yac, rtaph_yac2, compute_stimstats, create_ssd
-from FileUtils import load_aspect, web_query_aspect
-from gnomonic import gnomfwd_simple, gnomrev_simple
-from MCUtils import print_inline
-import cal
+import os
+import time
+# gPhoton imports.
+import gPhoton.cal
+from gPhoton.CalUtils import (clk_cen_scl_slp, get_stim_coefs, find_fuv_offset,
+                      post_csp_caldata, rtaph_yac, rtaph_yac2,
+                      compute_stimstats, create_ssd)
+from gPhoton.FileUtils import load_aspect, web_query_aspect
+from gPhoton.gnomonic import gnomfwd_simple, gnomrev_simple
+from gPhoton.MCUtils import print_inline
 
 # ------------------------------------------------------------------------------
 def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,

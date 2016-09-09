@@ -10,13 +10,15 @@
 """
 
 from __future__ import absolute_import, division, print_function
+# Core and Third Party imports.
+from astropy.io import fits as pyfits
 import csv
 import numpy as np
 import pandas as pd
-from astropy.io import fits as pyfits
-from MCUtils import rms, print_inline, get_fits_header, get_tbl_data
-from galextools import isPostCSP
-import cal
+# gPhoton imports.
+import gPhoton.cal
+from gPhoton.galextools import isPostCSP
+from gPhoton.MCUtils import rms, print_inline, get_fits_header, get_tbl_data
 
 # ------------------------------------------------------------------------------
 def clk_cen_scl_slp(band, eclipse):
