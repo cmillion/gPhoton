@@ -218,9 +218,9 @@ def makemap(band, skypos, trange, skyrange, response=False, verbose=0,
                   'x':photons[:, 5], 'y':photons[:, 6]}
     except IndexError:
         if verbose > 2:
-            print ('No events found at {s} +/- {r} in {t}.'.format(
+            print('No events found at {s} +/- {r} in {t}.'.format(
                 s=skypos, r=skyrange, t=trange))
-        return np.zeros(np.array(imsz,dtype='int32'))
+        return np.zeros(np.array(imsz, dtype='int32'))
 
     # Trim the data on detsize
     col, row = ct.xieta2colrow(events['xi'], events['eta'], band)
@@ -299,7 +299,7 @@ def integrate_map(band, skypos, tranges, skyrange, verbose=0, memlight=None,
     """
 
     imsz = gxt.deg2pix(skypos, skyrange)
-    img = np.zeros(np.array(imsz,dtype='int32'))
+    img = np.zeros(np.array(imsz, dtype='int32'))
 
     for trange in tranges:
         # If memlight is requested, break the integration into
@@ -310,7 +310,7 @@ def integrate_map(band, skypos, tranges, skyrange, verbose=0, memlight=None,
         step = memlight if memlight else trange[1]-trange[0]
 
         for i in np.arange(trange[0], trange[1], step):
-            t0, t1 = i, i+step if i+step<=trange[1] else trange[1]
+            t0, t1 = i, i+step if i+step <= trange[1] else trange[1]
             if verbose:
                 mc.print_inline('Processing '+str(t0)+' to '+str(t1))
             img += makemap(band, skypos, [t0, t1], skyrange, response=response,
@@ -435,11 +435,11 @@ def movie(band, skypos, tranges, skyrange, framesz=0, verbose=0,
 
     # Not defining stepsz creates a single full depth image.
     if verbose:
-        print tranges
+        print(tranges)
 
     if coadd or (len(tranges) == 1 and not framesz) or (not len(tranges)):
         if verbose > 2:
-            print 'Coadding across '+str(tranges)
+            print('Coadding across '+str(tranges))
 
         mv = integrate_map(band, skypos, tranges, skyrange,
                            verbose=verbose, memlight=memlight,
@@ -464,7 +464,7 @@ def movie(band, skypos, tranges, skyrange, framesz=0, verbose=0,
                                     response=response, detsize=detsize)
                 if img.min() == 0 and img.max() == 0:
                     if verbose > 1:
-                        print 'No data in frame {i}. Skipping...'.format(i=i)
+                        print('No data in frame {i}. Skipping...'.format(i=i))
                     continue
                 try:
                     mv.append(img)
@@ -633,7 +633,7 @@ def write_images(band, skypos, tranges, skyrange, write_cnt=None,
                                True if i in ['int', 'int_coadd'] else False))
         if img.tolist() is None:
             if verbose:
-                print 'No data found.'
+                print('No data found.')
             return
 
         # Add a conditional so that this is only created for multi-frame images
@@ -641,13 +641,13 @@ def write_images(band, skypos, tranges, skyrange, write_cnt=None,
                         retries=retries) if i in ['int', 'int_coadd'] else False
 
         hdu = pyfits.PrimaryHDU(img)
-        hdu = fits_header(band, skypos, tranges, skyrange,verbose=verbose, hdu=hdu,
-                          retries=retries)
+        hdu = fits_header(band, skypos, tranges, skyrange, verbose=verbose,
+                          hdu=hdu, retries=retries)
 
         hdulist = pyfits.HDUList([hdu, tbl]) if tbl else pyfits.HDUList([hdu])
 
         if verbose:
-            print 'Writing image to {o}'.format(o=imtypes[i])
+            print('Writing image to {o}'.format(o=imtypes[i]))
 
         hdulist.writeto(imtypes[i], clobber=overwrite)
 

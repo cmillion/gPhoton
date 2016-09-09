@@ -7,9 +7,9 @@
 """
 
 from __future__ import absolute_import, division, print_function
-import numpy as np
 import csv
 import os
+import numpy as np
 import pandas as pd
 import galextools as gt
 import dbasetools as dt
@@ -32,11 +32,11 @@ def file_setup(outfile):
     extant_objids = []
 
     if os.path.exists(outfile):
-        print 'This file exists.'
+        print('This file exists.')
         try:
             extant_objids = np.array(pd.read_csv(outfile)['objid']).tolist()
         except:
-            print 'And nonstandard!'
+            print('And nonstandard!')
             # Raise an exception?
             return False
     else:
@@ -166,41 +166,43 @@ def datamaker(band, skypos, outfile, maglimit=20., margin=0.005,
     extant_objids = file_setup(outfile)
 
     if extant_objids == False:
-        print 'NOT RUNNING!!*!'
+        print('NOT RUNNING!!*!')
         return False
 
     uniques = dt.find_unique_sources(band, skypos[0], skypos[1], searchradius,
                                      maglimit=maglimit)
 
     if uniques is None:
-        print 'No sources at this position.'
+        print('No sources at this position.')
         return
 
     for pos in uniques:
         mcat = dt.get_mcat_data(pos, margin)
         if not mcat:
-            print 'Nothing at {pos}.'.format(pos=pos)
+            print('Nothing at {pos}.'.format(pos=pos))
             continue
         extant_objids = file_setup(outfile)
         for i, objid in enumerate(mcat['objid']):
-            if (mcat[band]['ra'][i]==-99. and mcat[band]['dec'][i]==-99.):
-                print 'No {b} source'.format(b=band)
+            if mcat[band]['ra'][i] == -99. and mcat[band]['dec'][i] == -99.:
+                print('No {b} source'.format(b=band))
                 continue
             if objid in extant_objids:
-                print 'Already processed.'
+                print('Already processed.')
                 continue
             #exp = dt.exp_from_objid(objid)
             if mcat[band]['t0'][i] < 0:
-                print 'No MCAT exposure: skipping'
+                print('No MCAT exposure: skipping')
                 continue
-            print [mcat[band]['ra'][i], mcat[band]['dec'][i]]
-            print [mcat[band]['t0'][i], mcat[band]['t1'][i]]
+            print([mcat[band]['ra'][i], mcat[band]['dec'][i]])
+            print([mcat[band]['t0'][i], mcat[band]['t1'][i]])
             data = gAperture(band, [mcat[band]['ra'][i], mcat[band]['dec'][i]],
                              radius, annulus=annulus, verbose=verbose,
-                             coadd=True, trange=[mcat[band]['t0'][i], mcat[band]['t1'][i]], detsize=1.25)
+                             coadd=True, trange=[mcat[band]['t0'][i],
+                                                 mcat[band]['t1'][i]],
+                             detsize=1.25)
             try:
                 csv_construct = construct_row(i, band, objid, mcat, data)
-                print csv_construct
+                print(csv_construct)
                 with open(outfile, 'ab') as csvfile:
                     spreadsheet = csv.writer(csvfile, delimiter=',',
                                              quotechar='|',

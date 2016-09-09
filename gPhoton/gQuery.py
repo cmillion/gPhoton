@@ -78,14 +78,14 @@ def getValue(query, verbose=0, retries=100):
             try:
                 out = str(out.json()['data']['Tables'][0]['Rows'][0][0])
             except:
-                print 'Failed: {q}'.format(q=query)
+                print('Failed: {q}'.format(q=query))
                 raise
         except:
-            print 'Failed: {q}'.format(q=query)
+            print('Failed: {q}'.format(q=query))
             raise
         return out
     else:
-        print 'Failed: {q}'.format(q=query)
+        print('Failed: {q}'.format(q=query))
         raise ValueError("Query never finished on server, run with verbose"
                          " turned on for more info.")
 # ------------------------------------------------------------------------------
@@ -119,11 +119,11 @@ def getArray(query, verbose=0, retries=100):
         try:
             out = out.json()['data']['Tables'][0]['Rows']
         except:
-            print 'Failed: {q}'.format(q=query)
+            print('Failed: {q}'.format(q=query))
             raise
         return out
     else:
-        print 'Failed: {q}'.format(q=query)
+        print('Failed: {q}'.format(q=query))
         raise ValueError("Query never finished on server, run with verbose"
                          " turned on for more info.")
 # ------------------------------------------------------------------------------
@@ -212,9 +212,12 @@ def obstype(objid):
 # ------------------------------------------------------------------------------
 
 def obstype_from_t(t):
-    return "{baseURL}SELECT * from {baseDB}.fGetLegObsType({t}){formatURL}".format(
-            baseURL=baseURL,baseDB=baseDB,t=str(long(t*tscale)),
-            formatURL=formatURL)
+    """
+    Get the dither pattern type based on the time stamp.
+    """
+    return ("{baseURL}SELECT * from {baseDB}.fGetLegObsType({t})"
+            "{formatURL}").format(baseURL=baseURL, baseDB=baseDB,
+                                  t=str(long(t*tscale)), formatURL=formatURL)
 
 # -_----------------------------------------------------------------------------
 def mcat_visit_sources(ra0, dec0, radius):

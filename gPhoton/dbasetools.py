@@ -9,7 +9,7 @@
 from __future__ import absolute_import, division, print_function
 import numpy as np
 import gQuery
-from MCUtils import print_inline, area, distance, angularSeparation
+from MCUtils import print_inline, area, angularSeparation
 from galextools import GPSSECS, zpmag, aper2deg
 from gQuery import tscale
 
@@ -88,7 +88,7 @@ def distinct_tranges(times, maxgap=1.):
 
     ixs = [-1] + list(ix[0]) + [len(times)-1]
 
-    return [[times[ixs[i]+1], times[ixs[i+1]]] for i, b in enumerate(ixs[:-1])]
+    return [[times[ixs[i]+1], times[ixs[i+1]]] for i in xrange(len(ixs[:-1]))]
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -137,22 +137,28 @@ def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
     # entire region of sky for data, but it's not hugely dumb and does work...
     skypos_list = [skypos]
     if skyrange:
-        """ This massive construction with the hstack and separate calls to
-        linspace is to ensure that skypos (i.e. the target position) is
-        always uniquely searched.
-        In a perfect world, you would probably divice detsize by 2. The
-        detsize is divided by 3 to make sure to oversample the search just a
-        little bit."""
-        for r in np.unique(np.hstack([np.linspace(skypos[0],
-                skypos[0]+skyrange[0]/2.,
-                np.ceil(skyrange[0]/(detsize/3.)), endpoint=True),
-                np.linspace(skypos[0],skypos[0]-skyrange[0]/2.,
-                np.ceil(skyrange[0]/(detsize/3.)), endpoint=True)])):
-            for d in np.unique(np.hstack([np.linspace(skypos[1],
-                    skypos[1]+skyrange[1]/2.,
-                    np.ceil(skyrange[1]/(detsize/3.)), endpoint=True),
-                    np.linspace(skypos[1],skypos[1]-skyrange[1]/2.,
-                    np.ceil(skyrange[1]/(detsize/3.)), endpoint=True)])):
+        # This massive construction with the hstack and separate calls to
+        # linspace is to ensure that skypos (i.e. the target position) is
+        # always uniquely searched.
+        # In a perfect world, you would probably divice detsize by 2. The
+        # detsize is divided by 3 to make sure to oversample the search just a
+        # little bit.
+        for r in np.unique(
+                np.hstack([np.linspace(skypos[0],
+                                       skypos[0]+skyrange[0]/2.,
+                                       np.ceil(skyrange[0]/(detsize/3.)),
+                                       endpoint=True),
+                           np.linspace(skypos[0], skypos[0]-skyrange[0]/2.,
+                                       np.ceil(skyrange[0]/(detsize/3.)),
+                                       endpoint=True)])):
+            for d in np.unique(
+                    np.hstack([np.linspace(skypos[1],
+                                           skypos[1]+skyrange[1]/2.,
+                                           np.ceil(skyrange[1]/(detsize/3.)),
+                                           endpoint=True),
+                               np.linspace(skypos[1], skypos[1]-skyrange[1]/2.,
+                                           np.ceil(skyrange[1]/(detsize/3.)),
+                                           endpoint=True)])):
                 skypos_list += [[r, d]]
 
     times = []
@@ -163,14 +169,13 @@ def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
                          gQuery.exposure_ranges(band, skypos[0], skypos[1],
                                                 t0=trange[0], t1=trange[1],
                                                 detsize=detsize),
-                                                verbose=verbose),
-                                   dtype='float64')[:, 0]/tscale))
+                         verbose=verbose), dtype='float64')[:, 0]/tscale))
         except IndexError:
             if verbose:
-                print "No exposure time available at {pos}".format(pos=skypos)
+                print("No exposure time available at {pos}".format(pos=skypos))
             return np.array([], dtype='float64')
         except TypeError:
-            print "Is one of the inputs malformed?"
+            print("Is one of the inputs malformed?")
             raise
         except:
             raise
@@ -188,13 +193,13 @@ def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
         raise
 
     for trange in aspranges:
-        photontimes = np.array(gQuery.getArray(
-            gQuery.uniquetimes(band,trange[0],trange[1],flag=0)),
-                                            dtype='float64').flatten()/1000.
-        ix = np.where((photontimes.flatten()>=trange[0]) &
-                                        (photontimes.flatten()<trange[1]+1))
+        photontimes = (np.array(gQuery.getArray(
+            gQuery.uniquetimes(band, trange[0], trange[1], flag=0)),
+                                dtype='float64').flatten()/1000.)
+        ix = np.where((photontimes.flatten() >= trange[0]) &
+                      (photontimes.flatten() < trange[1]+1))
         if len(ix[0]):
-            newtimes+=np.arange(trange[0],trange[1]+1).tolist()
+            newtimes += np.arange(trange[0], trange[1]+1).tolist()
 
     return np.sort(np.unique(newtimes))
 # ------------------------------------------------------------------------------
@@ -303,7 +308,7 @@ def stimcount_shuttered(band, trange, verbose=0, timestamplist=False):
                       dtype='float64')[:, 0]/gQuery.tscale)
     except IndexError: # Shutter this whole time range.
         if verbose:
-            print 'No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1])
+            print('No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1]))
         return 0
 
     times = np.sort(np.unique(np.append(t, trange)))
@@ -354,7 +359,7 @@ def globalcount_shuttered(band, trange, verbose=0, timestamplist=False):
                       dtype='float64')[:, 0]/gQuery.tscale)
     except IndexError: # Shutter this whole time range.
         if verbose:
-            print 'No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1])
+            print('No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1]))
         return 0
 
     times = np.sort(np.unique(np.append(t, trange)))
@@ -491,18 +496,17 @@ def exposure(band, trange, verbose=0):
         return 0.
 
     try:
-        t = np.array(gQuery.getArray(gQuery.uniquetimes(band, trange[0],
-                            trange[1], flag=True),verbose=verbose),
-                     dtype='float64')[:, 0]/gQuery.tscale
+        t = (np.array(gQuery.getArray(
+            gQuery.uniquetimes(band, trange[0], trange[1], flag=True),
+            verbose=verbose), dtype='float64')[:, 0]/gQuery.tscale)
     except IndexError: # Shutter this whole time range.
         if verbose:
-            print 'No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1])
+            print('No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1]))
         return 0.
 
     shutter = compute_shutter(band, trange, verbose=verbose, timestamplist=t)
 
-    deadtime = empirical_deadtime(band, trange, verbose=verbose,
-                                  timestamplist=t)
+    deadtime = empirical_deadtime(band, trange, verbose=verbose, timestamplist=t)
 
     return (rawexpt-shutter)*(1.-deadtime)
 # ------------------------------------------------------------------------------
@@ -697,9 +701,12 @@ def exp_from_objid(objid):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def obstype(t,obsdata=None):
+def obstype(t, obsdata=None):
+    """
+    Determines the type of dither pattern.
+    """
     if not obsdata:
-        obsdata=gQuery.getArray(gQuery.obstype_from_t(t))
+        obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
     try:
         return str(obsdata[0][0])
     except IndexError:
@@ -707,9 +714,12 @@ def obstype(t,obsdata=None):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def legnum(t,obsdata=None):
+def legnum(t, obsdata=None):
+    """
+    Returns the lef number.
+    """
     if not obsdata:
-        obsdata=gQuery.getArray(gQuery.obstype_from_t(t))
+        obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
     try:
         return obsdata[0][5]
     except IndexError:
@@ -740,7 +750,7 @@ def obstype_from_objid(objid):
 
 # ------------------------------------------------------------------------------
 def mcat_skybg(band, skypos, radius, verbose=0, trange=None, mcat=None,
-    searchradius=0.1):
+               searchradius=0.1):
     """
     Estimate the sky background using the MCAT 'skybg' for nearby sources.
 
@@ -770,31 +780,31 @@ def mcat_skybg(band, skypos, radius, verbose=0, trange=None, mcat=None,
     # Search the visit-level MCAT for nearby detections.
     # Unless the MCAT data has already been handed off for detection purposes.
     if not mcat:
-        mcat = get_mcat_data(skypos,searchradius)
+        mcat = get_mcat_data(skypos, searchradius)
     try:
         # Find the distance to each source.
-        dist = np.array([angularSeparation(skypos[0],skypos[1],a[0],a[1])
-                            for a in zip(mcat[band]['ra'],mcat[band]['dec'])])
+        dist = np.array([angularSeparation(skypos[0], skypos[1], a[0], a[1])
+                         for a in zip(mcat[band]['ra'], mcat[band]['dec'])])
     except TypeError:
         print_inline(
             'No {b} MCAT sources within {r} degrees of {p}'.format(
-                                            b=band,r=searchradius,p=skypos))
+                b=band, r=searchradius, p=skypos))
         return np.nan
 
     # Find visits that overlap in time.
     if not trange:
-        tix = (np.array(range(len(mcat[band]['mag'])),dtype='int32'),)
+        tix = (np.array(range(len(mcat[band]['mag'])), dtype='int32'),)
     else:
         tix = np.where(
-            ((trange[0]>=mcat[band]['t0']) & (trange[0]<=mcat[band]['t1'])) |
-            ((trange[1]>=mcat[band]['t0']) & (trange[1]<=mcat[band]['t1'])) |
-            ((trange[0]<=mcat[band]['t0']) & (trange[1]>=mcat[band]['t1'])))
+            ((trange[0] >= mcat[band]['t0']) & (trange[0] <= mcat[band]['t1'])) |
+            ((trange[1] >= mcat[band]['t0']) & (trange[1] <= mcat[band]['t1'])) |
+            ((trange[0] <= mcat[band]['t0']) & (trange[1] >= mcat[band]['t1'])))
 
     if not len(tix[0]):
         print_inline('No concurrent {b} MCAT source nearby.'.format(b=band))
         return np.nan # Might not be the preferred behavior here.
 
-    ix = np.where(dist[tix]==min(dist[tix]))
+    ix = np.where(dist[tix] == min(dist[tix]))
 
     skybg = mcat[band]['skybg'][tix][ix]
 
@@ -867,7 +877,7 @@ def get_mags(band, ra0, dec0, radius, maglimit, mode='coadd',
                                                            maglimit=maglimit),
                                        verbose=verbose))
         if not len(out):
-            print "Warning: No sources found!"
+            print("Warning: No sources found!")
             return None
         return {'ra':out[:, 0], 'dec':out[:, 1],
                 'FUV':{'mag':out[:, 3], 1:out[:, 9]+zpf, 2:out[:, 10]+zpf,
@@ -877,9 +887,9 @@ def get_mags(band, ra0, dec0, radius, maglimit, mode='coadd',
                        3:out[:, 18]+zpn, 4:out[:, 19]+zpn, 5:out[:, 20]+zpn,
                        6:out[:, 21]+zpn, 7:out[:, 22]+zpn}}
     elif mode == 'visit':
-        return get_mcat_data([ra0,dec0],radius)
+        return get_mcat_data([ra0, dec0], radius)
     else:
-        print "mode must be in [coadd,visit]"
+        print("mode must be in [coadd,visit]")
         return None
 # ------------------------------------------------------------------------------
 
@@ -906,16 +916,16 @@ def find_nearest_mcat(band, skypos, radius, maglimit=30.):
     :type maglimit: float
     """
 
-    data = get_mags(band,skypos[0],skypos[1],radius,30)
+    data = get_mags(band, skypos[0], skypos[1], radius, 30)
     if not data:
         return None
 
-    separation = [angularSeparation(skypos[0],skypos[1],a[0],a[1])
-                                        for a in zip(data['ra'],data['dec'])]
-    minsep = np.where(separation==min(separation))
+    separation = [angularSeparation(skypos[0], skypos[1], a[0], a[1])
+                  for a in zip(data['ra'], data['dec'])]
+    minsep = np.where(separation == min(separation))
 
     return {'mag':data[band]['mag'][minsep][0],
-            'skypos':np.array(zip(data['ra'],data['dec']))[minsep][0].tolist(),
+            'skypos':np.array(zip(data['ra'], data['dec']))[minsep][0].tolist(),
             'distance':min(separation)}
 # ------------------------------------------------------------------------------
 
@@ -1092,26 +1102,26 @@ def nearest_source(band, skypos, radius=0.01, maglimit=20.0, verbose=0,
     out = np.array(gQuery.getArray(gQuery.mcat_sources(band, skypos[0],
                                                        skypos[1], radius,
                                                        maglimit=maglimit),
-                                                       verbose=verbose))
+                                   verbose=verbose))
 
     if not len(out) and band == 'FUV':
         if verbose:
-            print "No nearby MCAT source found in FUV. Trying NUV..."
+            print("No nearby MCAT source found in FUV. Trying NUV...")
         band = 'NUV'
         out = np.array(gQuery.getArray(gQuery.mcat_sources(band, skypos[0],
                                                            skypos[1], radius,
                                                            maglimit=maglimit),
-                                                           verbose=verbose))
+                                       verbose=verbose))
 
     if not len(out) and band == 'NUV':
         if verbose:
-            print "No nearby MCAT source found. Using input sky position."
+            print("No nearby MCAT source found. Using input sky position.")
         return skypos[0], skypos[1], 0.01
 
     dist = angularSeparation(out[:, 0], out[:, 1], skypos[0], skypos[1])
 
     if verbose > 1:
-        print "Finding nearest among "+str(len(dist))+" nearby sources."
+        print("Finding nearest among "+str(len(dist))+" nearby sources.")
 
     # Note that this doesn't cope with multiple entries for the same source.
     s = out[np.where(dist == dist.min())][0]
@@ -1157,7 +1167,7 @@ def nearest_distinct_source(band, skypos, radius=0.1, maglimit=20.0, verbose=0,
     out = np.array(gQuery.getArray(gQuery.mcat_sources(band, skypos[0],
                                                        skypos[1], radius,
                                                        maglimit=maglimit),
-                                                       verbose=verbose))
+                                   verbose=verbose))
 
     dist = angularSeparation(out[:, 0], out[:, 1], skypos[0], skypos[1])
 
@@ -1229,8 +1239,8 @@ def optimize_annulus(optrad, outann, verbose=0):
     """
 
     if outann <= round(2*optrad, 4):
-        print "Warning: There are known sources within the background annulus."
-        print "Use --hrbg to mask these out. (Will increase run times.)"
+        print("Warning: There are known sources within the background annulus.")
+        print("Use --hrbg to mask these out. (Will increase run times.)")
 
     return round(1.2*optrad, 4), round(2*optrad, 4)
 # ------------------------------------------------------------------------------
@@ -1266,11 +1276,11 @@ def suggest_parameters(band, skypos, verbose=0):
         pos = [mcat['ra'][ix].mean(), mcat['dec'][ix].mean()]
         radius = 2*mcat[band]['fwhm'][ix].mean()
         if verbose:
-            print 'Recentering on {pos}.'.format(pos=pos)
-            print 'Using aperture radius of {rad} degrees.'.format(rad=fwhm)
+            print('Recentering on {pos}.'.format(pos=pos))
+            print('Using aperture radius of {rad} degrees.'.format(rad=fwhm))
     else: # There is no known star at the target position...
         pos = skypos
-        radius = gt.aper2deg(4)
+        radius = aper2deg(4)
     annulus = [3*radius, 5*radius]
 
     return pos[0], pos[1], radius, annulus[0], annulus[1]

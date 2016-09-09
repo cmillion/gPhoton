@@ -8,10 +8,10 @@
 """
 
 from __future__ import absolute_import, division, print_function
-import numpy as np
-from astropy import wcs as pywcs
 import datetime
 import time
+from astropy import wcs as pywcs
+import numpy as np
 
 # ------------------------------------------------------------------------------
 GPSSECS = 315532800+432000
@@ -25,8 +25,8 @@ def recovery_tranges():
         (because of things like observing while not at HVNOM).
     """
     return [# CSP (05-04-2010 to 06-23-2010)
-            [time.mktime(datetime.date(2010,5,4).timetuple())-GPSSECS,
-             time.mktime(datetime.date(2010,6,23).timetuple())-GPSSECS],
+        [time.mktime(datetime.date(2010, 5, 4).timetuple())-GPSSECS,
+         time.mktime(datetime.date(2010, 6, 23).timetuple())-GPSSECS],
         ]
 
 # ------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ def aper2deg(apercode):
     """
 
     if not apercode == int(apercode) or apercode < 1 or apercode > 7:
-        print "Error: `apercode` must be an integer in interval [1,7]."
+        print("Error: `apercode` must be an integer in interval [1,7].")
         return None
 
     apers = np.array([1.5, 2.3, 3.8, 6.0, 9.0, 12.8, 17.3, 30., 60., 90.])/3600.
@@ -111,7 +111,7 @@ def apcorrect1(radius, band):
     # [Future]: Handle arrays.
 
     if not band in ['NUV', 'FUV']:
-        print "Invalid band."
+        print("Invalid band.")
         return
 
     aper = np.array([1.5, 2.3, 3.8, 6.0, 9.0, 12.8, 17.3, 30., 60., 90.])/3600.
@@ -158,7 +158,7 @@ def apcorrect2(radius, band):
     # [Future]: Handle arrays.
 
     if not band in ['NUV', 'FUV']:
-        print "Invalid band."
+        print("Invalid band.")
         return
 
     aper = np.array([1.5, 2.3, 3.8, 6.0, 9.0, 12.8, 17.3])/3600.
@@ -318,11 +318,11 @@ def local_nl_correction(mr, band):
         formula given in Fig. 8 of Morrissey 2007.
     """
 
-    coeffs = {'NUV':[-0.314,1.365,-0.103],
-              'FUV':[-0.531,1.696,-0.225]}
-    C0,C1,C2=coeffs[band]
+    coeffs = {'NUV':[-0.314, 1.365, -0.103],
+              'FUV':[-0.531, 1.696, -0.225]}
+    C0, C1, C2 = coeffs[band]
 
-    return 10**np.roots([C2, C1, C0-np.log10(MR)])[1]
+    return 10**np.roots([C2, C1, C0-np.log10(mr)])[1]
 
 def deg2pix(skypos, skyrange, pixsz=0.000416666666666667):
     """
@@ -398,7 +398,7 @@ def flat_scale_parameters(band):
         flat_correct_1 = -2.8843099e-10
         flat_correct_2 = 0.000
     else:
-        print "Band not specified."
+        print("Band not specified.")
         exit(1)
 
     # It turns out that flat_correct and flat_t0 never get used.
@@ -431,7 +431,7 @@ def compute_flat_scale(t, band, verbose=0):
     """
 
     if verbose:
-        print "Calculating flat scale for t=", t, ", and band=", band
+        print("Calculating flat scale for t=", t, ", and band=", band)
 
     (flat_correct_0, flat_correct_1,
      flat_correct_2) = flat_scale_parameters(band)
@@ -451,7 +451,7 @@ def compute_flat_scale(t, band, verbose=0):
             flat_scale *= 1.018 if t >= 881881215.995 else 1.
 
     if verbose:
-        print "         flat scale = ", flat_scale
+        print("         flat scale = ", flat_scale)
 
     return flat_scale
 # ------------------------------------------------------------------------------

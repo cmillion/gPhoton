@@ -91,29 +91,30 @@ def gfind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
                                     detsize=detsize, trange=trange, skyrange=skyrange)
         if not ranges.any():
             if not quiet:
-                print ('No {band} exposure'
-                       ' time in database.'.format(band=this_band))
+                print('No {band} exposure'
+                      ' time in database.'.format(band=this_band))
             output[this_band] = {'expt':0, 't0':None, 't1':None}
         else:
             expt = (ranges[:, 1]-ranges[:, 0]).sum()
             if not quiet:
-                print "{band}: {expt}s (raw) in {n} exposures.".format(
-                    band=this_band, expt=expt, n=len(ranges))
+                print("{band}: {expt}s (raw) in {n} exposures.".format(
+                    band=this_band, expt=expt, n=len(ranges)))
             if not exponly:
                 if gaper:
                     f = '['
                     for r in ranges:
                         f += '[%.3f' % r[0] + ', %.3f' % r[1] + '],'
                     if not quiet:
-                        print f[:-1]+']'
+                        print(f[:-1]+']')
                 else:
                     for r in ranges:
                         if not quiet:
-                            print ('    [ %.3f' % r[0] + ', %.3f' % r[1] +
-                                   ' ], %.3f' % (r[1]-r[0]) + ' seconds')
+                            print('    [ %.3f' % r[0] + ', %.3f' % r[1] +
+                                  ' ], %.3f' % (r[1]-r[0]) + ' seconds')
             output[this_band] = {'expt':expt, 't0':ranges[:, 0],
                                  't1':ranges[:, 1],
-                'nearest_source':dbt.find_nearest_mcat(this_band,skypos,0.05)}
+                                 'nearest_source':dbt.find_nearest_mcat(
+                                     this_band, skypos, 0.05)}
 
     return output
 # ------------------------------------------------------------------------------

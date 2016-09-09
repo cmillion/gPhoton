@@ -115,21 +115,21 @@ def gmap(band, cntfile=None, coadd=None, detsize=1.1, intfile=None,
         trange = dbt.fGetTimeRanges(band, skypos, trange=[6.E8, 11.E8],
                                     maxgap=maxgap, minexp=minexp,
                                     detsize=detsize, skyrange=skyrange)
-    if np.array(trange).size==0:
-        print 'No data available.'
+    if np.array(trange).size == 0:
+        print('No data available.')
         return
 
     if len(np.array(trange).shape) == 1:
         trange = [trange]
 
     # If trange is out of time order, this will put it back into order.
-    trange = np.array(trange)[np.argsort(np.array(trange)[:,0])]
+    trange = np.array(trange)[np.argsort(np.array(trange)[:, 0])]
 
     write_images(band.upper(), skypos, trange, skyrange, write_cnt=write_cnt,
-        write_int=write_int, framesz=stepsz,
-        overwrite=overwrite, verbose=verbose, memlight=memlight, coadd=coadd,
-        retries=retries, write_cnt_coadd=write_cnt_coadd,
-        write_int_coadd=write_int_coadd, detsize=detsize)
+                 write_int=write_int, framesz=stepsz,
+                 overwrite=overwrite, verbose=verbose, memlight=memlight,
+                 coadd=coadd, retries=retries, write_cnt_coadd=write_cnt_coadd,
+                 write_int_coadd=write_int_coadd, detsize=detsize)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -216,7 +216,7 @@ def check_args(args, iam='gmap'):
             args.raangle, args.decangle = args.skyrange
         else:
             gargs.gPhotonArgsError(
-                        "Invalid --skyrange: {s}".format(s=args.skyrange))
+                "Invalid --skyrange: {s}".format(s=args.skyrange))
 
     # use --angle to fill in missing subtend angles
     if args.angle and not args.raangle:
@@ -257,13 +257,13 @@ def __main__():
     args = check_args(args)
 
     if args.verbose:
-        print '{a} image(s) at {pos}'.format(
-            a='Writing' if not args.coadd else 'Coadding', pos=args.skypos)
-        print '		of dimensions {w}x{h} degrees'.format(
-            w=args.skyrange[0], h=args.skyrange[1])
-        print '		with a virtual detector {d} degrees across'.format(
-            d=args.detsize)
-        print '		in time range(s): {t}'.format(t=repr(args.trange))
+        print('{a} image(s) at {pos}'.format(
+            a='Writing' if not args.coadd else 'Coadding', pos=args.skypos))
+        print('		of dimensions {w}x{h} degrees'.format(
+            w=args.skyrange[0], h=args.skyrange[1]))
+        print('		with a virtual detector {d} degrees across'.format(
+            d=args.detsize))
+        print('		in time range(s): {t}'.format(t=repr(args.trange)))
 
     gmap(band=args.band, cntfile=args.cntfile,
          coadd=args.coadd, detsize=args.detsize, intfile=args.intfile,

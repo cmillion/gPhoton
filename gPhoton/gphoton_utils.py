@@ -79,7 +79,7 @@ def model_errors(catmag, band, sigma=3., mode='mag', trange=[1, 1600]):
 	"""
 
     if mode != 'cps' and mode != 'mag':
-        print 'mode must be set to "cps" or "mag"'
+        print('mode must be set to "cps" or "mag"')
         exit(0)
 
     x = np.arange(trange[0], trange[1])
@@ -128,7 +128,7 @@ def data_errors(catmag, band, t, sigma=3., mode='mag'):
     """
 
     if mode != 'cps' and mode != 'mag':
-        print 'mode must be set to "cps" or "mag"'
+        print('mode must be set to "cps" or "mag"')
         exit(0)
 
     cnt = gt.mag2counts(catmag, band)
