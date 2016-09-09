@@ -12,6 +12,8 @@
 from __future__ import absolute_import, division, print_function
 # Core and Third Party imports.
 from astropy.io import fits as pyfits
+from builtins import str
+from builtins import range
 import csv
 import numpy as np
 import pandas as pd
@@ -699,7 +701,7 @@ def post_csp_caldata():
     wig2fits, wig2head = cal.wiggle2()
     wig2 = np.zeros([128, 8, 32, 8])
 
-    for i in xrange(len(wig2fits)):
+    for i in range(len(wig2fits)):
         ya = wig2fits[i][0]
         yb = wig2fits[i][1]
         xb = wig2fits[i][2]
@@ -714,7 +716,7 @@ def post_csp_caldata():
     wlk2fits, wlk2head = cal.walk2()
     wlk2 = np.zeros([100, 8, 32])
 
-    for i in xrange(len(wlk2fits)):
+    for i in range(len(wlk2fits)):
         q = wlk2fits[i][0]
         yb = wlk2fits[i][1]
         yy = wlk2fits[i][2]
@@ -728,7 +730,7 @@ def post_csp_caldata():
     clk2fits, clk2head = cal.clock2()
     clk2 = np.zeros([100, 8])
 
-    for i in xrange(len(clk2fits)):
+    for i in range(len(clk2fits)):
         yb = clk2fits[i][0]
         yy = clk2fits[i][1]
         ycor = clk2fits[i][2]
@@ -951,7 +953,7 @@ def raw6_to_stims(raw6file, band, eclipse, margin=90.001):
 
     print("")
 
-    for i in xrange(int(nphots/chunksz)+1):
+    for i in range(int(nphots/chunksz)+1):
         csvrows = []
         chunkbeg, chunkend = i*chunksz, (i+1)*chunksz-1
         if chunkend > nphots:
@@ -1120,7 +1122,7 @@ def compute_stimstats(raw6file, band, eclipse):
     print("Raw stim separation is", stimsep)
 
     # Compute means and RMS values for each stim for each YA value stim1.
-    for ya in xrange(32):
+    for ya in range(32):
         ix = (stim1['ya'] == ya).nonzero()[0]
         ix = (stim2['ya'] == ya).nonzero()[0]
         ix = (stim3['ya'] == ya).nonzero()[0]
@@ -1242,8 +1244,8 @@ def compute_stimstats(raw6file, band, eclipse):
 
     # Fill in look up array.
     yac = np.zeros([40, 8])
-    for yb in xrange(8):
-        for ya in xrange(40):
+    for yb in range(8):
+        for ya in range(40):
             yac[ya][yb] = ((coef0_yb[yb] +
                             (float(ya)*coef1_yb[yb])) +
                            yac_ybs[yb])
@@ -1259,28 +1261,28 @@ def compute_stimstats(raw6file, band, eclipse):
 
     # [Future] The section below could be re-written more elegantly.
     # [Future] Does this return the correct values for YB==1?
-    for yb in xrange(8):
+    for yb in range(8):
         ix = ((stim1['yb'] == yb)&(stim1['ya'] > 4)).nonzero()[0]
         s1m = ((stim1['ys']-stim1['yac'])[ix]*aspum).mean()
         s1r = rms((stim1['ys']-stim1['yac'])[ix]*aspum)
         if len(ix) > 0:
             print("Corrected stim 1: YB=", yb, " Num=", len(ix),
                   " Mean=", s1m, " RMS=", s1r)
-    for yb in xrange(8):
+    for yb in range(8):
         ix = ((stim2['yb'] == yb)&(stim2['ya'] > 4)).nonzero()[0]
         s2m = ((stim2['ys']-stim2['yac'])[ix]*aspum).mean()
         s2r = rms((stim2['ys']-stim2['yac'])[ix]*aspum)
         if len(ix) > 0:
             print("Corrected stim 2: YB=", yb, " Num=", len(ix),
                   " Mean=", s2m, " RMS=", s2r)
-    for yb in xrange(8):
+    for yb in range(8):
         ix = ((stim3['yb'] == yb)&(stim3['ya'] > 4)).nonzero()[0]
         s3m = ((stim3['ys']-stim3['yac'])[ix]*aspum).mean()
         s3r = rms((stim3['ys']-stim3['yac'])[ix]*aspum)
         if len(ix) > 0:
             print("Corrected stim 3: YB=", yb, " Num=", len(ix),
                   " Mean=", s3m, " RMS=", s3r)
-    for yb in xrange(8):
+    for yb in range(8):
         ix = ((stim4['yb'] == yb)&(stim4['ya'] > 4)).nonzero()[0]
         s4m = ((stim4['ys']-stim4['yac'])[ix]*aspum).mean()
         s4r = rms((stim4['ys']-stim4['yac'])[ix]*aspum)
@@ -1343,7 +1345,7 @@ def create_ssd(raw6file, band, eclipse, ssdfile=None):
     pinc = 1000
     avt, sep, num = [], [], []
 
-    for i in xrange(0, len(stimt)-pinc, pinc):
+    for i in range(0, len(stimt)-pinc, pinc):
         ix1 = (stimix[i:i+pinc] == 1).nonzero()[0]
         ix2 = (stimix[i:i+pinc] == 2).nonzero()[0]
         ix3 = (stimix[i:i+pinc] == 3).nonzero()[0]
@@ -1375,7 +1377,7 @@ def create_ssd(raw6file, band, eclipse, ssdfile=None):
     fit = C+np.array(avt)*m
 
     if ssdfile:
-        for i in xrange(len(avt)):
+        for i in range(len(avt)):
             tbl.writerow([avt[i], sep[i], num[i], fit[i]])
 
     return C, m

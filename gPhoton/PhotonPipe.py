@@ -11,6 +11,8 @@
 from __future__ import absolute_import, division, print_function
 # Core and Third Party imports.
 from astropy.io import fits as pyfits
+from builtins import str
+from builtins import range
 import csv
 import numpy as np
 import os
@@ -196,7 +198,7 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
 
     print("")
 
-    for i in xrange(int(nphots/chunksz)+1):
+    for i in range(int(nphots/chunksz)+1):
         a = time.time()
 
         csvrows = []
@@ -528,7 +530,7 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         # amounts of memory and therefore takes longer to run than the
         # loop iffen it manages to complete at all without a memory
         # error or segmentation fault.
-        for i in xrange(len(t)):
+        for i in range(len(t)):
             cnt += 1
             # To avoid repeat indexing of flags...
             thisflag = flags[i]

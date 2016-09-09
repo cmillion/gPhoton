@@ -7,13 +7,14 @@
 
 from __future__ import absolute_import, division, print_function
 # Core and Third Party imports.
+from builtins import map
+from builtins import str
+from builtins import zip
 import numpy as np
 import pandas as pd
 # gPhoton imports.
-import gPhoton.cal
 import gPhoton.dbasetools as dbt
 import gPhoton.galextools as gxt
-import gPhoton.gQuery
 from gPhoton.gQuery import tscale
 import gPhoton.MCUtils as mc
 
@@ -281,8 +282,8 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
     colnames = ['t', 'ra', 'dec', 'xi', 'eta', 'x', 'y', 'flag']
     dtypes = ['f8', 'f8', 'f8', 'f4', 'f4', 'f4', 'f4', 'i4']
     try:
-        cols = map(np.asarray, stream, dtypes)
-        events = dict(zip(colnames, cols))
+        cols = list(map(np.asarray, stream, dtypes))
+        events = dict(list(zip(colnames, cols)))
         # Adjust the timestamp by tscale.
         events['t'] /= tscale
         return events
@@ -872,8 +873,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
         lcurve['t1'] = bins[np.unique(bin_ix)]
         lcurve['exptime'] = np.array(
             dbt.compute_exptime(band,
-                                tranges if coadd else zip(
-                                    lcurve['t0'], lcurve['t1']),
+                                tranges if coadd else list(zip(
+                                    lcurve['t0'], lcurve['t1'])),
                                 verbose=verbose, coadd=coadd, detsize=detsize,
                                 skypos=[ra0, dec0]))
     except IndexError:
@@ -1207,12 +1208,12 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
     if minimal_output:
         # Make sure each of these are included in data.keys()
         if not set(output_columns) <= set(
-                [x for x in data.keys() if x not in exclude_keys]):
+                [x for x in list(data.keys()) if x not in exclude_keys]):
             raise ValueError("Some output columns are not present in the"
                              " data structure.  A developer needs to fix this.")
     else:
         if set(output_columns) != set(
-                [x for x in data.keys() if x not in exclude_keys]):
+                [x for x in list(data.keys()) if x not in exclude_keys]):
             raise ValueError("Output columns do not match those returned in"
                              " data structure.  A developer needs to fix this.")
 

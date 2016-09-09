@@ -10,6 +10,7 @@
 
 from __future__ import absolute_import, division, print_function
 # Core and Third Party imports.
+from builtins import zip
 import argparse
 import ast
 import numpy as np
@@ -119,7 +120,7 @@ def calrun(outfile, band, nsamples=10, seed=323, rarange=[0., 360.],
         print('Bounded by RA:[{r0},{r1}] and Dec:[{d0},{d1}]'.format(
             r0=rarange[0], r1=rarange[1], d0=decrange[0], d1=decrange[1]))
         print('Actual positions used will be:')
-        print('{pos}'.format(pos=zip(ra, dec)))
+        print('{pos}'.format(pos=list(zip(ra, dec))))
 
     for skypos in zip(ra, dec):
         expt = gFind(skypos=skypos, band=band, quiet=True)[band]['expt']

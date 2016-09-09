@@ -86,7 +86,7 @@ def gfind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
     else:
         raise SystemExit('Invalid band: {b}'.format(b=band))
 
-    for this_band in output.keys():
+    for this_band in list(output.keys()):
         # Get valid time ranges, but only if trange is not provided.
         ranges = dbt.fGetTimeRanges(this_band, skypos, maxgap=maxgap,
                                     minexp=minexp, verbose=verbose,

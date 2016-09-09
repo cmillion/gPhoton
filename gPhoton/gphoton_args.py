@@ -9,6 +9,7 @@
 from __future__ import absolute_import, division, print_function
 # Core and Third Party imports.
 import ast
+from builtins import str
 import os
 import numpy as np
 # gPhoton imports.

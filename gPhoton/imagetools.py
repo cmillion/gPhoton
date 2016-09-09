@@ -9,6 +9,8 @@ from __future__ import absolute_import, division, print_function
 # Core and Third Party imports.
 from astropy import wcs as pywcs
 from astropy.io import fits as pyfits
+from builtins import str
+from builtins import zip
 import numpy as np
 import scipy.misc
 import scipy.ndimage
@@ -233,12 +235,12 @@ def makemap(band, skypos, trange, skyrange, response=False, verbose=0,
     if n == 0:
         return np.zeros(np.int(imsz))
 
-    for k in events.keys():
+    for k in list(events.keys()):
         events[k] = events[k][ix]
 
     events = ct.hashresponse(band, events)
     wcs = define_wcs(skypos, skyrange)
-    coo = zip(events['ra'], events['dec'])
+    coo = list(zip(events['ra'], events['dec']))
     foc = wcs.sip_pix2foc(wcs.wcs_world2pix(coo, 1), 1)
     weights = 1./events['response'] if response else None
     H, xedges, yedges = np.histogram2d(foc[:, 1]-0.5, foc[:, 0]-0.5, bins=imsz,
@@ -620,7 +622,7 @@ def write_images(band, skypos, tranges, skyrange, write_cnt=None,
     imtypes = {'cnt':write_cnt, 'int':write_int, 'int_coadd':write_int_coadd,
                'cnt_coadd':write_cnt_coadd}
 
-    for i in imtypes.keys():
+    for i in list(imtypes.keys()):
         if not imtypes[i]:
             continue
 

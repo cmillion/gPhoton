@@ -7,6 +7,7 @@
 """
 
 from __future__ import absolute_import
+from __future__ import unicode_literals
 from os import path
 # Always prefer setuptools over distutils
 from setuptools import setup

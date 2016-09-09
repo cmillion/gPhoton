@@ -9,6 +9,7 @@
 from __future__ import absolute_import, division, print_function
 # Core and Third Party imports.
 from astropy.io import fits as pyfits
+from builtins import str
 import numpy as np
 import requests
 from sys import stdout

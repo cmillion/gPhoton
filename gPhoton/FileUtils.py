@@ -8,6 +8,8 @@
 from __future__ import absolute_import, division, print_function
 # Core and Third Party imports.
 from astropy.io import fits as pyfits
+from builtins import str
+from builtins import range
 import numpy as np
 # gPhoton imports.
 import gPhoton.gQuery
@@ -52,7 +54,7 @@ def load_aspect(aspfile):
     twist, time, aspflags = np.array([]), np.array([]), np.array([])
 
     header = {'RA':[], 'DEC':[], 'ROLL':[]}
-    for i in xrange(len(aspfile)):
+    for i in range(len(aspfile)):
         print("         ", aspfile[i])
         hdulist = pyfits.open(aspfile[i], memmap=1)
         ra = np.append(ra, np.array(hdulist[1].data.field('ra')))
@@ -109,7 +111,7 @@ def web_query_aspect(eclipse, retries=20):
     ra, dec, twist, time, flags = [], [], [], [], []
     header = {'RA':[], 'DEC':[], 'ROLL':[]}
     ra0, dec0, twist0 = [], [], []
-    for i in xrange(n):
+    for i in range(n):
         # The times are *1000 in the database to integerify
         time.append(float(entries[i][2])/1000.)
         ra.append(float(entries[i][3]))

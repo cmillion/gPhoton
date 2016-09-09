@@ -8,10 +8,12 @@
 
 from __future__ import absolute_import, division, print_function
 # Core and Third Party imports.
+from builtins import range
+from builtins import str
+from builtins import zip
 import numpy as np
 # gPhoton imports.
 from gPhoton.galextools import GPSSECS, zpmag, aper2deg
-import gPhoton.gQuery
 from gPhoton.gQuery import tscale
 from gPhoton.MCUtils import print_inline, area, angularSeparation
 
@@ -61,7 +63,7 @@ def get_aspect(band, skypos, trange=[6e8, 11e8], verbose=0, detsize=1.25):
                   (angularSeparation(skypos[0], skypos[1],
                                      data['ra'], data['dec']) <= detsize/2.))
 
-    for key in data.keys():
+    for key in list(data.keys()):
         data[key] = data[key][ix]
 
     return data
@@ -90,7 +92,7 @@ def distinct_tranges(times, maxgap=1.):
 
     ixs = [-1] + list(ix[0]) + [len(times)-1]
 
-    return [[times[ixs[i]+1], times[ixs[i+1]]] for i in xrange(len(ixs[:-1]))]
+    return [[times[ixs[i]+1], times[ixs[i+1]]] for i in range(len(ixs[:-1]))]
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -267,7 +269,7 @@ def fGetTimeRanges(band, skypos, trange=None, detsize=1.1, verbose=0,
 
     # NOTE: The minimum meaningful maxgap is 1 second.
     if maxgap < 1 and not maxgap_override:
-        raise 'maxgap must be >=1 second'
+        raise ValueError('maxgap must be >=1 second')
 
     tranges = distinct_tranges(times, maxgap=maxgap)
 
@@ -795,7 +797,7 @@ def mcat_skybg(band, skypos, radius, verbose=0, trange=None, mcat=None,
 
     # Find visits that overlap in time.
     if not trange:
-        tix = (np.array(range(len(mcat[band]['mag'])), dtype='int32'),)
+        tix = (np.array(list(range(len(mcat[band]['mag']))), dtype='int32'),)
     else:
         tix = np.where(
             ((trange[0] >= mcat[band]['t0']) & (trange[0] <= mcat[band]['t1'])) |
@@ -927,7 +929,8 @@ def find_nearest_mcat(band, skypos, radius, maglimit=30.):
     minsep = np.where(separation == min(separation))
 
     return {'mag':data[band]['mag'][minsep][0],
-            'skypos':np.array(zip(data['ra'], data['dec']))[minsep][0].tolist(),
+            'skypos':np.array(list(zip(data['ra'],
+                                       data['dec'])))[minsep][0].tolist(),
             'distance':min(separation)}
 # ------------------------------------------------------------------------------
 
@@ -954,7 +957,7 @@ def parse_unique_sources(ras, decs, margin=0.001):
     :returns: list -- The indices corresponding to unique sources.
     """
 
-    skypos = zip(ras, decs)
+    skypos = list(zip(ras, decs))
 
     for i, pos in enumerate(skypos):
         ix = np.where(angularSeparation(pos[0], pos[1], ras, decs) <= margin)

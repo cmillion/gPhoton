@@ -11,6 +11,8 @@
 from __future__ import absolute_import, division, print_function
 # Core and Third Party imports.
 from astropy.io import fits as pyfits
+from builtins import str
+from builtins import range
 import csv
 import numpy as np
 import scipy.ndimage
@@ -345,7 +347,7 @@ def create_rr(csvfile, band, eclipse, aspfile=None, expstart=None, expend=None,
     rr = np.zeros([960, 960])
     col = (((xi_vec/36000.)/(detsize/2.)*flatfill + 1.)/2. * npixx)-400.
     row = (((eta_vec/36000.)/(detsize/2.)*flatfill + 1.)/2. * npixy)-400.
-    for i in xrange(len(asptime)-1):
+    for i in range(len(asptime)-1):
         if (asptime[i]+GPSSECS) < expstart or (asptime[i]+GPSSECS) > expend:
             print("		", asptime[i]+GPSSECS, " out of range.")
             continue

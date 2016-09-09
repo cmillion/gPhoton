@@ -1,4 +1,5 @@
 from __future__ import absolute_import, division, print_function
+from builtins import str
 import unittest
 from gPhoton.gMap import setup_parser as gm_setup_parser
 from gPhoton.gMap import check_args as gm_check_args
