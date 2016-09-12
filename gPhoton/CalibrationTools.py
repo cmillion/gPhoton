@@ -17,7 +17,7 @@ import csv
 import numpy as np
 import scipy.ndimage
 # gPhoton imports.
-import gPhoton.cal
+import gPhoton.cal as cal
 from gPhoton.CalUtils import find_stims
 from gPhoton.FileUtils import load_aspect, web_query_aspect
 from gPhoton.galextools import compute_flat_scale

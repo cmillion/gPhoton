@@ -14,6 +14,7 @@ from builtins import zip
 import numpy as np
 # gPhoton imports.
 from gPhoton.galextools import GPSSECS, zpmag, aper2deg
+import gPhoton.gQuery as gQuery
 from gPhoton.gQuery import tscale
 from gPhoton.MCUtils import print_inline, area, angularSeparation
 

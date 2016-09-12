@@ -21,7 +21,7 @@ import gPhoton.dbasetools as dbt
 import gPhoton.galextools as gxt
 from gPhoton import __version__
 import gPhoton.MCUtils as mc
-import gPhoton.gQuery
+import gPhoton.gQuery as gQuery
 from gPhoton.gQuery import tscale
 
 # ------------------------------------------------------------------------------

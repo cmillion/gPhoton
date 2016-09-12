@@ -4,27 +4,26 @@ import unittest
 from gPhoton.gMap import setup_parser as gm_setup_parser
 from gPhoton.gMap import check_args as gm_check_args
 from gPhoton.gFind import setup_parser as gf_setup_parser
-from gPhoton.gFind import check_args as gf_check_args
 from gPhoton.gAperture import setup_parser as ga_setup_parser
 from gPhoton.gAperture import check_args as ga_check_args
 
-"""Unit tests for the command line parameters and checking for the gPhoton
-command line utilities [gPhoton.py, gAperture.py,gMap.py, gFind.py].
+# Unit tests for the command line parameters and checking for the gPhoton
+# command line utilities [gPhoton.py, gAperture.py,gMap.py, gFind.py].
+#
+# Most of the parameters propagate from gphoton_args to all three command line
+# utilities. We'll just test these through gAperture and then individually test
+# the few that don't propagate through gAperture.
 
-Most of the parameters propagate from gphoton_args to all three command line
-utilities. We'll just test these through gAperture and then individually test
-the few that don't propagate through gAperture.
-"""
 class TestArguments(unittest.TestCase):
     def setUp(self):
-        self.bands = ['NUV','FUV']
-        self.skypos = [176.919525856024,0.255696872807351]
-        self.tranges = [[ 765579107.995, 765579821.995 ],
-                        [ 766525332.995, 766526576.995 ],
-                        [ 919754986.995, 919755916.995 ]]
+        self.bands = [str(u'NUV'), str(u'FUV')]
+        self.skypos = [176.919525856024, 0.255696872807351]
+        self.tranges = [[765579107.995, 765579821.995],
+                        [766525332.995, 766526576.995],
+                        [919754986.995, 919755916.995]]
         self.trange = self.tranges[0]
         self.radius = 0.01
-        self.annulus = [0.02,0.03]
+        self.annulus = [0.02, 0.03]
         self.parser = ga_setup_parser()
         self.args = self.parser.parse_args()
 
@@ -47,11 +46,11 @@ class TestArguments(unittest.TestCase):
 
     def test_band_default(self):
         """Check the default value of --band"""
-        self.assertEqual(self.args.band,'NUV')
+        self.assertEqual(self.args.band, 'NUV')
 
     def test_calpath_default(self):
         """Check the default value of --calpath"""
-        self.assertEqual(self.args.calpath,'../cal/')
+        self.assertEqual(self.args.calpath, '../cal/')
 
     def test_coadd_default(self):
         """Check the default value of --coadd"""
@@ -67,27 +66,27 @@ class TestArguments(unittest.TestCase):
 
     def test_detsize_default(self):
         """Check the default value of --detsize"""
-        self.assertAlmostEqual(self.args.detsize,1.1)
+        self.assertAlmostEqual(self.args.detsize, 1.1)
 
     def test_iocode_default(self):
         """Check the default value of --iocode"""
-        self.assertEqual(self.args.iocode,'wb')
+        self.assertEqual(self.args.iocode, 'wb')
 
     def test_maskdepth_default(self):
         """Check the default value of --bgmaskdepth"""
-        self.assertAlmostEqual(self.args.maskdepth,20.0)
+        self.assertAlmostEqual(self.args.maskdepth, 20.0)
 
     def test_maskradius_default(self):
         """Check the default value of --bgmaskradius"""
-        self.assertAlmostEqual(self.args.maskradius,1.5)
+        self.assertAlmostEqual(self.args.maskradius, 1.5)
 
     def test_maxgap_default(self):
         """Check the default value of --maxgap"""
-        self.assertAlmostEqual(self.args.maxgap,1500.0)
+        self.assertAlmostEqual(self.args.maxgap, 1500.0)
 
     def test_minexp_default(self):
         """Check the default value of --minexp"""
-        self.assertAlmostEqual(self.args.minexp,1.0)
+        self.assertAlmostEqual(self.args.minexp, 1.0)
 
     def test_overwrite_default(self):
         """Check the default value of --overwrite"""
@@ -103,7 +102,7 @@ class TestArguments(unittest.TestCase):
 
     def test_retries_default(self):
         """Check the default value of --retries"""
-        self.assertEqual(self.args.retries,20)
+        self.assertEqual(self.args.retries, 20)
 
     def test_skypos_default(self):
         """Check the default value of --skypos"""
@@ -115,7 +114,7 @@ class TestArguments(unittest.TestCase):
 
     def test_stepsz_default(self):
         """Check the default value of --stepsz"""
-        self.assertAlmostEqual(self.args.stepsz,0.0)
+        self.assertAlmostEqual(self.args.stepsz, 0.0)
 
     def test_suggest_default(self):
         """Check the default value of --suggest"""
@@ -123,11 +122,11 @@ class TestArguments(unittest.TestCase):
 
     def test_tmax_default(self):
         """Check the default value of --tmax"""
-        self.assertAlmostEqual(self.args.tmax,11.e8)
+        self.assertAlmostEqual(self.args.tmax, 11.e8)
 
     def test_tmin_default(self):
         """Check the default value of --tmin"""
-        self.assertAlmostEqual(self.args.tmin,6.e8)
+        self.assertAlmostEqual(self.args.tmin, 6.e8)
 
     def test_trange_default(self):
         """Check the default value of --trange"""
@@ -135,107 +134,117 @@ class TestArguments(unittest.TestCase):
 
     def test_verbose_default(self):
         """Check the default value of --verbose"""
-        self.assertEqual(self.args.verbose,0)
+        self.assertEqual(self.args.verbose, 0)
     # END TESTING DEFAULTS
 
     def test_ra_dec(self):
         """Check that RA/Dec are recorded."""
-        args = self.parser.parse_args(['--ra',str(self.skypos[0]),
-            '--dec',str(self.skypos[1]),'-a',str(self.radius)])
-        self.assertAlmostEqual(args.ra,self.skypos[0])
-        self.assertAlmostEqual(args.dec,self.skypos[1])
+        args = self.parser.parse_args(['--ra', str(self.skypos[0]),
+                                       '--dec', str(self.skypos[1]),
+                                       '-a', str(self.radius)])
+        self.assertAlmostEqual(args.ra, self.skypos[0])
+        self.assertAlmostEqual(args.dec, self.skypos[1])
         self.assertIsNone(args.skypos)
 
     def test_skypos_propagate(self):
         """Check that RA/Dec are propagated to skypos."""
-        args = self.parser.parse_args(['--ra',str(self.skypos[0]),
-            '--dec',str(self.skypos[1]),'-a',str(self.radius)])
+        args = self.parser.parse_args(['--ra', str(self.skypos[0]),
+                                       '--dec', str(self.skypos[1]),
+                                       '-a', str(self.radius)])
         args = ga_check_args(args)
-        self.assertAlmostEqual(args.skypos[0],self.skypos[0])
-        self.assertAlmostEqual(args.skypos[1],self.skypos[1])
+        self.assertAlmostEqual(args.skypos[0], self.skypos[0])
+        self.assertAlmostEqual(args.skypos[1], self.skypos[1])
 
     def test_ra_check_toobig(self):
         """Check that RA is forced to have reasonable values"""
-        args = self.parser.parse_args(['--ra',str(400),
-            '--dec',str(self.skypos[1]),'-a',str(self.radius)])
+        args = self.parser.parse_args(['--ra', str(400),
+                                       '--dec', str(self.skypos[1]),
+                                       '-a', str(self.radius)])
         with self.assertRaises(SystemExit):
             ga_check_args(args)
 
     def test_dec_check_toobig(self):
         """Check that Dec is forced to have reasonable values"""
-        args = self.parser.parse_args(['--ra',str(self.skypos[0]),
-            '--dec',str(100),'-a',str(self.radius)])
+        args = self.parser.parse_args(['--ra', str(self.skypos[0]),
+                                       '--dec', str(100),
+                                       '-a', str(self.radius)])
         with self.assertRaises(SystemExit):
             ga_check_args(args)
 
     def test_ra_check_toosmall(self):
         """Check that RA is forced to have reasonable values"""
-        args = self.parser.parse_args(['--ra',str(-20),
-            '--dec',str(self.skypos[1]),'-a',str(self.radius)])
+        args = self.parser.parse_args(['--ra', str(-20),
+                                       '--dec', str(self.skypos[1]),
+                                       '-a', str(self.radius)])
         with self.assertRaises(SystemExit):
             ga_check_args(args)
 
     def test_dec_check_toosmall(self):
         """Check that Dec is forced to have reasonable values"""
-        args = self.parser.parse_args(['--ra',str(self.skypos[0]),
-            '--dec',str(-100),'-a',str(self.radius)])
+        args = self.parser.parse_args(['--ra', str(self.skypos[0]),
+                                       '--dec', str(-100),
+                                       '-a', str(self.radius)])
         with self.assertRaises(SystemExit):
             ga_check_args(args)
 
     def test_no_skypos1(self):
         """Check that either RA/Dec or skypos is specified"""
-        args = self.parser.parse_args(['-a',str(self.radius)])
+        args = self.parser.parse_args(['-a', str(self.radius)])
         with self.assertRaises(SystemExit):
             ga_check_args(args)
 
     def test_no_skypos2(self):
         """Check that either RA/Dec or skypos is specified"""
-        args = self.parser.parse_args(['--ra',str(self.skypos[0])])
+        args = self.parser.parse_args(['--ra', str(self.skypos[0])])
         with self.assertRaises(SystemExit):
             ga_check_args(args)
 
     def test_both_skypos(self):
         """Check that not _both_ RA/Dec and skypos are specified."""
-        args = self.parser.parse_args(['--ra',str(self.skypos[0]),
-            '--dec',str(self.skypos[1]),
-            '--skypos',str([self.skypos[0]+1,self.skypos[1]])])
+        args = self.parser.parse_args(['--ra', str(self.skypos[0]),
+                                       '--dec', str(self.skypos[1]),
+                                       '--skypos', str([self.skypos[0]+1,
+                                                        self.skypos[1]])])
         with self.assertRaises(SystemExit):
             ga_check_args(args)
 
     def test_both_skypos_both(self):
         """Check that if both agreee, it's fine... weird edge case."""
-        args = self.parser.parse_args(['--ra',str(self.skypos[0]),
-            '--dec',str(self.skypos[1]),
-            '--skypos',str([self.skypos[0],self.skypos[1]])])
-        self.assertAlmostEqual(self.skypos[0],args.skypos[0])
-        self.assertAlmostEqual(self.skypos[1],args.skypos[1])
+        args = self.parser.parse_args(['--ra', str(self.skypos[0]),
+                                       '--dec', str(self.skypos[1]),
+                                       '--skypos', str([self.skypos[0],
+                                                        self.skypos[1]])])
+        self.assertAlmostEqual(self.skypos[0], args.skypos[0])
+        self.assertAlmostEqual(self.skypos[1], args.skypos[1])
 
     def test_no_radius(self):
         """Check that the aperture radius is mandatory."""
-        args = self.parser.parse_args(['--skypos',str(self.skypos)])
+        args = self.parser.parse_args(['--skypos', str(self.skypos)])
         with self.assertRaises(SystemExit):
             ga_check_args(args)
 
     def test_annulus_propagate1(self):
         """Check that inner and outer get propagated to annulus."""
-        args = self.parser.parse_args(['--skypos',str(self.skypos),
-            '-a',str(self.radius),'-i',str(self.annulus[0]),
-            '-o',str(self.annulus[1])])
+        args = self.parser.parse_args(['--skypos', str(self.skypos),
+                                       '-a', str(self.radius),
+                                       '-i', str(self.annulus[0]),
+                                       '-o', str(self.annulus[1])])
         args = ga_check_args(args)
-        self.assertAlmostEqual(self.annulus[0],args.annulus1)
-        self.assertAlmostEqual(self.annulus[1],args.annulus2)
-        self.assertAlmostEqual(self.annulus[0],args.annulus[0])
-        self.assertAlmostEqual(self.annulus[1],args.annulus[1])
+        self.assertAlmostEqual(self.annulus[0], args.annulus1)
+        self.assertAlmostEqual(self.annulus[1], args.annulus2)
+        self.assertAlmostEqual(self.annulus[0], args.annulus[0])
+        self.assertAlmostEqual(self.annulus[1], args.annulus[1])
 
     def test_annulus_propagate2(self):
         """Check that annulus propagates to inner and outer."""
-        args = self.parser.parse_args(['--skypos',str(self.skypos),
-            '-a',str(self.radius),'--annulus',str(self.annulus)])
+        args = self.parser.parse_args(['--skypos', str(self.skypos),
+                                       '-a', str(self.radius),
+                                       '--annulus', str(self.annulus)])
         args = ga_check_args(args)
-        self.assertAlmostEqual(self.annulus[0],args.annulus1)
-        self.assertAlmostEqual(self.annulus[1],args.annulus2)
-        self.assertAlmostEqual(self.annulus[0],args.annulus[0])
-        self.assertAlmostEqual(self.annulus[1],args.annulus[1])
+        self.assertAlmostEqual(self.annulus[0], args.annulus1)
+        self.assertAlmostEqual(self.annulus[1], args.annulus2)
+        self.assertAlmostEqual(self.annulus[0], args.annulus[0])
+        self.assertAlmostEqual(self.annulus[1], args.annulus[1])
 
     def test_tranges(self):
         self.assertTrue(True)
@@ -274,27 +283,28 @@ class TestArguments(unittest.TestCase):
 
     def test_memlight_default(self):
         """Check the default value of --memlight (gMap)"""
-        self.assertAlmostEqual(100.,gm_setup_parser().parse_args().memlight)
+        self.assertAlmostEqual(100., gm_setup_parser().parse_args().memlight)
 
     def test_angle_propagate1(self):
         """Check that raangle and decangle propagate to skyrange (gMap)"""
         args = gm_check_args(gm_setup_parser().parse_args([
-            '--skypos',str(self.skypos),'--raangle','0.1','--decangle','0.2']))
-        self.assertAlmostEqual(0.1,args.skyrange[0])
-        self.assertAlmostEqual(0.2,args.skyrange[1])
+            '--skypos', str(self.skypos), '--raangle', '0.1', '--decangle',
+            '0.2']))
+        self.assertAlmostEqual(0.1, args.skyrange[0])
+        self.assertAlmostEqual(0.2, args.skyrange[1])
 
     def test_angle_propagate2(self):
         """Check that skyrange propagates to raangle and decangle. (gMap)"""
         args = gm_check_args(gm_setup_parser().parse_args(
-            ['--skypos',str(self.skypos),'--skyrange','[0.1,0.2]']))
-        self.assertAlmostEqual(0.1,args.raangle)
-        self.assertAlmostEqual(0.2,args.decangle)
+            ['--skypos', str(self.skypos), '--skyrange', '[0.1, 0.2]']))
+        self.assertAlmostEqual(0.1, args.raangle)
+        self.assertAlmostEqual(0.2, args.decangle)
 
     def test_angle_both(self):
         """Check that both raangle and decangle must be specified. (gMap)"""
         with self.assertRaises(SystemExit):
             gm_check_args(gm_check_args(gm_setup_parser().parse_args(
-                ['--skypos',str(self.skypos),'--raangle','0.1'])))
+                ['--skypos', str(self.skypos), '--raangle', '0.1'])))
 
     # This is no longer the behavior
     #def test_tmin_tmax_propagate_defaults(self):

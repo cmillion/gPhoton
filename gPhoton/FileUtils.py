@@ -12,7 +12,7 @@ from builtins import str
 from builtins import range
 import numpy as np
 # gPhoton imports.
-import gPhoton.gQuery
+import gPhoton.gQuery as gQuery
 
 # ------------------------------------------------------------------------------
 def load_raw6(raw6file):

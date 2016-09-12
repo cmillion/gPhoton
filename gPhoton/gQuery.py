@@ -10,7 +10,7 @@ from __future__ import absolute_import, division, print_function
 # Core and Third Party imports.
 from builtins import str
 # gPhoton imports.
-import gPhoton.CalUtils
+import gPhoton.CalUtils as CalUtils
 from gPhoton.MCUtils import manage_requests2
 from gPhoton.galextools import isPostCSP
 from gPhoton import time_id

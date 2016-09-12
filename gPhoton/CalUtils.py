@@ -18,7 +18,7 @@ import csv
 import numpy as np
 import pandas as pd
 # gPhoton imports.
-import gPhoton.cal
+import gPhoton.cal as cal
 from gPhoton.galextools import isPostCSP
 from gPhoton.MCUtils import rms, print_inline, get_fits_header, get_tbl_data
 

@@ -18,7 +18,7 @@ import numpy as np
 import os
 import time
 # gPhoton imports.
-import gPhoton.cal
+import gPhoton.cal as cal
 from gPhoton.CalUtils import (clk_cen_scl_slp, get_stim_coefs, find_fuv_offset,
                       post_csp_caldata, rtaph_yac, rtaph_yac2,
                       compute_stimstats, create_ssd)

@@ -62,11 +62,12 @@ def common_args(parser, function_name,
         raise gPhotonArgsError("{f} not in {vf}".format(f=function_name,
                                                         vf=valid_functions))
 
-    parser.add_argument("-b", "--band", action="store", type=str.upper,
-                        dest="band", help="Band designation",
-                        default="BOTH" if function_name == 'gfind' else "NUV",
-                        choices=["NUV", "FUV"]+(
-                            ['BOTH'] if function_name == 'gfind' else []))
+    parser.add_argument(
+        "-b", "--band", action="store", type=str.upper,
+        dest="band", help="Band designation",
+        default=str(u"BOTH") if function_name == 'gfind' else str(u"NUV"),
+        choices=[str(u"NUV"), str(u"FUV")]+(
+            [str(u"BOTH")] if function_name == 'gfind' else []))
 
     parser.add_argument("-d", "--dec", action="store", type=float,
                         dest="dec", metavar="DEC",

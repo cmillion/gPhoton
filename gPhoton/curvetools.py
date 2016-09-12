@@ -13,8 +13,10 @@ from builtins import zip
 import numpy as np
 import pandas as pd
 # gPhoton imports.
+import gPhoton.cal as cal
 import gPhoton.dbasetools as dbt
 import gPhoton.galextools as gxt
+import gPhoton.gQuery as gQuery
 from gPhoton.gQuery import tscale
 import gPhoton.MCUtils as mc
 
