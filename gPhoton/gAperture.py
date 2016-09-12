@@ -24,7 +24,7 @@ from gPhoton.imagetools import write_jpeg # For JPEG preview image creation
 # ------------------------------------------------------------------------------
 def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
               stepsz=False, verbose=0, overwrite=False, trange=None,
-              tranges=None, minexp=1., maxgap=1500., iocode='wb',
+              tranges=None, minexp=1., maxgap=1500., iocode='w',
               detsize=1.1, minimal_output=False, photoncsvfile=None):
     """
     Creates a light curve and returns the data in a python dict() and as
@@ -222,7 +222,7 @@ def setup_parser(iam='gaperture'):
     parser.add_argument("--addhdr", action="store_true", dest="addhdr",
                         help="Add command line and column names to the top of"
                         " the .csv file.")
-    parser.add_argument("--iocode", action="store", dest="iocode", default="wb",
+    parser.add_argument("--iocode", action="store", dest="iocode", default="w",
                         help="The iocode to be passed to the cvs writer."
                         " Don't mess with this.", type=str)
     parser.add_argument("--bgmaskdepth", action="store", dest="maskdepth",
@@ -322,7 +322,7 @@ def setup_file(args):
             f.write('| '+reconstruct_command(args)+'\n')
         f.close()
         # Setting iocode to append to the file we just created
-        args.iocode = 'ab'
+        args.iocode = 'a'
 
     return args
 # ------------------------------------------------------------------------------

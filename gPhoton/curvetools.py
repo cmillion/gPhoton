@@ -1072,7 +1072,7 @@ def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
 # ------------------------------------------------------------------------------
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                 stepsz=None, trange=None, tranges=None, verbose=0, coadd=False,
-                iocode='wb', detsize=1.1, overwrite=False, minexp=1., maxgap=1.,
+                iocode='w', detsize=1.1, overwrite=False, minexp=1., maxgap=1.,
                 minimal_output=False, photoncsvfile=None):
     """
     Generates a lightcurve and optionally writes the data to a CSV file.
