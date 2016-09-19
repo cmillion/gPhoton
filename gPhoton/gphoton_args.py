@@ -63,7 +63,7 @@ def common_args(parser, function_name,
                                                         vf=valid_functions))
 
     parser.add_argument(
-        "-b", "--band", action="store", type=str.upper,
+        "-b", "--band", action="store", type=lambda b: str.upper(str(b)),
         dest="band", help="Band designation",
         default=str(u"BOTH") if function_name == 'gfind' else str(u"NUV"),
         choices=[str(u"NUV"), str(u"FUV")]+(

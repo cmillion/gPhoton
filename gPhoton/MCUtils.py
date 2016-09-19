@@ -304,7 +304,7 @@ def get_tbl_data(filename, comment='|'):
 
     for line in lines:
         if line[0] != comment:
-            strarr = str.split(line)
+            strarr = str.split(str(line))
             if len(strarr) > 0:
                 tbl.append(strarr)
 

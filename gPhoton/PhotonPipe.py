@@ -186,14 +186,14 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
 
     outfile = outbase+'.csv'
     print("Preparing output file "+outfile)
-    spreadsheet = csv.writer(open(outfile, 'wb'), delimiter=',',
+    spreadsheet = csv.writer(open(outfile, 'w'), delimiter=',',
                              quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
     # If specified, dump lines with NULLS into a separate csv file.
     if nullfile:
         nullfile = outbase+'_NULL.csv'
         print("Preparing output file "+nullfile)
-        NULLspreadsheet = csv.writer(open(nullfile, 'wb'), delimiter=',',
+        NULLspreadsheet = csv.writer(open(nullfile, 'w'), delimiter=',',
                                      quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
     print("")
@@ -543,7 +543,8 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
                 if nullfile:
                     NULLspreadsheet.writerow(
                         [int(t[i]*dbscale), x[i], y[i],
-                         xa[i], ya[i], q[i], xi[i], eta[i],
+                         xa[i], ya[i], q[i], xi[i],
+                         eta[i],
                          "", "", flags[i]])
                 else:
                     spreadsheet.writerow(
@@ -553,8 +554,8 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
             else:
                 spreadsheet.writerow(
                     [int(t[i]*dbscale), x[i], y[i], xa[i],
-                     ya[i], q[i], xi[i], eta[i], ra[i], dec[i],
-                     flags[i]])
+                     ya[i], q[i], xi[i], eta[i],
+                      ra[i], dec[i], flags[i]])
 
     raw6hdulist.close()
     stopt = time.time()
