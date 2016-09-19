@@ -13,12 +13,13 @@ before_install:
   #- sudo rm -rf /dev/shm
   #- sudo ln -s /run/shm /dev/shm
 install:
-  - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy scipy builtins matplotlib nose pandas
+  - conda install --yes python=$TRAVIS_PYTHON_VERSION pip numpy scipy matplotlib nose pandas
   # Coverage packages are on my binstar channel
   - conda install --yes -c dan_blanchard python-coveralls nose-cov
   #- pip install numpy
   - pip install requests
   - pip install astropy
+  - pip install future
   #- pip install pandas
 # command to run tests, e.g. python setup.py test
 script:
