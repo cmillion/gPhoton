@@ -70,7 +70,7 @@ class TestArguments(unittest.TestCase):
 
     def test_iocode_default(self):
         """Check the default value of --iocode"""
-        self.assertEqual(self.args.iocode, 'wb')
+        self.assertEqual(self.args.iocode, 'w')
 
     def test_maskdepth_default(self):
         """Check the default value of --bgmaskdepth"""
