@@ -1,6 +1,0 @@
-#!/usr/bin/env python
-
-import gPhoton.gCalrun
-
-if __name__ == '__main__':
-    gPhoton.gCalrun.__main__()
