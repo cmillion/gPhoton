@@ -36,7 +36,7 @@ Very minor comment - in Figure 1, DEC should not be written like an acronym but 
 AUTHOR RESPONSE: We made this modification in Figure 1. We also took the opportunity to make more consistent use of "right ascension and declination" throughout the text.
 
 NOTE:
-Since Dr. Günther has chosen to de-anonymize himself, we have thanked him by name in the acknowledgements. We'd be happy to keep the acknowledgement anonymous if he prefers.
+We have also modified the acknowledgement to thank the referee by name.
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
