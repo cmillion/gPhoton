@@ -124,6 +124,7 @@ for band in bands:
         gt.mag2counts(magrange,band)+1*np.sqrt(
             gt.mag2counts(magrange,band)*100)/100,band)
     magmedian = np.zeros(len(magrange)-1)
+    errmedian = np.zeros(len(magrange)-1)
     dmag = {#'NoBg':data[band]['aper4']-data[band]['mag'], # Awful photometry!
             'Annulus':data[band][apertxt]-data[band]['mag_bgsub'],
             'MCAT':data[band][apertxt]-data[band]['mag_mcatbgsub']}
@@ -152,18 +153,31 @@ for band in bands:
                 dtype='int16'),0b11111111)==0) & (data[band][apertxt]>=m) &
                 (data[band][apertxt]<m+magstep) & np.isfinite(dmag[bgmode]))
             magmedian[i]=dmag[bgmode][mix].median()
-        plt.errorbar(data[band][apertxt][ix],np.array(dmag[bgmode][ix]),
-            yerr=np.array(data[band]['{apertxt}_err'.format(
-                apertxt=apertxt)][ix]),fmt="none",ecolor='b',alpha=0.025)
+            errmedian[i]=np.median(np.array(data[band]['{apertxt}_err'.format(
+            apertxt=apertxt)][mix]))
+        # for i in range(np.array(data[band][apertxt][ix]).shape[0]):
+        #     plt.errorbar(np.array(data[band][apertxt][ix])[i],
+        #         np.array(dmag[bgmode][ix])[i]*0.,
+        #         yerr=np.array(data[band]['{apertxt}_err'.format(
+        #         apertxt=apertxt)][ix])[i],fmt="none",
+        # Set up a magnitude dependent alpha for more visible error bars
+        #        ecolor=[0.,0.,1.,
+        #                    (10./np.array(data[band][apertxt][ix])[i])**5])
+        #        #,ecolor='b',alpha=0.025)
 
         plt.plot(data[band][apertxt][ix],dmag[bgmode][ix],'.',color='k',
             alpha=0.2)
 
-        plt.plot(magrange,-(data_errors(magrange,band,100,sigma=1,aper=aper,bg=22 if band=='NUV' else 23.5)[1]-magrange),'r--',color='g')
-        plt.plot(magrange,(data_errors(magrange,band,100,sigma=1,aper=aper,bg=22 if band=='NUV' else 23.5)[1]-magrange),'r--',color='g')
-
+        #plt.plot(magrange,-(data_errors(magrange,band,100,sigma=1,aper=aper,bg=22 if band=='NUV' else 23.5)[1]-magrange),'r--',color='g')
+        #plt.plot(magrange,(data_errors(magrange,band,100,sigma=1,aper=aper,bg=22 if band=='NUV' else 23.5)[1]-magrange),'r--',color='g')
         plt.plot(magrange[:-1]+magstep/2.,magmedian,color='r',
-                                            linestyle='dashed',linewidth=4)
+            linestyle='dashed',linewidth=4,
+            label='Median {d}Mag'.format(d=r'$\Delta$'))
+        plt.plot(magrange[:-1]+magstep/2.,errmedian,'r--',color='g',
+            label='Median MCAT error')
+        plt.plot(magrange[:-1]+magstep/2.,-errmedian,'r--',color='g')
+        plt.legend(loc=3,fontsize=20)
+
         plt.text(14.5,0.3,
             {'NoBg':'No Background Correction',
              'Annulus':'Annulus Background Correction',
@@ -1168,7 +1182,7 @@ outpath = '.'
 
 magrange = np.arange(14,24,1)[::-1]
 
-expt_ratio = 0.8 # Estimate of ration of effective to raw exposure time
+expt_ratio = 0.8 # Estimate of ratio of effective to raw exposure time
 t_raw = np.arange(1,1600,1)
 t_eff = expt_ratio*t_raw
 
@@ -1187,9 +1201,9 @@ for sigma in [3]:
             cps = gt.mag2counts(mag,band)
             cps_err = sigma*np.sqrt(cps*t_eff)/t_eff
             mag_err = mag-gt.counts2mag(cps+cps_err,band)
-            plt.plot(t_raw,mag_err,label='{m}{u}'.format(m=mag,u=' Mag' if ((mag==23) | (mag==17)) else ''))
+            plt.plot(t_raw,mag_err,label='{m}{u}'.format(m=mag,u=' Mag' if ((mag==23) | (mag==18)) else ''))
         for l in [30]:
-            plt.axvline(l, color='k', linestyle='dotted', linewidth=2, label='{n} Seconds'.format(n=l))
+            plt.axvline(l, color='k', linestyle='dotted', linewidth=2)#, label='{n} Seconds'.format(n=l))
         plt.legend(fontsize=22,ncol=2)
     plt.tight_layout()
     plt.savefig('{p}/Fig11.pdf'.format(p=outpath,n=sigma),
