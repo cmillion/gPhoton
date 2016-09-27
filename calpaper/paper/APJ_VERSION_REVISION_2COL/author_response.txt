@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-RESPONSES TO REFEREE COMMENTS
+RESPONSES TO SECOND REFEREE REPORT
 --------------------------------------------------------------------------------
 Fig 2 + 3: What are the blue lines? Gauss fits? Smoothed data?
 --------------------------------------------------------------------------------
@@ -8,13 +8,13 @@ AUTHOR RESPONSE: The blue _curves_ in Figures 2, 3, 4, 5, 8 and 9 are Gaussian K
 --------------------------------------------------------------------------------
 5.3 Please read over this section again to check if some re-wording can make is easier to read. I think it's all correct, but it's not easy to follow, e.g. the last sentence "The modeled 1 sigma errors ... use these typical background values". If you have typical measured values, what needs to be modeled? After reading it again, I concluded that you probably model source + bg errors, based on these bg errors. Unfortunately, I don't have a simple suggestion how to fix this, but please look over this sentence and others in this section again.
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: We removed these modeled errors from the plot in favor of curves that delineate the median MCAT error as a function of magnitude. See below.
+AUTHOR RESPONSE: We removed these modeled errors from the plot in favor of curves that delineate the median MCAT error as a function of magnitude. We have also removed references to the modeled errors elsewhere in the text. Please see the next note.
 
 --------------------------------------------------------------------------------
 Fig 4 + 5: left panels: It looks as if the blue lines (errors) are all much larger than the actual spread in value? Is that so? Or is it just that you overplot a large number of error bars and I see only the largest values because they are all stacked? In this case, you might want to experiment with the opacity of the blue lines so that I can see that the error bars are denser in the middle or maybe only plot error bars for a random subsample of the values.
 Caption: What are the red and blue lines in the right panels?
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: Yes. The (lower limits on) the errors are larger than the spread in values and also consistent with our modeled errors. The first point that we want to make is that gAperture does a good job of reproducing the mission photometry, i.e. within the measurement error. The second point we want to make is that this is even true for the systematic "swoop" in NUV due to differences in background estimation (top panel of Figure 5) even though it looks dramatic compared to the other plots. We struggled with how to visually depict this; the alpha value on the blue error bars was already set to a meager 0.025. We have decided to remove the error bars on the individual points and replace the curves delineating model errors with curves delineating the median 1-sigma errors as reported by the MCAT in 1 magnitude bins. This (1) is just as informative as the modeled error, (2) makes for a less confused plot, (3) allows us to avoid the awkward explanation of how the model works that was noted above. We have also added legends to the left panels of Figures 4 and 5.
+AUTHOR RESPONSE: Yes. The (lower limits on) the errors are larger than the spread in values and also consistent with our modeled errors. The first point that we want to make is that gAperture does a good job of reproducing the mission photometry, i.e. within the measurement error. The second point we want to make is that this is also true for the systematic "swoop" in NUV due to differences in background estimation (top panel of Figure 5) even though it looks dramatic compared to the other plots. We struggled with how to visually depict this; the alpha value on the blue error bars was already set to a meager 0.025. We have decided to remove the error bars on the individual points and replace the curves delineating model errors with curves delineating the median 1-sigma errors on the data as reported by the MCAT in 1 magnitude bins. This (1) is consistent with and just as informative as the modeled error, (2) makes for a less confused plot, (3) allows us to avoid the awkward explanation of how the model works that was noted above. We have also added legends to the left panels of Figures 4 and 5.
 
 The red lines in the right panels are the median value for the whole sample, which is the value reported in the legend. The blue curves are KDE estimates and a note has been added to the caption about these, per the earlier comment.
 
@@ -33,7 +33,7 @@ RESPONSES TO EDITOR COMMENTS
 --------------------------------------------------------------------------------
 Very minor comment - in Figure 1, DEC should not be written like an acronym but I would just spell out declination instead (since there is space)
 --------------------------------------------------------------------------------
-AUTHOR RESPONSE: We made this modification in Figure 1. We also took the opportunity to make more consistent use of "right ascension and declination" throughout the text.
+AUTHOR RESPONSE: We have made this change. We also took the opportunity to make more consistent use of "right ascension and declination" throughout the text.
 
 NOTE:
 We have also modified the acknowledgement to thank the referee by name.
@@ -41,7 +41,7 @@ We have also modified the acknowledgement to thank the referee by name.
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
-RESPONSES TO FIRST ROUND OF EDITS
+RESPONSES TO FIRST REFEREE REPORT
 --------------------------------------------------------------------------------
 We thank the referee for the thorough review of our paper and software. In addition to addressing the referee's comments, we have made some additional code changes since the paper was initially submitted (which was v1.27.1), and the most recent version (v1.27.2). These code changes directly produced no change to the calibration results presented in the paper at the precision used. However, we've also taken the opportunity to make the sample size more consistent between the two bands, which precipitated very minor changes to the final results (~1% in some places), and have refined our modeled error estimates to take into account the effect of the aperture, which necessarily produced some changes in the results of the LDS749B analysis.
 
