@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  26 SEP 2016 13:33
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (TeX Live 2016) (preloaded format=pdflatex 2016.5.22)  27 SEP 2016 10:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -732,13 +732,13 @@ LaTeX Warning: A float is stuck (cannot be placed) on input line 230.
 
 Class revtex4-1 Warning: Deferred float stuck during \clearpage processing.
 
-<Fig06a.pdf, id=522, 809.42403pt x 404.712pt>
+<Fig06a.pdf, id=521, 809.42403pt x 404.712pt>
 File: Fig06a.pdf Graphic file (type pdf)
  <use Fig06a.pdf>
 Package pdftex.def Info: Fig06a.pdf used on input line 232.
 (pdftex.def)             Requested size: 236.03746pt x 118.01807pt.
 
-<Fig06b.pdf, id=523, 809.42403pt x 404.712pt>
+<Fig06b.pdf, id=522, 809.42403pt x 404.712pt>
 File: Fig06b.pdf Graphic file (type pdf)
  <use Fig06b.pdf>
 Package pdftex.def Info: Fig06b.pdf used on input line 233.
@@ -747,13 +747,13 @@ Package pdftex.def Info: Fig06b.pdf used on input line 233.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<Fig07a.pdf, id=524, 809.42403pt x 404.712pt>
+<Fig07a.pdf, id=523, 809.42403pt x 404.712pt>
 File: Fig07a.pdf Graphic file (type pdf)
  <use Fig07a.pdf>
 Package pdftex.def Info: Fig07a.pdf used on input line 239.
 (pdftex.def)             Requested size: 236.03746pt x 118.01807pt.
 
-<Fig07b.pdf, id=525, 809.42403pt x 404.712pt>
+<Fig07b.pdf, id=524, 809.42403pt x 404.712pt>
 File: Fig07b.pdf Graphic file (type pdf)
  <use Fig07b.pdf>
 Package pdftex.def Info: Fig07b.pdf used on input line 240.
@@ -762,13 +762,13 @@ Package pdftex.def Info: Fig07b.pdf used on input line 240.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<Fig08a.pdf, id=528, 1011.78pt x 404.712pt>
+<Fig08a.pdf, id=527, 1011.78pt x 404.712pt>
 File: Fig08a.pdf Graphic file (type pdf)
  <use Fig08a.pdf>
 Package pdftex.def Info: Fig08a.pdf used on input line 246.
 (pdftex.def)             Requested size: 236.03746pt x 94.41568pt.
 
-<Fig08b.pdf, id=529, 1011.78pt x 404.712pt>
+<Fig08b.pdf, id=528, 1011.78pt x 404.712pt>
 File: Fig08b.pdf Graphic file (type pdf)
  <use Fig08b.pdf>
 Package pdftex.def Info: Fig08b.pdf used on input line 247.
@@ -799,19 +799,19 @@ LaTeX Warning: A float is stuck (cannot be placed) on input line 255.
 
 Class revtex4-1 Warning: Deferred float stuck during \clearpage processing.
 
-<Fig09a.pdf, id=794, 1011.78pt x 404.712pt>
+<Fig09a.pdf, id=793, 1011.78pt x 404.712pt>
 File: Fig09a.pdf Graphic file (type pdf)
  <use Fig09a.pdf>
 Package pdftex.def Info: Fig09a.pdf used on input line 257.
 (pdftex.def)             Requested size: 236.03746pt x 94.41568pt.
 
-<Fig09b.pdf, id=795, 809.42403pt x 404.712pt>
+<Fig09b.pdf, id=794, 809.42403pt x 404.712pt>
 File: Fig09b.pdf Graphic file (type pdf)
  <use Fig09b.pdf>
 Package pdftex.def Info: Fig09b.pdf used on input line 258.
 (pdftex.def)             Requested size: 141.10416pt x 70.54776pt.
 
-<Fig09c.pdf, id=796, 505.89pt x 404.712pt>
+<Fig09c.pdf, id=795, 505.89pt x 404.712pt>
 File: Fig09c.pdf Graphic file (type pdf)
  <use Fig09c.pdf>
 Package pdftex.def Info: Fig09c.pdf used on input line 259.
@@ -850,13 +850,13 @@ pdfTeX warning: pdflatex (file ./Fig09b.pdf): PDF inclusion: multiple pdfs with
 
 pdfTeX warning: pdflatex (file ./Fig09c.pdf): PDF inclusion: multiple pdfs with
  page group included in a single page
->] <Fig10a.pdf, id=1193, 722.7pt x 361.35pt>
+>] <Fig10a.pdf, id=1192, 722.7pt x 361.35pt>
 File: Fig10a.pdf Graphic file (type pdf)
  <use Fig10a.pdf>
 Package pdftex.def Info: Fig10a.pdf used on input line 290.
 (pdftex.def)             Requested size: 236.03746pt x 118.0163pt.
 
-<Fig10b.pdf, id=1194, 722.7pt x 361.35pt>
+<Fig10b.pdf, id=1193, 722.7pt x 361.35pt>
 File: Fig10b.pdf Graphic file (type pdf)
  <use Fig10b.pdf>
 Package pdftex.def Info: Fig10b.pdf used on input line 291.
@@ -865,7 +865,7 @@ Package pdftex.def Info: Fig10b.pdf used on input line 291.
 
 pdfTeX warning: pdflatex (file ./Fig10b.pdf): PDF inclusion: multiple pdfs with
  page group included in a single page
->] <Fig11.pdf, id=1350, 1141.8177pt x 852.6094pt>
+>] <Fig11.pdf, id=1349, 1141.8177pt x 852.6094pt>
 File: Fig11.pdf Graphic file (type pdf)
  <use Fig11.pdf>
 Package pdftex.def Info: Fig11.pdf used on input line 321.
@@ -927,7 +927,7 @@ t/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/local/texlive/2016/texmf-dist/
 fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2016/texmf-dist/f
 onts/type1/public/amsfonts/cm/cmtt8.pfb></usr/local/texlive/2016/texmf-dist/fon
 ts/type1/public/amsfonts/cm/cmtt9.pfb>
-Output written on gphoton.pdf (18 pages, 1569245 bytes).
+Output written on gphoton.pdf (18 pages, 1567905 bytes).
 PDF statistics:
  1636 PDF objects out of 1728 (max. 8388607)
  597 compressed objects within 6 object streams
