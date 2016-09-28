@@ -1,0 +1,119 @@
+\begin{thebibliography}{}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+
+\bibitem[{{Astropy Collaboration} {et~al.}(2013){Astropy Collaboration},
+  {Robitaille}, {Tollerud}, {Greenfield}, {Droettboom}, {Bray}, {Aldcroft},
+  {Davis}, {Ginsburg}, {Price-Whelan}, {Kerzendorf}, {Conley}, {Crighton},
+  {Barbary}, {Muna}, {Ferguson}, {Grollier}, {Parikh}, {Nair}, {Unther},
+  {Deil}, {Woillez}, {Conseil}, {Kramer}, {Turner}, {Singer}, {Fox}, {Weaver},
+  {Zabalza}, {Edwards}, {Azalee Bostroem}, {Burke}, {Casey}, {Crawford},
+  {Dencheva}, {Ely}, {Jenness}, {Labrie}, {Lim}, {Pierfederici}, {Pontzen},
+  {Ptak}, {Refsdal}, {Servillat}, \& {Streicher}}]{astropy}
+{Astropy Collaboration}, {Robitaille}, T.~P., {Tollerud}, E.~J., {et~al.} 2013,
+  \aap, 558, A33
+
+\bibitem[{Bianchi {et~al.}(2011)Bianchi, Herald, Efremova, Girardi, Zabot,
+  Marigo, Conti, \& Shiao}]{bianchi2011galex}
+Bianchi, L., Herald, J., Efremova, B., {et~al.} 2011, Astrophysics and Space
+  Science, 335, 161
+
+\bibitem[{Bohlin \& Koester(2008)}]{bohlin2008absolute}
+Bohlin, R., \& Koester, D. 2008, The Astronomical Journal, 135, 1092
+
+\bibitem[{{Calabretta} \& {Greisen}(2002)}]{cal2002}
+{Calabretta}, M.~R., \& {Greisen}, E.~W. 2002, \aap, 395, 1077
+
+\bibitem[{Camarota \& Holberg(2014)}]{camarota2014white}
+Camarota, L., \& Holberg, J. 2014, Monthly Notices of the Royal Astronomical
+  Society, 438, 3111
+
+\bibitem[{{Cristaldi} \& {Rodon{\`o}}(1970)}]{cri1970}
+{Cristaldi}, S., \& {Rodon{\`o}}, M. 1970, A\&AS, 2, 223
+
+\bibitem[{{de la Vega} \& {Bianchi}(2016)}]{delavega2016}
+{de la Vega}, A., \& {Bianchi}, L. 2016, private communication
+
+\bibitem[{{Foreman-Mackey} {et~al.}(2013){Foreman-Mackey}, {Hogg}, {Lang}, \&
+  {Goodman}}]{for2013}
+{Foreman-Mackey}, D., {Hogg}, D.~W., {Lang}, D., \& {Goodman}, J. 2013, \pasp,
+  125, 306
+
+\bibitem[{Gray {et~al.}(2006)Gray, Nieto-Santisteban, \& Szalay}]{gra2006}
+Gray, J., Nieto-Santisteban, M.~A., \& Szalay, A.~S. 2006, The Zones Algorithm
+  for Finding Points-Near-a-Point or Cross-Matching Spatial Datasets, Tech.
+  Rep. MSR-TR-2006-52, Microsoft Research
+
+\bibitem[{{Greisen} \& {Calabretta}(2002)}]{gre2002}
+{Greisen}, E.~W., \& {Calabretta}, M.~R. 2002, \aap, 395, 1061
+
+\bibitem[{{Martin} {et~al.}(2005){Martin}, {Fanson}, {Schiminovich},
+  {Morrissey}, {Friedman}, {Barlow}, {Conrow}, {Grange}, {Jelinsky},
+  {Milliard}, {Siegmund}, {Bianchi}, {Byun}, {Donas}, {Forster}, {Heckman},
+  {Lee}, {Madore}, {Malina}, {Neff}, {Rich}, {Small}, {Surber}, {Szalay},
+  {Welsh}, \& {Wyder}}]{mar2005}
+{Martin}, D.~C., {Fanson}, J., {Schiminovich}, D., {et~al.} 2005, ApJL, 619, L1
+
+\bibitem[{{Morrissey}(2013)}]{mor2013}
+{Morrissey}, P. 2013, private communication
+
+\bibitem[{{Morrissey} {et~al.}(2005){Morrissey}, {Schiminovich}, {Barlow},
+  {Martin}, {Blakkolb}, {Conrow}, {Cooke}, {Erickson}, {Fanson}, {Friedman},
+  {Grange}, {Jelinsky}, {Lee}, {Liu}, {Mazer}, {McLean}, {Milliard}, {Randall},
+  {Schmitigal}, {Sen}, {Siegmund}, {Surber}, {Vaughan}, {Viton}, {Welsh},
+  {Bianchi}, {Byun}, {Donas}, {Forster}, {Heckman}, {Lee}, {Madore}, {Malina},
+  {Neff}, {Rich}, {Small}, {Szalay}, \& {Wyder}}]{mor2005}
+{Morrissey}, P., {Schiminovich}, D., {Barlow}, T.~A., {et~al.} 2005, ApJL, 619,
+  L7
+
+\bibitem[{{Morrissey} {et~al.}(2007){Morrissey}, {Conrow}, {Barlow}, {Small},
+  {Seibert}, {Wyder}, {Budav{\'a}ri}, {Arnouts}, {Friedman}, {Forster},
+  {Martin}, {Neff}, {Schiminovich}, {Bianchi}, {Donas}, {Heckman}, {Lee},
+  {Madore}, {Milliard}, {Rich}, {Szalay}, {Welsh}, \& {Yi}}]{mor2007}
+{Morrissey}, P., {Conrow}, T., {Barlow}, T.~A., {et~al.} 2007, ApJS, 173, 682
+
+\bibitem[{{Olmedo} {et~al.}(2015){Olmedo}, {Lloyd}, {Mamajek}, {Ch{\'a}vez},
+  {Bertone}, {Martin}, \& {Neill}}]{olmedo2015deep}
+{Olmedo}, M., {Lloyd}, J., {Mamajek}, E.~E., {et~al.} 2015, \apj, 813, 100
+
+\bibitem[{{Pence} {et~al.}(2010){Pence}, {Chiappetti}, {Page}, {Shaw}, \&
+  {Stobie}}]{pen2010}
+{Pence}, W.~D., {Chiappetti}, L., {Page}, C.~G., {Shaw}, R.~A., \& {Stobie}, E.
+  2010, \aap, 524, A42
+
+\bibitem[{{Ramsay} {et~al.}(2013){Ramsay}, {Doyle}, {Hakala}, {Garcia-Alvarez},
+  {Brooks}, {Barclay}, \& {Still}}]{ram2013}
+{Ramsay}, G., {Doyle}, J.~G., {Hakala}, P., {et~al.} 2013, MNRAS, 434, 2451
+
+\bibitem[{{Robinson} {et~al.}(2005){Robinson}, {Wheatley}, {Welsh}, {Forster},
+  {Morrissey}, {Seibert}, {Rich}, {Salim}, {Barlow}, {Bianchi}, {Byun},
+  {Donas}, {Friedman}, {Heckman}, {Jelinsky}, {Lee}, {Madore}, {Malina},
+  {Martin}, {Milliard}, {Neff}, {Schiminovich}, {Siegmund}, {Small}, {Szalay},
+  \& {Wyder}}]{rob2005}
+{Robinson}, R.~D., {Wheatley}, J.~M., {Welsh}, B.~Y., {et~al.} 2005, \apj, 633,
+  447
+
+\bibitem[{{Tamazian} {et~al.}(2008){Tamazian}, {Docobo}, {Balega}, {Melikian},
+  {Maximov}, \& {Malogolovets}}]{tam2008}
+{Tamazian}, V.~S., {Docobo}, J.~A., {Balega}, Y.~Y., {et~al.} 2008, AJ, 136,
+  974
+
+\bibitem[{{Welsh} {et~al.}(2006){Welsh}, {Wheatley}, {Browne}, {Siegmund},
+  {Doyle}, {O'Shea}, {Antonova}, {Forster}, {Seibert}, {Morrissey}, \&
+  {Taroyan}}]{wel2006}
+{Welsh}, B.~Y., {Wheatley}, J., {Browne}, S.~E., {et~al.} 2006, A\&A, 458, 921
+
+\bibitem[{{Welsh} {et~al.}(2007){Welsh}, {Wheatley}, {Seibert}, {Browne},
+  {West}, {Siegmund}, {Barlow}, {Forster}, {Friedman}, {Martin}, {Morrissey},
+  {Small}, {Wyder}, {Schiminovich}, {Neff}, \& {Rich}}]{wel2007}
+{Welsh}, B.~Y., {Wheatley}, J.~M., {Seibert}, M., {et~al.} 2007, \apjs, 173,
+  673
+
+\bibitem[{{Wenger} {et~al.}(2000){Wenger}, {Ochsenbein}, {Egret}, {Dubois},
+  {Bonnarel}, {Borde}, {Genova}, {Jasniewicz}, {Lalo{\"e}}, {Lesteven}, \&
+  {Monier}}]{simbad}
+{Wenger}, M., {Ochsenbein}, F., {Egret}, D., {et~al.} 2000, \aaps, 143, 9
+
+\bibitem[{{Wheatley} {et~al.}(2008){Wheatley}, {Welsh}, \& {Browne}}]{whe2008}
+{Wheatley}, J.~M., {Welsh}, B.~Y., \& {Browne}, S.~E. 2008, AJ, 136, 259
+
+\end{thebibliography}
