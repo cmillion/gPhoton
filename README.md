@@ -11,6 +11,7 @@ You may also wish to review the [gPhoton calibration paper](https://arxiv.org/ab
 
 #####Citation
 If you use gPhoton software in your research, please cite:
+
 Million, C. C., Fleming, S. W., Shiao, B., Parke, L. 2016, gPhoton: Time-tagged GALEX photon events analysis tools, Astrophysics Source Code Library, ascl:1603.004 
 
 ![Logo](https://travis-ci.org/cmillion/gPhoton.svg?branch=master)
