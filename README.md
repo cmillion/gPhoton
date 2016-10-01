@@ -9,7 +9,7 @@ To get started, please read the [User Guide](https://github.com/cmillion/gPhoton
 
 #####Citation
 If you use gPhoton software in your research, please cite:
-Million, C., Fleming, S. W., Shiao, B. (2014) gPhoton. Software available at https://github.com/cmillion/gPhoton
+Million, C. C., Fleming, S. W., Shiao, B., Parke, L. 2016, gPhoton: Time-tagged GALEX photon events analysis tools, Astrophysics Source Code Library, ascl:1603.004 
 
 ![Logo](https://travis-ci.org/cmillion/gPhoton.svg?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/gphoton/badge/?version=master)](http://gphoton.readthedocs.io/en/master/?badge=master)
