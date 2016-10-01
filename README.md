@@ -4,6 +4,8 @@ The master branch currently supports Python 2.7 **only**.  The "py3comp" branch 
 
 To get started, please read the [User Guide](https://github.com/cmillion/gPhoton/blob/master/docs/UserGuide.md).  You can also refer to the [Full API](http://gphoton.readthedocs.io/en/master/) available on ReadTheDocs.
 
+You may also wish to review the [gPhoton calibration paper](https://arxiv.org/abs/1609.09492).
+
 #####Database Status
 **Every photon observed through GR6/7 is now available in the database!** This includes every observation up to the start of the post-NASA or "CAUSE" phase of the mission.
 
