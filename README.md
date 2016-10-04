@@ -10,9 +10,8 @@ You may also wish to review the [gPhoton calibration paper](https://arxiv.org/ab
 **Every photon observed through GR6/7 is now available in the database!** This includes every observation up to the start of the post-NASA or "CAUSE" phase of the mission.
 
 #####Citation
-If you use gPhoton software in your research, please cite:
-
-Million, C. C., Fleming, S. W., Shiao, B., Parke, L. 2016, gPhoton: Time-tagged GALEX photon events analysis tools, Astrophysics Source Code Library, ascl:1603.004 
+If you use gPhoton software in your research, please cite the introductory/calibration paper:
+[Million et al. 2016, *ApJ*](https://arxiv.org/abs/1609.09492).
 
 ![Logo](https://travis-ci.org/cmillion/gPhoton.svg?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/gphoton/badge/?version=master)](http://gphoton.readthedocs.io/en/master/?badge=master)
