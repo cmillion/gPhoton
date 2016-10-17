@@ -537,13 +537,9 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
             # This substitutes empty strings for RA and Dec
             # values so that when they're dumped into the database
             # they are correctly recorded as NULL
-            if (thisflag == 2 or thisflag == 5 or thisflag == 7 or
-                    thisflag == 8 or thisflag == 9 or thisflag == 10 or
-                    thisflag == 11 or thisflag == 12):
-            # Should be:
-            #if ((thisflag == 3) or (thisflag == 6) or (thisflag == 8) or
-            #        (thisflag == 9) or (thisflag == 10) or
-            #        (thisflag == 11) or (thisflag = 12):)
+            if ((thisflag == 3) or (thisflag == 6) or (thisflag == 8) or
+                    (thisflag == 9) or (thisflag == 10) or
+                    (thisflag == 11) or (thisflag == 12)):
                 if nullfile:
                     NULLspreadsheet.writerow(
                         [int(t[i]*dbscale), x[i], y[i],
