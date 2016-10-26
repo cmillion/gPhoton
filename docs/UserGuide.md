@@ -411,22 +411,22 @@ The column definitions for the .csv file output by gPhoton.py are as follows.
 ####Flag Column Definitions
 These are the definitions of various values of the _flag_ column in the gPhoton .csv output file. Note that these are not identical to any flag column definitions for output created by the canonical pipeline. In general, end users will be most interested in events for which _flag = 1_, and this is the default search criterion for all queries performed by the Photon Tools.
 
-0. successfully calibrated (no errors)
-1. _N/A_
-2. event skipped
-3. _N/A_
-4. _N/A_
-5. classified as stim
-6. hotspot (covered by hotspot mask)
-7. bad aspect (unkown aspect solution)
-8. out of range (off of detector prior to the wiggle correction)
-9. bad walk (off of detector prior to the walk correction)
-10. bad linearity (off of the detector prior to the linearity correction)
-11. bad distortion (off of the detector prior to the distortion correction)
-12. aspect jump (questionable aspect due to occuring during a jump or gap in the aspect solution or bracketed by one or more flagged aspect values)
-13. _N/A_
-14. _N/A_
-15. _N/A_
+0 = successfully calibrated (no errors)
+1 = _N/A_
+2 =  event skipped
+3 = _N/A_
+4 = _N/A_
+5 = out of detector window
+6 = hotspot (covered by hotspot mask)
+7 = bad aspect (unkown aspect solution)
+8 = out of range (off of detector prior to the wiggle correction)
+9 = bad walk (off of detector prior to the walk correction)
+10 = bad linearity (off of the detector prior to the linearity correction)
+11 = bad distortion (off of the detector prior to the distortion correction)
+12 = aspect jump (questionable aspect due to occuring during a jump or gap in the aspect solution or bracketed by one or more flagged aspect values)
+13 = _N/A_
+14 = _N/A_
+15 = _N/A_
 
 ##Common Questions, Issues, and Gotchas
 1. **"My data is not available!"** You can verify that data for your desired target does or does not exist in the database and present by using the `gFind` commands described above. If data for your target is not available, there are two possible explanations: (1) we have not yet loaded those observations into the photon database, or (2) that target was never observed by the GALEX mission. As of this writing, we have loaded all direct imaging data up through the GR6/7 release, which corresponds to the end of the NASA-funded mission and beginning of the CAUSE phase. You can confirm that your target was, indeed, observed by GALEX by searching for it in the [GALEX Catalog](http://galex.stsci.edu/GR6/?page=mastform).

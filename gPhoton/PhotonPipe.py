@@ -128,11 +128,9 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
     distortion_x, disthead = cal.distortion(band, 'x', eclipse, stimsep)
     distortion_y, _ = cal.distortion(band, 'y', eclipse, stimsep)
     (cube_x0, cube_dx, cube_y0, cube_dy, cube_d0, cube_dd, cube_nd, cube_nc,
-     cube_nr) = (disthead['DC_X0'], disthead['DC_DX'],
-                 disthead['DC_Y0'], disthead['DC_DY'],
-                 disthead['DC_D0'], disthead['DC_DD'],
-                 disthead['NAXIS3'], disthead['NAXIS1'],
-                 disthead['NAXIS2'])
+     cube_nr) = (disthead['DC_X0'], disthead['DC_DX'], disthead['DC_Y0'],
+        disthead['DC_DY'], disthead['DC_D0'], disthead['DC_DD'],
+        disthead['NAXIS3'], disthead['NAXIS1'], disthead['NAXIS2'])
 
     if band == 'FUV':
         xoffset, yoffset = find_fuv_offset(scstfile)
@@ -199,26 +197,24 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
     print("")
 
     for i in range(int(nphots/chunksz)+1):
-        a = time.time()
+        a = time.time() # Start the timer.
 
         csvrows = []
-        chunkbeg, chunkend = i*chunksz, (i+1)*chunksz
-        if chunkend > nphots:
-            chunkend = nphots
+        chunkbeg, chunkend = i*chunksz, min(nphots,(i+1)*chunksz)
 
         chunkid = " "+str(i+1)+" of "+str(int(nphots/chunksz)+1)+": "
         print_inline(chunkid+"Unpacking raw6 data...")
         t = np.array(raw6hdulist[1].data.field('t')[chunkbeg:chunkend])
         phb1 = np.array(raw6hdulist[1].data.field('phb1')[chunkbeg:chunkend],
-                        dtype='int64')
+                                                                dtype='int64')
         phb2 = np.array(raw6hdulist[1].data.field('phb2')[chunkbeg:chunkend],
-                        dtype='int64')
+                                                                dtype='int64')
         phb3 = np.array(raw6hdulist[1].data.field('phb3')[chunkbeg:chunkend],
-                        dtype='int64')
+                                                                dtype='int64')
         phb4 = np.array(raw6hdulist[1].data.field('phb4')[chunkbeg:chunkend],
-                        dtype='int64')
+                                                                dtype='int64')
         phb5 = np.array(raw6hdulist[1].data.field('phb5')[chunkbeg:chunkend],
-                        dtype='int64')
+                                                                dtype='int64')
 
         # Bitwise "decoding" of the raw6 telemetry.
         q = ((phb4 & 3) << 3) + ((phb5 & 224) >> 5)
@@ -254,10 +250,8 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
                              wlk2data, clk2, clk2data)
             y = y + yac
 
-        # [Future] This and other ugly lines like it below are for the purpose
-        # of memory management. There is likely a more Pythonic way.
-        (phb1, phb2, phb3, phb4, phb5, xb, xamc, yb, yamc, xraw0, yraw0, xraw,
-         yraw) = ([], [], [], [], [], [], [], [], [], [], [], [], [])
+        # Empty these variables for memory management purposes.
+        phb1,phb2,phb3,phb4,phb5,xb,xamc,yb,yamc,xraw0,yraw0,xraw,yraw=[[]]*13
 
         flags = np.zeros(len(t))
 
@@ -267,13 +261,12 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         fptrx = x_as/10. + 240.
         fptry = y_as/10. + 240.
 
-        x_as, y_as = [], []
+        x_as, y_as = [[]]*2 # Memory management.
 
         # This and other lines like it below are to verify that the
         # event is still on the detector.
-        cut = ((fptrx > 0.) & (fptrx < 479.) & (fptry > 0.) & (fptry < 479.) &
-               (flags == 0))
-        flags[np.where(cut == False)[0]] = 8
+        cut = ((fptrx > 0.) & (fptrx < 479.) & (fptry > 0.) & (fptry < 479.))
+        flags[np.where((cut == False) & (flags == 0))[0]] = 8
         ix = np.where(cut == True)[0]
 
         blt = fptrx-np.array(fptrx, dtype='int64')
@@ -289,7 +282,7 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         xdig = x + wigx/(10.*aspum)
         ydig = y + wigy/(10.*aspum)
 
-        wigx, wigy = [], []
+        wigx, wigy = [[]]*2 # Memory management.
 
         print_inline(chunkid+"Applying walk correction...")
         xdig_as = xdig*aspum
@@ -297,12 +290,20 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         fptrx = xdig_as/10. + 240.
         fptry = ydig_as/10. + 240.
 
-        xdig_as, ydig_as = [], []
+        xdig_as, ydig_as = [[]]*2 # Memory management.
 
-        cut = ((fptrx > 0.) & (fptrx < 479.) & (fptry > 0.) & (fptry < 479.) &
-               (flags == 0))
-        flags[np.where(cut == False)[0]] = 9
+        cut = ((fptrx > 0.) & (fptrx < 479.) & (fptry > 0.) & (fptry < 479.))
+        flags[np.where((cut == False) & (flags == 0))[0]] = 9
         ix = np.where(cut == True)[0]
+
+        # #Suggested code cleanup from Hans Gunter Moritz.
+        # cut_fptrx = np.array(fptrx[ix], dtype='int64')
+        # cut_fptry = np.array(fptry[ix], dtype='int64')
+        #
+        # cut[ix] = (np.any(walk_x[q[ix], cut_fptry:cut_fptry+2,
+        #                                 cut_fptrx:cut_fptrx+2] != -999) |
+        #            np.any(walk_y[q[ix], cut_fptry:cut_fptry+2,
+        #                                 cut_fptrx:cut_fptrx+2] != -999))
 
         cut[ix] = ((walk_x[q[ix], np.array(fptry[ix], dtype='int64'),
                            np.array(fptrx[ix], dtype='int64')] != -999) |
@@ -320,7 +321,8 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
                            np.array(fptrx[ix], dtype='int64')] != -999) |
                    (walk_y[q[ix], np.array(fptry[ix], dtype='int64')+1,
                            np.array(fptrx[ix], dtype='int64')+1] != -999))
-        flags[np.where(cut == False)[0]] = 9
+
+        flags[np.where((cut == False) & (flags == 0))] = 9
         ix = np.where(cut == True)[0]
 
         blt = fptrx-np.array(fptrx, dtype='int64')
@@ -369,12 +371,10 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         fptrx = xp_as/10. + 240.
         fptry = yp_as/10. + 240.
 
-        xp, yp = [], []
-        walkx, walky = [], []
+        xp, yp, walkx, walky = [[]]*4 # Memory management.
 
-        cut = ((fptrx > 0.) & (fptrx < 479.) & (fptry > 0.) & (fptry < 479.) &
-               (flags == 0))
-        flags[np.where(cut == False)[0]] = 10
+        cut = ((fptrx > 0.) & (fptrx < 479.) & (fptry > 0.) & (fptry < 479.))
+        flags[np.where((cut == False) & (flags == 0))] = 10
         ix = np.where(cut == True)[0]
 
         blt = fptrx-np.array(fptrx, dtype='int64')
@@ -427,9 +427,8 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         depth[((depth >= cube_nd)).nonzero()[0]] = -1.
         """
 
-        cut = ((col > -1) & (col < cube_nc) & (row > -1) & (row < cube_nr) &
-               (flags == 0))
-        flags[np.where(cut == False)[0]] = 11
+        cut = ((col > -1) & (col < cube_nc) & (row > -1) & (row < cube_nr))
+        flags[np.where((cut == False) & (flags == 0))] = 11
         ix = np.where(cut == True)[0]
 
         xshift, yshift = np.zeros(len(t)), np.zeros(len(t))
@@ -448,9 +447,7 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         print_inline(chunkid+"Applying hotspot mask...")
 
         # The detectors aren't oriented the same way.
-        flip = 1.
-        if band == 'FUV':
-            flip = -1.
+        flip = -1. if band=='FUV' else 1.
 
         xi = (
             xi_xsc*(flip*(yp_as + dy + yshift)*10.) +
@@ -459,24 +456,23 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
             eta_xsc*(flip*(yp_as + dy + yshift)*10.) +
             eta_ysc*(flip*(xp_as + dx + xshift)*10.))
 
-        xp_as, yp_as, depth, ss = [], [], [], []
-        dx, dy, xshift, yshift = [], [], [], []
+        xp_as,yp_as,depth,ss,dx,dy,xshift,yshift=[[]]*8 # Memory management.
 
         col = (((xi/36000.)/(detsize/2.)*maskfill + 1.)/2. * npixx)
         row = (((eta/36000.)/(detsize/2.)*maskfill + 1.)/2. * npixy)
 
-        cut = ((col > 0.) & (col < 799.) & (row > 0.) & (row < 799.) &
-               (flags == 0))
-        flags[np.where(cut == False)[0]] = 6
+        # Off detector at hotspot mask. Should mostly be stims.
+        cut = ((col > 0.) & (col < 799.) & (row > 0.) & (row < 799.))
+        flags[np.where((cut == False))] = 5 # Clobbers some earlier flags.
         ix = np.where(cut == True)[0]
 
-        cut[ix] = (
-            (mask[np.array(col[ix], dtype='int64'),
-                  np.array(row[ix], dtype='int64')] == 1.))
-        flags[np.where(cut == False)[0]] = 6
+        # Hotspot masks. Must use ix to prevent out-of-bounds error.
+        cut[ix] = (mask[np.array(col, dtype='int64')[ix],
+                    np.array(row, dtype='int64')[ix]] == 1.)
+        flags[np.where((cut == False) & (flags == 0))] = 6
         ix = np.where(cut == True)[0]
 
-        col, row = [], []
+        col, row = [[]]*2 # Memory management.
 
         # This gives the index of the aspect time that comes _before_
         # each photon time. Without the '-1' it will give the index
@@ -487,9 +483,8 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         print_inline(chunkid+"Applying dither correction...")
         # Use only photons that are bracketed by valid aspect solutions
         # and have been not themselves been flagged as invalid.
-        cut = ((aspix > 0) & (aspix < (len(asptime)-1)) &
-               ((flags == 0) | (flags == 6)))
-        flags[np.where(cut == False)[0]] = 7
+        cut = ((aspix > 0) & (aspix < (len(asptime)-1)))
+        flags[np.where((cut == False) & ((flags==0) | (flags == 6)))] = 7
         ix = np.where(cut == True)[0]
 
         print_inline(chunkid+"Interpolating aspect solutions...")
@@ -509,12 +504,12 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
                                          aspdec[aspix[ix]],
                                          -asptwist[aspix[ix]], 1/36000., 0.)
 
-        cut = (
+        cut[ix] = (
             ((asptime[aspix[ix]+1]-asptime[aspix[ix]]) == 1) &
             (aspflags[aspix[ix]]%2 == 0) & (aspflags[aspix[ix]+1]%2 == 0) &
             (aspflags[aspix[ix]-1]%2 == 0) & (flags[ix] == 0) &
-            (flags[ix] != 7))
-        flags[np.where(cut == False)[0]] = 12
+            (flags[ix] != 7) & (flags[ix] !=6))
+        flags[np.where((cut == False) & (flags == 0))[0]] = 12
 
         # NOTE: If you wish to add a hook that filters the gPhoton output
         # (like perhaps by sky position or time range) then add it here.
@@ -537,25 +532,19 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
             # This substitutes empty strings for RA and Dec
             # values so that when they're dumped into the database
             # they are correctly recorded as NULL
-            if ((thisflag == 3) or (thisflag == 6) or (thisflag == 8) or
-                    (thisflag == 9) or (thisflag == 10) or
-                    (thisflag == 11) or (thisflag == 12)):
+            if thisflag in [2,5,7,8,9,10,11,12]:
                 if nullfile:
                     NULLspreadsheet.writerow(
-                        [int(t[i]*dbscale), x[i], y[i],
-                         xa[i], ya[i], q[i], xi[i],
-                         eta[i],
-                         "", "", flags[i]])
+                        [int(t[i]*dbscale), x[i], y[i],xa[i], ya[i], q[i],
+                         xi[i], eta[i], "", "", flags[i]])
                 else:
                     spreadsheet.writerow(
-                        [int(t[i]*dbscale), x[i], y[i], xa[i],
-                         ya[i], q[i], xi[i], eta[i], "", "",
-                         flags[i]])
+                        [int(t[i]*dbscale), x[i], y[i], xa[i], ya[i], q[i],
+                         xi[i], eta[i], "", "", flags[i]])
             else:
                 spreadsheet.writerow(
-                    [int(t[i]*dbscale), x[i], y[i], xa[i],
-                     ya[i], q[i], xi[i], eta[i],
-                      ra[i], dec[i], flags[i]])
+                    [int(t[i]*dbscale), x[i], y[i], xa[i], ya[i], q[i], xi[i],
+                     eta[i], ra[i], dec[i], flags[i]])
 
     raw6hdulist.close()
     stopt = time.time()
