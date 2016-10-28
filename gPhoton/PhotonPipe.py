@@ -253,7 +253,7 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         # Empty these variables for memory management purposes.
         phb1,phb2,phb3,phb4,phb5,xb,xamc,yb,yamc,xraw0,yraw0,xraw,yraw=[[]]*13
 
-        flags = np.zeros(len(t))
+        flags = np.zeros(len(t)) # initialized
 
         print_inline(chunkid+"Applying wiggle correction...")
         x_as = x*aspum
@@ -269,15 +269,17 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         flags[np.where((cut == False) & (flags == 0))[0]] = 8
         ix = np.where(cut == True)[0]
 
-        blt = fptrx-np.array(fptrx, dtype='int64')
-        blu = fptry-np.array(fptry, dtype='int64')
+        fptrx_ix = np.array(fptrx, dtype='int64')
+        fptry_ix = np.array(fptry, dtype='int64')
+        blt = fptrx-fptrx_ix
+        blu = fptry-fptry_ix
         wigx, wigy = np.zeros(len(t)), np.zeros(len(t))
         wigx[ix] = (
-            (1-blt[ix])*(wiggle_x[xa[ix], np.array(fptrx[ix], dtype='int64')]) +
-            (blt[ix])*(wiggle_x[xa[ix], np.array(fptrx[ix], dtype='int64')+1]))
+            (1-blt[ix])*(wiggle_x[xa[ix], fptrx_ix[ix]]) +
+            (blt[ix])*(wiggle_x[xa[ix], fptrx_ix[ix]+1]))
         wigy[ix] = (
-            (1-blu[ix])*(wiggle_y[ya[ix], np.array(fptry[ix], dtype='int64')]) +
-            (blu[ix])*(wiggle_y[ya[ix], np.array(fptry[ix], dtype='int64')+1]))
+            (1-blu[ix])*(wiggle_y[ya[ix], fptry_ix[ix]]) +
+            (blu[ix])*(wiggle_y[ya[ix], fptry_ix[ix]+1]))
 
         xdig = x + wigx/(10.*aspum)
         ydig = y + wigy/(10.*aspum)
@@ -296,72 +298,35 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         flags[np.where((cut == False) & (flags == 0))[0]] = 9
         ix = np.where(cut == True)[0]
 
-        # #Suggested code cleanup from Hans Gunter Moritz.
-        # cut_fptrx = np.array(fptrx[ix], dtype='int64')
-        # cut_fptry = np.array(fptry[ix], dtype='int64')
-        #
-        # cut[ix] = (np.any(walk_x[q[ix], cut_fptry:cut_fptry+2,
-        #                                 cut_fptrx:cut_fptrx+2] != -999) |
-        #            np.any(walk_y[q[ix], cut_fptry:cut_fptry+2,
-        #                                 cut_fptrx:cut_fptrx+2] != -999))
-
-        cut[ix] = ((walk_x[q[ix], np.array(fptry[ix], dtype='int64'),
-                           np.array(fptrx[ix], dtype='int64')] != -999) |
-                   (walk_x[q[ix], np.array(fptry[ix], dtype='int64'),
-                           np.array(fptrx[ix], dtype='int64')+1] != -999) |
-                   (walk_x[q[ix], np.array(fptry[ix], dtype='int64')+1,
-                           np.array(fptrx[ix], dtype='int64')] != -999) |
-                   (walk_x[q[ix], np.array(fptry[ix], dtype='int64')+1,
-                           np.array(fptrx[ix], dtype='int64')+1] != -999) |
-                   (walk_y[q[ix], np.array(fptry[ix], dtype='int64'),
-                           np.array(fptrx[ix], dtype='int64')] != -999) |
-                   (walk_y[q[ix], np.array(fptry[ix], dtype='int64'),
-                           np.array(fptrx[ix], dtype='int64')+1] != -999) |
-                   (walk_y[q[ix], np.array(fptry[ix], dtype='int64')+1,
-                           np.array(fptrx[ix], dtype='int64')] != -999) |
-                   (walk_y[q[ix], np.array(fptry[ix], dtype='int64')+1,
-                           np.array(fptrx[ix], dtype='int64')+1] != -999))
+        fptrx_ix = np.array(fptrx, dtype='int64')
+        fptry_ix = np.array(fptry, dtype='int64')
+        cut[ix] = ((walk_x[q[ix],fptry_ix[ix],fptrx_ix[ix]] != -999) |
+                   (walk_x[q[ix],fptry_ix[ix],fptrx_ix[ix]+1] != -999) |
+                   (walk_x[q[ix],fptry_ix[ix]+1,fptrx_ix[ix]] != -999) |
+                   (walk_x[q[ix],fptry_ix[ix]+1,fptrx_ix[ix]+1] != -999) |
+                   (walk_y[q[ix],fptry_ix[ix],fptrx_ix[ix]] != -999) |
+                   (walk_y[q[ix],fptry_ix[ix],fptrx_ix[ix]+1] != -999) |
+                   (walk_y[q[ix],fptry_ix[ix]+1,fptrx_ix[ix]] != -999) |
+                   (walk_y[q[ix],fptry_ix[ix]+1,fptrx_ix[ix]+1] != -999))
 
         flags[np.where((cut == False) & (flags == 0))] = 9
         ix = np.where(cut == True)[0]
 
-        blt = fptrx-np.array(fptrx, dtype='int64')
-        blu = fptry-np.array(fptry, dtype='int64')
+        fptrx_ix = np.array(fptrx, dtype='int64')
+        fptry_ix = np.array(fptry, dtype='int64')
+        blt = fptrx-fptrx_ix
+        blu = fptry-fptry_ix
         walkx, walky = np.zeros(len(t)), np.zeros(len(t))
         walkx[ix] = (
-            (1-blt[ix])*(1-blu[ix])*(
-                walk_x[q[ix],
-                       np.array(fptry[ix], dtype='int64'),
-                       np.array(fptrx[ix], dtype='int64')])+
-            (blt[ix])*(1-blu[ix])*(
-                walk_x[q[ix],
-                       np.array(fptry[ix], dtype='int64'),
-                       np.array(fptrx[ix], dtype='int64')+1])+
-            (1-blt[ix])*(blu[ix])*(
-                walk_x[q[ix],
-                       np.array(fptry[ix], dtype='int64')+1,
-                       np.array(fptrx[ix], dtype='int64')]) +
-            (blt[ix])*(blu[ix])*(
-                walk_x[q[ix],
-                       np.array(fptry[ix], dtype='int64')+1,
-                       np.array(fptrx[ix], dtype='int64')+1]))
+            (1-blt[ix])*(1-blu[ix])*(walk_x[q[ix],fptry_ix[ix],fptrx_ix[ix]])+
+            (blt[ix])*(1-blu[ix])*(walk_x[q[ix],fptry_ix[ix],fptrx_ix[ix]+1])+
+            (1-blt[ix])*(blu[ix])*(walk_x[q[ix],fptry_ix[ix]+1,fptrx_ix[ix]]) +
+            (blt[ix])*(blu[ix])*(walk_x[q[ix],fptry_ix[ix]+1,fptrx_ix[ix]+1]))
         walky[ix] = (
-            (1-blt[ix])*(1-blu[ix])*(
-                walk_y[q[ix],
-                       np.array(fptry[ix], dtype='int64'),
-                       np.array(fptrx[ix], dtype='int64')]) +
-            (blt[ix])*(1-blu[ix])*(
-                walk_y[q[ix],
-                       np.array(fptry[ix], dtype='int64'),
-                       np.array(fptrx[ix], dtype='int64')+1]) +
-            (1-blt[ix])*(blu[ix])*(
-                walk_y[q[ix],
-                       np.array(fptry[ix], dtype='int64')+1,
-                       np.array(fptrx[ix], dtype='int64')]) +
-            (blt[ix])*(blu[ix])*(
-                walk_y[q[ix],
-                       np.array(fptry[ix], dtype='int64')+1,
-                       np.array(fptrx[ix], dtype='int64')+1]))
+            (1-blt[ix])*(1-blu[ix])*(walk_y[q[ix],fptry_ix[ix],fptrx_ix[ix]]) +
+            (blt[ix])*(1-blu[ix])*(walk_y[q[ix],fptry_ix[ix],fptrx_ix[ix]+1]) +
+            (1-blt[ix])*(blu[ix])*(walk_y[q[ix],fptry_ix[ix]+1,fptrx_ix[ix]]) +
+            (blt[ix])*(blu[ix])*(walk_y[q[ix],fptry_ix[ix]+1,fptrx_ix[ix]+1]))
 
         print_inline(chunkid+"Applying spatial non-linearity correction...")
         xp = xdig - walkx
@@ -377,35 +342,22 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         flags[np.where((cut == False) & (flags == 0))] = 10
         ix = np.where(cut == True)[0]
 
-        blt = fptrx-np.array(fptrx, dtype='int64')
-        blu = fptry-np.array(fptry, dtype='int64')
+        fptrx_ix = np.array(fptrx, dtype='int64')
+        fptry_ix = np.array(fptry, dtype='int64')
+        blt = fptrx-fptrx_ix
+        blu = fptry-fptry_ix
 
         dx, dy = np.zeros(len(t)), np.zeros(len(t))
         dx[ix] = (
-            (1-blt[ix])*(1-blu[ix])*
-            linearity_x[np.array(fptry[ix], dtype='int64'),
-                        np.array(fptrx[ix], dtype='int64')]+
-            (blt[ix])*(1-blu[ix])*
-            linearity_x[np.array(fptry[ix], dtype='int64'),
-                        np.array(fptrx[ix], dtype='int64')+1]+
-            (1-blt[ix])*(blu[ix])*
-            linearity_x[np.array(fptry[ix], dtype='int64')+1,
-                        np.array(fptrx[ix], dtype='int64')]+
-            (blt[ix])*(blu[ix])*
-            linearity_x[np.array(fptry[ix], dtype='int64')+1,
-                        np.array(fptrx[ix], dtype='int64')+1])
-        dy[ix] = ((1-blt[ix])*(1-blu[ix])*
-                  linearity_y[np.array(fptry[ix], dtype='int64'),
-                              np.array(fptrx[ix], dtype='int64')]+
-                  (blt[ix])*(1-blu[ix])*
-                  linearity_y[np.array(fptry[ix], dtype='int64'),
-                              np.array(fptrx[ix], dtype='int64')+1]+
-                  (1-blt[ix])*(blu[ix])*
-                  linearity_y[np.array(fptry[ix], dtype='int64')+1,
-                              np.array(fptrx[ix], dtype='int64')]+
-                  (blt[ix])*(blu[ix])*
-                  linearity_y[np.array(fptry[ix], dtype='int64')+1,
-                              np.array(fptrx[ix], dtype='int64')+1])
+            (1-blt[ix])*(1-blu[ix])*linearity_x[fptry_ix[ix],fptrx_ix[ix]]+
+            (blt[ix])*(1-blu[ix])*linearity_x[fptry_ix[ix],fptrx_ix[ix]+1]+
+            (1-blt[ix])*(blu[ix])*linearity_x[fptry_ix[ix]+1,fptrx_ix[ix]]+
+            (blt[ix])*(blu[ix])*linearity_x[fptry_ix[ix]+1,fptrx_ix[ix]+1])
+        dy[ix] = (
+            (1-blt[ix])*(1-blu[ix])*linearity_y[fptry_ix[ix],fptrx_ix[ix]]+
+            (blt[ix])*(1-blu[ix])*linearity_y[fptry_ix[ix],fptrx_ix[ix]+1]+
+            (1-blt[ix])*(blu[ix])*linearity_y[fptry_ix[ix]+1,fptrx_ix[ix]]+
+            (blt[ix])*(blu[ix])*linearity_y[fptry_ix[ix]+1,fptrx_ix[ix]+1])
 
         print_inline(chunkid+"Applying stim distortion correction...")
 
@@ -481,8 +433,7 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         aspix = np.digitize(t, asptime)-1
 
         print_inline(chunkid+"Applying dither correction...")
-        # Use only photons that are bracketed by valid aspect solutions
-        # and have been not themselves been flagged as invalid.
+        # Sky-project all data that are bracketed by aspect timestamps.
         cut = ((aspix > 0) & (aspix < (len(asptime)-1)))
         flags[np.where((cut == False) & ((flags==0) | (flags == 6)))] = 7
         ix = np.where(cut == True)[0]
@@ -500,10 +451,10 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         print_inline(chunkid+"Mapping to sky...")
         ra, dec = np.zeros(len(t)), np.zeros(len(t))
         ra[ix], dec[ix] = gnomrev_simple(xi[ix]+dxi[ix], eta[ix]+deta[ix],
-                                         aspra[aspix[ix]],
-                                         aspdec[aspix[ix]],
-                                         -asptwist[aspix[ix]], 1/36000., 0.)
+                aspra[aspix[ix]],aspdec[aspix[ix]],
+                        -asptwist[aspix[ix]], 1/36000.,0.)
 
+        # Flag data that do not have "good" aspect flags on both sides.
         cut[ix] = (
             ((asptime[aspix[ix]+1]-asptime[aspix[ix]]) == 1) &
             (aspflags[aspix[ix]]%2 == 0) & (aspflags[aspix[ix]+1]%2 == 0) &
