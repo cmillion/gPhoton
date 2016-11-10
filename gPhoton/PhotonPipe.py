@@ -205,16 +205,16 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         chunkid = " "+str(i+1)+" of "+str(int(nphots/chunksz)+1)+": "
         print_inline(chunkid+"Unpacking raw6 data...")
         t = np.array(raw6hdulist[1].data.field('t')[chunkbeg:chunkend])
-        phb1 = np.array(raw6hdulist[1].data.field('phb1')[chunkbeg:chunkend],
-                                                                dtype='int64')
-        phb2 = np.array(raw6hdulist[1].data.field('phb2')[chunkbeg:chunkend],
-                                                                dtype='int64')
-        phb3 = np.array(raw6hdulist[1].data.field('phb3')[chunkbeg:chunkend],
-                                                                dtype='int64')
-        phb4 = np.array(raw6hdulist[1].data.field('phb4')[chunkbeg:chunkend],
-                                                                dtype='int64')
-        phb5 = np.array(raw6hdulist[1].data.field('phb5')[chunkbeg:chunkend],
-                                                                dtype='int64')
+        phb1 = np.array(
+            raw6hdulist[1].data.field('phb1')[chunkbeg:chunkend],dtype='int64')
+        phb2 = np.array(
+            raw6hdulist[1].data.field('phb2')[chunkbeg:chunkend],dtype='int64')
+        phb3 = np.array(
+            raw6hdulist[1].data.field('phb3')[chunkbeg:chunkend],dtype='int64')
+        phb4 = np.array(
+            raw6hdulist[1].data.field('phb4')[chunkbeg:chunkend],dtype='int64')
+        phb5 = np.array(
+            raw6hdulist[1].data.field('phb5')[chunkbeg:chunkend],dtype='int64')
 
         # Bitwise "decoding" of the raw6 telemetry.
         q = ((phb4 & 3) << 3) + ((phb5 & 224) >> 5)
@@ -384,14 +384,10 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         ix = np.where(cut == True)[0]
 
         xshift, yshift = np.zeros(len(t)), np.zeros(len(t))
-        xshift[ix] = distortion_x[
-            np.array(depth[ix], dtype='int64'),
-            np.array(row[ix], dtype='int64'),
-            np.array(col[ix], dtype='int64')]
-        yshift[ix] = distortion_y[
-            np.array(depth[ix], dtype='int64'),
-            np.array(row[ix], dtype='int64'),
-            np.array(col[ix], dtype='int64')]
+        xshift[ix] = distortion_x[np.array(depth[ix], dtype='int64'),
+            np.array(row[ix], dtype='int64'),np.array(col[ix], dtype='int64')]
+        yshift[ix] = distortion_y[np.array(depth[ix], dtype='int64'),
+            np.array(row[ix], dtype='int64'),np.array(col[ix], dtype='int64')]
 
         xshift = (xshift*arcsecperpixel)+xoffset
         yshift = (yshift*arcsecperpixel)+yoffset
@@ -441,7 +437,8 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         print_inline(chunkid+"Interpolating aspect solutions...")
         dxi, deta = np.zeros(len(t)), np.zeros(len(t))
         dxi[ix] = (
-            (xi_vec[aspix[ix]+1]-xi_vec[aspix[ix]])*(t[ix]-asptime[aspix[ix]])/
+            (xi_vec[aspix[ix]+1]-xi_vec[aspix[ix]])*
+            (t[ix]-asptime[aspix[ix]])/
             (asptime[aspix[ix]+1]-asptime[aspix[ix]]))
         deta[ix] = (
             (eta_vec[aspix[ix]+1]-eta_vec[aspix[ix]])*
@@ -455,6 +452,7 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
                         -asptwist[aspix[ix]], 1/36000.,0.)
 
         # Flag data that do not have "good" aspect flags on both sides.
+        #                       "Good" aspect solutions are divisible by 2.
         cut[ix] = (
             ((asptime[aspix[ix]+1]-asptime[aspix[ix]]) == 1) &
             (aspflags[aspix[ix]]%2 == 0) & (aspflags[aspix[ix]+1]%2 == 0) &
@@ -464,18 +462,15 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
 
         # NOTE: If you wish to add a hook that filters the gPhoton output
         # (like perhaps by sky position or time range) then add it here.
-        # I reccomend that you use the "ix = np.where" technique used above.
         # [Future]: Preprogram a (commented out) filter on RA/Dec.
 
         print_inline(chunkid+"Writing to spreadsheet...")
 
-        # The issue is that we need to recombine the data into rows to
-        # feed to csv.writerow, hence the loop.
-        # It might be possible to do without a loop. One way would be
-        # with numpy.column_stack except that this requires stupid
-        # amounts of memory and therefore takes longer to run than the
-        # loop iffen it manages to complete at all without a memory
-        # error or segmentation fault.
+        # There is a loop here because:
+        #   we need to recombine the data into rows to feed to csv.writerow...
+        #   numpy.column_stack requires a ton of memory and therefore takes
+        #       longer to run than the loop...
+        #   so there might be a more Pythonic way, but I don't know it. (cm)
         for i in range(len(t)):
             cnt += 1
             # To avoid repeat indexing of flags...
@@ -507,7 +502,7 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         seconds=stopt-startt, minutes=(stopt-startt)/60.))
     print("	processed	=	"+str(cnt)+" of "+str(nphots)+" events.")
     if cnt < nphots:
-        print("		WARNING: MISSING EVENTS!")
+        print("		WARNING: MISSING EVENTS!") # This should never happen.
     print("	rate		=	"+str(nphots/(stopt-startt))+" photons/sec.")
     print("")
 
