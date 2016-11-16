@@ -365,7 +365,7 @@ You will need to download the sample eclipse directory from [here](https://archi
 
 Run the first two example gPhoton commands below. These will generate all of the aspect corrected FUV and NUV photons for eclipse 31000 as comma separate value (.csv) files. While gPhoton is running, the terminal will update with the photon chunk and current processing rate, mostly just so you know that something is happening. The photons will be dumped into files named [NF]UVPhotons.csv which will be quite large (several Gb), so make sure that you have enough disk space available. It can also take minutes to hours (depending on the observation and speed of your computer); if processing is taking longer than you want, you can kill gPipeline at any time with `Ctrl+C`. New runs will overwrite .csv output from previous runs.
 
-**Note:** Differences in variable type handling cause a very minor difference due to rounding (in a distant decimal place) between 2.x and 3.x, however; if you want to precisely reproduce the photon list data as it is currently archived, please use Python 2.7.
+**Note:** Differences in variable type handling create a very minor difference due to rounding (at <10e-8) between 2.x and 3.x, however; if you want to precisely reproduce the photon list data as it is currently archived / instantiated in the MAST database, please use Python 2.7.
 
 This generates the aspect corrected FUV photons for eclipse 31000 and writes them to `FUVphotons.csv`.
 
