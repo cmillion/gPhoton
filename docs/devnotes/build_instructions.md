@@ -1,4 +1,7 @@
-**Procedure for testing:**
+**Procedure for Regression Testing:**
+1. Remove commented block in tests/test_gAperture_regr.py and run nosetests in a local build. Confirm success, or justify failure and change the tests as needed. (Don't commit this change. This block of code takes a while to run and so makes Travis-CI time out / error.)
+
+**Procedure for testing the build:**
 1. Make a clean clone / fetch / checkout of the branch.
     git clone https://github.com/cmillion/gPhoton
     cd gPhoton

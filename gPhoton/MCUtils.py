@@ -6,12 +6,13 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
-from sys import stdout
+from __future__ import absolute_import, division, print_function
+# Core and Third Party imports.
+from astropy.io import fits as pyfits
+from builtins import str
 import numpy as np
 import requests
-import time
-from astropy.io import fits as pyfits
-import csv
+from sys import stdout
 
 # ------------------------------------------------------------------------------
 def area(radius):
@@ -156,19 +157,19 @@ def manage_requests2(query, maxcnt=100, wait=1, timeout=60., verbose=0):
         try:
             r = requests.get(query, timeout=timeout)
             successful_response = True
-        except requests.exceptions.ConnectionError as e:
+        except requests.exceptions.ConnectTimeout:
             if verbose:
-                print "Domain does not resolve."
+                print("Connection time out.")
             cnt += 1
             continue
-        except requests.exceptions.ConnectTimeout as e:
+        except requests.exceptions.ConnectionError:
             if verbose:
-                print "Connection time out."
+                print("Domain does not resolve.")
             cnt += 1
             continue
         except:
             if verbose:
-                print 'bad query? {q}'.format(q=query)
+                print('bad query? {q}'.format(q=query))
             cnt += 1
             continue
         if r.json()['status'] == 'EXECUTING':
@@ -181,11 +182,11 @@ def manage_requests2(query, maxcnt=100, wait=1, timeout=60., verbose=0):
                 print_inline('COMPLETE')
             break
         elif r.json()['status'] == 'ERROR':
-            print 'ERROR'
-            print 'Unsuccessful query: {q}'.format(q=query)
+            print('ERROR')
+            print('Unsuccessful query: {q}'.format(q=query))
             raise ValueError(r.json()['msg'])
         else:
-            print 'Unknown return: {s}'.format(s=r.json()['status'])
+            print('Unknown return: {s}'.format(s=r.json()['status']))
             cnt += 1
             continue
 
@@ -249,7 +250,7 @@ def get_fits_data(filename, dim=0, verbose=0):
     """
 
     if verbose:
-        print "         ", filename
+        print("         ", filename)
 
     hdulist = pyfits.open(filename, memmap=1)
 
@@ -303,7 +304,7 @@ def get_tbl_data(filename, comment='|'):
 
     for line in lines:
         if line[0] != comment:
-            strarr = str.split(line)
+            strarr = str.split(str(line))
             if len(strarr) > 0:
                 tbl.append(strarr)
 

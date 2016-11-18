@@ -1,6 +1,8 @@
-import unittest
-import pandas as pd
+from __future__ import absolute_import, division, print_function
+# Core and Third Party imports.
 import numpy as np
+import pandas as pd
+import unittest
 
 class TestArguments(unittest.TestCase):
     def setUp(self):
@@ -14,8 +16,8 @@ class TestArguments(unittest.TestCase):
     def test_everything(self):
         """Check the values of everything."""
         for band in ['NUV','FUV']:
-            for k in self.standard[band].keys():
-                self.assertTrue(k in self.testrun[band].keys())
+            for k in list(self.standard[band].keys()):
+                self.assertTrue(k in list(self.testrun[band].keys()))
                 for i,val in enumerate(self.standard[band][k]):
                     if (np.isnan(self.standard[band][k][i]) and
                                         np.isnan(self.testrun[band][k][i])):

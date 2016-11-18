@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function
+from builtins import str
 import unittest
 import gPhoton.gQuery as gq
 import gPhoton.CalUtils as cu
@@ -87,8 +89,8 @@ class TestGQueryFunctions(unittest.TestCase):
             '((x >= {x40} and x < {x41}) and (y >= {y40} and y < {y41}))'+
             '){formatURL}').format(baseURL=self.baseURL,
                 baseDB=self.baseDB, band=self.NUV,
-                t0=str(long(self.t0*self.tscale)),
-                t1=str(long(self.t1*self.tscale)),
+                t0=str(int(self.t0*self.tscale)),
+                t1=str(int(self.t1*self.tscale)),
                 x10=(avgstim['x1']-margin[0])/self.aspum,
                 x11=(avgstim['x1']+margin[0])/self.aspum,
                 y10=(avgstim['y1']-margin[1])/self.aspum,

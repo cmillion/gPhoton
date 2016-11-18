@@ -9,8 +9,12 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
-from PhotonPipe import photonpipe
+from __future__ import absolute_import, division, print_function
+# Core and Third Party imports.
 import argparse
+from builtins import str
+# gPhoton imports.
+from gPhoton.PhotonPipe import photonpipe
 
 # ------------------------------------------------------------------------------
 def gpipeline(raw6file, scstfile, band, outbase, aspfile, ssdfile, nullout,
@@ -105,15 +109,15 @@ def check_args(args):
     """
 
     if not args.raw6file:
-        print "Must specify a RAW6 filename (--raw6)."
+        print("Must specify a RAW6 filename (--raw6).")
         raise SystemExit
 
     if not args.scstfile:
-        print "Must specify a SCST filename (--scst)."
+        print("Must specify a SCST filename (--scst).")
         raise SystemExit
 
     if not args.outbase:
-        print "Must specify an output base filename (--outbase)."
+        print("Must specify an output base filename (--outbase).")
         raise SystemExit
 
     if args.aspfile:
@@ -125,19 +129,19 @@ def check_args(args):
 	# If the band is not explicity called, attempt to derive it from the raw6
     # filename.
     if not args.band:
-        print "Determining band from raw6 filename..."
+        print("Determining band from raw6 filename...")
         if '-fd-raw6' in args.raw6file:
             args.band = 'FUV'
         elif '-nd-raw6' in args.raw6file:
             args.band = 'NUV'
         else:
-            print ("Unable to parse band from raw6 filename. Specify band on"
-                   " command line using --band.")
+            print("Unable to parse band from raw6 filename. Specify band on"
+                  " command line using --band.")
             raise SystemExit
     else:
         args.band = args.band.upper()
         if not args.band in ["NUV", "FUV"]:
-            print "Band must be NUV or FUV. "
+            print("Band must be NUV or FUV. ")
             raise SystemExit
 
     return args

@@ -8,22 +8,23 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
-import os
-import ast
-import sys
+from __future__ import absolute_import, division, print_function
+# Core and Third Party imports.
 import argparse
-import numpy as np
-import curvetools as ct
-import gphoton_args as gargs
-from imagetools import write_jpeg # For JPEG preview image creation
-from dbasetools import suggest_parameters
-from galextools import aper2deg
+import ast
+import os
+import sys
+# gPhoton imports.
+import gPhoton.curvetools as ct
+from gPhoton.galextools import aper2deg
 from gPhoton import __version__
+import gPhoton.gphoton_args as gargs
+from gPhoton.imagetools import write_jpeg # For JPEG preview image creation
 
 # ------------------------------------------------------------------------------
 def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
               stepsz=False, verbose=0, overwrite=False, trange=None,
-              tranges=None, minexp=1., maxgap=1500., iocode='wb',
+              tranges=None, minexp=1., maxgap=1500., iocode='w',
               detsize=1.1, minimal_output=False, photoncsvfile=None):
     """
     Creates a light curve and returns the data in a python dict() and as
@@ -107,16 +108,16 @@ def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
     """
 
     if verbose > 1:
-        print "Using v{v} of gAperture.".format(v=__version__)
-        print "Generating a light curve with the following paramters:"
-        print " band:    {band}".format(band=band)
-        print " skypos:  {skypos}".format(skypos=skypos)
-        print " tranges: {trange}".format(trange=trange if trange else tranges)
-        print " radius:  {radius}".format(radius=radius)
-        print " annulus: {annulus}".format(annulus=annulus)
-        print " stepsz:  {stepsz}".format(stepsz=stepsz)
-        print " csvfile: {csvfile}".format(csvfile=csvfile)
-        print " verbose: {verbose}".format(verbose=verbose)
+        print("Using v{v} of gAperture.".format(v=__version__))
+        print("Generating a light curve with the following paramters:")
+        print(" band:    {band}".format(band=band))
+        print(" skypos:  {skypos}".format(skypos=skypos))
+        print(" tranges: {trange}".format(trange=trange if trange else tranges))
+        print(" radius:  {radius}".format(radius=radius))
+        print(" annulus: {annulus}".format(annulus=annulus))
+        print(" stepsz:  {stepsz}".format(stepsz=stepsz))
+        print(" csvfile: {csvfile}".format(csvfile=csvfile))
+        print(" verbose: {verbose}".format(verbose=verbose))
 
     data = ct.write_curve(band.upper(), skypos[0], skypos[1], radius,
                           csvfile=csvfile, annulus=annulus, stepsz=stepsz,
@@ -143,11 +144,11 @@ def check_radius(args):
     """
 
     if not (args.radius or args.suggest or args.aperradius):
-        print "Must specify an aperture radius."
+        print("Must specify an aperture radius.")
         raise SystemExit
 
     if args.radius and args.aperradius:
-        print "Must not specify both --aperture and --mcataper."
+        print("Must not specify both --aperture and --mcataper.")
         raise SystemExit
 
     if args.aperradius and not args.radius:
@@ -221,7 +222,7 @@ def setup_parser(iam='gaperture'):
     parser.add_argument("--addhdr", action="store_true", dest="addhdr",
                         help="Add command line and column names to the top of"
                         " the .csv file.")
-    parser.add_argument("--iocode", action="store", dest="iocode", default="wb",
+    parser.add_argument("--iocode", action="store", dest="iocode", default="w",
                         help="The iocode to be passed to the cvs writer."
                         " Don't mess with this.", type=str)
     parser.add_argument("--bgmaskdepth", action="store", dest="maskdepth",
@@ -231,9 +232,10 @@ def setup_parser(iam='gaperture'):
                         help="DEPRECATED. Radius of background mask in n"
                         " sigmas (assuming Gaussians)", type=float, default=1.5)
     parser.add_argument("--minimal_output", "--minout", action="store_true",
-                        dest="minimal_output", help=("If csvfile is also set,"
-                        " writes only a small number of human-readable columns"
-                        "to the lightcurve file."))
+                        dest="minimal_output",
+                        help=("If csvfile is also set, writes only a small"
+                              " number of human-readable columns to the"
+                              " lightcurve file."))
 
     return parser
 # ------------------------------------------------------------------------------
@@ -282,7 +284,7 @@ def reconstruct_command(args):
             cmd=cmd, i=args.annulus1, o=args.annulus2, a=args.radius)
 
     if args.verbose > 1:
-        print cmd
+        print(cmd)
 
     return cmd
 # ------------------------------------------------------------------------------
@@ -306,21 +308,21 @@ def setup_file(args):
     else:
         # This initiates the file.
         if not args.overwrite and os.path.exists(args.csvfile):
-            print "{csvfile} exists. Pass --overwrite to replace it.".format(
-                csvfile=args.csvfile)
+            print("{csvfile} exists. Pass --overwrite to replace it.".format(
+                csvfile=args.csvfile))
             raise SystemExit
         f = open(args.csvfile, args.iocode)
         f.write('| v{v}\n'.format(v=__version__))
 
         if args.addhdr:
             if args.verbose:
-                print 'Recording command line construction to {f}'.format(
-                    f=args.csvfile)
+                print('Recording command line construction to {f}'.format(
+                    f=args.csvfile))
             # Write the command line to the top of the output file
             f.write('| '+reconstruct_command(args)+'\n')
         f.close()
         # Setting iocode to append to the file we just created
-        args.iocode = 'ab'
+        args.iocode = 'a'
 
     return args
 # ------------------------------------------------------------------------------
@@ -339,7 +341,7 @@ def stamp(args):
         return
     else:
         if args.verbose:
-            print 'Writing stamp preview to {f}'.format(f=args.stamp)
+            print('Writing stamp preview to {f}'.format(f=args.stamp))
 
         width = 2.*(args.annulus2 if args.annulus2 else args.radius)
 
