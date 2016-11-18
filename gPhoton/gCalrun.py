@@ -8,14 +8,16 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
-import ast
+from __future__ import absolute_import, division, print_function
+# Core and Third Party imports.
+from builtins import zip
 import argparse
-from regtestutils import datamaker
-import MCUtils as mc
-from gPhoton import gFind
+import ast
 import numpy as np
-import os
-import galextools as gt
+# gPhoton imports.
+import gPhoton.galextools as gt
+from gPhoton import gFind
+from gPhoton.regtestutils import datamaker
 
 # ------------------------------------------------------------------------------
 def find_random_positions(rarange=[0., 360.], decrange=[-90., 90.], nsamples=10,
@@ -113,21 +115,21 @@ def calrun(outfile, band, nsamples=10, seed=323, rarange=[0., 360.],
                                       nsamples=nsamples, seed=seed)
 
     if verbose:
-        print 'Running {n} random samples with seed of {seed}.'.format(
-            n=nsamples, seed=seed)
-        print 'Bounded by RA:[{r0},{r1}] and Dec:[{d0},{d1}]'.format(
-            r0=rarange[0], r1=rarange[1], d0=decrange[0], d1=decrange[1])
-        print 'Actual positions used will be:'
-        print '{pos}'.format(pos=zip(ra, dec))
+        print('Running {n} random samples with seed of {seed}.'.format(
+            n=nsamples, seed=seed))
+        print('Bounded by RA:[{r0},{r1}] and Dec:[{d0},{d1}]'.format(
+            r0=rarange[0], r1=rarange[1], d0=decrange[0], d1=decrange[1]))
+        print('Actual positions used will be:')
+        print('{pos}'.format(pos=list(zip(ra, dec))))
 
     for skypos in zip(ra, dec):
         expt = gFind(skypos=skypos, band=band, quiet=True)[band]['expt']
         if exprange[0] <= expt <= exprange[1]:
-            print skypos, expt, True
+            print(skypos, expt, True)
             datamaker(band, skypos, outfile, maglimit=maglimit, verbose=verbose,
-                searchradius=0.01)
+                      searchradius=0.01)
         else:
-            print skypos, expt, False
+            print(skypos, expt, False)
 
     return
 # ------------------------------------------------------------------------------
@@ -257,6 +259,6 @@ def __main__():
 if __name__ == "__main__":
     try:
         __main__()
-    except (KeyboardInterrupt, pycurl.error):
+    except (KeyboardInterrupt):
         exit('Received Ctrl + C... Exiting! Bye.', 1)
 # ------------------------------------------------------------------------------

@@ -5,16 +5,20 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
+from __future__ import absolute_import, division, print_function
+# Core and Third Party imports.
+from builtins import map
+from builtins import str
+from builtins import zip
 import numpy as np
 import pandas as pd
-import os
-# gPhoton specific
-import gQuery
-from gQuery import tscale
-import MCUtils as mc
-import dbasetools as dbt
-import galextools as gxt
-import cal
+# gPhoton imports.
+import gPhoton.cal as cal
+import gPhoton.dbasetools as dbt
+import gPhoton.galextools as gxt
+import gPhoton.gQuery as gQuery
+from gPhoton.gQuery import tscale
+import gPhoton.MCUtils as mc
 
 # ------------------------------------------------------------------------------
 def gphot_params(band, skypos, radius, annulus=None, verbose=0, detsize=1.25,
@@ -195,6 +199,7 @@ def read_photons(photonfile, ra0, dec0, tranges, radius, verbose=0,
     angsep = mc.angularSeparation(ra0, dec0, ra, dec)
 
     ix = np.array([])
+    # [FIXME]: This loops over tranges but doesn't use anything from that!
     for trange in tranges:
         cut = np.where((angsep <= radius) & (np.isfinite(angsep)))[0]
         ix = np.concatenate((ix, cut), axis=0)
@@ -265,21 +270,22 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
         # [Future]: This call to fGetTimeRanges prevents the downloading of
         # events with bad aspect solutions which currently have incorrect
         # quality flags (of zero) in the photon database.
-        trs = dbt.fGetTimeRanges(band,[ra0,dec0],trange=trange,detsize=detsize)
+        trs = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
+                                 detsize=detsize)
         if not trs.any():
             continue
         for tr in trs:
             thisstream = gQuery.getArray(
                 gQuery.allphotons(band, ra0, dec0, tr[0], tr[1], radius,
-                                flag=flag), verbose=verbose, retries=100)
+                                  flag=flag), verbose=verbose, retries=100)
             stream.extend(thisstream)
 
     stream = np.array(stream, 'f8').T
     colnames = ['t', 'ra', 'dec', 'xi', 'eta', 'x', 'y', 'flag']
     dtypes = ['f8', 'f8', 'f8', 'f4', 'f4', 'f4', 'f4', 'i4']
     try:
-        cols = map(np.asarray, stream, dtypes)
-        events = dict(zip(colnames, cols))
+        cols = list(map(np.asarray, stream, dtypes))
+        events = dict(list(zip(colnames, cols)))
         # Adjust the timestamp by tscale.
         events['t'] /= tscale
         return events
@@ -421,7 +427,7 @@ def reduce_lcurve(bin_ix, region_ix, data, function, dtype='float64'):
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def recoverywarning(band,bin_ix,events,verbose=0):
+def recoverywarning(band, bin_ix, events, verbose=0):
     """
     Test whether the bin contains data that was collected during a spacecraft
         recovery period (e.g. FUV cycling) as defined by the lookup table in
@@ -448,13 +454,13 @@ def recoverywarning(band,bin_ix,events,verbose=0):
     tranges = gxt.recovery_tranges()
     for trange in tranges:
         t = np.array(events['photons']['t'])[bin_ix]
-        if ((trange[0]<=t) & (trange[1]>=t)).any():
+        if ((trange[0] <= t) & (trange[1] >= t)).any():
             return True
     return False
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
-def caiwarning(band,bin_ix,events,verbose=0):
+def caiwarning(band, bin_ix, events, verbose=0):
     """
     Test whether a bin contains data from the first 3 legs of an FUV
         observation as part of the calibration (CAI) survey.
@@ -477,13 +483,13 @@ def caiwarning(band,bin_ix,events,verbose=0):
 
     :type verbose: int
     """
-    if band=='FUV':
+    if band == 'FUV':
         for trange in dbt.distinct_tranges(np.array(events['photons']['t'])[bin_ix]):
             t = np.median(trange)
             obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
             if not obsdata:
                 continue
-            if ((str(obsdata[0][0]) is 'CAI') and (obsdata[0][5]<=3)):
+            if (str(obsdata[0][0]) is 'CAI') and (obsdata[0][5] <= 3):
                 return True
     return False
 # ------------------------------------------------------------------------------
@@ -528,37 +534,40 @@ def maskwarning(band, bin_ix, events, verbose=0, mapkey='H', mode=None):
         reg_ix = np.where(events['photons']['col'][bin_ix]) # i.e. all of them
     elif mode is 'aper':
         reg_ix = np.where(
-            mc.angularSeparation(events['params']['skypos'][0],
-                                events['params']['skypos'][1],
-                                events['photons']['ra'],
-                                events['photons']['dec'])[bin_ix]<=
-                                events['params']['radius'])
+            mc.angularSeparation(
+                events['params']['skypos'][0],
+                events['params']['skypos'][1],
+                events['photons']['ra'],
+                events['photons']['dec'])[bin_ix] <= events['params']['radius'])
     elif mode is 'bg':
-        if not (events['params']['annulus']):
+        if not events['params']['annulus']:
             return False
         reg_ix = np.where(
-            (mc.angularSeparation(events['params']['skypos'][0],
-                                        events['params']['skypos'][1],
-                                        events['photons']['ra'],
-                                        events['photons']['dec'])[bin_ix]<=
-                                        events['params']['annulus'][0]) &
-            (mc.angularSeparation(events['params']['skypos'][0],
-                                        events['params']['skypos'][1],
-                                        events['photons']['ra'],
-                                        events['photons']['dec'])[bin_ix]<
-                                        events['params']['annulus'][1]))
+            (mc.angularSeparation(
+                events['params']['skypos'][0],
+                events['params']['skypos'][1],
+                events['photons']['ra'],
+                events['photons']['dec'])[bin_ix] <= (
+                    events['params']['annulus'][0])) &
+            (mc.angularSeparation(
+                events['params']['skypos'][0],
+                events['params']['skypos'][1],
+                events['photons']['ra'],
+                events['photons']['dec'])[bin_ix] < (
+                    events['params']['annulus'][1])))
     else:
-        print 'Unknown mask flag mode of: {m}'.format(m=mode)
-        raise
+        print('Unknown mask flag mode of: {m}'.format(m=mode))
+        raise ValueError("Unknown mask flag mode.")
 
-    for xoff in [-1,0,1]:
-        for yoff in [-1,0,1]:
+    for xoff in [-1, 0, 1]:
+        for yoff in [-1, 0, 1]:
             if np.shape(np.where(
-                img[np.array(
-                events['photons']['col'][bin_ix][reg_ix],dtype='int32')+xoff,
-                np.array(
-                events['photons']['row'][bin_ix][reg_ix],dtype='int32')
-                                        +yoff]==0))[1]>0:
+                    img[np.array(
+                        events['photons']['col'][bin_ix][reg_ix],
+                        dtype='int32')+xoff,
+                        np.array(
+                            events['photons']['row'][bin_ix][reg_ix],
+                            dtype='int32')+yoff] == 0))[1] > 0:
                 return True
 
     return False#True if len(ix[0]) else False
@@ -748,10 +757,10 @@ def getflags(band, bin_ix, events, verbose=0):
             #ix = bin_ix[np.where(bin_ix == bin)]
             try:
                 if maskwarning(band, ix, events, mapkey='H',
-                                            mode='aper', verbose=verbose):
+                               mode='aper', verbose=verbose):
                     flags[i] += 1
                 if maskwarning(band, ix, events, mapkey='E',
-                                            mode='aper', verbose=verbose):
+                               mode='aper', verbose=verbose):
                     flags[i] += 2
                 if exptimewarning(i, events, verbose=verbose):
                     flags[i] += 4
@@ -762,10 +771,10 @@ def getflags(band, bin_ix, events, verbose=0):
                 if detedgewarning(ix, events, verbose=verbose):
                     flags[i] += 32
                 if maskwarning(band, ix, events, mapkey='H',
-                                            mode='bg', verbose=verbose):
+                               mode='bg', verbose=verbose):
                     flags[i] += 64
                 if maskwarning(band, ix, events, mapkey='E',
-                                            mode='bg', verbose=verbose):
+                               mode='bg', verbose=verbose):
                     flags[i] += 128
                 #if caiwarning(band, ix, events, verbose=verbose):
                 #    flags[i] += 256
@@ -866,9 +875,10 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
         lcurve['t1'] = bins[np.unique(bin_ix)]
         lcurve['exptime'] = np.array(
             dbt.compute_exptime(band,
-                tranges if coadd else zip(lcurve['t0'],lcurve['t1']),
-                            verbose=verbose, coadd=coadd, detsize=detsize,
-                                                            skypos=[ra0, dec0]))
+                                tranges if coadd else list(zip(
+                                    lcurve['t0'], lcurve['t1'])),
+                                verbose=verbose, coadd=coadd, detsize=detsize,
+                                skypos=[ra0, dec0]))
     except IndexError:
         if np.isnan(data['t']):
             if verbose:
@@ -895,10 +905,10 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
     lcurve['racent'] = reduce_lcurve(bin_ix, aper_ix, data['ra'], np.mean)
     lcurve['deccent'] = reduce_lcurve(bin_ix, aper_ix, data['dec'], np.mean)
 
-    skybgmcatdata = dbt.get_mcat_data([ra0,dec0],radius)
+    skybgmcatdata = dbt.get_mcat_data([ra0, dec0], radius)
     lcurve['mcat_bg'] = lcurve['exptime']*np.array(
         [dbt.mcat_skybg(band, [ra0, dec0], radius, trange=tr,
-                                        mcat=skybgmcatdata, verbose=verbose)
+                        mcat=skybgmcatdata, verbose=verbose)
          for tr in zip(lcurve['t0'], lcurve['t1'])])
 
     if annulus is not None:
@@ -967,8 +977,8 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
 
 # ------------------------------------------------------------------------------
 def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
-             trange=None, tranges=None, verbose=0, coadd=False, minexp=1.,
-             maxgap=1., detsize=1.1):
+              trange=None, tranges=None, verbose=0, coadd=False, minexp=1.,
+              maxgap=1., detsize=1.1):
     """
     Wraps quickmag() to make it ensure some proper parameter formatting and
         therefore make it slightly more user friendly.
@@ -1062,7 +1072,7 @@ def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
 # ------------------------------------------------------------------------------
 def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                 stepsz=None, trange=None, tranges=None, verbose=0, coadd=False,
-                iocode='wb', detsize=1.1, overwrite=False, minexp=1., maxgap=1.,
+                iocode='w', detsize=1.1, overwrite=False, minexp=1., maxgap=1.,
                 minimal_output=False, photoncsvfile=None):
     """
     Generates a lightcurve and optionally writes the data to a CSV file.
@@ -1150,12 +1160,12 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
     """
 
     data = get_curve(band, ra0, dec0, radius, annulus=annulus, stepsz=stepsz,
-                    trange=trange, tranges=tranges, verbose=verbose,
-                    coadd=coadd, minexp=minexp, maxgap=maxgap,
-                    detsize=detsize)
+                     trange=trange, tranges=tranges, verbose=verbose,
+                     coadd=coadd, minexp=minexp, maxgap=maxgap,
+                     detsize=detsize)
     if not data:
         if verbose:
-            print 'No events available at the requested location and time(s).'
+            print('No events available at the requested location and time(s).')
         return None
 
     exclude_keys = ['photons', 'params']
@@ -1171,7 +1181,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
 
             # Then include these columns in all cases.
             output_columns += ['flux_mcatbgsub', 'flux_mcatbgsub_err',
-                                'flags', 'counts', 'exptime', 'detrad']
+                               'flags', 'counts', 'exptime', 'detrad']
     else:
         # Otherwise, define the order of the output columns to match the
         # User Guide sorting.
@@ -1181,12 +1191,12 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
                                       'mag_bgsub', 'mag_bgsub_err_1',
                                       'mag_bgsub_err_2']
         mcat_bkg_corrected_cols = ['cps_mcatbgsub', 'cps_mcatbgsub_err',
-                                      'flux_mcatbgsub', 'flux_mcatbgsub_err',
-                                      'mag_mcatbgsub', 'mag_mcatbgsub_err_1',
-                                      'mag_mcatbgsub_err_2']
+                                   'flux_mcatbgsub', 'flux_mcatbgsub_err',
+                                   'mag_mcatbgsub', 'mag_mcatbgsub_err_1',
+                                   'mag_mcatbgsub_err_2']
         bkg_uncorrected_cols = ['cps', 'cps_err',
-                                      'flux', 'flux_err',
-                                      'mag', 'mag_err_1', 'mag_err_2']
+                                'flux', 'flux_err',
+                                'mag', 'mag_err_1', 'mag_err_2']
         total_counts_cols = ['counts', 'flat_counts', 'bg_counts',
                              'bg_flat_counts']
         calibration_cols = ['exptime', 'bg', 'mcat_bg', 'responses', 'detxs',
@@ -1200,12 +1210,12 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
     if minimal_output:
         # Make sure each of these are included in data.keys()
         if not set(output_columns) <= set(
-                [x for x in data.keys() if x not in exclude_keys]):
+                [x for x in list(data.keys()) if x not in exclude_keys]):
             raise ValueError("Some output columns are not present in the"
                              " data structure.  A developer needs to fix this.")
     else:
         if set(output_columns) != set(
-                [x for x in data.keys() if x not in exclude_keys]):
+                [x for x in list(data.keys()) if x not in exclude_keys]):
             raise ValueError("Output columns do not match those returned in"
                              " data structure.  A developer needs to fix this.")
 
@@ -1224,24 +1234,24 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
         try:
             output = pd.DataFrame(frame)
         except:
-            raise
             if verbose > 1:
-                print 'Unable to build dataframe.'
+                print('Unable to build dataframe.')
+            raise ValueError("Unable to build dataframe.")
         try:
             output.to_csv(csvfile, index=False, mode=iocode, columns=columns)
         except:
-            print 'Unable to write to: '+str(csvfile)
+            print('Unable to write to: '+str(csvfile))
 
     else:
         if verbose > 2:
-            print "No CSV file requested."
+            print("No CSV file requested.")
 
         if verbose or (not verbose and not csvfile):
-            print "AB Magnitudes:               "
-            print data['mag']
+            print("AB Magnitudes:               ")
+            print(data['mag'])
 
     if photoncsvfile:
-        pd.DataFrame(data['photons']).to_csv(photoncsvfile,index=False)
+        pd.DataFrame(data['photons']).to_csv(photoncsvfile, index=False)
 
     return data
 # ------------------------------------------------------------------------------

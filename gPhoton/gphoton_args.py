@@ -6,10 +6,14 @@
 .. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
-import os
+from __future__ import absolute_import, division, print_function
+# Core and Third Party imports.
 import ast
-import dbasetools as dbt
+from builtins import str
+import os
 import numpy as np
+# gPhoton imports.
+import gPhoton.dbasetools as dbt
 
 # ------------------------------------------------------------------------------
 class gPhotonArgsError(Exception):
@@ -58,11 +62,12 @@ def common_args(parser, function_name,
         raise gPhotonArgsError("{f} not in {vf}".format(f=function_name,
                                                         vf=valid_functions))
 
-    parser.add_argument("-b", "--band", action="store", type=str.upper,
-                        dest="band", help="Band designation",
-                        default="BOTH" if function_name == 'gfind' else "NUV",
-                        choices=["NUV", "FUV"]+(
-                            ['BOTH'] if function_name == 'gfind' else []))
+    parser.add_argument(
+        "-b", "--band", action="store", type=lambda b: str.upper(str(b)),
+        dest="band", help="Band designation",
+        default=str(u"BOTH") if function_name == 'gfind' else str(u"NUV"),
+        choices=[str(u"NUV"), str(u"FUV")]+(
+            [str(u"BOTH")] if function_name == 'gfind' else []))
 
     parser.add_argument("-d", "--dec", action="store", type=float,
                         dest="dec", metavar="DEC",
@@ -208,10 +213,10 @@ def check_common_args(args, function_name,
                                                  verbose=0)
         args.skypos = [args.ra, args.dec]
         if args.verbose:
-            print "Recentering on ["+str(args.ra)+", "+str(args.dec)+"]"
-            print "Setting radius to "+str(args.radius)
-            print ("Setting annulus to ["+str(args.annulus1)+", "+
-                   str(args.annulus2)+"]")
+            print("Recentering on ["+str(args.ra)+", "+str(args.dec)+"]")
+            print("Setting radius to "+str(args.radius))
+            print("Setting annulus to ["+str(args.annulus1)+", "+
+                  str(args.annulus2)+"]")
 
     if args.skypos:
         if np.array(args.skypos).shape != (2,):
