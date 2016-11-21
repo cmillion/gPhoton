@@ -12,7 +12,7 @@ from gPhoton import cal_dir
 #from gPhoton.download import download_with_progress_bar
 
 # Remote repository for GALEX calibration files.
-cal_url = 'https://archive.stsci.edu/prepds/gphoton/cal/cal'
+cal_url = 'https://archive.stsci.edu/prepds/gphoton/cal/cal/'
 
 """
 The following three functions are substantially derived from code in
