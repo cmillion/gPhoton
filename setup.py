@@ -26,16 +26,16 @@ setup(
     zip_safe=False,
     license='AURA',
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python',
         ],
     keywords=['astronomy', 'galex', 'photometry', 'ultraviolet'],
     scripts=['bin/gPipeline', 'bin/gAperture', 'bin/gFind', 'bin/gMap'],
     packages=['gPhoton', 'gPhoton.cal'],
     install_requires=['numpy', 'scipy', 'requests>=2.4.0', 'pandas', 'astropy',],
-    package_data={'gPhoton.cal' : ['cal/*.fits', 'cal/*.tbl']},
-    include_package_data=True,
-    download_url='https://archive.stsci.edu/prepds/gphoton/cal/gPhoton-{v}.tar'
-    '.gz'.format(v=__version__),
+    # package_data={'gPhoton.cal' : ['cal/*.fits', 'cal/*.tbl']},
+    # include_package_data=True,
+    # download_url='https://archive.stsci.edu/prepds/gphoton/cal/gPhoton-{v}.tar'
+    # '.gz'.format(v=__version__),
 )
