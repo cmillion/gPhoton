@@ -199,7 +199,7 @@ def calculate_jd(galex_time):
     :type galex_time: float
 
     :returns: float -- The time converted to a Julian date, in the TDB
-    time standard.
+        time standard.
     """
 
     if np.isfinite(galex_time):
@@ -226,7 +226,7 @@ def calculate_jd_utc(galex_time):
     :type galex_time: float
 
     :returns: float -- The time converted to a Julian date, in the UTC
-    time standard.
+        time standard.
     """
 
     if np.isfinite(galex_time):
@@ -253,7 +253,7 @@ def calculate_jd_tai(galex_time):
     :type galex_time: float
 
     :returns: float -- The time converted to a Julian date, in the TAI
-    time standard.
+        time standard.
     """
 
     if np.isfinite(galex_time):
@@ -281,7 +281,7 @@ def calculate_caldat(galex_time):
     :type galex_time: float
 
     :returns: float -- The time converted to a Gregorian calendar date,
-    in the UTC time standard.
+        in the UTC time standard.
     """
 
     if np.isfinite(galex_time):
