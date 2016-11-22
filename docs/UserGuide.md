@@ -448,3 +448,4 @@ Where _t_ is a GALEX timestamp, run the following function, which will return `T
             obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
             return False if (not obsdata or not ((str(obsdata[0][0]) is 'CAI')
                 and (obsdata[0][5]<=3))) else True
+11. **Calibration Files** As of v1.28.0, these are not included in the software distribution by default. Each calibration file will be downloaded from the MAST server the first time it is required by the software. The download location will be the same the location of your gPhoton software installation, so you will need write permission at that location. 
