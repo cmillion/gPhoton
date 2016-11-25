@@ -1051,7 +1051,7 @@ def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
         tranges = dbt.fGetTimeRanges(band, [ra0, dec0], trange=trange,
                                      maxgap=maxgap, minexp=minexp,
                                      verbose=verbose, detsize=detsize)
-    if not np.array(tranges).shape[1]:
+    if not len(tranges.flatten()):
         if verbose:
             mc.print_inline(
                 "No exposure time at this location: [{ra},{dec}]".format(
