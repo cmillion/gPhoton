@@ -42,6 +42,8 @@ You must then install the most recent version of gPhoton from the Python Package
 
 You will be able to run `gFind`, `gAperture`, `gMap`, and `gPipeline` as scripts directly from your terminal as well as `import gPhoton` from within a Python interactive session. The examples in this guide assume that gPhoton was installed using _pip_.
 
+**Note:** In v1.28.2, the `future` package is (incorrectly) not specified by the installation script. This might manifest as an error referring to a package called `builtins` (which is in `future`). If you get this error, try installing the dependency manually with `pip install future`. This issue will be fixed in v1.28.3, which is being staged as of this writing (2/1/17). -Mgt.
+
 ####Manual Package Management (advanced users)
 Advanced users and developers will want more control over their installation and direct access to the source code and git repository. Importantly, this method will not give you access to the command line scripts unless you add them manually to your /usr/bin (or equivalent) directory, or install via the `setup.py` file in the repo, via `python setup.py install`, or if you don't have root access to the default install directory, via `python setup.py install --user`.
 
@@ -51,7 +53,7 @@ Advanced users and developers will want more control over their installation and
 Note: If you want to run the command line scripts (`gMap`, `gAperture`, `gFind`, and `gPipeline`) from your github checkout, and did not run the setup.py installation script, you'll need to move them into the correct directory relative to the main module. They currently reside in the _bin_ directory directly under the repo (from which the PyPI installation puts them into _/usr/bin/_). You should copy them to the top level directory (which contains _gPhoton_, _docs_, etc.) and run them as scripts from there. (Running the scripts straight from _bin_ will result in an error like "ValueError: Attempted relative import beyond toplevel package").  In general, we strongly recommend installing via the setup.py file included in the repo to ensure command-line access is available.
 
 #####Managing dependencies
-You will need to install _python2.7_, _numpy_, _scipy_, _astropy_, _requests_ (>=v2.4.0) and _pandas_. The recommended commands for doing this appear below under the appropriate operating system.
+You will need to install _python2.7_, _numpy_, _scipy_, _astropy_, _requests_ (>=v2.4.0) _pandas_, and _future_. The recommended commands for doing this appear below under the appropriate operating system.
 
 The best specific tools for package installation and management shift rapidly. We'll try to keep this section up to date. If anything suggested here is actually _broken_, please let us know.
 
@@ -66,6 +68,7 @@ You should use `pip` to get the latest versions of _requests_ and _astropy_. If 
     sudo pip install requests
     sudo pip install astropy
     sudo pip install pandas
+    sudo pip install future
 
 ######Mac (OSX)
 **Draft.** For installing and managing your custom Python build in Mac OSX, we suggest using the [MacPorts package](https://www.macports.org/). There is also a tutorial for installing Python on Mac with MacPorts [here](https://astrofrog.github.io/macports-python/).
@@ -75,6 +78,8 @@ You should use `pip` to get the latest versions of _requests_ and _astropy_. If 
     sudo port install py27-astropy
     sudo port install py27-requests
     sudo port install py27-pandas
+    
+    _and `future`..._
 
 Note: If your installation of requests complains about missing library dependencies, you may need to install them explicitly with the following command: `sudo pip install --upgrade pyopenssl ndg-httpsclient pyasn1`
 
