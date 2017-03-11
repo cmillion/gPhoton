@@ -33,6 +33,8 @@ The standalone tools are written exclusively in Python, a flexible and powerful 
 
 **Note:** As of v1.28.0 of gPhoton, we are providing dual support of Python 2.x and 3.x. Our testing indicates that results from gFind, gAperture, and gMap should be identical for both environments. Differences in variable type handling cause a very minor difference due to rounding (in a distant decimal place) between 2.x and 3.x, however; if you want to precisely reproduce the photon list data as it is currently archived, please use Python 2.7. We plan to stop active support of Python 2.x at the same time as the astropy library makes that transition. If and when we regenerate photon data for the entire database, we will use Python 3.x.
 
+**Note:** The `future` module used to support compatibility across multiple versions of Python may break `distutils` or older versions of `setuptools`. If your attempt at installation crashes out of `setup.py`, make sure that you are using a current version of `setuptools`.
+
 Because the standalone tools are written in Python, they are theoretically cross platform. Development of the current version was on OSX. At last attempt (circa 2013), we were not able to run the tools on Debian Linux because some of the required libraries were not yet supported.
 
 ####Anaconda + PIP (recommended for most users)
@@ -448,4 +450,4 @@ Where _t_ is a GALEX timestamp, run the following function, which will return `T
             obsdata = gQuery.getArray(gQuery.obstype_from_t(t))
             return False if (not obsdata or not ((str(obsdata[0][0]) is 'CAI')
                 and (obsdata[0][5]<=3))) else True
-11. **Calibration Files** As of v1.28.1, these are not included in the software distribution by default. Each calibration file will be downloaded from the MAST server the first time it is required by the software. The download location will be the same the location of your gPhoton software installation, so you will need write permission at that location. 
+11. **Calibration Files** As of v1.28.1, these are not included in the software distribution by default. Each calibration file will be downloaded from the MAST server the first time it is required by the software. The download location will be the same the location of your gPhoton software installation, so you will need write permission at that location.
