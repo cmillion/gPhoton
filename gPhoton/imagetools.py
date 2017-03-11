@@ -653,7 +653,7 @@ def write_images(band, skypos, tranges, skyrange, write_cnt=None,
         if verbose:
             print('Writing image to {o}'.format(o=imtypes[i]))
 
-        hdulist.writeto(imtypes[i], clobber=overwrite)
+        hdulist.writeto(imtypes[i], overwrite=overwrite)
 
     return
 # ------------------------------------------------------------------------------
