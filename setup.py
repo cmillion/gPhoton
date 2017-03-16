@@ -33,5 +33,5 @@ setup(
     keywords=['astronomy', 'galex', 'photometry', 'ultraviolet'],
     scripts=['bin/gPipeline', 'bin/gAperture', 'bin/gFind', 'bin/gMap'],
     packages=['gPhoton', 'gPhoton.cal'],
-    install_requires=['numpy', 'scipy', 'requests>=2.4.0', 'pandas', 'astropy', 'future'],
+    install_requires=['numpy', 'scipy', 'requests>=2.4.0', 'pandas', 'astropy>=1.3', 'future'],
 )
