@@ -346,6 +346,11 @@ def deg2pix(skypos, skyrange, pixsz=0.000416666666666667):
     :returns: float -- The converted number of pixels.
     """
 
+    if not (0<=skypos[0]<=360):
+        raise ValueError('RA out of range [0:360].')
+    if not (-90<=skypos[1]<=90):
+        raise ValueError('Dec out of range [-90:90].')
+
     # [Future]: Fix this.
     # > gt.deg2pix([0,90],[0,0])
     # >  array([ 0.,  1.])
