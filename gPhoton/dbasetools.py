@@ -827,7 +827,7 @@ def mcat_skybg(band, skypos, radius, verbose=0, trange=None, mcat=None,
 
 # ------------------------------------------------------------------------------
 def get_mags(band, ra0, dec0, radius, maglimit, mode='coadd',
-             zpmag={'NUV':20.08, 'FUV':18.82}, verbose=0):
+             zpmag={'NUV':20.08, 'FUV':18.82}, verbose=1):
     """
     Given RA, Dec and search radius, searches the coadd MCAT for sources.
         Returns a dict() which contains magnitudes for all of the APER settings.
@@ -882,7 +882,8 @@ def get_mags(band, ra0, dec0, radius, maglimit, mode='coadd',
                                                            maglimit=maglimit),
                                        verbose=verbose))
         if not len(out):
-            print("Warning: No sources found!")
+            if verbose:
+                print("Warning: No sources found!")
             return None
         return {'ra':out[:, 0], 'dec':out[:, 1],
                 'FUV':{'mag':out[:, 3], 1:out[:, 9]+zpf, 2:out[:, 10]+zpf,
