@@ -25,7 +25,8 @@ from gPhoton.imagetools import write_jpeg # For JPEG preview image creation
 def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
               stepsz=False, verbose=0, overwrite=False, trange=None,
               tranges=None, minexp=1., maxgap=1500., iocode='w',
-              detsize=1.1, minimal_output=False, photoncsvfile=None):
+              detsize=1.1, minimal_output=False, photoncsvfile=None,
+              addhdr=False):
     """
     Creates a light curve and returns the data in a python dict() and as
         a CSV file, if outfile is specified. Can be called from the interpreter.
@@ -125,7 +126,7 @@ def gaperture(band, skypos, radius, csvfile=None, annulus=None, coadd=False,
                           tranges=tranges, coadd=coadd, minexp=minexp,
                           maxgap=maxgap, iocode=iocode, detsize=detsize,
                           minimal_output=minimal_output,
-                          photoncsvfile=photoncsvfile)
+                          photoncsvfile=photoncsvfile,addhdr=addhdr)
 
     return data
 # ------------------------------------------------------------------------------
@@ -311,16 +312,13 @@ def setup_file(args):
             print("{csvfile} exists. Pass --overwrite to replace it.".format(
                 csvfile=args.csvfile))
             raise SystemExit
-        f = open(args.csvfile, args.iocode)
-        f.write('| v{v}\n'.format(v=__version__))
-
-        if args.addhdr:
-            if args.verbose:
-                print('Recording command line construction to {f}'.format(
-                    f=args.csvfile))
-            # Write the command line to the top of the output file
-            f.write('| '+reconstruct_command(args)+'\n')
-        f.close()
+        with open(args.csvfile, args.iocode) as f:
+            if args.addhdr:
+                if args.verbose:
+                    print('Recording command line construction to {f}'.format(
+                        f=args.csvfile))
+                # Write the command line to the top of the output file
+                f.write('| '+reconstruct_command(args)+'\n')
         # Setting iocode to append to the file we just created
         args.iocode = 'a'
 
@@ -374,7 +372,7 @@ def __main__():
                      coadd=args.coadd, minexp=args.minexp, maxgap=args.maxgap,
                      iocode=args.iocode, detsize=args.detsize,
                      minimal_output=args.minimal_output,
-                     photoncsvfile=args.photoncsvfile)
+                     photoncsvfile=args.photoncsvfile,addhdr=args.addhdr)
 # ------------------------------------------------------------------------------
 
 if __name__ == "__main__":

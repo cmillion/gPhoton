@@ -169,6 +169,9 @@ def fits_header(band, skypos, tranges, skyrange, verbose=0, hdu=None,
     hdu.header['EQUINOX'], hdu.header['EPOCH'] = 2000., 2000.
     hdu.header['BAND'] = 1 if band == 'NUV' else 2
     hdu.header['VERSION'] = 'v{v}'.format(v=__version__)
+    hdu.header['EXPSTART'] = np.array(tranges).min()
+    hdu.header['EXPEND'] = np.array(tranges).max()
+    hdu.header['EXPTIME'] = sum(t1-t0 for (t0,t1) in tranges)
 
     return hdu
 # ------------------------------------------------------------------------------
