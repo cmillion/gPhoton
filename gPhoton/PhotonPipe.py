@@ -428,7 +428,7 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         """
 
         cut = ((col > -1) & (col < cube_nc) & (row > -1) & (row < cube_nr) &
-               (flags == 0))
+               (flags == 0) & (np.array(depth,dtype='int64')<18))
         flags[np.where(cut == False)[0]] = 11
         ix = np.where(cut == True)[0]
 
