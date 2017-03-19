@@ -877,13 +877,13 @@ def rtaph_yac2(q, xb, yb, ya, y, aspum, wig2, wig2data, wlk2, wlk2data, clk2,
     ix = ((y_as > -2000)&(y_as < 2000)).nonzero()[0]
 
     ii = (np.array(y_as, dtype='int64')-wig2data['start'])/wig2data['inc']
-    yac_as[ix] = wig2[ii[ix], yb[ix], ya[ix], xb[ix]]
+    yac_as[ix] = wig2[np.array(ii[ix],dtype='int64'), yb[ix], ya[ix], xb[ix]]
 
     ii = (np.array(y_as, dtype='int64')-wlk2data['start'])/wlk2data['inc']
-    yac_as[ix] = wlk2[ii[ix], yb[ix], q[ix]]
+    yac_as[ix] = wlk2[np.array(ii[ix],dtype='int64'), yb[ix], q[ix]]
 
     ii = (np.array(y_as, dtype='int64')-clk2data['start'])/clk2data['inc']
-    yac_as[ix] = clk2[ii[ix], yb[ix]]
+    yac_as[ix] = clk2[np.array(ii[ix],dtype='int64'), yb[ix]]
 
     return yac_as/aspum
 # ------------------------------------------------------------------------------
@@ -1329,7 +1329,16 @@ def create_ssd(raw6file, band, eclipse, ssdfile=None):
     aspum = pltscl/1000.0
     # [Future] If these are made module constants, can remove from this method.
 
-    stim1, stim2, stim3, stim4 = raw6_to_stims(raw6file, band, eclipse, 20.)
+    stim1, stim2, stim3, stim4 = raw6_to_stims(raw6file, band, eclipse,
+                                                                    margin=20.)
+    if not (stim1['t'].shape[0] and stim2['t'].shape[0] and
+            stim3['t'].shape[0] and stim4['t'].shape[0]):
+        # Missing a stim. Try again with the default margin of 90.
+        stim1, stim2, stim3, stim4 = raw6_to_stims(raw6file, band, eclipse)
+        if not (stim1['t'].shape[0] and stim2['t'].shape[0] and
+                stim3['t'].shape[0] and stim4['t'].shape[0]):
+            raise ValueError('Unable to locate a stim. Cant create SSD.')
+
     stimt = np.concatenate([stim1['t'], stim2['t'], stim3['t'], stim4['t']],
                            axis=0)
     sortt = np.argsort(stimt)
