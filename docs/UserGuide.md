@@ -191,6 +191,7 @@ There are three additional header parameters related to possible contamination o
 Remember to always check the images for contamination.
 
 ####Lightcurve File Column Definitions
+
 **NOTE:** The column definitions for the .csv output from _gAperture_ are in flux. These are the column definitions as of the v1.28.4 build.
 
 **NOTE:** The columns are not necessarily written to the output file in the order given. Nor are the columns necessarily fixed in order at all. You should parse the lightcurve file on the column _name_ and not the column number.
