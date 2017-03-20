@@ -6,7 +6,7 @@ Myron Smith<sup>2</sup>
 <sup>1</sup>Million Concepts (chase.million@gmail.com),
 <sup>2</sup>Space Telescope Science Institute
 
-###Summary
+### Summary
 
 The MAST/GALEX photon database and tools exist in an effort to maximize the flexibility and utility of the GALEX data set. The GALEX detectors were microchannel plates which recorded detector position and time-of-arrival information for every detected photon event with a time resolution of five thousandths of a second, composing a huge and rich short time domain survey of the UV. Due to digital storage space and processing limitations, the data was only formally released by the mission team as integrated images. The "extended" photon list files--internally known as _x-files_--were only provided by special request and with little to no additional support for their calibration or use.
 
@@ -17,7 +17,7 @@ Additionally, the authors and MAST have undertaken to reduce all available GALEX
 * _gAperture_, for extracting photon lists and generating calibrated lightcurves of specific targets.
 * _gMap_, for creating calibrated images and movies.
 
-##Getting Started
+## Getting Started
 If you are a new user of the GALEX data or have not familiarized yourself with the quirks and intricacies of the GALEX detectors and calibration, please read the official [Technical Documentation](http://www.galex.caltech.edu/researcher/techdocs.html) with particular attention paid to [Chapter 3 - Pipeline Overview - Imaging](http://www.galex.caltech.edu/researcher/techdoc-ch3.html). This will answer many common questions of new users such as
 * What is the difference between an observation, a visit, and an eclipse?
 * What is a "dither correction?"
@@ -28,7 +28,7 @@ The primary mission calibration paper (henceforth "the calibration paper") is al
 
 Morrissey, Patrick, et al. "The calibration and data products of GALEX." The Astrophysical Journal Supplement Series 173.2 (2007): 682.
 
-###Installation Instructions
+### Installation Instructions
 The standalone tools are written exclusively in Python, a flexible and powerful interpreted programming and data exploration language that has been increasingly adopted in many fields of research and especially astronomy. The "installation" in this case refers to installing the required version of Python and the non-standard Python modules ("dependencies") called by the gPhoton software. For naive Python users, we suggest simply [downloading the Anaconda distribution](https://store.continuum.io/cshop/anaconda/) of Python which contains all of the required dependencies. For advanced users and developers, we suggest that you manage the dependencies yourself; the complete dependency list and suggested installation instructions are given under **Manual Package Management** below.
 
 **Note:** As of v1.28.0 of gPhoton, we are providing dual support of Python 2.x and 3.x. Our testing indicates that results from gFind, gAperture, and gMap should be identical for both environments. Differences in variable type handling cause a very minor difference due to rounding (in a distant decimal place) between 2.x and 3.x, however; if you want to precisely reproduce the photon list data as it is currently archived, please use Python 2.7. We plan to stop active support of Python 2.x at the same time as the astropy library makes that transition. If and when we regenerate photon data for the entire database, we will use Python 3.x.
@@ -37,7 +37,7 @@ The standalone tools are written exclusively in Python, a flexible and powerful 
 
 Because the standalone tools are written in Python, they are theoretically cross platform. Development of the current version was on OSX. At last attempt (circa 2013), we were not able to run the tools on Debian Linux because some of the required libraries were not yet supported.
 
-####Anaconda + PIP (recommended for most users)
+#### Anaconda + PIP (recommended for most users)
 There are several versions of Python available which include not only the core "standard" version itself, but many common and popular modules as a single package, eliminating the need for users to manage such dependencies themselves. At present, the most promising of these appears to be Anaconda, which is available as a free download (with some advanced features available as paid add-ons). Anaconda contains all of the required dependencies for the gPhoton project. Advanced users and Python developers will probably want to manage their own dependencies; if you are not such a user, you can [download Anaconda here](https://store.continuum.io/cshop/anaconda/).
 
 You must then install the most recent version of gPhoton from the Python Package Index (PyPI). Use the following terminal command: `pip install gPhoton`
@@ -46,20 +46,20 @@ You will be able to run `gFind`, `gAperture`, `gMap`, and `gPipeline` as scripts
 
 **Note:** In v1.28.2, the `future` package is (incorrectly) not specified by the installation script. This might manifest as an error referring to a package called `builtins` (which is in `future`). If you get this error, try installing the dependency manually with `pip install future`. This issue will be fixed in v1.28.3, which is being staged as of this writing (2/1/17). -Mgt.
 
-####Manual Package Management (advanced users)
+#### Manual Package Management (advanced users)
 Advanced users and developers will want more control over their installation and direct access to the source code and git repository. Importantly, this method will not give you access to the command line scripts unless you add them manually to your /usr/bin (or equivalent) directory, or install via the `setup.py` file in the repo, via `python setup.py install`, or if you don't have root access to the default install directory, via `python setup.py install --user`.
 
-#####Obtaining the Source Code
+##### Obtaining the Source Code
 **For developers:** Obtain the source code by cloning the master branch of the [gPhoton repository on Github](https://github.com/cmillion/gPhoton). Instructions for getting started using Github can be found [here](https://help.github.com/categories/54/articles), and instructions specifically for cloning repositories can be found [here](https://help.github.com/articles/which-remote-url-should-i-use#cloning-with-ssh). Once you've cloned the repository, it will be straightforward for your to update your local version when we make updates to the master version.
 
 Note: If you want to run the command line scripts (`gMap`, `gAperture`, `gFind`, and `gPipeline`) from your github checkout, and did not run the setup.py installation script, you'll need to move them into the correct directory relative to the main module. They currently reside in the _bin_ directory directly under the repo (from which the PyPI installation puts them into _/usr/bin/_). You should copy them to the top level directory (which contains _gPhoton_, _docs_, etc.) and run them as scripts from there. (Running the scripts straight from _bin_ will result in an error like "ValueError: Attempted relative import beyond toplevel package").  In general, we strongly recommend installing via the setup.py file included in the repo to ensure command-line access is available.
 
-#####Managing dependencies
+##### Managing dependencies
 You will need to install _python2.7_, _numpy_, _scipy_, _astropy_, _requests_ (>=v2.4.0) _pandas_, and _future_. The recommended commands for doing this appear below under the appropriate operating system.
 
 The best specific tools for package installation and management shift rapidly. We'll try to keep this section up to date. If anything suggested here is actually _broken_, please let us know.
 
-######Linux
+###### Linux
 Here are the recommended commands for Ubuntu. If you are using Fedora, substitute `yum` for `apt-get` everywhere.
 
     sudo apt-get install python-setuptools
@@ -72,7 +72,7 @@ You should use `pip` to get the latest versions of _requests_ and _astropy_. If 
     sudo pip install pandas
     sudo pip install future
 
-######Mac (OSX)
+###### Mac (OSX)
 **Draft.** For installing and managing your custom Python build in Mac OSX, we suggest using the [MacPorts package](https://www.macports.org/). There is also a tutorial for installing Python on Mac with MacPorts [here](https://astrofrog.github.io/macports-python/).
 
     sudo port install py27-numpy
@@ -85,7 +85,7 @@ You should use `pip` to get the latest versions of _requests_ and _astropy_. If 
 
 Note: If your installation of requests complains about missing library dependencies, you may need to install them explicitly with the following command: `sudo pip install --upgrade pyopenssl ndg-httpsclient pyasn1`
 
-######Windows
+###### Windows
 **Draft.** We haven't actually tried to do any of this on Windows. We suggest trying the [Enthought Python Distribution (EPD)](https://www.enthought.com/products/epd/) or the aforementioned [Anaconda](https://store.continuum.io/cshop/anaconda/) distribution.
 
 ##The Database Tools
@@ -93,14 +93,14 @@ The "database tools" or "photon tools" are the command line programs that provid
 
 _Note:_ For the rest of this User Guide, we will use the M dwarf flare star GJ 3685A as our standard example target. The GALEX observation of this flare was described in _Robinson, et al. "GALEX observations of an energetic ultraviolet flare on the dM4e star GJ 3685A." The Astrophysical Journal 633.1 (2005): 447._ It's a good test because it has an obvious and dramatic light curve; you'll know it when you see it.
 
-###gFind.py
+### gFind.py
 _gFind_ is the data location tool. Given a target sky position (and, optionally, bands and time ranges), it will return the estimated raw exposure time and approximate time ranges of data that are currently available in the photon database. That is, _gFind_ is your convenient utility for assessing what data is currently available for use by _gAperture_ and _gMap_. Attempt the following command.
 
     gFind -b 'NUV' -r 176.919525856024 -d 0.255696872807351
 
 This should report 2802.0 seconds of "raw" exposure time in five exposures along with the time ranges (in "GALEX Time") of those observations.
 
-####Tweaking Search Parameters
+#### Tweaking Search Parameters
 The allowable gap between two time stamps for them to be considered "contiguous" is adjustable with the `--maxgap` parameter. Because MIS-depth GALEX observations are ~1600 seconds long, a good way to get time ranges that approximate the mission bookkeping of "visits" would be to set `--maxgap 1600`, and this is the default for this parameter in _gFind_. If you wanted only time ranges with no gaps, then a reasonable setting would be for one second,  because that is the default spacing between adjacent entries in the aspect table. As an example, try the following command to consider data with gaps of as much as 100 seconds to be contiguous.
 
     gFind -b 'NUV' -r 176.919525856024 -d 0.255696872807351 --maxgap 100
@@ -121,7 +121,7 @@ Note that this reduces the depth of some exposures in addition to eliminating so
 
 _For the curious:_ The estimates returned by _gFind_ are computed by finding the boresight pointings (in the aspect database) which fall within a detector _radius_ (nominally 0.625 degrees) of the desired sky position and comparing the associated time stamps against the time stamps of data that has actually been loaded into the photon database. The _predicted_ keyword performs this same search on the aspect solutions only without comparing it against the database.
 
-####Alternative I/O Formats
+#### Alternative I/O Formats
 Rather than passing RA (`-r`) and Dec (`-d`) separately, you can pass them to `--skypos` as follows.
 
     gFind -b 'NUV' --skypos '[176.919525856024,0.255696872807351]'
@@ -130,7 +130,7 @@ If you are interested only in the available raw exposure times and not the indiv
 
     gFind -b 'NUV' --skypos '[176.919525856024,0.255696872807351]' --exponly
 
-####Calling from within the Python Interpreter
+#### Calling from within the Python Interpreter
 If you're creating scripts using the gPhoton tools, it might be more convenient to work from directly within the Python interpreter. _gFind_ can be imported like any other module in the following manner.
 
     import gPhoton.gFind
@@ -148,7 +148,7 @@ within the interpreter would be the following.
     import gPhoton
     gPhoton.gFind(band='NUV',skypos=[176.919525856024,0.255696872807351],maxgap=100.,minexp=100.)
 
-###gAperture.py
+### gAperture.py
 _gAperture_ is the photometry tool which computes source fluxes or light curves for specified targets and time ranges with customizable apertures and background annuli. If an output filename is provided, the light curve data will be written to a .csv file.
 
 The minimum required parameters are RA (`-r` or `--ra`), Dec (`-d` or `--dec`), and aperture radius (`-a`), all in decimal degrees. This will compute the integrated flux over all available data with no background subtraction. For our flare star example and an aperture with radius of 0.03 degrees, that command looks like this.
@@ -179,7 +179,7 @@ If you want to generate a light curve rather than an integrated value, pass the 
 
 For any command, you can always request more information be printed to the terminal by setting the `--verbose` or `-v` flag to a number between 1-3 (defualt is 0) where larger numbers indicate increasing levels of output. Setting `-v 3` will print out complete SQL commands and should really only be used for debugging.
 
-####Lightcurve Header Definitions
+#### Lightcurve Header Definitions
 Setting the `--addhdr` keyword when calling gAperture from command line or `addhdr=True` when called as a Python module will induce gAperture to prefix several rows of additional information to each lightcurve file. This information includes the parameters used for the call as well as the software version number. If called from the command line, the header will include a reconstruction of the command line call used.
 
 There are three additional header parameters related to possible contamination of the observation by outside sources:
@@ -190,7 +190,7 @@ There are three additional header parameters related to possible contamination o
 
 Remember to always check the images for contamination.
 
-####Lightcurve File Column Definitions
+#### Lightcurve File Column Definitions
 
 **NOTE:** The column definitions for the .csv output from _gAperture_ are in flux. These are the column definitions as of the v1.28.4 build.
 
@@ -299,7 +299,7 @@ Remember to always check the images for contamination.
 
 &nbsp;&nbsp;**flags** - Automatically generated gAperture quality flag. Bins with a flag that is non-zero should not be naively trusted. See flag definitions below for more information.
 
-#####Flag Column Definitions
+##### Flag Column Definitions
 These flags are automatically set in software based upon conditions that we know to reproducibly generate misleading lightcurves. The flags are additive in binary, so it's possible to have more than one flag set at a time. They are defined as follows:
 
 1 - 'hotspot' - aperture events in pixels contiguous to a masked hotspot
@@ -322,12 +322,12 @@ These flags are automatically set in software based upon conditions that we know
 
 512 - 'Spacecraft Recovery' - Includes data collected during a spacecraft recovery period. This often involved unusual operating modes (like observing at low voltage) and should be regarded skeptically. -- NOT YET FULLY POPULATED
 
-####Calling from within the Python Interpreter
+#### Calling from within the Python Interpreter
 You can also import and work with _gAperture_ and its modules from within the Python interpeter.
 
     import gPhoton.gAperture
 
-####Retrieving the Photon Events
+#### Retrieving the Photon Events
 The individual photon events used in the creation of a light curve can be optionally written to a separate CSV file using the `--photoncsvfile` flag to gAperture. These data are also included under the _photons_ key of the dictionary data structure that is returned when gAperture is run as a Python module. These data may have scientific utility in "unbinned" analyses, and they are often extremely useful for troubleshooting. The available columns include everything described in Photon File Column Definitions below in addition to:
 
 &nbsp;&nbsp;**col** - The flat (and mask) image pixel row in which the event falls.
@@ -340,7 +340,7 @@ The individual photon events used in the creation of a light curve can be option
 
 &nbsp;&nbsp;**response** - Equal to _flat_*_scale_.
 
-###gMap.py
+### gMap.py
 
 **NOTE: As of v1.26.0, gMap does not apply any exposure time correction. The images (including intensity) should be used for assessment purposes, but not photometric analysis.**
 
@@ -350,7 +350,7 @@ _gMap_ writes all image files in the Flexible Image Transport System (FITS) stan
 
 <sup>+</sup>Caveat emptor. "Arbitrariness" is limited by your available patience and RAM.
 
-####Count Maps
+#### Count Maps
 Count (_cnt_) maps are integrated, aspect corrected but uncalibrated (that is, not adjusted for resonse or exposure time) images of the sky. Count images are good for "quick looks" at the data, to ensure that you are pointing in the location that you expected and that you are seeing the sources or features desired. But because they are not calibrated by either the relative response or the effective exposure time, you should not use them for photometric analyses of any kind.
 
 You can create a count image from the command line by specifying the band (`-b`), sky position (`-r` and `-d` or just `--skypos`), the angular extent of the desired image in degrees (`--angle`), an output FITS filename (`--count`), and optionally a time range (`--t0` and `--t1` or just `--trange` or `--tranges`). Try the following simple command.
@@ -369,17 +369,17 @@ However, if you do not specify any time range, _gMap_ will automatically use all
 
     gMap -b 'FUV' --skypos '[176.919525856024,0.255696872807351]' --angle 0.5 --count 'count.fits' --coadd
 
-####Intensity Maps
+#### Intensity Maps
 Intensity maps (_int_) are integrated, aspect corrected images which have been corrected for both relative response as well as effective exposure time. If you need to perform photometric analysis on an image, you need an intensity map. Note the warning above about long run times for generating the _response_ for this. If you want to create an intensity map, pass a FITS filename to the `--intensity` flag.
 
     gMap -b 'FUV' --skypos '[176.919525856024,0.255696872807351]' --angle 0.5 --intensity 'intensity.fits' --coadd
 
-####Movies
+#### Movies
 You can turn any of the above map types into a _movie_ (that is, a time-binned, multi-plane image), by passing the desired (raw) bin depth in seconds to the `--frame` parameter. For example, to create a count image with 100 second depth image planes, try the following.
 
     gMap -b 'FUV' -r 176.919525856024 -d 0.255696872807351 --angle 0.5 --t0 766525332.995 --t1 766526576.995 --count 'count.fits' --frame 100
 
-##gPipeline.py - The Standalone Calibration Pipeline
+## gPipeline.py - The Standalone Calibration Pipeline
 You will need to download the sample eclipse directory from [here](https://archive.stsci.edu/prepds/gphoton/cal/e31000.tar.gz). This directory contains the raw science (raw6), spacecraft state (scst), and refined aspect (asprta) files for eclipse e31000. Unzip this test eclipse into a known location, and then cd into that directory.
 
 Run the first two example gPhoton commands below. These will generate all of the aspect corrected FUV and NUV photons for eclipse 31000 as comma separate value (.csv) files. While gPhoton is running, the terminal will update with the photon chunk and current processing rate, mostly just so you know that something is happening. The photons will be dumped into files named [NF]UVPhotons.csv which will be quite large (several Gb), so make sure that you have enough disk space available. It can also take minutes to hours (depending on the observation and speed of your computer); if processing is taking longer than you want, you can kill gPipeline at any time with `Ctrl+C`. New runs will overwrite .csv output from previous runs.
@@ -394,25 +394,25 @@ This generates the aspect corrected NUV photons for eclipse 31000 and writes the
 
     gPipeline -r 'MISWZN11_12494_0315_0002-nd-raw6.fits' -a 'MISWZN11_12494_0315_0002-asprta.fits' -o 'NUVphotons' -s 'MISWZN11_12494_0315_0002-scst.fits' -d 'SSD_nuv_31000.tbl'
 
-###Optional parameters
+### Optional parameters
 A number of the command line parameters given above are actually option. If (and only if) you have a working internet connection, then the aspect file (`-a`) parameter can be omitted; the software will instead query the aspect database table at MAST for the appropriate values. The Stim Separation Data (SSD) file parameter (`-d`) is _always optional_ because the values in this reference table can be generated directly from the raw data (at a very small cost in terms of total run time). Try the following command, which omits both of these parameters.
 
     gPipeline -r 'MISWZN11_12494_0315_0002-fd-raw6.fits' -o 'FUVphotons' -s 'MISWZN11_12494_0315_0002-scst.fits'
 
-###NULL vs. non-NULL data
+### NULL vs. non-NULL data
 A large number of events cannot be aspect corrected either because they fall in a time range for which noa spect solution is available (for a variety of possible reasons) or because they don't actually fall on the detector proper (e.g. stims). Such events appear in the .csv output file with _NULL_ entries for RA and Dec and are referred to as "null data." These data are of limited scientific interest and it was convenient for us to separate them in the MAST database, so you can optionally write null data to a separate file from non-null data by passign the `-u` flag. This will create a second .csv file for null data with "_NULL.csv" appended to the filname.
 
     gPipeline -r 'MISWZN11_12494_0315_0002-fd-raw6.fits' -a 'MISWZN11_12494_0315_0002-asprta.fits' -o 'FUVphotons' -s 'MISWZN11_12494_0315_0002-scst.fits' -u
 
-###Multi-visit Eclipses
+### Multi-visit Eclipses
 For multi-visit eclipses (e.g. AIS), you can specify more than one aspect file for a single raw6 file using the following syntax.
 
     -a '../FOO_sv01-asprta.fits,../FOO_sv02-asprta.fits,../FOO_sv03-asprta.fits'
 
 Again, if you do not specify `-a` at all, then the software will query the aspect database at MAST for the appropriate values, even for multi-visit eclipses.
 
-###Other Notes
-####Photon File Column Definitions
+### Other Notes
+#### Photon File Column Definitions
 The column definitions for the .csv file output by gPhoton.py are as follows.
 
 1. _t_ - time of the event (in "GALEX Time" = "UNIX Time" - 315964800)
@@ -427,7 +427,7 @@ The column definitions for the .csv file output by gPhoton.py are as follows.
 10. _dec_ - aspect corrected declination of the event (decimal degrees)
 11. _flags_ - status information (see below)
 
-####Flag Column Definitions
+#### Flag Column Definitions
 These are the definitions of various values of the _flag_ column in the gPhoton .csv output file. Note that these are not identical to any flag column definitions for output created by the canonical pipeline. In general, end users will be most interested in events for which _flag = 1_, and this is the default search criterion for all queries performed by the Photon Tools.
 
 0. successfully calibrated (no errors)
@@ -447,7 +447,7 @@ These are the definitions of various values of the _flag_ column in the gPhoton 
 14. _N/A_
 15. _N/A_
 
-##Common Questions, Issues, and Gotchas
+## Common Questions, Issues, and Gotchas
 1. **"My data is not available!"** You can verify that data for your desired target does or does not exist in the database and present by using the `gFind` commands described above. If data for your target is not available, there are two possible explanations: (1) we have not yet loaded those observations into the photon database, or (2) that target was never observed by the GALEX mission. As of this writing, we have loaded all direct imaging data up through the GR6/7 release, which corresponds to the end of the NASA-funded mission and beginning of the CAUSE phase. You can confirm that your target was, indeed, observed by GALEX by searching for it in the [GALEX Catalog](http://galex.stsci.edu/GR6/?page=mastform).
 2. **Why are there negative counts per second or NaN magnitudes?** This happens when the measured background (in counts per second per area) is larger than the measured source (in counts per second per area) such that `cps<sub>source</sub>-cps<sub>background</sub><0`. In most cases, this is for the obvious reason that the signal is near or has dropped below the background. It is not uncommon for shorter integrations of particularly dim sources (especially in FUV) to have _zero_ counts detected within the aperture.
 3. **How do I convert GALEX time stamps to something meaningful?** The GALEX time stamps are in "GALEX Time" which is is defined UNIX Time less 315964800 seconds. (t<sub>GALEX</sub> = t<sub>UNIX</sub> - 315964800) UNIX Time is a standard defined as the number of seconds that have elapsed since January 1, 1970. A number of utilities exist online for converting UNIX time to something with broader meaning (like Julian Date).
