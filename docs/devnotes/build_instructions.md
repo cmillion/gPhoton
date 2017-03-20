@@ -19,3 +19,7 @@ The main PyPI server no longer requires a registration server after the first ti
 1. Create a distribution file with: `python setup.py sdist`
 2. Upload the file (securely): `twine upload dist/*`
 3. Install gPhoton: `pip install gPhoton`
+
+**After building:**
+1. Move a copy of the `tar.gz` build file to the appropriate long term home in the MAST archive.
+2. Tag this as a "release" on github. Include the build file as an attachment.
