@@ -2,12 +2,9 @@
 
 To get started, please read the [User Guide](https://github.com/cmillion/gPhoton/blob/master/docs/UserGuide.md).  You can also refer to the [Full API](http://gphoton.readthedocs.io/en/master/) available on ReadTheDocs.
 
-##### Citation
 If you use gPhoton software in your research, please cite at least one of the following:
-
-_Million, et al. "gPhoton: The GALEX Photon Data Archive." The Astrophysical Journal 833.2 (2016): 292._
-
-_Million, et al., 2016, gPhoton, Astrophysics Source Code Library, record ascl:1603.004_
+* _Million, et al. "gPhoton: The GALEX Photon Data Archive." The Astrophysical Journal 833.2 (2016): 292._
+* _Million, et al., 2016, gPhoton, Astrophysics Source Code Library, record ascl:1603.004_
 
 ![Logo](https://travis-ci.org/cmillion/gPhoton.svg?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/gphoton/badge/?version=master)](http://gphoton.readthedocs.io/en/master/?badge=master)
