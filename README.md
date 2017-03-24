@@ -8,7 +8,7 @@ To get started, please read the [User Guide](https://github.com/cmillion/gPhoton
 ##### Citation
 If you use gPhoton software in your research, please cite at least one of the following:
 
-_Million, Chase, et al. "gPhoton: The GALEX Photon Data Archive." The Astrophysical Journal 833.2 (2016): 292._
+_Million, et al. "gPhoton: The GALEX Photon Data Archive." The Astrophysical Journal 833.2 (2016): 292._
 
 _Million, et al., 2016, gPhoton, Astrophysics Source Code Library, record ascl:1603.004_
 
