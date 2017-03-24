@@ -14,3 +14,4 @@ _Million, et al., 2016, gPhoton, Astrophysics Source Code Library, record ascl:1
 
 ![Logo](https://travis-ci.org/cmillion/gPhoton.svg?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/gphoton/badge/?version=master)](http://gphoton.readthedocs.io/en/master/?badge=master)
+<a href="http://ascl.net/1603.004"><img src="https://img.shields.io/badge/ascl-1603.004-blue.svg?colorB=262255" alt="ascl:1603.004" /></a>
