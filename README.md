@@ -1,17 +1,17 @@
 **gPhoton** is a project to calibrate, archive, and make available every photon event observed by the GALEX mission in an effort to dramatically improve the flexibility and utility of the data with specific emphasis on enabling short time domain photometric studies.
 
-The master branch currently supports Python 2.7 **only**.  The "py3comp" branch is our in-development version of the code that does support both Python 2.7 and Python 3.5.  If you are running a Python 3 environment, please check out that version of the code, but keep in mind that it is in active development and a beta stage, so there are no guarantees on the data results or functionality until it is merged into the master branch.
-
 To get started, please read the [User Guide](https://github.com/cmillion/gPhoton/blob/master/docs/UserGuide.md).  You can also refer to the [Full API](http://gphoton.readthedocs.io/en/master/) available on ReadTheDocs.
 
-You may also wish to review the [gPhoton calibration paper](https://arxiv.org/abs/1609.09492).
-
-#####Database Status
+##### Database Status
 **Every photon observed through GR6/7 is now available in the database!** This includes every observation up to the start of the post-NASA or "CAUSE" phase of the mission.
 
-#####Citation
-If you use gPhoton software in your research, please cite the introductory/calibration paper:
-[Million et al. 2016, *ApJ*](https://arxiv.org/abs/1609.09492).
+##### Citation
+If you use gPhoton software in your research, please cite at least one of the following:
+
+_Million, et al. "gPhoton: The GALEX Photon Data Archive." The Astrophysical Journal 833.2 (2016): 292._
+
+_Million, et al., 2016, gPhoton, Astrophysics Source Code Library, record ascl:1603.004_
 
 ![Logo](https://travis-ci.org/cmillion/gPhoton.svg?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/gphoton/badge/?version=master)](http://gphoton.readthedocs.io/en/master/?badge=master)
+<a href="http://ascl.net/1603.004"><img src="https://img.shields.io/badge/ascl-1603.004-blue.svg?colorB=262255" alt="ascl:1603.004" /></a>
