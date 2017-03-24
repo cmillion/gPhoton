@@ -311,21 +311,31 @@ def integrate_map(band, skypos, tranges, skyrange, verbose=0, memlight=None,
     for trange in tranges:
         # If memlight is requested, break the integration into
         # smaller chunks.
-        # [Future]: memlight gives slightly wrong answers right now
-        # This is probably due to a quirk of SQL, per issue #140.
-        # Deprecating memlight until this can be resolved.
         step = memlight if memlight else trange[1]-trange[0]
 
         for i in np.arange(trange[0], trange[1], step):
             t0, t1 = i, i+step if i+step <= trange[1] else trange[1]
             if verbose:
                 mc.print_inline('Processing '+str(t0)+' to '+str(t1))
-            img += makemap(band, skypos, [t0, t1], skyrange, response=response,
-                           verbose=verbose, detsize=detsize)
+            one_s_bins = np.arange(np.ceil(t0),np.floor(t1),1)
+            if t0!=np.ceil(t0):
+                one_s_bins=np.append(one_s_bins,t0)
+            if t1!=np.floor(t1):
+                one_s_bins=np.append(one_s_bins,t1)
+            for t in one_s_bins:
+                mc.print_inline('Stamping {t}'.format(t=t))
+                # Weight each 1 second bin by the eff. expt ratio.
+                img += (makemap(band, skypos, [t, t+1], skyrange,
+                    response=response,verbose=verbose,detsize=detsize)/
+                    (trange[1]-trange[0])*dbt.compute_exptime(band, [t,t+1],
+                    verbose=verbose) if response else 1.)
 
-        if response: # This is an intensity map.
-            img /= dbt.compute_exptime(band, trange, skypos=skypos,
-                                       verbose=verbose)
+        #img /= (trange[1]-trange[0]) if response else 1.
+        #if response: # This is an intensity map.
+            #img /= dbt.compute_exptime(band, trange, skypos=skypos,
+            #                           verbose=verbose)
+
+
 
     return img
 # ------------------------------------------------------------------------------
