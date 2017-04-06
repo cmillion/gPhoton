@@ -663,7 +663,8 @@ def find_fuv_offset(scstfile):
         eclipse = int(scsthead['eclipse'])
         fdttdc = float(scsthead['fdttdc'])
     except KeyError:
-        print("ERROR: FUV header values missing from SCST.")
+        print("WARNING: FUV header values missing from SCST.")
+        print("         This is probably not a real FUV observation.")
         return 0., 0.
 
     print("Offsetting FUV image for eclipse {e} at {t} degrees.".format(
@@ -1331,13 +1332,13 @@ def create_ssd(raw6file, band, eclipse, ssdfile=None):
 
     stim1, stim2, stim3, stim4 = raw6_to_stims(raw6file, band, eclipse,
                                                                     margin=20.)
-    if not (stim1['t'].shape[0] and stim2['t'].shape[0] and
-            stim3['t'].shape[0] and stim4['t'].shape[0]):
-        # Missing a stim. Try again with the default margin of 90.
-        stim1, stim2, stim3, stim4 = raw6_to_stims(raw6file, band, eclipse)
-        if not (stim1['t'].shape[0] and stim2['t'].shape[0] and
-                stim3['t'].shape[0] and stim4['t'].shape[0]):
-            raise ValueError('Unable to locate a stim. Cant create SSD.')
+    # if not (stim1['t'].shape[0] and stim2['t'].shape[0] and
+    #         stim3['t'].shape[0] and stim4['t'].shape[0]):
+    #     # Missing a stim. Try again with the default margin of 90.
+    #     stim1, stim2, stim3, stim4 = raw6_to_stims(raw6file, band, eclipse)
+    #     if not (stim1['t'].shape[0] and stim2['t'].shape[0] and
+    #             stim3['t'].shape[0] and stim4['t'].shape[0]):
+    #         raise ValueError('Unable to locate a stim. Cant create SSD.')
 
     stimt = np.concatenate([stim1['t'], stim2['t'], stim3['t'], stim4['t']],
                            axis=0)
