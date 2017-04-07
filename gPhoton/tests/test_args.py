@@ -306,14 +306,5 @@ class TestArguments(unittest.TestCase):
             gm_check_args(gm_check_args(gm_setup_parser().parse_args(
                 ['--skypos', str(self.skypos), '--raangle', '0.1'])))
 
-    # This is no longer the behavior
-    #def test_tmin_tmax_propagate_defaults(self):
-    #    """If trange is not given, sub in tmin/tmax."""
-    #    args = self.parser.parse_args(['--skypos',str(self.skypos),
-    #        '-a',str(self.radius)])
-    #    args = ga_check_args(args)
-    #    self.assertAlmostEqual(args.tmin,args.trange[0][0])
-    #    self.assertAlmostEqual(args.tmax,args.trange[0][1])
-
 suite = unittest.TestLoader().loadTestsFromTestCase(TestArguments)
 unittest.TextTestRunner(verbosity=2).run(suite)
