@@ -9,11 +9,13 @@
 from __future__ import absolute_import, division, print_function
 # Core and Third Party imports.
 from astropy.time import Time
+import scipy.stats # CHECK THIS DEPENDENCY
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 # gPhoton imports.
 import gPhoton.galextools as gt
+import gPhoton.dbasetools as dt
 
 # ------------------------------------------------------------------------------
 def read_lc(csvfile, comment='|'):
@@ -340,6 +342,13 @@ def checkplot(csvfile,outfile=None,format='png',maxgap=500,imscale=4,
     :returns: float -- The time converted to a Julian date, in the TAI
         time standard.
     """
+
+    def crosscorr_title(a,b):
+        return '{pearsonr}, {spearmanr}, {kendalltau}'.format(
+            pearsonr=round(scipy.stats.pearsonr(a,b)[0],2),
+            spearmanr=round(scipy.stats.spearmanr(a,b)[0],2),
+            kendalltau=round(scipy.stats.kendalltau(a,b)[0],2))
+
     lc = read_lc(csvfile)
     tranges = dt.distinct_tranges(np.array(lc['t0']),maxgap=500)
     stepsz = np.median(lc['t1']-lc['t0']) # sort of a guess at stepsz
