@@ -17,8 +17,11 @@ import gPhoton.cal as cal
 import gPhoton.gQuery as gQuery
 from gPhoton.MCUtils import manage_requests2
 
-def get_raw_paths(eclipse):
-    r = manage_requests2(gQuery.raw_data_paths(eclipse))
+def get_raw_paths(eclipse,verbose=0):
+    url = gQuery.raw_data_paths(eclipse)
+    if verbose>1:
+        print(url)
+    r = manage_requests2(url)
     out = {'NUV':None,'FUV':None,'scst':None}
     for f in r.json()['data']['Tables'][0]['Rows']:
         if (f[1].strip()=='NUV') or (f[1].strip()=='FUV'):
@@ -27,8 +30,8 @@ def get_raw_paths(eclipse):
             out['scst']=f[2]
     return out
 
-def download_data(eclipse,band,ftype,datadir='./'):
-    urls = get_raw_paths(eclipse)
+def download_data(eclipse,band,ftype,datadir='./',verbose=0):
+    urls = get_raw_paths(eclipse,verbose=verbose)
     if not ftype in ['raw6','scst']:
         raise ValueError('ftype must be either raw6 or scst')
     if not band in ['NUV','FUV']:
@@ -37,6 +40,10 @@ def download_data(eclipse,band,ftype,datadir='./'):
     if not url:
         print('Unable to locate {f} file on MAST server.'.format(f=ftype))
         return None
+    if url[-6:]=='.gz.gz': # Handling a very rare mislabeling of the URL.
+        url = url[:-3]
+    if verbose>1:
+        print(url)
     if not datadir:
         datadir = '.'
     if datadir and datadir[-1]!='/':
