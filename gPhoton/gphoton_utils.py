@@ -9,7 +9,7 @@
 from __future__ import absolute_import, division, print_function
 # Core and Third Party imports.
 from astropy.time import Time
-import scipy.stats # CHECK THIS DEPENDENCY
+import scipy.stats
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
