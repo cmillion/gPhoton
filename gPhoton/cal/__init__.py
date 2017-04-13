@@ -63,7 +63,7 @@ def download_with_progress_bar(data_url, file_path):
     fhandle = urlopen(data_url)
     content_length = url_content_length(fhandle)
     chunk_size = content_length // num_units
-    print('Downloading {url}/n to {cal_dir}'.format(
+    print('Downloading {url} to {cal_dir}'.format(
                             url=data_url,cal_dir=_os.path.dirname(file_path)))
     nchunks = 0
     buf = BytesIO()

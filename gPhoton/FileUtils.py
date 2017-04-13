@@ -10,9 +10,60 @@ from __future__ import absolute_import, division, print_function
 from astropy.io import fits as pyfits
 from builtins import str
 from builtins import range
+import os
 import numpy as np
 # gPhoton imports.
+import gPhoton.cal as cal
 import gPhoton.gQuery as gQuery
+from gPhoton.MCUtils import manage_requests2
+
+def get_raw_paths(eclipse,verbose=0):
+    url = gQuery.raw_data_paths(eclipse)
+    if verbose>1:
+        print(url)
+    r = manage_requests2(url)
+    out = {'NUV':None,'FUV':None,'scst':None}
+    for f in r.json()['data']['Tables'][0]['Rows']:
+        if (f[1].strip()=='NUV') or (f[1].strip()=='FUV'):
+            out[f[1].strip()]=f[2]
+        elif f[1].strip()=='BOTH': # misnamed scst path
+            out['scst']=f[2]
+    return out
+
+def download_data(eclipse,band,ftype,datadir='./',verbose=0):
+    urls = get_raw_paths(eclipse,verbose=verbose)
+    if not ftype in ['raw6','scst']:
+        raise ValueError('ftype must be either raw6 or scst')
+    if not band in ['NUV','FUV']:
+        raise ValueError('band must be either NUV or FUV')
+    url = urls[band] if ftype is 'raw6' else urls['scst']
+    if not url:
+        print('Unable to locate {f} file on MAST server.'.format(f=ftype))
+        return None
+    if url[-6:]=='.gz.gz': # Handling a very rare mislabeling of the URL.
+        url = url[:-3]
+    if verbose>1:
+        print(url)
+    if not datadir:
+        datadir = '.'
+    if datadir and datadir[-1]!='/':
+        datadir+='/'
+    filename = url.split('/')[-1]
+    opath = '{d}{f}'.format(d=datadir,f=filename)
+    if os.path.isfile(opath):
+        print('Using {f} file already at {d}'.format(
+                                    f=ftype,d=os.path.abspath(opath)))
+    else:
+        # FIXME: All exceptions are treated the same. Could be missing data or
+        #  a network outage. Should treat these cases differently.
+        try:
+            cal.download_with_progress_bar(url,opath)
+        except:
+            print('Unable to download data from {u}'.format(u=url))
+            raise
+            #return None
+    return opath
+
 
 # ------------------------------------------------------------------------------
 def load_raw6(raw6file):
