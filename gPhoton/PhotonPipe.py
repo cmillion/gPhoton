@@ -22,13 +22,14 @@ import gPhoton.cal as cal
 from gPhoton.CalUtils import (clk_cen_scl_slp, get_stim_coefs, find_fuv_offset,
                       post_csp_caldata, rtaph_yac, rtaph_yac2,
                       compute_stimstats, create_ssd)
-from gPhoton.FileUtils import load_aspect, web_query_aspect
+from gPhoton.FileUtils import load_aspect, web_query_aspect, download_data
 from gPhoton.gnomonic import gnomfwd_simple, gnomrev_simple
 from gPhoton.MCUtils import print_inline
 
 # ------------------------------------------------------------------------------
-def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
-               nullfile=None, verbose=0, retries=20):
+def photonpipe(outbase, band, raw6file=None, scstfile=None, aspfile=None,
+               ssdfile=None, nullfile=None, verbose=0, retries=20,
+               eclipse=None):
     """
     Apply static and sky calibrations to -raw6 GALEX data, producing fully
         aspect-corrected and time-tagged photon list files.
@@ -90,11 +91,23 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
     xi_xsc, xi_ysc, eta_xsc, eta_ysc = 0., 1., 1., 0.
 
     # Determine the eclipse number from the raw6 header.
+    if not raw6file:
+        if not eclipse:
+            raise ValueError('Must specifiy eclipse if no raw6file.')
+        else:
+            raw6file = download_data(
+                        eclipse,band,'raw6',datadir=os.path.dirname(outbase))
+            if raw6file==None:
+                print('Unable to retrieve raw6 file for this eclipse.')
+                return
     hdulist = pyfits.open(raw6file)
     hdr = hdulist[0].header
     hdulist.close()
+    if eclipse and (eclipse!=hdr['eclipse']): # just a consistency check
+        print("Warning: eclipse mismatch {e0} vs. {e1} (header)".format(
+                                                e0=eclipse,e1=hdr['eclipse']))
     eclipse = hdr['eclipse']
-    print("Eclipse is "+str(eclipse)+".")
+    print("Processing eclipse "+str(eclipse)+".")
 
     # Returns detector constants.
     print("Band is "+band+".")
@@ -135,6 +148,15 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
                  disthead['NAXIS2'])
 
     if band == 'FUV':
+        if not scstfile:
+            if not eclipse:
+                raise ValueError('Must specifiy eclipse if no scstfile.')
+            else:
+                scstfile = download_data(
+                        eclipse,band,'scst',datadir=os.path.dirname(outbase))
+            if scstfile==None:
+                print('Unable to retrieve SCST file for this eclipse.')
+                return
         xoffset, yoffset = find_fuv_offset(scstfile)
     else:
         xoffset, yoffset = 0., 0.
@@ -428,7 +450,7 @@ def photonpipe(raw6file, scstfile, band, outbase, aspfile=None, ssdfile=None,
         """
 
         cut = ((col > -1) & (col < cube_nc) & (row > -1) & (row < cube_nr) &
-               (flags == 0))
+               (flags == 0) & (np.array(depth,dtype='int64')<18))
         flags[np.where(cut == False)[0]] = 11
         ix = np.where(cut == True)[0]
 

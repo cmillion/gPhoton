@@ -9,11 +9,13 @@
 from __future__ import absolute_import, division, print_function
 # Core and Third Party imports.
 from astropy.time import Time
+import scipy.stats
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 # gPhoton imports.
 import gPhoton.galextools as gt
+import gPhoton.dbasetools as dt
 
 # ------------------------------------------------------------------------------
 def read_lc(csvfile, comment='|'):
@@ -340,6 +342,13 @@ def checkplot(csvfile,outfile=None,format='png',maxgap=500,imscale=4,
     :returns: float -- The time converted to a Julian date, in the TAI
         time standard.
     """
+
+    def crosscorr_title(a,b):
+        return '{pearsonr}, {spearmanr}, {kendalltau}'.format(
+            pearsonr=round(scipy.stats.pearsonr(a,b)[0],2),
+            spearmanr=round(scipy.stats.spearmanr(a,b)[0],2),
+            kendalltau=round(scipy.stats.kendalltau(a,b)[0],2))
+
     lc = read_lc(csvfile)
     tranges = dt.distinct_tranges(np.array(lc['t0']),maxgap=500)
     stepsz = np.median(lc['t1']-lc['t0']) # sort of a guess at stepsz
@@ -353,9 +362,8 @@ def checkplot(csvfile,outfile=None,format='png',maxgap=500,imscale=4,
             plt.xticks([])
             if i==0:
                 plt.ylabel('cps_mcatbgsub')
-            plt.ylim(
-                np.array(lc['cps_mcatbgsub']-2*5*lc['cps_mcatbgsub_err']).min(),
-                np.array(lc['cps_mcatbgsub']+2*5*lc['cps_mcatbgsub_err']).max())
+            plt.ylim((lc['cps_mcatbgsub']-2*5*lc['cps_mcatbgsub_err']).min(),
+                     (lc['cps_mcatbgsub']+2*5*lc['cps_mcatbgsub_err']).max())
             time_ix = np.where((np.array(lc['t0'])>=trange[0]) &
                                            (np.array(lc['t1'])<=trange[1]))
             if not len(time_ix[0]):
@@ -386,38 +394,6 @@ def checkplot(csvfile,outfile=None,format='png',maxgap=500,imscale=4,
             plt.title(crosscorr_title(
                         np.array(lc['cps_mcatbgsub_err'])[time_ix],
                         np.array(lc['detrad'])[time_ix]))
-
-            # # Response
-            # plt.subplot(n, len(tranges),i+1+len(tranges)*2)
-            # plt.xticks([])
-            # if i==0:
-            #     plt.ylabel('responses')
-            # plt.xlim(tlim[0],tlim[1])
-            # plt.ylim(np.array(lc['responses'])[time_ix].min()-.1,
-            #          np.array(lc['responses'])[time_ix].max()+.1)
-            # plt.plot(np.array(lc['t_mean'])[time_ix],
-            #          np.array(lc['responses'])[time_ix],'k.')
-            # plt.title(crosscorr_title(
-            #             np.array(lc['cps_mcatbgsub_err'])[time_ix],
-            #             np.array(lc['responses'])[time_ix]))
-            # plt.plot(np.array(lc['t_mean'])[time_ix][flag_ix],
-            #     np.array(lc['responses'])[time_ix][flag_ix],'rx')
-            #
-            # # Exposure Time
-            # plt.subplot(n, len(tranges),i+1+len(tranges)*3)
-            # plt.xticks([])
-            # if i==0:
-            #     plt.ylabel('exptime')
-            # plt.xlim(tlim[0],tlim[1])
-            # plt.ylim(np.array(lc['exptime'])[time_ix].min()-stepsz/2.,
-            #          np.array(lc['exptime'])[time_ix].max()+stepsz/2.)
-            # plt.plot(np.array(lc['t_mean'])[time_ix],
-            #          np.array(lc['exptime'])[time_ix],'k.')
-            # plt.plot(np.array(lc['t_mean'])[time_ix][flag_ix],
-            #     np.array(lc['exptime'])[time_ix][flag_ix],'rx')
-            # plt.title(crosscorr_title(
-            #             np.array(lc['cps_mcatbgsub_err'])[time_ix],
-            #             np.array(lc['exptime'])[time_ix]))
 
         plt.tight_layout()
         if outfile:

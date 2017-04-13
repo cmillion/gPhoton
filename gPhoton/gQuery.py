@@ -1166,3 +1166,18 @@ def skyrect(band, ra0, dec0, t0, t1, ra, dec, flag=0):
                 t0=str(int(t0*tscale)), t1=str(int(t1*tscale)), flag=flag,
                 formatURL=formatURL))
 # ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+def raw_data_paths(eclipse):
+    """
+    Construct a query that returns a data structure containing the download
+    paths
+
+    :param eclipse: GALEX eclipse number.
+
+    :type flag: int
+
+    :returns: str -- The query to submit to the database.
+    """
+    return 'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=spGetRawUrls {ecl}&format=extjs'.format(ecl=int(eclipse))
+# ------------------------------------------------------------------------------

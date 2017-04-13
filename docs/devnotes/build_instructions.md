@@ -16,6 +16,7 @@
 
 **Procedure for building:**
 The main PyPI server no longer requires a registration server after the first time. You just upload the file, so...
+0. Merge BRACH into Master.
 1. Create a distribution file with: `python setup.py sdist`
 2. Upload the file (securely): `twine upload dist/*`
 3. Install gPhoton: `pip install gPhoton`
