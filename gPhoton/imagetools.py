@@ -309,33 +309,11 @@ def integrate_map(band, skypos, tranges, skyrange, verbose=0, memlight=None,
     img = np.zeros(np.array(imsz, dtype='int32'))
 
     for trange in tranges:
-        # If memlight is requested, break the integration into
-        # smaller chunks.
-        step = memlight if memlight else trange[1]-trange[0]
-
-        for i in np.arange(trange[0], trange[1], step):
-            t0, t1 = i, i+step if i+step <= trange[1] else trange[1]
-            if verbose:
-                mc.print_inline('Processing '+str(t0)+' to '+str(t1))
-            one_s_bins = np.arange(np.ceil(t0),np.floor(t1),1)
-            if t0!=np.ceil(t0):
-                one_s_bins=np.append(one_s_bins,t0)
-            if t1!=np.floor(t1):
-                one_s_bins=np.append(one_s_bins,t1)
-            for t in one_s_bins:
-                mc.print_inline('Stamping {t}'.format(t=t))
-                # Weight each 1 second bin by the eff. expt ratio.
-                img += (makemap(band, skypos, [t, t+1], skyrange,
-                    response=response,verbose=verbose,detsize=detsize)/
-                    (trange[1]-trange[0])*dbt.compute_exptime(band, [t,t+1],
-                    verbose=verbose) if response else 1.)
-
-        #img /= (trange[1]-trange[0]) if response else 1.
-        #if response: # This is an intensity map.
-            #img /= dbt.compute_exptime(band, trange, skypos=skypos,
-            #                           verbose=verbose)
-
-
+        expt_eff = 1.
+        if response:
+            expt_eff = dbt.compute_exptime(band,trange)
+        img += makemap(band, skypos, trange, skyrange,
+            response=response, verbose=verbose, detsize=detsize)/expt_eff
 
     return img
 # ------------------------------------------------------------------------------
@@ -640,14 +618,9 @@ def write_images(band, skypos, tranges, skyrange, write_cnt=None,
             continue
 
         img = create_image(band, skypos, tranges, skyrange, framesz=framesz,
-                           verbose=verbose,
-                           memlight=memlight, retries=retries, detsize=detsize,
-                           coadd=(
-                               True if (coadd or i in ['cnt_coadd',
-                                                       'int_coadd']) else
-                               False),
-                           response=(
-                               True if i in ['int', 'int_coadd'] else False))
+            verbose=verbose, memlight=memlight, retries=retries, detsize=detsize,
+            coadd=coadd or i in ['cnt_coadd','int_coadd'],
+            response=i in ['int', 'int_coadd'])
         if img.tolist() is None:
             if verbose:
                 print('No data found.')
