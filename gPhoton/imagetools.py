@@ -473,7 +473,7 @@ def movie(band, skypos, tranges, skyrange, framesz=0, verbose=0,
                         mv = [img]
 
     try:
-        if not any((mv>0).tolist()):
+        if not (mv>0).any():
             return np.array(None)
     except TypeError:
         pass
