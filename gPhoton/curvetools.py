@@ -465,6 +465,8 @@ def reduce_lcurve(bin_ix, region_ix, data, function, dtype='float64'):
     output = np.empty(len(bin_num))
 
     for i, b in enumerate(bin_num):
+        if len(np.where(bin_ix[region_ix]==b)[0])==0:
+            continue
         try:
             ix = region_ix[0][np.where(bin_ix[region_ix] == b)]
             output[i] = function(data[ix])
