@@ -154,13 +154,19 @@ class TestImagetoolsFunctions(unittest.TestCase):
         self.assertAlmostEqual(np.sum(int_visits_NUV),
                                                 np.sum(int_coadd_NUV))
 
-    # def test_int_visit_flux_preservation_NUV(self): ### FAILS!!! ###
-    #     int_movie_NUV = it.create_image(
-    #         'NUV',self.skypos,self.tranges[0],self.skyrange,response=True,
-    #         framesz=self.framesz)
-    #     int_NUV = it.create_image(
-    #         'NUV',self.skypos,self.tranges[0],self.skyrange,response=True)
-    #     self.assertAlmostEqual(np.sum(int_movie_NUV),np.sum(int_NUV))
+    def test_int_visit_flux_preservation_NUV(self):
+        """ Intensity maps are basically countrate maps, which is to say that
+        they are averaged in time. The sum of the averages is not the average
+        of the sums, so these should not be equal unless exposure time
+        correction is not happening and we're accidentally creating a "flux"
+        map.
+        """
+        int_movie_NUV = it.create_image(
+            'NUV',self.skypos,self.tranges[0],self.skyrange,response=True,
+            framesz=self.framesz)
+        int_NUV = it.create_image(
+            'NUV',self.skypos,self.tranges[0],self.skyrange,response=True)
+        self.assertNotEqual(np.sum(int_movie_NUV),np.sum(int_NUV))
 
     def test_int_FUV(self):
         int_FUV = it.create_image(
@@ -202,13 +208,19 @@ class TestImagetoolsFunctions(unittest.TestCase):
                                                 coadd=True,response=True)
         self.assertAlmostEqual(np.sum(int_visits_FUV),np.sum(int_coadd_FUV))
 
-    # def test_int_visit_flux_preservation_FUV(self): ### FAILS!!! ###
-    #     int_movie_FUV = it.create_image(
-    #         'FUV',self.skypos,self.tranges[1],self.skyrange,response=True,
-    #                 framesz=self.framesz)
-    #     int_FUV = it.create_image(
-    #         'FUV',self.skypos,self.tranges[0],self.skyrange,response=True)
-    #     self.assertAlmostEqual(np.sum(int_movie_FUV),np.sum(int_FUV))
+    def test_int_visit_flux_preservation_FUV(self): ### FAILS!!! ###
+        """ Intensity maps are basically countrate maps, which is to say that
+        they are averaged in time. The sum of the averages is not the average
+        of the sums, so these should not be equal unless exposure time
+        correction is not happening and we're accidentally creating a "flux"
+        map.
+        """
+        int_movie_FUV = it.create_image(
+            'FUV',self.skypos,self.tranges[1],self.skyrange,response=True,
+                    framesz=self.framesz)
+        int_FUV = it.create_image(
+            'FUV',self.skypos,self.tranges[1],self.skyrange,response=True)
+        self.assertNotEqual(np.sum(int_movie_FUV),np.sum(int_FUV))
 
 # These should gracefully return None instead of crashing.
 

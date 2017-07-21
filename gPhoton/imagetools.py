@@ -450,13 +450,11 @@ def movie(band, skypos, tranges, skyrange, framesz=0, verbose=0,
             try:
                 steps = np.ceil((trange[1]-trange[0])/stepsz)
             except IndexError:
-                return None # There is no data.
-            for i, t0 in enumerate(np.arange(trange[0], trange[1], stepsz)):
-                #if verbose > 1:
-                #    mc.print_inline('Movie frame '+str(i+1)+' of '+
-                #                    str(int(steps)))
-                t1 = trange[1] if i == steps else t0+stepsz
-
+                return None # expt_raw == 0
+            tsteps = np.arange(trange[0],trange[1],framesz)
+            trs = np.vstack([tsteps,np.append(tsteps[1:],trange[1])]).T
+            for tr in trs:
+                t0,t1=tr
                 img = integrate_map(band, skypos, [[t0, t1]], skyrange,
                                     verbose=verbose,
                                     memlight=memlight, hdu=hdu, retries=retries,
