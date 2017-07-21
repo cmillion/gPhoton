@@ -309,11 +309,13 @@ def integrate_map(band, skypos, tranges, skyrange, verbose=0, memlight=None,
     img = np.zeros(np.array(imsz, dtype='int32'))
 
     for trange in tranges:
-        expt_eff = 1.
-        if response:
-            expt_eff = dbt.compute_exptime(band,trange)
         img += makemap(band, skypos, trange, skyrange,
-            response=response, verbose=verbose, detsize=detsize)/expt_eff
+            response=response, verbose=verbose, detsize=detsize)
+
+    if response: # Intensity maps == average countrate maps.
+        expt=np.sum([dbt.compute_exptime(band,trange) for trange in tranges])
+        if expt>0:
+            img/=expt
 
     return img
 # ------------------------------------------------------------------------------
@@ -451,8 +453,11 @@ def movie(band, skypos, tranges, skyrange, framesz=0, verbose=0,
                 steps = np.ceil((trange[1]-trange[0])/stepsz)
             except IndexError:
                 return None # expt_raw == 0
-            tsteps = np.arange(trange[0],trange[1],framesz)
-            trs = np.vstack([tsteps,np.append(tsteps[1:],trange[1])]).T
+            if framesz==0:
+                trs=[trange]
+            else:
+                tsteps = np.arange(trange[0],trange[1],framesz)
+                trs = np.vstack([tsteps,np.append(tsteps[1:],trange[1])]).T
             for tr in trs:
                 t0,t1=tr
                 img = integrate_map(band, skypos, [[t0, t1]], skyrange,
