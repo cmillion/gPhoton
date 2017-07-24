@@ -129,7 +129,7 @@ class TestImagetoolsFunctions(unittest.TestCase):
         for i, frame in enumerate(int_visits_NUV):
             self.assertAlmostEqual(
                 [3.37294349404, 527.037522816, 3.19930808804][i],
-                np.sum(int_visits_NUV))
+                np.sum(frame))
 
     def test_int_coadd_NUV(self):
         int_coadd_NUV = it.create_image(
@@ -196,7 +196,7 @@ class TestImagetoolsFunctions(unittest.TestCase):
         self.assertEqual(np.shape(int_visits_FUV)[2],23)
         for i,frame in enumerate(int_visits_FUV):
             self.assertAlmostEqual([122.422927443, 0.287938511271][i],
-                np.sum(int_visits_FUV))
+                np.sum(frame))
 
     def test_int_coadd_FUV(self):
         int_coadd_FUV = it.create_image(
@@ -218,7 +218,7 @@ class TestImagetoolsFunctions(unittest.TestCase):
                 [0.497924179493, 0.847007693848, 0.80058446059, 0.972137734434,
                  1.3665057898, 5.39927107707, 171.572488917, 195.807659308,
                  190.440959947, 455.239978231, 282.896126611, 164.741134199,
-                 121.560357866][i], np.sum(int_movie_FUV))
+                 121.560357866][i], np.sum(frame))
 
     def test_int_coadd_flux_preservation_FUV(self):
         """ Intensity maps are basically countrate maps, which is to say that
