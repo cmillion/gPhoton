@@ -14,6 +14,8 @@ import gPhoton.CalUtils as CalUtils
 from gPhoton.MCUtils import manage_requests2
 from gPhoton.galextools import isPostCSP
 from gPhoton import time_id
+import pyodbc
+import requests
 
 # ------------------------------------------------------------------------------
 # To save space, times in the database are "integer-ized" by multiplying by 1000
@@ -76,10 +78,20 @@ def getValue(query, verbose=0, retries=100):
 
     if out is not None:
         try:
-            out = float(out.json()['data']['Tables'][0]['Rows'][0][0])
+            if isinstance(out, pyodbc.Cursor):
+                #print("### Pyodbc Cursor returned. Direct Connect called")
+                out = out.fetchall()[0][0]
+            elif isinstance(out, requests.models.Response):
+                #print("### Response model returned. Webserver called")
+                out = out.json()['data']['Tables'][0]['Rows'][0][0]
         except ValueError:
             try:
-                out = str(out.json()['data']['Tables'][0]['Rows'][0][0])
+                if isinstance(out, pyodbc.Cursor):
+                    #print("### Pyodbc Cursor returned. Direct Connect called")
+                    out = str(out.fetchall()[0][0])
+                elif isinstance(out, requests.models.Response):
+                    #print("### Response model returned. Webserver called")
+                    out = str(out.json()['data']['Tables'][0]['Rows'][0][0])
             except:
                 print('Failed: {q}'.format(q=query))
                 raise
@@ -116,11 +128,17 @@ def getArray(query, verbose=0, retries=100):
 
     hasNaN(query)
 
-    out = manage_requests2(query, maxcnt=retries, verbose=verbose)
-
+    #out = manage_requests2(query, maxcnt=retries, verbose=verbose)
+    out = manage_requests2(query, maxcnt=1, verbose=verbose)
     if out is not None:
         try:
-            out = out.json()['data']['Tables'][0]['Rows']
+            #import ipdb; ipdb.set_trace()
+            if isinstance(out, pyodbc.Cursor):
+                #print("### Pyodbc Cursor returned. Direct Connect called")
+                out = out.fetchall()
+            elif isinstance(out, requests.models.Response):
+                #print("### Response model returned. Webserver called")
+                out = out.json()['data']['Tables'][0]['Rows']
         except:
             print('Failed: {q}'.format(q=query))
             raise

@@ -14,6 +14,8 @@ import numpy as np
 import requests
 from sys import stdout
 
+DIRECT_CONNECT = 0
+
 # ------------------------------------------------------------------------------
 def area(radius):
     """
@@ -145,57 +147,82 @@ def manage_requests2(query, maxcnt=100, wait=1, timeout=60., verbose=0):
     :returns: requests.Response or None -- The response from the server. If the
         query does not receive a response, returns None.
     """
-
+    #print("Calling manage_requests2()")
+    #print("Query:", query)
+    rawQuery = query.split('query=')[1].split('--')[0]
     # Keep track of the number of failures.
     cnt = 0
 
     # This will keep track of whether we've gotten at least one
     # successful response.
     successful_response = False
-
-    while cnt < maxcnt:
-        try:
-            r = requests.get(query, timeout=timeout)
-            successful_response = True
-        except requests.exceptions.ConnectTimeout:
-            if verbose:
-                print("Connection time out.")
-            cnt += 1
-            continue
-        except requests.exceptions.ConnectionError:
-            if verbose:
-                print("Domain does not resolve.")
-            cnt += 1
-            continue
-        except:
-            if verbose:
-                print('bad query? {q}'.format(q=query))
-            cnt += 1
-            continue
-        if r.json()['status'] == 'EXECUTING':
-            if verbose > 1:
-                print_inline('EXECUTING')
-            cnt = 0
-            continue
-        elif r.json()['status'] == 'COMPLETE':
-            if verbose > 1:
-                print_inline('COMPLETE')
-            break
-        elif r.json()['status'] == 'ERROR':
-            print('ERROR')
-            print('Unsuccessful query: {q}'.format(q=query))
-            raise ValueError(r.json()['msg'])
-        else:
-            print('Unknown return: {s}'.format(s=r.json()['status']))
-            cnt += 1
-            continue
-
-    if not successful_response:
-        # Initiate an empty response object in case
-        # the try statement is never executed.
-        # r = requests.Response()
-        r = None
-
+    r = 0;
+    
+    if DIRECT_CONNECT == 1:
+        #print("###Calling Direct Server Connect")
+        import pyodbc
+        conn = pyodbc.connect(
+            r'DRIVER={ODBC Driver 13 for SQL Server};' +
+            (
+                'SERVER={server},{port};'   +
+                'DATABASE={database};'      +
+                'UID={username};'           +
+                'PWD={password}'
+            ).format(
+                server= 'galexag.stsci.edu',
+                port= 1433,
+                database= 'gpfcore',
+                username= 'webaccess',
+                password= 'webaccess'
+            )
+        )
+ 
+        cursor = conn.cursor()
+ 
+        r = cursor.execute(rawQuery)
+        cnt += 1
+    elif DIRECT_CONNECT == 0:
+        while cnt < maxcnt:
+            try:
+                r = requests.get(query, timeout=timeout)
+                successful_response = True
+            except requests.exceptions.ConnectTimeout:
+                if verbose:
+                    print("Connection time out.")
+                cnt += 1
+                continue
+            except requests.exceptions.ConnectionError:
+                if verbose:
+                    print("Domain does not resolve.")
+                cnt += 1
+                continue
+            except:
+                if verbose:
+                    print('bad query? {q}'.format(q=query))
+                cnt += 1
+                continue
+            if r.json()['status'] == 'EXECUTING':
+                if verbose > 1:
+                    print_inline('EXECUTING')
+                cnt = 0
+                continue
+            elif r.json()['status'] == 'COMPLETE':
+                if verbose > 1:
+                    print_inline('COMPLETE')
+                break
+            elif r.json()['status'] == 'ERROR':
+                print('ERROR')
+                print('Unsuccessful query: {q}'.format(q=query))
+                raise ValueError(r.json()['msg'])
+            else:
+                print('Unknown return: {s}'.format(s=r.json()['status']))
+                cnt += 1
+                continue
+        if not successful_response:
+            # Initiate an empty response object in case
+            # the try statement is never executed.
+            # r = requests.Response()
+            r = None
     return r
 # ------------------------------------------------------------------------------
 
