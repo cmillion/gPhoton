@@ -251,7 +251,6 @@ def read_photons(photonfile, ra0, dec0, tranges, radius, verbose=0,
     angsep = mc.angularSeparation(ra0, dec0, ra, dec)
 
     ix = np.array([])
-    # [FIXME]: This loops over tranges but doesn't use anything from that!
     for trange in tranges:
         cut = np.where((angsep <= radius) & (np.isfinite(angsep)))[0]
         ix = np.concatenate((ix, cut), axis=0)
@@ -1111,6 +1110,9 @@ def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
                 "No exposure time at this location: [{ra},{dec}]".format(
                     ra=ra0, dec=dec0))
         return None
+    if trange is not None and stepsz!=0 and stepsz is not None:
+        tranges = [trange] # affix the time ranges under this condition
+                           # for reproducibility and bin-matching
     lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,
                       stepsz=stepsz, verbose=verbose, coadd=coadd)
     if not lcurve:
