@@ -1110,7 +1110,7 @@ def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
                 "No exposure time at this location: [{ra},{dec}]".format(
                     ra=ra0, dec=dec0))
         return None
-    if trange is not None and stepsz!=0 and stepsz is not None:
+    if trange is not None and stepsz:
         tranges = [trange] # affix the time ranges under this condition
                            # for reproducibility and bin-matching
     lcurve = quickmag(band, ra0, dec0, tranges, radius, annulus=annulus,

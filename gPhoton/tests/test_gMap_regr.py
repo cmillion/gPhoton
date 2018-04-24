@@ -20,7 +20,7 @@ class TestRegression(unittest.TestCase):
         self.parser = gm_setup_parser()
         self.args = self.parser.parse_args()
 
-    def test_blah(self):
+    def test_placeholder(self):
         self.assertTrue(True)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestRegression)
