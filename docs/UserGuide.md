@@ -3,7 +3,7 @@
 Chase Million<sup>1</sup>, Bernie Shiao<sup>2</sup>, Scott Fleming<sup>2</sup>,
 Myron Smith<sup>2</sup>
 
-<sup>1</sup>Million Concepts (chase.million@gmail.com),
+<sup>1</sup>Million Concepts (chase@millionconcepts.com),
 <sup>2</sup>Space Telescope Science Institute
 
 ### Summary
