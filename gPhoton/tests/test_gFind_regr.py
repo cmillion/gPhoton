@@ -26,14 +26,14 @@ class TestRegression(unittest.TestCase):
     def test_basic_query(self):
         """Test a simple query."""
         out = gf(band=self.bands[0],skypos=self.skypos,quiet=True)
-        self.assertAlmostEqual(out[self.bands[0]]['expt'],3516.0)
+        self.assertAlmostEqual(out[self.bands[0]]['expt'],3517.0)
         self.assertEqual(len(out[self.bands[0]]['t0']),6)
 
     def test_maxgap_query(self):
         """Test that the maxgap keyword combines nearby time ranges."""
         out = gf(band=self.bands[0],skypos=self.skypos,maxgap=6000,
                        quiet=True)
-        self.assertAlmostEqual(out[self.bands[0]]['expt'],9031.0)
+        self.assertAlmostEqual(out[self.bands[0]]['expt'],9032.0)
         self.assertEqual(len(out[self.bands[0]]['t0']),5)
 
     def test_minexp_query(self):
@@ -47,7 +47,7 @@ class TestRegression(unittest.TestCase):
         """Test that the detsize keyword excludes exposure times."""
         out = gf(band=self.bands[0],skypos=self.skypos,detsize=0.5,
                        quiet=True)
-        self.assertAlmostEqual(out[self.bands[0]]['expt'],2781.0)
+        self.assertAlmostEqual(out[self.bands[0]]['expt'],2782.0)
         self.assertEqual(len(out[self.bands[0]]['t0']),5)
 
     def test_both_query(self):

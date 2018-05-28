@@ -211,7 +211,8 @@ def get_valid_times(band, skypos, trange=None, detsize=1.1, verbose=0,
 
 # ------------------------------------------------------------------------------
 def fGetTimeRanges(band, skypos, trange=None, detsize=1.1, verbose=0,
-                   maxgap=1., minexp=1., skyrange=None, maxgap_override=False):
+                   maxgap=1., minexp=1., skyrange=None, maxgap_override=False,
+                   minexp_override = False):
     """
     Find the contiguous time ranges within a time range at a specific location.
 
@@ -259,8 +260,19 @@ def fGetTimeRanges(band, skypos, trange=None, detsize=1.1, verbose=0,
         minimum exposure lengths and maximum gaps.
 	"""
 
-    times = get_valid_times(band, skypos, trange=trange, detsize=detsize,
-                            verbose=verbose, skyrange=skyrange)
+    if trange is not None:
+        trange_buffer = (trange[0]-1,trange[1]+1)
+        times = get_valid_times(band, skypos, trange=trange_buffer,
+                            detsize=detsize, verbose=verbose, skyrange=skyrange)
+        times = np.append(times,times[-1]+1)
+        if times[0]<trange[0]:
+            times[0]=trange[0]
+        if times[-1]>trange[1]:
+            times[-1]=trange[1]
+    else:
+        times = get_valid_times(band, skypos, trange=None, detsize=detsize,
+                                    verbose=verbose, skyrange=skyrange)
+        times = np.append(times,times[-1]+1)
 
     if not len(times):
         return np.array([[]], dtype='float64')
@@ -274,8 +286,9 @@ def fGetTimeRanges(band, skypos, trange=None, detsize=1.1, verbose=0,
 
     tranges = distinct_tranges(times, maxgap=maxgap)
 
-    ix = np.where(np.array(tranges)[:, 1]-np.array(tranges)[:, 0] >= minexp)
-    tranges = np.array(tranges)[ix].tolist()
+    if not minexp_override:
+        ix = np.where(np.array(tranges)[:, 1]-np.array(tranges)[:, 0] >= minexp)
+        tranges = np.array(tranges)[ix].tolist()
 
     return np.array(tranges, dtype='float64')
 # ------------------------------------------------------------------------------
