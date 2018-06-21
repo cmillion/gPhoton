@@ -1,8 +1,6 @@
 """
 .. module:: curvetools
    :synopsis: Functions for creation of lightcurves and components thereof.
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function
@@ -1095,6 +1093,11 @@ def get_curve(band, ra0, dec0, radius, annulus=None, stepsz=None,
 
     :returns: dict -- The light curve, including input parameters.
     """
+
+    # Temporary # HACK:
+    if trange is not None:
+        trange[0]-=trange[0]%0.005
+        trange[1]-=trange[1]%0.005
 
     skyrange = [np.array(annulus).max().tolist() if annulus else radius,
                 np.array(annulus).max().tolist() if annulus else radius,]
