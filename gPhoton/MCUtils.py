@@ -2,8 +2,6 @@
 .. module:: MCUtils
    :synopsis: A library of generic utilities programs that C. Million wants to
        keep separate in order to re-use across other projects.
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function

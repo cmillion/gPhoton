@@ -5,8 +5,6 @@
        parameters / constants related to the "static" or detector-space event
        calibration, including walk, wiggle, linearity, post-CSP, and stim
        scaling corrections.
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function

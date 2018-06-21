@@ -2,8 +2,6 @@
 .. module:: gnomonic
    :synopsis: This module contains gnomonic projection methods for translating
        between detector and sky coordinates.
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function

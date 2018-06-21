@@ -2,8 +2,6 @@
 .. module:: gphoton_utils
    :synopsis: Read, plot, time conversion, and other functionality useful when
        dealing with gPhoton data.
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function

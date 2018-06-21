@@ -2,8 +2,6 @@
 .. module:: gphoton_args
    :synopsis: This module contains functions for checking duplicate arguments
        across gFind, gAperture, gMap, and other gPhoton functions.
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function
