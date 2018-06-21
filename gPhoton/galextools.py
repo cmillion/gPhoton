@@ -3,8 +3,6 @@
    :synopsis: This module contains helper and reference functions that are
        specific to GALEX and used by other modules, but do not directly access
        the database or generate end products of any kind.
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function
@@ -13,6 +11,7 @@ from astropy import wcs as pywcs
 import datetime
 import time
 import numpy as np
+import warnings
 
 # ------------------------------------------------------------------------------
 GPSSECS = 315532800+432000
@@ -258,8 +257,12 @@ def counts2mag(cps, band):
 
     scale = 18.82 if band == 'FUV' else 20.08
 
+    # This threw a warning if the countrate was negative which happens when
+    #  the background is brighter than the source. Suppress.
     with np.errstate(invalid='ignore'):
-        mag = -2.5 * np.log10(cps) + scale
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            mag = -2.5 * np.log10(cps) + scale
 
     return mag
 # ------------------------------------------------------------------------------
