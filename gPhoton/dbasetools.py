@@ -2,8 +2,6 @@
 .. module:: dbasetools
    :synopsis: Contains tools for working with data from the database that are
        used by a number of different modules.
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function
@@ -264,15 +262,17 @@ def fGetTimeRanges(band, skypos, trange=None, detsize=1.1, verbose=0,
         trange_buffer = (trange[0]-1,trange[1]+1)
         times = get_valid_times(band, skypos, trange=trange_buffer,
                             detsize=detsize, verbose=verbose, skyrange=skyrange)
-        times = np.append(times,times[-1]+1)
-        if times[0]<trange[0]:
-            times[0]=trange[0]
-        if times[-1]>trange[1]:
-            times[-1]=trange[1]
+        if len(times):
+            times = np.append(times,times[-1]+1)
+            if times[0]<trange[0]:
+                times[0]=trange[0]
+            if times[-1]>trange[1]:
+                times[-1]=trange[1]
     else:
         times = get_valid_times(band, skypos, trange=None, detsize=detsize,
                                     verbose=verbose, skyrange=skyrange)
-        times = np.append(times,times[-1]+1)
+        if len(times):
+            times = np.append(times,times[-1]+1)
 
     if not len(times):
         return np.array([[]], dtype='float64')
@@ -326,7 +326,7 @@ def stimcount_shuttered(band, trange, verbose=0, timestamplist=False):
                       dtype='float64')[:, 0]/gQuery.tscale)
     except IndexError: # Shutter this whole time range.
         if verbose:
-            print('No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1]))
+            print_inline('No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1]))
         return 0
 
     times = np.sort(np.unique(np.append(t, trange)))
@@ -377,7 +377,7 @@ def globalcount_shuttered(band, trange, verbose=0, timestamplist=False):
                       dtype='float64')[:, 0]/gQuery.tscale)
     except IndexError: # Shutter this whole time range.
         if verbose:
-            print('No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1]))
+            print_inline('No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1]))
         return 0
 
     times = np.sort(np.unique(np.append(t, trange)))
@@ -519,7 +519,7 @@ def exposure(band, trange, verbose=0):
             verbose=verbose), dtype='float64')[:, 0]/gQuery.tscale)
     except IndexError: # Shutter this whole time range.
         if verbose:
-            print('No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1]))
+            print_inline('No data in {t0},{t1}'.format(t0=trange[0], t1=trange[1]))
         return 0.
 
     shutter = compute_shutter(band, trange, verbose=verbose, timestamplist=t)
