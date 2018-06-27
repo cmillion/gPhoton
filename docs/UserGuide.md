@@ -80,7 +80,7 @@ You should use `pip` to get the latest versions of _requests_ and _astropy_. If 
     sudo port install py27-astropy
     sudo port install py27-requests
     sudo port install py27-pandas
-    
+
     _and `future`..._
 
 Note: If your installation of requests complains about missing library dependencies, you may need to install them explicitly with the following command: `sudo pip install --upgrade pyopenssl ndg-httpsclient pyasn1`
@@ -308,7 +308,7 @@ These flags are automatically set in software based upon conditions that we know
 
 4 - 'exptime' - bin contains < 50% exposure time coverage
 
-8 - 'respose' - events weighted with response < 0.7
+8 - 'response' - events weighted with response < 0.7
 
 16 - 'nonlinearity' - local countrate exceeds 10% response dropoff
 
@@ -323,7 +323,7 @@ These flags are automatically set in software based upon conditions that we know
 512 - 'Spacecraft Recovery' - Includes data collected during a spacecraft recovery period. This often involved unusual operating modes (like observing at low voltage) and should be regarded skeptically. -- NOT YET FULLY POPULATED
 
 #### Calling from within the Python Interpreter
-You can also import and work with _gAperture_ and its modules from within the Python interpeter.
+You can also import and work with _gAperture_ and its modules from within the Python interpreter.
 
     import gPhoton.gAperture
 
@@ -468,3 +468,4 @@ Where _t_ is a GALEX timestamp, run the following function, which will return `T
             return False if (not obsdata or not ((str(obsdata[0][0]) is 'CAI')
                 and (obsdata[0][5]<=3))) else True
 11. **Calibration Files** As of v1.28.1, these are not included in the software distribution by default. Each calibration file will be downloaded from the MAST server the first time it is required by the software. The download location will be the same the location of your gPhoton software installation, so you will need write permission at that location.
+12. **Event Time Precision** GALEX timestamps are stored in the database by multiplying them by 1000 and then representing them as SQL BigInt values. This effectively truncates the timestamps at after the third decimal. _Most_ GALEX observations have a time resolution of 5ms, but a small number of observations were made in a higher resolution mode; such data have timestamps that are truncated (not rounded) at the 1ms level. This is unlikely to affect any results. But if you pass a `trange` or `stepsz` with better than 1ms precision, this precision will not propagate through analysis.
