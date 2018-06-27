@@ -21,9 +21,10 @@ class TestDbasetoolsFunctions(unittest.TestCase):
                                dbt.compute_exptime('NUV',trange,skypos=skypos),
                                places=12)
 
-    def test_compute_exptime_3(self):
-        """Check that exposure time over a time range and exposure time
-        over a time range passed through fGetTimeRanges return the same."""
+    def test_compute_exptime_regression_1(self):
+        trange = (891394895.0, 891394925.0)
+        self.assertAlmostEqual(dbt.compute_exptime('NUV',trange)[0],
+                               0.8842699997336518,places=12)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestDbasetoolsFunctions)
 unittest.TextTestRunner(verbosity=2).run(suite)
