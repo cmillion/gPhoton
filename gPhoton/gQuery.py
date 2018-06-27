@@ -30,6 +30,15 @@ MCATDB = 'GR6Plus7.dbo'
 formatURL = ' -- '+str(time_id)+'&format=extjs'
 # ------------------------------------------------------------------------------
 
+# The photon even timestamps are stored in the database at the precision level
+#  of SQL's BIGINT. This truncated (not rounded) some timestamps at the level
+#  of 1ms. Most timestamps have a resolution of only 5ms except for rare high
+#  resolution visits, and even in that case the extra precision does not
+#  matter for science. To make gAperture consistent with the database, we'll
+#  truncate times at 1ms for queries.
+def truncate(n):
+    return str(n*tscale).split('.')[0]
+
 # ------------------------------------------------------------------------------
 def hasNaN(query):
     """
@@ -218,7 +227,7 @@ def obstype_from_t(t):
     """
     return ("{baseURL}SELECT * from {baseDB}.fGetLegObsType({t})"
             "{formatURL}").format(baseURL=baseURL, baseDB=baseDB,
-                                  t=str(int(t*tscale)), formatURL=formatURL)
+                                  t=truncate(t), formatURL=formatURL)
 
 # -_----------------------------------------------------------------------------
 def mcat_visit_sources(ra0, dec0, radius):
@@ -345,7 +354,7 @@ def exposure_ranges(band, ra0, dec0, t0=1, t1=10000000000000, detsize=1.25,
         'select distinct time from '+str(baseDB)+
         '.fGetNearbyAspectEq('+repr(float(ra0))+','+repr(float(dec0))+',(('+
         str(detsize)+'/2.0)*60.0),'+
-        str(t0*tscale)+','+str(int((t1+epsilon)*tscale))+')'
+        truncate(t0)+','+truncate(t1+epsilon)+')'
         ' where band=\''+str(band)+'\' or band=\'FUV/NUV\' order by time'+
         str(formatURL))
 # ------------------------------------------------------------------------------
@@ -421,8 +430,8 @@ def aperture(band, ra0, dec0, t0, t1, radius):
     return (str(baseURL)+
             'Select  sum(photonCount) from '+str(baseDB)+
             '.fGetNearbyObjEqCount'+str(band)+'('+repr(float(ra0))+','+
-            repr(float(dec0))+','+str(radius)+','+str(t0*tscale)+','+
-            str(t1*tscale)+',0)'+str(formatURL))
+            repr(float(dec0))+','+str(radius)+','+truncate(t0)+','+
+            truncate(t1)+',0)'+str(formatURL))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -453,8 +462,8 @@ def deadtime1(band, t0, t1, flag=False):
         '{baseURL}select count(*) from {baseDB}.{band}PhotonsV where '+
         'time >= {t0} and time < {t1}'+
         '{flag}{formatURL}').format(
-            baseURL=baseURL, baseDB=baseDB, band=band, t0=str(t0*tscale),
-            t1=str(t1*tscale), flag=' and flag=0' if flag else '',
+            baseURL=baseURL, baseDB=baseDB, band=band, t0=truncate(t0),
+            t1=truncate(t1), flag=' and flag=0' if flag else '',
             formatURL=formatURL)
 # ------------------------------------------------------------------------------
 
@@ -481,7 +490,7 @@ def deadtime2(band, t0, t1):
     return ('{baseURL}select count(*) from {baseDB}.{band}PhotonsNULLV where '+
             'time >= {t0} and time < {t1}{formatURL}').format(
                 baseURL=baseURL, baseDB=baseDB, band=band,
-                t0=str(t0*tscale), t1=str(t1*tscale),
+                t0=truncate(t0), t1=truncate(t1),
                 formatURL=formatURL)
 # ------------------------------------------------------------------------------
 
@@ -520,11 +529,11 @@ def deadtime(band, t0, t1, feeclkratio=0.966, tec2fdead=5.52e-6):
     return (str(baseURL)+
             'select sum(dt)*'+'%0.30f'%scale+' / ('+repr(t1)+'-'+repr(t0)+')'
             ' from(select count(*) as dt from '+str(baseDB)+'.'+str(band)+
-            'PhotonsNULLV where time >= '+str(t0*tscale)+' and time < '+
-            str(t1*tscale)+' union all select count(*) as dt from '+
+            'PhotonsNULLV where time >= '+truncate(t0)+' and time < '+
+            truncate(t1)+' union all select count(*) as dt from '+
             str(baseDB)+'.'+str(band)+
-            'PhotonsV where time >= '+str(t0*tscale)+' and time < '+
-            str(t1*tscale)+') x'+str(formatURL))
+            'PhotonsV where time >= '+truncate(t0)+' and time < '+
+            truncate(t1)+') x'+str(formatURL))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -557,7 +566,7 @@ def globalcounts(band, t0, t1, flag=False):
             'select time as t from {baseDB}.{band}PhotonsNULLV where time >= '+
             '{t0} and time < {t1}) x{formatURL}').format(
                 baseURL=baseURL, baseDB=baseDB, band=band,
-                t0=str(t0*tscale), t1=str(t1*tscale),
+                t0=truncate(t0), t1=truncate(t1),
                 flag=' and flag=0' if flag else '', formatURL=formatURL)
 # ------------------------------------------------------------------------------
 
@@ -587,7 +596,7 @@ def alltimes(band, t0, t1):
             'from {baseDB}.{band}PhotonsNULLV where time >= '+
             '{t0} and time < {t1}) x{formatURL}').format(
                 baseURL=baseURL, baseDB=baseDB, band=band,
-                t0=str(t0*tscale), t1=str(t1*tscale),
+                t0=truncate(t0), t1=truncate(t1),
                 formatURL=formatURL)
 # ------------------------------------------------------------------------------
 
@@ -622,7 +631,7 @@ def uniquetimes(band, t0, t1, flag=False, null=False):
                 'where time >= {t0} and time < {t1} order by '+
                 'time{formatURL}').format(
                     baseURL=baseURL, baseDB=baseDB, band=band,
-                    t0=str(t0*tscale), t1=str(t1*tscale),
+                    t0=truncate(t0), t1=truncate(t1),
                     formatURL=formatURL)
     else:
         return ('{baseURL}select distinct time from '+
@@ -630,7 +639,7 @@ def uniquetimes(band, t0, t1, flag=False, null=False):
                 'time >= {t0} and time < {t1} order by time'+
                 '{formatURL}').format(
                     baseURL=baseURL, baseDB=baseDB, band=band,
-                    t0=str(t0*tscale), t1=str(t1*tscale),
+                    t0=truncate(t0), t1=truncate(t1),
                     formatURL=formatURL)
 # ------------------------------------------------------------------------------
 
@@ -664,8 +673,8 @@ def boxcount(band, t0, t1, xr, yr):
     """
 
     return (str(baseURL)+'select count(*) from '+str(baseDB)+'.'+str(band)+
-            'PhotonsNULLV where time >= '+str(t0*tscale)+' and time < '+
-            str(t1*tscale)+' and x >= '+str(xr[0])+' and x < '+str(xr[1])+
+            'PhotonsNULLV where time >= '+truncate(t0)+' and time < '+
+            truncate(t1)+' and x >= '+str(xr[0])+' and x < '+str(xr[1])+
             ' and y >= '+str(yr[0])+' and y < '+str(yr[1])+str(formatURL))
 # ------------------------------------------------------------------------------
 
@@ -703,7 +712,7 @@ def detbox(band, t0, t1, xr, yr):
             'x >= {xmin} and x < {xmax} and y >= {ymin} and y < {ymax}'+
             '{formatURL}').format(
                 baseURL=baseURL, baseDB=baseDB, band=band,
-                t0=str(t0*tscale), t1=str(t1*tscale), xmin=xr[0],
+                t0=truncate(t0), t1=truncate(t1), xmin=xr[0],
                 xmax=xr[1], ymin=yr[0], ymax=yr[1], formatURL=formatURL)
 # ------------------------------------------------------------------------------
 
@@ -763,8 +772,8 @@ def stimcount(band, t0, t1, margin=[90.01, 90.01], aspum=68.754932/1000.,
             '((x >= {x40} and x < {x41}) and (y >= {y40} and y < {y41}))'+
             '){formatURL}').format(baseURL=baseURL, baseDB=baseDB, band=band,
                                    N='NULL' if null else '',
-                                   t0=str(t0*tscale),
-                                   t1=str(t1*tscale),
+                                   t0=truncate(t0),
+                                   t1=truncate(t1),
                                    x10=(avgstim['x1']-margin[0])/aspum,
                                    x11=(avgstim['x1']+margin[0])/aspum,
                                    y10=(avgstim['y1']-margin[1])/aspum,
@@ -833,8 +842,8 @@ def stimtimes(band, t0, t1, margin=[90.01, 90.01], aspum=68.754932/1000.,
             '((x >= {x30} and x < {x31}) and (y >= {y30} and y < {y31})) or '+
             '((x >= {x40} and x < {x41}) and (y >= {y40} and y < {y41}))'+
             '){formatURL}').format(baseURL=baseURL, baseDB=baseDB, band=band,
-                                   t0=str(t0*tscale),
-                                   t1=str(t1*tscale),
+                                   t0=truncate(t0),
+                                   t1=truncate(t1),
                                    x10=(avgstim['x1']-margin[0])/aspum,
                                    x11=(avgstim['x1']+margin[0])/aspum,
                                    y10=(avgstim['y1']-margin[1])/aspum,
@@ -884,7 +893,7 @@ def boxcentroid(band, t0, t1, xr, yr):
 
     return (str(baseURL)+'select avg(x), avg(y) from '+str(baseDB)+
             '.'+str(band)+'PhotonsNULLV where time >= '+
-            str(t0*tscale)+' and time < '+str(t1*tscale)+
+            truncate(t0)+' and time < '+truncate(t1)+
             ' and x >= '+str(xr[0])+' and x < '+str(xr[1])+' and y >= '+
             str(yr[0])+' and y < '+str(yr[1])+str(formatURL))
 # ------------------------------------------------------------------------------
@@ -920,7 +929,7 @@ def boxtimes(band, t0, t1, xr, yr):
     return (str(baseURL)+
             'select time from '+str(baseDB)+'.'+str(band)+
             'PhotonsNULLV where time >= '+
-            str(t0*tscale)+' and time < '+str(t1*tscale)+
+            truncate(t0)+' and time < '+truncate(t1)+
             ' and x >= '+
             str(xr[0])+' and x < '+str(xr[1])+' and y >= '+str(yr[0])+
             ' and y < '+str(yr[1])+str(formatURL))
@@ -968,8 +977,8 @@ def allphotons(band, ra0, dec0, t0, t1, radius, flag=0):
             '{baseDB}.fGetNearbyObjEq{band}AllColumns({ra0},{dec0},{radius},'
             '{t0},{t1},{flag}){formatURL}').format(
                 baseURL=baseURL, baseDB=baseDB, band=band, ra0=repr(float(ra0)),
-                dec0=repr(float(dec0)), radius=radius, t0=str(t0*tscale),
-                t1=str(t1*tscale), flag=flag, formatURL=formatURL)
+                dec0=repr(float(dec0)), radius=radius, t0=truncate(t0),
+                t1=truncate(t1), flag=flag, formatURL=formatURL)
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -993,7 +1002,7 @@ def shutter(band, t0, t1):
     """
 
     return (str(baseURL)+'select shutter*0.05 from '+str(baseDB)+'.fGet'+
-            str(band)+'Shutter('+str(t0*tscale)+','+str(t1*tscale)+
+            str(band)+'Shutter('+truncate(t0)+','+truncate(t1)+
             ')'+str(formatURL))
 # ------------------------------------------------------------------------------
 
@@ -1015,8 +1024,8 @@ def aspect(t0, t1):
 
     return (str(baseURL)+
             'select eclipse, filename, time, ra, dec, twist, flag, ra0, dec0,'
-            ' twist0 from aspect where time >= '+str(t0*tscale)+
-            ' and time < '+str(t1*tscale)+' order by time'+str(formatURL))
+            ' twist0 from aspect where time >= '+truncate(t0)+
+            ' and time < '+truncate(t1)+' order by time'+str(formatURL))
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -1106,7 +1115,7 @@ def box(band, ra0, dec0, t0, t1, radius, flag=0):
 
     return (str(baseURL)+'select time,ra,dec from '+str(baseDB)+'.'+str(band)+
             'PhotonsV where time >= '+
-            str(t0*tscale)+' and time < '+str(t1*tscale)+
+            truncate(t0)+' and time < '+truncate(t1)+
             ' and ra >= '+
             repr(ra0-radius)+' and ra < '+repr(ra0+radius)+' and dec >= '+
             repr(dec0-radius)+' and dec < '+repr(dec0+radius)+' and flag='+
@@ -1161,7 +1170,7 @@ def skyrect(band, ra0, dec0, t0, t1, ra, dec, flag=0):
                 baseURL=baseURL, baseDB=baseDB, band=band,
                 ra_min=repr(ra0-ra/2.), ra_max=repr(ra0+ra/2.),
                 dec_min=repr(dec0-dec/2.), dec_max=repr(dec0+dec/2.),
-                t0=str(t0*tscale), t1=str(t1*tscale), flag=flag,
+                t0=truncate(t0), t1=truncate(t1), flag=flag,
                 formatURL=formatURL))
 # ------------------------------------------------------------------------------
 
