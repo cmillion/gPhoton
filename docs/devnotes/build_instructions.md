@@ -3,11 +3,13 @@
 
 **Procedure for testing the build:**
 1. Make a clean clone / fetch / checkout of the branch.
+```
     git clone https://github.com/cmillion/gPhoton
     cd gPhoton
     git fetch
     git checkout -b BRANCH
     git pull origin BRANCH
+```
 2. Register the test distribution with testPyPI: `python setup.py register -r https://testpypi.python.org/pypi`
 3. Build and upload the distribution file to testPyPI: `python setup.py sdist upload -r https://testpypi.python.org/pypi`
 4. Install the new version from testPyPI: `pip install -i https://testpypi.python.org/pypi gPhoton`
