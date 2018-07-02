@@ -1,8 +1,6 @@
 """
 .. module:: imagetools
    :synopsis: Tools for the cration of count and intensity images and movies.
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function
@@ -466,8 +464,8 @@ def movie(band, skypos, tranges, skyrange, framesz=0, verbose=0,
                                     response=response, detsize=detsize)
                 if (img.min() == 0 and img.max() == 0) or (not
                                                 np.isfinite(img).any()):
-                    if verbose > 1:
-                        print('No data in frame {i}. Skipping...'.format(i=i))
+                    #if verbose > 1:
+                    #    print('No data in frame {i}. Skipping...'.format(i=i))
                     continue
                 else:
                     try:

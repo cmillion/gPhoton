@@ -1,8 +1,6 @@
 """
 .. module:: FileUtils
    :synopsis: Methods for reading data from files or web queries.
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function

@@ -4,8 +4,6 @@
 .. module:: gCalrun
    :synopsis: Performs a batch run of photometric extractions on semi-random
        sets of known sources for calibration / regression purposes.
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function

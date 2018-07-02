@@ -4,8 +4,6 @@
 .. module:: gAperture
    :synopsis: Module for the creation of GALEX  light curves with user-defined
        time bins and photometric apertures.
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function

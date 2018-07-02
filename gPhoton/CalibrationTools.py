@@ -4,8 +4,6 @@
        at the image level, mostly when operating directly on the photon lists
        (not the db), including exposure time and relative response. Not really
        used elsewhere at present but possibly useful as "documentation."
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function

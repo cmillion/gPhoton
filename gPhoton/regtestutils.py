@@ -2,8 +2,6 @@
 .. module:: regtestutils
    :synopsis: Functions for end-to-end photometric regression testing with
        emphasis on comparing gAperture values to MCAT values.
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function
@@ -43,7 +41,7 @@ def file_setup(outfile):
             return False
     else:
         # Initialize the file with a header
-        with open(outfile, 'wb') as csvfile:
+        with open(outfile, 'w') as csvfile:
             cols = ['objid', 'flat_counts', 'mcat_bg', 'bg_counts',
                     'flux_bgsub_err', 'cps_mcatbgsub', 'counts',
                     'mag_mcatbgsub', 'cps_err', 'mag_bgsub', 'cps_bgsub',
@@ -205,7 +203,7 @@ def datamaker(band, skypos, outfile, maglimit=20., margin=0.005,
             try:
                 csv_construct = construct_row(i, band, objid, mcat, data)
                 print(csv_construct)
-                with open(outfile, 'ab') as csvfile:
+                with open(outfile, 'a') as csvfile:
                     spreadsheet = csv.writer(csvfile, delimiter=',',
                                              quotechar='|',
                                              quoting=csv.QUOTE_MINIMAL)

@@ -4,8 +4,6 @@
        pipeline to generate calibrated and sky-projected photon-level data from
        raw spacecraft and detector telemetry. Generates time-tagged photon lists
        given mission-produced -raw6, -scst, and -asprta data.
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function

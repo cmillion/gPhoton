@@ -5,8 +5,6 @@
    :synopsis: Runs the module that runs the standalone gPhoton calibration
        pipelines to create aspect-corrected, time-tagged photon events from
        low-level archived GALEX data products.
-
-.. moduleauthor:: Chase Million <chase.million@gmail.com>
 """
 
 from __future__ import absolute_import, division, print_function
