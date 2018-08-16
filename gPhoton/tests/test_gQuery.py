@@ -117,7 +117,7 @@ class TestGQueryFunctions(unittest.TestCase):
         self.assertEqual(gq.boxtimes(self.NUV,self.t0,self.t1,self.xr,self.yr),'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select time from GPFCore.dbo.NUVPhotonsNULLV where time >= 766525332995 and time < 866526576995 and x >= 200 and x < 400 and y >= 300 and y < 500'+self.formatURL)
 
     def test_allphotons(self):
-        self.assertEqual(gq.allphotons(self.NUV,self.ra0,self.dec0,self.t0,self.t1,self.radius),'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select time,ra,dec,xi,eta,x,y,flag from GPFCore.dbo.fGetNearbyObjEqNUVAllColumns(176.919525856,0.255696872807,0.004,766525332995,866526576995,0)'+self.formatURL)
+        self.assertEqual(gq.allphotons(self.NUV,self.ra0,self.dec0,self.t0,self.t1,self.radius),'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select time,ra,dec,xi,eta,x,y,flag,q from GPFCore.dbo.fGetNearbyObjEqNUVAllColumns(176.919525856,0.255696872807,0.004,766525332995,866526576995,0)'+self.formatURL)
 
     def test_shutter(self):
         self.assertEqual(gq.shutter(self.NUV,self.t0,self.t1),'https://mastcomp.stsci.edu/portal/Mashup/MashupQuery.asmx/GalexPhotonListQueryTest?query=select shutter*0.05 from GPFCore.dbo.fGetNUVShutter(766525332995,866526576995)'+self.formatURL)
