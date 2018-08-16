@@ -973,7 +973,7 @@ def allphotons(band, ra0, dec0, t0, t1, radius, flag=0):
     :returns: str -- The query to submit to the database.
     """
 
-    return ('{baseURL}select time,ra,dec,xi,eta,x,y,flag from '
+    return ('{baseURL}select time,ra,dec,xi,eta,x,y,flag,q from '
             '{baseDB}.fGetNearbyObjEq{band}AllColumns({ra0},{dec0},{radius},'
             '{t0},{t1},{flag}){formatURL}').format(
                 baseURL=baseURL, baseDB=baseDB, band=band, ra0=repr(float(ra0)),

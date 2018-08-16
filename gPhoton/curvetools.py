@@ -330,8 +330,8 @@ def query_photons(band, ra0, dec0, tranges, radius, verbose=0, flag=0,
             stream.extend(thisstream)
 
     stream = np.array(stream, 'f8').T
-    colnames = ['t', 'ra', 'dec', 'xi', 'eta', 'x', 'y', 'flag']
-    dtypes = ['f8', 'f8', 'f8', 'f4', 'f4', 'f4', 'f4', 'i4']
+    colnames = ['t', 'ra', 'dec', 'xi', 'eta', 'x', 'y', 'flag', 'q']
+    dtypes = ['f8', 'f8', 'f8', 'f4', 'f4', 'f4', 'f4', 'i4', 'f4']
     try:
         cols = list(map(np.asarray, stream, dtypes))
         events = dict(list(zip(colnames, cols)))
@@ -945,6 +945,7 @@ def quickmag(band, ra0, dec0, tranges, radius, annulus=None, stepsz=None,
     lcurve['t0_data'] = reduce_lcurve(bin_ix, aper_ix, data['t'], np.min)
     lcurve['t1_data'] = reduce_lcurve(bin_ix, aper_ix, data['t'], np.max)
     lcurve['t_mean'] = reduce_lcurve(bin_ix, aper_ix, data['t'], np.mean)
+    lcurve['q_mean'] = reduce_lcurve(bin_ix, aper_ix, data['q'], np.mean)
     lcurve['counts'] = reduce_lcurve(bin_ix, aper_ix, data['t'], len)
     lcurve['flat_counts'] = reduce_lcurve(bin_ix, aper_ix,
                                           1./data['response'], np.sum)
@@ -1260,7 +1261,7 @@ def write_curve(band, ra0, dec0, radius, csvfile=None, annulus=None,
         total_counts_cols = ['counts', 'flat_counts', 'bg_counts',
                              'bg_flat_counts']
         calibration_cols = ['exptime', 'bg', 'mcat_bg', 'responses', 'detxs',
-                            'detys', 'detrad', 'racent', 'deccent', 'flags']
+                            'detys', 'detrad', 'racent', 'deccent', 'q_mean', 'flags']
         output_columns = (time_related_cols + annulus_bkg_corrected_cols +
                           mcat_bkg_corrected_cols + bkg_uncorrected_cols +
                           total_counts_cols + calibration_cols)
