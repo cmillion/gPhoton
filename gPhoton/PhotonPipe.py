@@ -13,6 +13,7 @@ from builtins import str
 from builtins import range
 import csv
 import numpy as np
+import pandas as pd
 import os
 import time
 # gPhoton imports.
@@ -27,7 +28,7 @@ from gPhoton.MCUtils import print_inline
 # ------------------------------------------------------------------------------
 def photonpipe(outbase, band, raw6file=None, scstfile=None, aspfile=None,
                ssdfile=None, nullfile=None, verbose=0, retries=20,
-               eclipse=None):
+               eclipse=None, overwrite=True):
     """
     Apply static and sky calibrations to -raw6 GALEX data, producing fully
         aspect-corrected and time-tagged photon list files.
@@ -79,7 +80,7 @@ def photonpipe(outbase, band, raw6file=None, scstfile=None, aspfile=None,
     # in from the raw6 for processing. Even if your machine has a lot
     # of memory, making this number bigger is unlikely to improve the
     # processing time much because so much is eaten up by the .csv write.
-    chunksz = 1000000
+    chunksz = 10000000
 
     # These are just constants for the mission.
     detsize = 1.25 # Detector size in degrees
@@ -105,10 +106,10 @@ def photonpipe(outbase, band, raw6file=None, scstfile=None, aspfile=None,
         print("Warning: eclipse mismatch {e0} vs. {e1} (header)".format(
                                                 e0=eclipse,e1=hdr['eclipse']))
     eclipse = hdr['eclipse']
-    print("Processing eclipse "+str(eclipse)+".")
+    print_inline('Processing eclipse {eclipse}'.format(eclipse=eclipse))
 
     # Returns detector constants.
-    print("Band is "+band+".")
+    print_inline("Band is {band}.".format(band=band))
     (xclk, yclk, xcen, ycen, xscl, yscl, xslp,
      yslp) = clk_cen_scl_slp(band, eclipse)
 
@@ -120,22 +121,23 @@ def photonpipe(outbase, band, raw6file=None, scstfile=None, aspfile=None,
                                                               eclipse)
         wig2, wig2data, wlk2, wlk2data, clk2, clk2data = post_csp_caldata()
 
-    print("Loading wiggle files...")
+    print_inline("Loading wiggle files...")
     wiggle_x, _ = cal.wiggle(band, 'x')
     wiggle_y, _ = cal.wiggle(band, 'y')
 
-    print("Loading walk files...")
+    print_inline("Loading walk files...")
     walk_x, _ = cal.walk(band, 'x')
     walk_y, _ = cal.walk(band, 'y')
 
-    print("Loading linearity files...")
+    print_inline("Loading linearity files...")
     linearity_x, _ = cal.linearity(band, 'x')
     linearity_y, _ = cal.linearity(band, 'y')
 
     # This is for the post-CSP stim distortion corrections.
-    print("Loading distortion files...")
+    print_inline("Loading distortion files...")
     if eclipse > 37460:
-        print(" Using stim separation of :"+str(stimsep))
+        print_inline(" Using stim separation of : {stimsep}".format(
+                                                            stimsep=stimsep))
     distortion_x, disthead = cal.distortion(band, 'x', eclipse, stimsep)
     distortion_y, _ = cal.distortion(band, 'y', eclipse, stimsep)
     (cube_x0, cube_dx, cube_y0, cube_dy, cube_d0, cube_dd, cube_nd, cube_nc,
@@ -160,24 +162,26 @@ def photonpipe(outbase, band, raw6file=None, scstfile=None, aspfile=None,
         xoffset, yoffset = 0., 0.
 
     if os.path.isfile(str(ssdfile)):
-        print("SSD file provided: "+str(ssdfile))
+        print_inline("SSD file provided: {ssdfile}".format(ssdfile=ssdfile))
         stim_coef0, stim_coef1 = get_stim_coefs(ssdfile)
     elif ssdfile:
-        print("SSD file requested: "+str(ssdfile))
+        print_inline("SSD file requested: {ssdfile}".format(ssdfile=ssdfile))
         stim_coef0, stim_coef1 = create_ssd(raw6file, band, eclipse, ssdfile)
     else:
-        print("No SSD file provided or requested.")
+        print_inline("No SSD file provided or requested.")
         stim_coef0, stim_coef1 = create_ssd(raw6file, band, eclipse)
-    print("		stim_coef0, stim_coef1 = "+str(stim_coef0)+", "+str(stim_coef1))
+    if verbose>1:
+        print("	    stim_coef0, stim_coef1 = "+
+            str(stim_coef0)+", "+str(stim_coef1))
 
-    print("Loading mask file...")
+    print_inline("Loading mask file...")
     mask, maskinfo = cal.mask(band)
     npixx = mask.shape[0]
     npixy = mask.shape[1]
     pixsz = maskinfo['CDELT2']
     maskfill = detsize/(npixx*pixsz)
 
-    print("Loading aspect data...")
+    print_inline("Loading aspect data...")
     if aspfile:
         (aspra, aspdec, asptwist, asptime, aspheader,
          aspflags) = load_aspect(aspfile)
@@ -187,36 +191,58 @@ def photonpipe(outbase, band, raw6file=None, scstfile=None, aspfile=None,
 
     minasp, maxasp = min(asptime), max(asptime)
     trange = [minasp, maxasp]
-    print("			trange= ( {t0} , {t1} )".format(t0=trange[0], t1=trange[1]))
+    if verbose>1:
+        print("			trange= ( {t0} , {t1} )".format(
+            t0=trange[0], t1=trange[1]))
     ra0, dec0, roll0 = aspheader['RA'], aspheader['DEC'], aspheader['ROLL']
-    print("			[avgRA, avgDEC, avgROLL] = [{RA}, {DEC}, {ROLL}]".format(
-        RA=aspra.mean(), DEC=aspdec.mean(), ROLL=asptwist.mean()))
+    if verbose>1:
+        print("			[avgRA, avgDEC, avgROLL] = [{RA}, {DEC}, {ROLL}]".format(
+            RA=aspra.mean(), DEC=aspdec.mean(), ROLL=asptwist.mean()))
 
     # This projects the aspect solutions onto the MPS field centers.
-    print("Computing aspect vectors...")
+    print_inline("Computing aspect vectors...")
     (xi_vec, eta_vec) = gnomfwd_simple(aspra, aspdec, ra0, dec0, -asptwist,
                                        1.0/36000.0, 0.)
 
-    print("Loading raw6 file...")
+    print_inline("Loading raw6 file...")
     raw6hdulist = pyfits.open(raw6file, memmap=1)
     raw6htab = raw6hdulist[1].header
     nphots = raw6htab['NAXIS2']
-    print("		"+str(nphots)+" events")
+    if verbose>1:
+        print("		"+str(nphots)+" events")
     cnt = 0
 
-    outfile = outbase+'.csv'
-    print("Preparing output file "+outfile)
-    spreadsheet = csv.writer(open(outfile, 'w'), delimiter=',',
-                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    #outfile = outbase+'.h5'#'.csv'
+    #print("Preparing output file "+outfile)
+    #if os.path.exists(outbase):
+    #    if overwrite:
+    #        print_inline("Overwriting {outbase}".format(outbase=outbase))
+    #        #os.remove(outbase)
+    #    else:
+    #        print("{outbase} already exists... aborting run".format(outbase=outbase))
+    #        return
+    #if not os.path.exists(outbase):
+    #    os.makedirs(outbase)
+    outfile = '{outbase}.h5'.format(outbase=outbase)
+        #eclbase=outbase.split('/')[-1])
+    if os.path.exists(outfile):
+        if overwrite:
+            os.remove(outfile)
+        else:
+            print('{of} already exists... aborting run'.format(of=outfile))
+
+    #spreadsheet = csv.writer(open(outfile, 'w'), delimiter=',',
+    #                         quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
     # If specified, dump lines with NULLS into a separate csv file.
     if nullfile:
         nullfile = outbase+'_NULL.csv'
-        print("Preparing output file "+nullfile)
+        print_inline("Preparing output file {nullfile}".format(
+                        nullfile=nullfile))
         NULLspreadsheet = csv.writer(open(nullfile, 'w'), delimiter=',',
                                      quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
-    print("")
+    #print("")
 
     for i in range(int(nphots/chunksz)+1):
         a = time.time()
@@ -448,7 +474,7 @@ def photonpipe(outbase, band, raw6file=None, scstfile=None, aspfile=None,
         """
 
         cut = ((col > -1) & (col < cube_nc) & (row > -1) & (row < cube_nr) &
-               (flags == 0) & (np.array(depth,dtype='int64')<18))
+               (flags == 0) & (np.array(depth,dtype='int64')<=16))
         flags[np.where(cut == False)[0]] = 11
         ix = np.where(cut == True)[0]
 
@@ -487,7 +513,7 @@ def photonpipe(outbase, band, raw6file=None, scstfile=None, aspfile=None,
 
         cut = ((col > 0.) & (col < 799.) & (row > 0.) & (row < 799.) &
                (flags == 0))
-        flags[np.where(cut == False)[0]] = 6
+        flags[np.where(cut == False)[0]] = 16
         ix = np.where(cut == True)[0]
 
         cut[ix] = (
@@ -541,59 +567,41 @@ def photonpipe(outbase, band, raw6file=None, scstfile=None, aspfile=None,
         # I reccomend that you use the "ix = np.where" technique used above.
         # [Future]: Preprogram a (commented out) filter on RA/Dec.
 
-        print_inline(chunkid+"Writing to spreadsheet...")
+        #outfile = '{outbase}/{eclbase}_{i}.h5'.format(outbase=outbase,
+        #    eclbase=outbase.split('/')[-1],i=i)
+        #if os.path.exists(outfile) and overwrite:
+        #    os.remove(outfile)
+        print_inline('Writing to {outfile}'.format(outfile=outfile)) 
 
-        # The issue is that we need to recombine the data into rows to
-        # feed to csv.writerow, hence the loop.
-        # It might be possible to do without a loop. One way would be
-        # with numpy.column_stack except that this requires stupid
-        # amounts of memory and therefore takes longer to run than the
-        # loop iffen it manages to complete at all without a memory
-        # error or segmentation fault.
-        for i in range(len(t)):
-            cnt += 1
-            # To avoid repeat indexing of flags...
-            thisflag = flags[i]
-            # This substitutes empty strings for RA and Dec
-            # values so that when they're dumped into the database
-            # they are correctly recorded as NULL
-            if (thisflag == 2 or thisflag == 5 or thisflag == 7 or
-                    thisflag == 8 or thisflag == 9 or thisflag == 10 or
-                    thisflag == 11 or thisflag == 12):
-            # Should be:
-            #if ((thisflag == 3) or (thisflag == 6) or (thisflag == 8) or
-            #        (thisflag == 9) or (thisflag == 10) or
-            #        (thisflag == 11) or (thisflag = 12):)
-                if nullfile:
-                    NULLspreadsheet.writerow(
-                        [int(t[i]*dbscale), x[i], y[i],
-                         xa[i], ya[i], q[i], xi[i],
-                         eta[i],
-                         "", "", flags[i]])
-                else:
-                    spreadsheet.writerow(
-                        [int(t[i]*dbscale), x[i], y[i], xa[i],
-                         ya[i], q[i], xi[i], eta[i], "", "",
-                         flags[i]])
-            else:
-                spreadsheet.writerow(
-                    [int(t[i]*dbscale), x[i], y[i], xa[i],
-                     ya[i], q[i], xi[i], eta[i],
-                      ra[i], dec[i], flags[i]])
+        null_ix = np.where((
+            (flags == 2) | (flags == 5) | (flags == 7) |
+            (flags == 8) | (flags == 9) | (flags == 10) |
+            (flags == 11) | (flags == 12)))
+        df = pd.DataFrame({'t':np.array(t*dbscale,dtype='int64'),
+                               'x':x,'y':y,'xa':xa,'ya':ya,
+                               'q':q,'xi':xi,'eta':eta,
+                               'ra':ra,'dec':dec,'flags':flags})
+        df.loc[null_ix[0],'ra']=np.nan
+        df.loc[null_ix[0],'dec']=np.nan
+        with pd.HDFStore(outfile) as store:
+            store.append('photons',df)
+        cnt+=len(df)
+        df = None
 
     raw6hdulist.close()
     stopt = time.time()
 
     print_inline("")
     print("")
-    print("Runtime statistics:")
-    print(" runtime		=	{seconds} sec. = ({minutes} min.)".format(
-        seconds=stopt-startt, minutes=(stopt-startt)/60.))
-    print("	processed	=	"+str(cnt)+" of "+str(nphots)+" events.")
-    if cnt < nphots:
-        print("		WARNING: MISSING EVENTS!")
-    print("	rate		=	"+str(nphots/(stopt-startt))+" photons/sec.")
-    print("")
+    if verbose:
+        print("Runtime statistics:")
+        print(" runtime		=	{seconds} sec. = ({minutes} min.)".format(
+            seconds=stopt-startt, minutes=(stopt-startt)/60.))
+        print("	processed	=	"+str(cnt)+" of "+str(nphots)+" events.")
+        if cnt < nphots:
+            print("		WARNING: MISSING EVENTS!")
+        print("	rate		=	"+str(nphots/(stopt-startt))+" photons/sec.")
+        print("")
 
     return
 # ------------------------------------------------------------------------------

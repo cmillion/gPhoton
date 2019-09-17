@@ -88,7 +88,8 @@ def gfind(band='both', detsize=1.1, exponly=False, gaper=False, maxgap=1500.0,
         # Get valid time ranges, but only if trange is not provided.
         ranges = dbt.fGetTimeRanges(this_band, skypos, maxgap=maxgap,
                                     minexp=minexp, verbose=verbose,
-                                    detsize=detsize, trange=trange, skyrange=skyrange)
+                                    detsize=detsize, trange=trange,
+                                    skyrange=skyrange)
         if not ranges.any():
             if not quiet:
                 print('No {band} exposure'

@@ -659,10 +659,21 @@ def find_fuv_offset(scstfile):
 
     try:
         eclipse = int(scsthead['eclipse'])
-        fdttdc = float(scsthead['fdttdc'])
+    except:
+        print("WARNING: ECLIPSE is not defined in SCST header.")
+        try:
+            eclipse = int(photon_file.split('/')[-1].split('-')[0][1:])
+            print("         Using {e} from filename.".format(e=eclipse))
+        except:
+            print("         Unable to infer eclipse from filename.")
+            return 0., 0.
+
+    try:
+        fdttdc = float(scsthead['FDTTDC'])
     except KeyError:
-        print("WARNING: FUV header values missing from SCST.")
-        print("         This is probably not a real FUV observation.")
+        print("WARNING: FUV temperature value missing from SCST.")
+        print("         This is probably not a valid FUV observation.")
+        #raise
         return 0., 0.
 
     print("Offsetting FUV image for eclipse {e} at {t} degrees.".format(
