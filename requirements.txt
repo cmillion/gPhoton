@@ -4,4 +4,3 @@ pandas==1.5.3
 requests==2.31.0
 astropy==5.2.2
 future==0.18.3
--e .
