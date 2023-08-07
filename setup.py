@@ -26,7 +26,6 @@ setup(
     zip_safe=False,
     license='AURA',
     classifiers=[
-        'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
         'Programming Language :: Python',
         ],
