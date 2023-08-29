@@ -73,7 +73,40 @@ You should use `pip` to get the latest versions of _requests_ and _astropy_. If 
     sudo pip install future
 
 ###### Mac (OSX)
-**Draft.** For installing and managing your custom Python build in Mac OSX, we suggest using the [MacPorts package](https://www.macports.org/). There is also a tutorial for installing Python on Mac with MacPorts [here](https://astrofrog.github.io/macports-python/).
+
+**Draft.V2** 
+Extra notes: 
+
+Create a new environment to install gPhoton and its dependencies
+
+    conda create -n gphoton_env python=3.9
+
+    conda activate gphoton_env 
+
+Inside your gphoton environment, check for the Python version
+
+    python --version 
+
+It should be: Python 3.9.17 
+
+Now, proceed to install all dependencies before installing gPhoton   
+
+    pip install numpy requests scipy astropy future pandas urllib3==1.26.7
+
+    pip install gPhoton
+
+(maybe, you will need to use this commandf to force installation in your gphoton_env (note: update the local user folder). 
+
+    pip install --target=/Users/<YOU_LOCAL_USER_FOLDER>/anaconda3/envs/gphoton_env/lib/python3.9/site-packages gPhoton --upgrade
+
+run 
+    python 
+    import gPhoton
+
+to check the installation was succesfull. 
+
+
+**Draft.V1** For installing and managing your custom Python build in Mac OSX, we suggest using the [MacPorts package](https://www.macports.org/). There is also a tutorial for installing Python on Mac with MacPorts [here](https://astrofrog.github.io/macports-python/).
 
     sudo port install py27-numpy
     sudo port install py27-scipy
