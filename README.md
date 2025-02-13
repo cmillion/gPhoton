@@ -1,3 +1,5 @@
+## This project is no longer actively maintained. We now recommend that most users try [gPhoton2](https://github.com/millionconcepts/gphoton2) instead.
+
 **gPhoton** is a project to calibrate, archive, and make available every photon event observed by the GALEX mission in an effort to dramatically improve the flexibility and utility of the data with specific emphasis on enabling short time domain photometric studies.
 
 To get started, please read the [User Guide](https://github.com/cmillion/gPhoton/blob/master/docs/UserGuide.md).  You can also refer to the [Full API](http://gphoton.readthedocs.io/en/master/) available on ReadTheDocs.
